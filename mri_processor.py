@@ -195,9 +195,9 @@ if answer2 == 'y':
 # Generate path to dicom files.
 target_folder_name = f'{p_id}'  # Set the target folder name
 # Create the path to the target folder
-target_folder_path = os.path.join(working_dir, target_folder_name)
+target_folder_path = os.path.join(working_dir, target_folder_name, 'neurofeedback')
 if not os.path.isdir(target_folder_path):  # Check if the target folder exists
-    print(f"Target folder '{target_folder_name}' not found.")
+    print(f"Target folder '{target_folder_path}' not found.")
     exit()
 # Initialize a variable to store the name of the folder containing 'CISC'
 cisc_directory_name = None

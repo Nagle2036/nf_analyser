@@ -229,14 +229,14 @@ if seq_no_table_210.shape[1] == 2:
     seq_no_table_run1 = seq_no_table_210.iloc[:, 0]
     # Convert Run 1 dicoms to Nifti.
     subprocess.run(['cd', f'{p_id}/neurofeedback/{cisc_directory_name}', '&&', 'dcm2niix', '-o',
-                   f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 's', f'0000{seq_no_table_run1}'], shell=True)
+                   f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 'n', f'0000{seq_no_table_run1}'], shell=True)
 else:
     run_1_number = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
     if run_1_number in seq_no_table_210.columns:
         seq_no_table_run1 = seq_no_table_210.filter(like=run_1_number)
     # Convert Run 1 dicoms to Nifti.
     subprocess.run(['cd', f'{p_id}/neurofeedback/{cisc_directory_name}', '&&', 'dcm2niix', '-o',
-                   f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 's', f'0000{run_1_number}'], shell=True)
+                   f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 'n', f'0000{run_1_number}'], shell=True)
 # Merge Run 1 Nifi volumes.
 subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01.nii',
                '-Tmean', f'{p_id}/susceptibility/run01_averaged'])

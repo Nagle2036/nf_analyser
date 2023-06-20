@@ -24,6 +24,7 @@ import signal
 import sys
 import subprocess
 import pandas as pd
+import shutil
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
@@ -227,16 +228,34 @@ seq_no_table_210 = seq_no_table.loc[:, seq_no_table.applymap(
 # Remove Run 4 from the table, or ask for input to specify Run 1 and subsequently remove the other run columns.
 if seq_no_table_210.shape[1] == 2:
     seq_no_table_run1 = seq_no_table_210.iloc[:, 0]
+    # Copy Run 1 dicoms to separate folder 
+    run1_dicom_folder_path = f'{p_id}/susceptibility/run01_dicoms'
+    matching_files = [
+        file for file in os.listdir(cisc_directory_path)
+        if file.endswith('.dcm') and f'{seq_no_table_run1.columns}' in file
+    ]
+    for file in matching_files:
+        source_path = os.path.join(cisc_directory_path, file)
+        destination_path = os.path.join(run1_dicom_folder_path, file)
+        shutil.copy2(cisc_directory_path, run1_dicom_folder_path)
     # Convert Run 1 dicoms to Nifti.
-    subprocess.run(['cd', f'{p_id}/neurofeedback/{cisc_directory_name}', '&&', 'dcm2niix', '-o',
-                   f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 'n', f'0000{seq_no_table_run1}'], shell=True)
+    subprocess.run(['dcm2niix', '-o', f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 'n', f'{p_id}/susceptibility/run01_dicoms'], shell=True)
 else:
     run_1_number = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
     if run_1_number in seq_no_table_210.columns:
         seq_no_table_run1 = seq_no_table_210.filter(like=run_1_number)
-    # Convert Run 1 dicoms to Nifti.
-    subprocess.run(['cd', f'{p_id}/neurofeedback/{cisc_directory_name}', '&&', 'dcm2niix', '-o',
-                   f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 'n', f'0000{run_1_number}'], shell=True)
+        # Copy Run 1 dicoms to separate folder 
+        run1_dicom_folder_path = f'{p_id}/susceptibility/run01_dicoms'
+        matching_files = [
+            file for file in os.listdir(cisc_directory_path)
+            if file.endswith('.dcm') and f'{seq_no_table_run1.columns}' in file
+        ]
+        for file in matching_files:
+            source_path = os.path.join(cisc_directory_path, file)
+            destination_path = os.path.join(run1_dicom_folder_path, file)
+            shutil.copy2(cisc_directory_path, run1_dicom_folder_path)
+        # Convert Run 1 dicoms to Nifti.
+        subprocess.run(['dcm2niix', '-o', f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 'n', f'{p_id}/susceptibility/run01_dicoms'], shell=True)
 # Merge Run 1 Nifi volumes.
 subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01.nii',
                '-Tmean', f'{p_id}/susceptibility/run01_averaged'])

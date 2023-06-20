@@ -239,7 +239,7 @@ if seq_no_table_210.shape[1] == 2:
         destination_path = os.path.join(run1_dicom_folder_path, file)
         shutil.copy2(cisc_directory_path, run1_dicom_folder_path)
     # Convert Run 1 dicoms to Nifti.
-    subprocess.run(['dcm2niix', '-o', f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 'n', f'{p_id}/susceptibility/run01_dicoms'], shell=True)
+    subprocess.run(['cd', f'{p_id}/susceptibility/run01_dicoms', '&&', 'dcm2niix', '-o', f'{p_id}/susceptibility/run01'], shell=True)
 else:
     run_1_number = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
     if run_1_number in seq_no_table_210.columns:
@@ -255,7 +255,7 @@ else:
             destination_path = os.path.join(run1_dicom_folder_path, file)
             shutil.copy2(cisc_directory_path, run1_dicom_folder_path)
         # Convert Run 1 dicoms to Nifti.
-        subprocess.run(['dcm2niix', '-o', f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 'n', f'{p_id}/susceptibility/run01_dicoms'], shell=True)
+        subprocess.run(['cd', f'{p_id}/susceptibility/run01_dicoms', '&&', 'dcm2niix', '-o', f'{p_id}/susceptibility/run01'], shell=True)
 # Merge Run 1 Nifi volumes.
 subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01.nii',
                '-Tmean', f'{p_id}/susceptibility/run01_averaged'])

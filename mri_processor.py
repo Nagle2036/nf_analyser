@@ -232,7 +232,7 @@ if seq_no_table_210.shape[1] == 2:
     run1_dicom_folder_path = f'{p_id}/susceptibility/run01_dicoms'
     matching_files = [
         file for file in os.listdir(cisc_directory_path)
-        if file.endswith('.dcm') and f'{seq_no_table_run1.columns}' in file
+        if file.endswith('.dcm') and f'{seq_no_table_run1}' in file
     ]
     for file in matching_files:
         source_path = os.path.join(cisc_directory_path, file)
@@ -248,7 +248,7 @@ else:
         run1_dicom_folder_path = f'{p_id}/susceptibility/run01_dicoms'
         matching_files = [
             file for file in os.listdir(cisc_directory_path)
-            if file.endswith('.dcm') and f'{seq_no_table_run1.columns}' in file
+            if file.endswith('.dcm') and f'{seq_no_table_run1}' in file
         ]
         for file in matching_files:
             source_path = os.path.join(cisc_directory_path, file)

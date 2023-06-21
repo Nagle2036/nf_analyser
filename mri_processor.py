@@ -237,7 +237,7 @@ if seq_no_table_210.shape[1] == 2:
     for file in matching_files:
         source_path = os.path.join(cisc_directory_path, file)
         destination_path = os.path.join(run1_dicom_folder_path, file)
-        shutil.copy2(cisc_directory_path, run1_dicom_folder_path)
+        subprocess.run(f'cp "{source_path}" "{destination_path}"', shell=True)
     # Convert Run 1 dicoms to Nifti.
     subprocess.run(f'cd {p_id}/susceptibility/run01_dicoms && dcm2niix -o {p_id}/susceptibility/run01', shell=True)
 else:
@@ -253,7 +253,7 @@ else:
         for file in matching_files:
             source_path = os.path.join(cisc_directory_path, file)
             destination_path = os.path.join(run1_dicom_folder_path, file)
-            shutil.copy2(cisc_directory_path, run1_dicom_folder_path)
+            subprocess.run(f'cp "{source_path}" "{destination_path}"', shell=True)
         # Convert Run 1 dicoms to Nifti.
         subprocess.run(f'cd {p_id}/susceptibility/run01_dicoms && dcm2niix -o {p_id}/susceptibility/run01', shell=True)
 # Merge Run 1 Nifi volumes.

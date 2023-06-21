@@ -193,6 +193,8 @@ if answer2 == 'y':
 
 # %% SUSCEPTIBILITY.
 
+import subprocess
+
 # Generate path to dicom files.
 target_folder_name = f'{p_id}'  # Set the target folder name
 # Create the path to the target folder
@@ -213,6 +215,7 @@ for root, directories, _ in os.walk(target_folder_path):
             break
     if cisc_directory_name:
         break
+
 # Create table of sequences from the scan.
 file_list = os.listdir(cisc_directory_path)
 seq_no_table = pd.DataFrame([[]])
@@ -222,9 +225,11 @@ for item in file_list:
         if seq_no not in seq_no_table.columns:
             seq_no_table[f'{seq_no}'] = np.nan
         seq_no_table[f'{seq_no}'] = f'{item}'
+
 # Find the sequences which only have 210 Dicoms (Runs 1 and 4).
 seq_no_table_210 = seq_no_table.loc[:, seq_no_table.applymap(
     lambda x: '210' in str(x)).any()]
+
 # Remove Run 4 from the table, or ask for input to specify Run 1 and subsequently remove the other run columns.
 if seq_no_table_210.shape[1] == 2:
     seq_no_table_run1 = seq_no_table_210.iloc[:, 0]
@@ -232,14 +237,14 @@ if seq_no_table_210.shape[1] == 2:
     run1_dicom_folder_path = f'{p_id}/susceptibility/run01_dicoms'
     matching_files = [
         file for file in os.listdir(cisc_directory_path)
-        if file.endswith('.dcm') and f'{seq_no_table_run1}' in file
+        if file.endswith('.dcm') and seq_no_table_run1.name in file
     ]
     for file in matching_files:
         source_path = os.path.join(cisc_directory_path, file)
         destination_path = os.path.join(run1_dicom_folder_path, file)
-        subprocess.run(f'cp "{source_path}" "{destination_path}"', shell=True)
+        subprocess.run(['cp', source_path, destination_path])
     # Convert Run 1 dicoms to Nifti.
-    subprocess.run(f'cd {p_id}/susceptibility/run01_dicoms && dcm2niix -o {p_id}/susceptibility/run01', shell=True)
+    subprocess.run(['dcm2niix', '-o', f'{p_id}/susceptibility/run01', run1_dicom_folder_path])
 else:
     run_1_number = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
     if run_1_number in seq_no_table_210.columns:
@@ -248,14 +253,16 @@ else:
         run1_dicom_folder_path = f'{p_id}/susceptibility/run01_dicoms'
         matching_files = [
             file for file in os.listdir(cisc_directory_path)
-            if file.endswith('.dcm') and f'{seq_no_table_run1}' in file
+            if file.endswith('.dcm') and seq_no_table_run1.name in file
         ]
         for file in matching_files:
             source_path = os.path.join(cisc_directory_path, file)
             destination_path = os.path.join(run1_dicom_folder_path, file)
-            subprocess.run(f'cp "{source_path}" "{destination_path}"', shell=True)
+            subprocess.run(['cp', source_path, destination_path])
         # Convert Run 1 dicoms to Nifti.
-        subprocess.run(f'cd {p_id}/susceptibility/run01_dicoms && dcm2niix -o {p_id}/susceptibility/run01', shell=True)
+        subprocess.run(['dcm2niix', '-o', f'{p_id}/susceptibility/run01', run1_dicom_folder_path])
+
+
 # Merge Run 1 Nifi volumes.
 subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01.nii',
                '-Tmean', f'{p_id}/susceptibility/run01_averaged'])

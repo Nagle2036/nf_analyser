@@ -191,6 +191,7 @@ if answer2 == 'y':
     # Wait for the web server thread to complete
     server_thread.join()
 
+
 # %% SUSCEPTIBILITY.
 
 # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
@@ -227,7 +228,7 @@ if len(series_with_210_files) == 2:
     series_to_copy = series_with_210_files[0]
 else:
     # Step 4: Prompt the user to specify the series number
-    series_to_copy = input("Enter the two-digit series number to copy the .dcm files from: ")
+    series_to_copy = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
 
 # Copy the .dcm files to the destination folder
 destination_folder = os.path.join(os.getcwd(), p_id, "susceptibility", "run01_dicoms")
@@ -241,58 +242,24 @@ for filename in os.listdir(cisc_path):
 
 print("Dicom files copied successfully.")
 
+# Step 5: Convert DICOM files to Nifti format
+output_folder = os.path.join(os.getcwd(), p_id, "susceptibility")
+subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', destination_folder])
+
+print("DICOM files converted to Nifti format.")
+
+# Step 6: Merge volumes using fslmaths
+nifti_file = os.path.join(output_folder, "run01.nii")
+averaged_file = os.path.join(output_folder, "run01_averaged.nii")
+subprocess.run(['fslmaths', nifti_file, '-Tmean', averaged_file])
+
+print("Volumes merged successfully.")
 
 
 
 
-""" # Generate path to dicom files.
-target_folder_name = f'{p_id}'  # Set the target folder name
-# Create the path to the target folder
-target_folder_path = os.path.join(working_dir, target_folder_name, 'neurofeedback')
-if not os.path.isdir(target_folder_path):  # Check if the target folder exists
-    print(f"Target folder '{target_folder_path}' not found.")
-    exit()
-# Initialize a variable to store the name of the folder containing 'CISC'
-cisc_directory_name = None
-# Initialize a variable to store the path of the folder containing 'CISC'
-cisc_directory_path = None
-# Recursively search for the folder containing 'CISC' within the target folder
-for root, directories, _ in os.walk(target_folder_path):
-    for directory in directories:
-        if 'CISC' in directory:
-            cisc_directory_name = directory
-            cisc_directory_path = os.path.join(root, directory)
-            break
-    if cisc_directory_name:
-        break
 
-# Create table of sequences from the scan.
-file_list = os.listdir(cisc_directory_path)
-seq_no_table = pd.DataFrame([[]])
-for item in file_list:
-    if item.endswith('.dcm'):
-        seq_no = item[8:10]
-        if seq_no not in seq_no_table.columns:
-            seq_no_table[f'{seq_no}'] = np.nan
-        seq_no_table[f'{seq_no}'] = f'{item}'
-
-# Find the sequences which only have 210 Dicoms (Runs 1 and 4).
-seq_no_table_210 = seq_no_table.loc[:, seq_no_table.applymap(
-    lambda x: '210' in str(x)).any()]
-
-# Remove Run 4 from the table, or ask for input to specify Run 1 and subsequently remove the other run columns.
-if seq_no_table_210.shape[1] == 2:
-    seq_no_table_run1 = seq_no_table_210.iloc[:, 0]
-    # Copy Run 1 dicoms to separate folder 
-    run1_dicom_folder_path = f'{p_id}/susceptibility/run01_dicoms'
-    matching_files = [
-        file for file in os.listdir(cisc_directory_path)
-        if file.endswith('.dcm') and seq_no_table_run1.name in file
-    ]
-    for file in matching_files:
-        source_path = os.path.join(cisc_directory_path, file)
-        destination_path = os.path.join(run1_dicom_folder_path, file)
-        subprocess.run(['cp', source_path, destination_path])
+""" 
     # Convert Run 1 dicoms to Nifti.
     subprocess.run(['dcm2niix', '-o', f'{p_id}/susceptibility/run01', run1_dicom_folder_path])
 else:

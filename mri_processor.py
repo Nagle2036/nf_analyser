@@ -193,9 +193,59 @@ if answer2 == 'y':
 
 # %% SUSCEPTIBILITY.
 
-import subprocess
+# Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
+path = os.path.join(os.getcwd(), p_id, "neurofeedback")
+cisc_folder = None
 
-# Generate path to dicom files.
+for folder_name in os.listdir(path):
+    if "CISC" in folder_name:
+        cisc_folder = folder_name
+        break
+
+if cisc_folder is None:
+    print("No 'CISC' folder found in the 'neurofeedback' directory.")
+    exit(1)
+
+# Step 2: Identify dicom series with 210 files
+series_numbers = []
+cisc_path = os.path.join(path, cisc_folder)
+
+for filename in os.listdir(cisc_path):
+    if filename.endswith(".dcm"):
+        series_number = filename.split("_")[1]
+        series_numbers.append(series_number)
+
+series_counts = {series_number: series_numbers.count(series_number) for series_number in set(series_numbers)}
+series_with_210_files = [series_number for series_number, count in series_counts.items() if count == 210]
+
+if len(series_with_210_files) == 0:
+    print("No dicom series with exactly 210 .dcm files found.")
+    exit(1)
+
+# Step 3: Copy files from the first series if there are only two series with 210 files
+if len(series_with_210_files) == 2:
+    series_to_copy = series_with_210_files[0]
+else:
+    # Step 4: Prompt the user to specify the series number
+    series_to_copy = input("Enter the two-digit series number to copy the .dcm files from: ")
+
+# Copy the .dcm files to the destination folder
+destination_folder = os.path.join(os.getcwd(), p_id, "susceptibility", "run01_dicoms")
+os.makedirs(destination_folder, exist_ok=True)
+
+for filename in os.listdir(cisc_path):
+    if filename.endswith(".dcm") and filename.split("_")[1] == series_to_copy:
+        source_path = os.path.join(cisc_path, filename)
+        destination_path = os.path.join(destination_folder, filename)
+        shutil.copy2(source_path, destination_path)
+
+print("Dicom files copied successfully.")
+
+
+
+
+
+""" # Generate path to dicom files.
 target_folder_name = f'{p_id}'  # Set the target folder name
 # Create the path to the target folder
 target_folder_path = os.path.join(working_dir, target_folder_name, 'neurofeedback')
@@ -321,3 +371,4 @@ plt.figure()
 plt.imshow(flipped_mask_data[..., 0], cmap='gray')
 plt.title('Flipped Binary Mask Volume')
 plt.savefig(f'{p_id}/susceptibility/flipped_binary_mask_plot.png')
+ """

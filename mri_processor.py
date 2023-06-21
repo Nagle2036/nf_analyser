@@ -196,7 +196,7 @@ if answer2 == 'y':
     server_thread.join()
 #endregion
 
-#region SUSCEPTIBILITY
+#region SUSCEPTIBILITY.
 
 # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
 path = os.path.join(os.getcwd(), p_id, "neurofeedback")

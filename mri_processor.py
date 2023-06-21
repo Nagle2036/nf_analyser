@@ -223,24 +223,32 @@ if len(series_with_210_files) == 0:
     print("No dicom series with exactly 210 .dcm files found.")
     exit(1)
 
-# Step 3: Copy files from the first series if there are only two series with 210 files
+# Step 3: Copy files from Run 1 to new folder
 if len(series_with_210_files) == 2:
     series_to_copy = series_with_210_files[0]
 else:
-    # Step 4: Prompt the user to specify the series number
     series_to_copy = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
 
-# Copy the .dcm files to the destination folder
 destination_folder = os.path.join(os.getcwd(), p_id, "susceptibility", "run01_dicoms")
 os.makedirs(destination_folder, exist_ok=True)
 
+existing_files = os.listdir(destination_folder)
+files_to_copy = []
+
 for filename in os.listdir(cisc_path):
     if filename.endswith(".dcm") and filename.split("_")[1] == series_to_copy:
+        if filename not in existing_files:
+            files_to_copy.append(filename)
+
+if len(files_to_copy) == 0:
+    print("DICOM files already present in the destination folder. No files copied.")
+else:
+    for filename in files_to_copy:
         source_path = os.path.join(cisc_path, filename)
         destination_path = os.path.join(destination_folder, filename)
         shutil.copy2(source_path, destination_path)
 
-print("Dicom files copied successfully.")
+    print("DICOM files copied successfully.")
 
 # Step 5: Convert DICOM files to Nifti format
 output_folder = os.path.join(os.getcwd(), p_id, "susceptibility")

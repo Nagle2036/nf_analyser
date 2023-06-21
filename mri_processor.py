@@ -7,7 +7,7 @@
 # Upload analysis outputs back to Box account.
 # Add percentage completion metric
 
-# %% IMPORT PACKAGES.
+#region IMPORT PACKAGES.
 
 import time
 import urllib.parse
@@ -28,8 +28,9 @@ import shutil
 import numpy as np
 import nibabel as nib
 import matplotlib.pyplot as plt
+#endregion
 
-# %% INSTRUCTIONS.
+#region INSTRUCTIONS.
 print("\nWelcome to the MRI analysis processor. Please complete the following before proceeding:\n")
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
@@ -37,16 +38,19 @@ answer = input("Have the above steps been completed? (y/n)\n")
 if answer != 'y':
     print('Error: please complete prerequisite steps before proceeding.\n')
     sys.exit()
+#endregion
 
-# %% INPUT INFORMATION.
+#region INPUT INFORMATION.
 p_id = input("Enter the participant's ID (e.g. P001).\n")
+#endregion
 
-# %% CREATE FOLDERS.
+#region CREATE FOLDERS.
 working_dir = os.getcwd()
 subprocess.run(['mkdir', f'{p_id}'])
 subprocess.run(['mkdir', f'{p_id}/susceptibility'])
+#endregion
 
-# %% DOWNLOAD BOX FILES TO SERVER.
+#region DOWNLOAD BOX FILES TO SERVER.
 
 answer2 = input("Would you like to update your files from Box? (y/n)\n")
 if answer2 == 'y':
@@ -190,9 +194,9 @@ if answer2 == 'y':
         print(f"Parent folder '{parent_folder_name}' not found.")
     # Wait for the web server thread to complete
     server_thread.join()
+#endregion
 
-
-# %% SUSCEPTIBILITY.
+#region SUSCEPTIBILITY
 
 # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
 path = os.path.join(os.getcwd(), p_id, "neurofeedback")
@@ -324,3 +328,4 @@ plt.figure()
 plt.imshow(flipped_mask_data[..., 0], cmap='gray')
 plt.title('Flipped Binary Mask Volume')
 plt.savefig(f'{p_id}/susceptibility/flipped_binary_mask_plot.png')
+#endregion

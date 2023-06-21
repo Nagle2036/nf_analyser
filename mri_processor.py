@@ -252,7 +252,7 @@ else:
 
 # Step 5: Convert DICOM files to Nifti format
 output_folder = os.path.join(os.getcwd(), p_id, "susceptibility")
-subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', destination_folder])
+subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
 
 print("DICOM files converted to Nifti format.")
 

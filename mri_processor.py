@@ -225,7 +225,7 @@ if len(series_with_210_files) == 0:
 
 # Step 3: Copy files from Run 1 to new folder
 if len(series_with_210_files) == 2:
-    series_to_copy = series_with_210_files[0]
+    series_to_copy = min(series_with_210_files)
 else:
     series_to_copy = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
 

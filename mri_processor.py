@@ -263,35 +263,7 @@ subprocess.run(['fslmaths', nifti_file, '-Tmean', averaged_file])
 
 print("Volumes merged successfully.")
 
-
-
-
-
-""" 
-    # Convert Run 1 dicoms to Nifti.
-    subprocess.run(['dcm2niix', '-o', f'{p_id}/susceptibility/run01', run1_dicom_folder_path])
-else:
-    run_1_number = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
-    if run_1_number in seq_no_table_210.columns:
-        seq_no_table_run1 = seq_no_table_210.filter(like=run_1_number)
-        # Copy Run 1 dicoms to separate folder 
-        run1_dicom_folder_path = f'{p_id}/susceptibility/run01_dicoms'
-        matching_files = [
-            file for file in os.listdir(cisc_directory_path)
-            if file.endswith('.dcm') and seq_no_table_run1.name in file
-        ]
-        for file in matching_files:
-            source_path = os.path.join(cisc_directory_path, file)
-            destination_path = os.path.join(run1_dicom_folder_path, file)
-            subprocess.run(['cp', source_path, destination_path])
-        # Convert Run 1 dicoms to Nifti.
-        subprocess.run(['dcm2niix', '-o', f'{p_id}/susceptibility/run01', run1_dicom_folder_path])
-
-
-# Merge Run 1 Nifi volumes.
-subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01.nii',
-               '-Tmean', f'{p_id}/susceptibility/run01_averaged'])
-# Read the .roi file and extract the voxel coordinates.
+# Step 7: Read the .roi file and extract the voxel coordinates
 def read_roi_file(roi_file):
     voxel_coordinates = []
     with open(roi_file, 'r') as file:
@@ -302,7 +274,7 @@ def read_roi_file(roi_file):
                 voxel_coordinates.append(
                     (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
     return voxel_coordinates
-roi_file = f'{p_id}/neurofeedback/{cisc_directory_name}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
+roi_file = f'{cisc_path}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
 voxel_coordinates = read_roi_file(roi_file)
 # Get the dimensions of the functional data.
 functional_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
@@ -346,4 +318,3 @@ plt.figure()
 plt.imshow(flipped_mask_data[..., 0], cmap='gray')
 plt.title('Flipped Binary Mask Volume')
 plt.savefig(f'{p_id}/susceptibility/flipped_binary_mask_plot.png')
- """

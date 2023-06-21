@@ -252,16 +252,22 @@ else:
 
 # Step 5: Convert DICOM files to Nifti format
 output_folder = os.path.join(os.getcwd(), p_id, "susceptibility")
-subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
+output_file = os.path.join(output_folder, "run01.nii")
 
-print("DICOM files converted to Nifti format.")
+if not os.path.exists(output_file):
+    subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
+    print("DICOM files converted to Nifti format.")
+else:
+    print("Output file already exists. Skipping conversion.")
 
 # Step 6: Merge volumes using fslmaths
 nifti_file = os.path.join(output_folder, "run01.nii")
-averaged_file = os.path.join(output_folder, "run01_averaged.nii")
-subprocess.run(['fslmaths', nifti_file, '-Tmean', averaged_file])
-
-print("Volumes merged successfully.")
+averaged_file = os.path.join(output_folder, "run01_averaged.nii.gz")
+if not os.path.exists(averaged_file):
+    subprocess.run(['fslmaths', nifti_file, '-Tmean', averaged_file])
+    print("Volumes merged successfully.")
+else:
+    print("Output file already exists. Skipping merging operation.")
 
 # Step 7: Read the .roi file and extract the voxel coordinates
 def read_roi_file(roi_file):

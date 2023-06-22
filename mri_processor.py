@@ -280,13 +280,14 @@ def read_roi_file(roi_file):
         for line in lines:
             if line.strip().isdigit():
                 coordinates = line.strip().split()
+                print("Coordinates:", coordinates) #test
                 voxel_coordinates.append(
                     (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
     return voxel_coordinates
 roi_file = f'{cisc_path}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
 voxel_coordinates = read_roi_file(roi_file)
 
-print(voxel_coordinates)
+print("Voxel Coordinates:", voxel_coordinates) #test
 
 # Step 8: Get the dimensions of the functional data and create the subject space ROI.
 functional_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
@@ -305,10 +306,10 @@ binary_mask_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
 binary_mask_image_info = nib.load(binary_mask_image)
 binary_mask_data = binary_mask_image_info.get_fdata()
 
-print("Functional Data Shape:", functional_data.shape)
-print("Binary Mask Data Shape:", binary_mask_data.shape)
-print("Functional Image Affine:", functional_image_info.affine)
-print("Binary Mask Image Affine:", binary_mask_image_info.affine)
+print("Functional Data Shape:", functional_data.shape) #test
+print("Binary Mask Data Shape:", binary_mask_data.shape) #test
+print("Functional Image Affine:", functional_image_info.affine) #test
+print("Binary Mask Image Affine:", binary_mask_image_info.affine) #test
 
 first_volume = functional_data[..., 0]
 overlay = np.ma.masked_where(binary_mask_data == 0, first_volume)

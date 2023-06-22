@@ -292,9 +292,9 @@ functional_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
 functional_image_info = nib.load(functional_image)
 functional_dims = functional_image_info.shape
 binary_volume = np.zeros(functional_dims)
-print('binary volume shape:', binary_volume.shape) #test
 for voxel in voxel_coordinates:
     x, y, z = voxel
+    print(f"Assigning 1 to voxel ({x}, {y}, {z})")
     binary_volume[x, y, z] = 1
 binary_nifti = nib.Nifti1Image(binary_volume, affine=np.eye(4)) # Assuming an identity affine (i.e. that there is no rotation, scaling, or translation applied to the image data. In other words, it assumes that the voxel coordinates directly correspond to the physical world coordinates without any additional transformation.)
 nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')

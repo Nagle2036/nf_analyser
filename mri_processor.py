@@ -25,6 +25,7 @@ import subprocess
 import pandas as pd
 import shutil
 import numpy as np
+import re
 import nibabel as nib
 import matplotlib.pyplot as plt
 #endregion
@@ -276,17 +277,13 @@ else:
 def read_roi_file(roi_file):
     voxel_coordinates = []
     with open(roi_file, 'r') as file:
-        lines = file.readlines()
-        for line in lines:
-            if not line.strip().isdigit():
-                print("Invalid Line:", line.strip())
-            else:
-                coordinates = line.strip().split()
-                voxel_coordinates.append(
-                    (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
+        content = file.read()
+        matches = re.findall(r'\d+\s+\d+\s+\d+', content)
+        for match in matches:
+            coordinates = match.split()
+            voxel_coordinates.append(
+                (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
     return voxel_coordinates
-roi_file = f'{cisc_path}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
-voxel_coordinates = read_roi_file(roi_file)
 
 print("Voxel Coordinates:", voxel_coordinates) #test
 

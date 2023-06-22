@@ -3,9 +3,8 @@
 ###TO DO###
 # Create Python script to automatically generate PSC / thermometer level plots and blindedly show whether group allocation (a/b) matched training directions from scan.
 # Organise files in BIDS format.
-# Register to GitHub for version control.
 # Upload analysis outputs back to Box account.
-# Add percentage completion metric
+# Add percentage completion metric.
 
 #region IMPORT PACKAGES.
 

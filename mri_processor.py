@@ -280,6 +280,7 @@ def read_roi_file(roi_file):
         content = file.read()
         matches = re.findall(r'\d+\s+\d+\s+\d+', content)
         for match in matches:
+            print("match:", match) #test
             coordinates = match.split()
             voxel_coordinates.append(
                 (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
@@ -294,7 +295,6 @@ functional_dims = functional_image_info.shape
 binary_volume = np.zeros(functional_dims)
 for voxel in voxel_coordinates:
     x, y, z = voxel
-    print(f"Assigning 1 to voxel ({x}, {y}, {z})")
     binary_volume[x, y, z] = 1
 binary_nifti = nib.Nifti1Image(binary_volume, affine=np.eye(4)) # Assuming an identity affine (i.e. that there is no rotation, scaling, or translation applied to the image data. In other words, it assumes that the voxel coordinates directly correspond to the physical world coordinates without any additional transformation.)
 nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')

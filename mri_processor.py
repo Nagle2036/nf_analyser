@@ -278,9 +278,10 @@ def read_roi_file(roi_file):
     with open(roi_file, 'r') as file:
         lines = file.readlines()
         for line in lines:
-            if line.strip().isdigit():
+            if not line.strip().isdigit():
+                print("Invalid Line:", line.strip())
+            else:
                 coordinates = line.strip().split()
-                print("Coordinates:", coordinates) #test
                 voxel_coordinates.append(
                     (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
     return voxel_coordinates

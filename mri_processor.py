@@ -286,6 +286,8 @@ def read_roi_file(roi_file):
 roi_file = f'{cisc_path}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
 voxel_coordinates = read_roi_file(roi_file)
 
+print(voxel_coordinates)
+
 # Step 8: Get the dimensions of the functional data and create the subject space ROI.
 functional_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
 functional_image_info = nib.load(functional_image)

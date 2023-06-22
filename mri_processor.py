@@ -287,8 +287,6 @@ def read_roi_file(roi_file):
 roi_file = f'{cisc_path}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
 voxel_coordinates = read_roi_file(roi_file)
 
-print("Voxel Coordinates:", voxel_coordinates) #test
-
 # Step 8: Get the dimensions of the functional data and create the subject space ROI.
 functional_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
 functional_image_info = nib.load(functional_image)
@@ -297,6 +295,7 @@ binary_volume = np.zeros(functional_dims)
 for voxel in voxel_coordinates:
     x, y, z = voxel
     binary_volume[x, y, z] = 1
+    print(binary_volume) #test
 binary_nifti = nib.Nifti1Image(binary_volume, affine=np.eye(4)) # Assuming an identity affine (i.e. that there is no rotation, scaling, or translation applied to the image data. In other words, it assumes that the voxel coordinates directly correspond to the physical world coordinates without any additional transformation.)
 nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
 

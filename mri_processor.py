@@ -285,29 +285,32 @@ def read_roi_file(roi_file):
     return voxel_coordinates
 roi_file = f'{cisc_path}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
 voxel_coordinates = read_roi_file(roi_file)
-# Get the dimensions of the functional data.
+
+# Step 8: Get the dimensions of the functional data and create the subject space ROI.
 functional_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
 functional_image_info = nib.load(functional_image)
 functional_dims = functional_image_info.shape
-# Create an empty binary volume.
 binary_volume = np.zeros(functional_dims)
-# Assign a value of 1 to the voxel coordinates in the binary volume.
 for voxel in voxel_coordinates:
     x, y, z = voxel
     binary_volume[x, y, z] = 1
-# Save the binary volume as a NIfTI file.
-# Assuming an identity affine (i.e. that there is no rotation, scaling, or translation applied to the image data. In other words, it assumes that the voxel coordinates directly correspond to the physical world coordinates without any additional transformation.)
-binary_nifti = nib.Nifti1Image(binary_volume, affine=np.eye(4))
+binary_nifti = nib.Nifti1Image(binary_volume, affine=np.eye(4)) # Assuming an identity affine (i.e. that there is no rotation, scaling, or translation applied to the image data. In other words, it assumes that the voxel coordinates directly correspond to the physical world coordinates without any additional transformation.)
 nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
-# Load the reference functional data.
+
+# Step 9: Create an overlay of the subject space ROI onto the reference functional image
 functional_data = functional_image_info.get_fdata()
-# Load the binary mask volume.
 binary_mask_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
 binary_mask_image_info = nib.load(binary_mask_image)
 binary_mask_data = binary_mask_image_info.get_fdata()
-# Overlay the binary mask onto the first volume of functional data.
+
+print("Functional Data Shape:", functional_data.shape)
+print("Binary Mask Data Shape:", binary_mask_data.shape)
+print("Functional Image Affine:", functional_image_info.affine)
+print("Binary Mask Image Affine:", binary_mask_image_info.affine)
+
 first_volume = functional_data[..., 0]
 overlay = np.ma.masked_where(binary_mask_data == 0, first_volume)
+
 # Plot the overlay.
 plt.figure()
 plt.imshow(first_volume, cmap='gray')

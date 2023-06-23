@@ -279,7 +279,7 @@ def read_roi_file(roi_file):
     with open(roi_file, 'r') as file:
         content = file.read()
         print("Content:", content) #test
-        matches = re.findall(r'\d+\s+\d+\s+\d+', content)
+        matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
         for match in matches:
             print("match:", match) #test
             coordinates = match.split()

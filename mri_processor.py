@@ -278,6 +278,7 @@ def read_roi_file(roi_file):
     voxel_coordinates = []
     with open(roi_file, 'r') as file:
         content = file.read()
+        print("Content:", content) #test
         matches = re.findall(r'\d+\s+\d+\s+\d+', content)
         for match in matches:
             print("match:", match) #test

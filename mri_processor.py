@@ -295,10 +295,10 @@ binary_volume = np.zeros(functional_dims)
 for voxel in voxel_coordinates:
     x, y, z = voxel
     binary_volume[x, y, z] = 1
-binary_volume = np.flip(binary_volume, axis=0) #test
+binary_volume = np.flip(binary_volume, axis=1) #test
 functional_affine = functional_image_info.affine
 binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
-nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI_flipped0.nii.gz') #name_changed
+nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI_flipped1.nii.gz') #name_changed
 
 
 

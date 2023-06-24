@@ -278,10 +278,8 @@ def read_roi_file(roi_file):
     voxel_coordinates = []
     with open(roi_file, 'r') as file:
         content = file.read()
-        print("Content:", content) #test
         matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
         for match in matches:
-            print("match:", match) #test
             coordinates = match.split()
             voxel_coordinates.append(
                 (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
@@ -297,13 +295,14 @@ binary_volume = np.zeros(functional_dims)
 for voxel in voxel_coordinates:
     x, y, z = voxel
     binary_volume[x, y, z] = 1
+binary_volume = np.flip(binary_volume, axis=0) #test
 functional_affine = functional_image_info.affine
 binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
-nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
+nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI_flipped0.nii.gz') #name_changed
 
 
 
-"""
+""""
 # Step 9: Create an overlay of the subject space ROI onto the reference functional image
 functional_data = functional_image_info.get_fdata()
 binary_mask_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'

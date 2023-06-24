@@ -297,9 +297,13 @@ binary_volume = np.zeros(functional_dims)
 for voxel in voxel_coordinates:
     x, y, z = voxel
     binary_volume[x, y, z] = 1
-binary_nifti = nib.Nifti1Image(binary_volume, affine=np.eye(4)) # Assuming an identity affine (i.e. that there is no rotation, scaling, or translation applied to the image data. In other words, it assumes that the voxel coordinates directly correspond to the physical world coordinates without any additional transformation.)
+functional_affine = functional_image_info.affine
+binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
 nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
 
+
+
+"""
 # Step 9: Create an overlay of the subject space ROI onto the reference functional image
 functional_data = functional_image_info.get_fdata()
 binary_mask_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
@@ -334,3 +338,4 @@ plt.imshow(flipped_mask_data[..., 0], cmap='gray')
 plt.title('Flipped Binary Mask Volume')
 plt.savefig(f'{p_id}/susceptibility/flipped_binary_mask_plot.png')
 #endregion
+"""

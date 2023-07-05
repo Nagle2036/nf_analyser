@@ -185,8 +185,8 @@ if answer2 == 'y':
         while True:
             download_files_from_folder(parent_folder, save_directory, downloaded_files)
             # Get the updated folder information to check if all files have been downloaded
-            parent_folder_info = client.folder(parent_folder.id).get()
-            item_collection = parent_folder_info["item_collection"]
+            parent_folder = client.folder(parent_folder.id).get()
+            item_collection = parent_folder.item_collection()
             total_items = item_collection["total_count"]
             # Check if all files have been downloaded
             if len(downloaded_files) == total_items:

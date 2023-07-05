@@ -302,6 +302,10 @@ if answer3 == 'y':
     binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
     nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
 
-    # Step 8: 
+    # Step 8: Save screenshot of the subject-space ROI on EPI image.
+    binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
+    screenshot_file = "ROI_on_EPI.png"
+    subprocess.run(['fsleyes', 'render', '-of', screenshot_file, functional_image, '-ot', 'mask', '-ol', 'red', '-l', 'Hot', binary_nifti_image])
+    print("Screenshot saved as", screenshot_file)
 
 #endregion

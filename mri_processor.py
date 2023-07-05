@@ -192,12 +192,13 @@ if answer2 == 'y':
             if len(downloaded_files) == total_items:
                 break  # Break the loop if all files have been downloaded
             # Check if the access token needs refreshing
-            if oauth.access_token_expires_at - time.time() < 60:  # Refresh if token expires within 60 seconds
-                oauth.refresh(oauth.access_token, oauth.refresh_token)
-                # Update the Box client with the refreshed token
-                client = Client(oauth)
-            else:
-                break  # Break the loop if the token is still valid
+            try:
+                if oauth.access_token_expires_at - time.time() < 60:  # Refresh if token expires within 60 seconds
+                    oauth.refresh(oauth.access_token, oauth.refresh_token)
+                    # Update the Box client with the refreshed token
+                    client = Client(oauth)
+            except AttributeError:
+                pass  # Ignore the AttributeError if the access_token_expires_at attribute is not present
     else:
         print(f"Parent folder '{parent_folder_name}' not found.")
     # Wait for the web server thread to complete

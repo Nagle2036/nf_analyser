@@ -184,8 +184,12 @@ if answer2 == 'y':
         # Download files recursively from the parent folder and its subfolders
         while True:
             download_files_from_folder(parent_folder, save_directory, downloaded_files)
+            # Get the updated folder information to check if all files have been downloaded
+            parent_folder = client.folder(parent_folder.id).get()
+            item_collection = parent_folder.item_collection()
+            total_items = item_collection["total_count"]
             # Check if all files have been downloaded
-            if len(downloaded_files) == len(parent_folder.item_collection["entries"]):
+            if len(downloaded_files) == total_items:
                 break  # Break the loop if all files have been downloaded
             # Check if the access token needs refreshing
             if oauth.access_token_expires_at - time.time() < 60:  # Refresh if token expires within 60 seconds

@@ -199,6 +199,7 @@ if answer2 == 'y':
                     client = Client(oauth)
             except AttributeError:
                 pass  # Ignore the AttributeError if the access_token_expires_at attribute is not present
+                break
     else:
         print(f"Parent folder '{parent_folder_name}' not found.")
     # Wait for the web server thread to complete

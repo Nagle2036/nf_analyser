@@ -192,7 +192,7 @@ if answer2 == 'y':
             if len(downloaded_files) == total_items:
                 break  # Break the loop if all files have been downloaded
             # Check if the access token needs refreshing
-            if oauth.expires_at - time.time() < 60:  # Refresh if token expires within 60 seconds
+            if oauth.access_token_expires_at - time.time() < 60:  # Refresh if token expires within 60 seconds
                 oauth.refresh(oauth.access_token, oauth.refresh_token)
                 # Update the Box client with the refreshed token
                 client = Client(oauth)

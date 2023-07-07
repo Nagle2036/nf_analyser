@@ -3,11 +3,10 @@
 ###TO DO###
 # Create Python script to automatically generate PSC / thermometer level plots and blindedly show whether group allocation (a/b) matched training directions from scan.
 # Organise files in BIDS format.
-# Register to GitHub for version control.
 # Upload analysis outputs back to Box account.
-# Add percentage completion metric
+# Add percentage completion metric.
 
-# %% IMPORT PACKAGES.
+#region IMPORT PACKAGES.
 
 import time
 import urllib.parse
@@ -24,11 +23,14 @@ import signal
 import sys
 import subprocess
 import pandas as pd
+import shutil
 import numpy as np
+import re
 import nibabel as nib
 import matplotlib.pyplot as plt
+#endregion
 
-# %% INSTRUCTIONS.
+#region INSTRUCTIONS.
 print("\nWelcome to the MRI analysis processor. Please complete the following before proceeding:\n")
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
@@ -36,19 +38,23 @@ answer = input("Have the above steps been completed? (y/n)\n")
 if answer != 'y':
     print('Error: please complete prerequisite steps before proceeding.\n')
     sys.exit()
+#endregion
 
-# %% INPUT INFORMATION.
+#region INPUT INFORMATION.
 p_id = input("Enter the participant's ID (e.g. P001).\n")
+#endregion
 
-# %% CREATE FOLDERS.
+#region CREATE FOLDERS.
 working_dir = os.getcwd()
 subprocess.run(['mkdir', f'{p_id}'])
 subprocess.run(['mkdir', f'{p_id}/susceptibility'])
+#endregion
 
-# %% DOWNLOAD BOX FILES TO SERVER.
+#region DOWNLOAD BOX FILES TO SERVER.
 
 answer2 = input("Would you like to update your files from Box? (y/n)\n")
 if answer2 == 'y':
+    
     # Define the signal handler function
     def signal_handler(sig, frame):
         # Kill the process using port 8080
@@ -178,120 +184,131 @@ if answer2 == 'y':
         # Download files recursively from the parent folder and its subfolders
         while True:
             download_files_from_folder(parent_folder, save_directory, downloaded_files)
+            # Get the updated folder information to check if all files have been downloaded
+            parent_folder_info = client.folder(parent_folder.id).get()
+            item_collection = parent_folder_info["item_collection"]
+            total_items = item_collection["total_count"]
+            # Check if all files have been downloaded
+            if len(downloaded_files) == total_items:
+                break  # Break the loop if all files have been downloaded
             # Check if the access token needs refreshing
-            if oauth.access_token_expires_at - time.time() < 60:  # Refresh if token expires within 60 seconds
-                oauth.refresh(oauth.access_token, oauth.refresh_token)
-                # Update the Box client with the refreshed token
-                client = Client(oauth)
-            else:
-                break  # Break the loop if the token is still valid
+            try:
+                if oauth.access_token_expires_at - time.time() < 60:  # Refresh if token expires within 60 seconds
+                    oauth.refresh(oauth.access_token, oauth.refresh_token)
+                    # Update the Box client with the refreshed token
+                    client = Client(oauth)
+            except AttributeError:
+                pass  # Ignore the AttributeError if the access_token_expires_at attribute is not present
+                break
     else:
         print(f"Parent folder '{parent_folder_name}' not found.")
     # Wait for the web server thread to complete
     server_thread.join()
+#endregion
 
-# %% SUSCEPTIBILITY.
+#region SUSCEPTIBILITY.
 
-# Generate path to dicom files.
-target_folder_name = f'{p_id}'  # Set the target folder name
-# Create the path to the target folder
-target_folder_path = os.path.join(working_dir, target_folder_name)
-if not os.path.isdir(target_folder_path):  # Check if the target folder exists
-    print(f"Target folder '{target_folder_name}' not found.")
-    exit()
-# Initialize a variable to store the name of the folder containing 'CISC'
-cisc_directory_name = None
-# Initialize a variable to store the path of the folder containing 'CISC'
-cisc_directory_path = None
-# Recursively search for the folder containing 'CISC' within the target folder
-for root, directories, _ in os.walk(target_folder_path):
-    for directory in directories:
-        if 'CISC' in directory:
-            cisc_directory_name = directory
-            cisc_directory_path = os.path.join(root, directory)
+answer3 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
+if answer3 == 'y':
+
+    # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
+    path = os.path.join(os.getcwd(), p_id, "neurofeedback")
+    cisc_folder = None
+    for folder_name in os.listdir(path):
+        if "CISC" in folder_name:
+            cisc_folder = folder_name
             break
-    if cisc_directory_name:
-        break
-# Create table of sequences from the scan.
-file_list = os.listdir(cisc_directory_path)
-seq_no_table = pd.DataFrame([[]])
-for item in file_list:
-    if item.endswith('.dcm'):
-        seq_no = item[8:10]
-        if seq_no not in seq_no_table.columns:
-            seq_no_table[f'{seq_no}'] = np.nan
-        seq_no_table[f'{seq_no}'] = f'{item}'
-# Find the sequences which only have 210 Dicoms (Runs 1 and 4).
-seq_no_table_210 = seq_no_table.loc[:, seq_no_table.applymap(
-    lambda x: '210' in str(x)).any()]
-# Remove Run 4 from the table, or ask for input to specify Run 1 and subsequently remove the other run columns.
-if seq_no_table_210.shape[1] == 2:
-    seq_no_table_run1 = seq_no_table_210.iloc[:, 0]
-else:
-    run_1_number = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
-    if run_1_number in seq_no_table_210.columns:
-        seq_no_table_run1 = seq_no_table_210.filter(like=run_1_number)
+    if cisc_folder is None:
+        print("No 'CISC' folder found in the 'neurofeedback' directory.")
+        exit(1)
+
+    # Step 2: Identify dicom series with 210 files
+    series_numbers = []
+    cisc_path = os.path.join(path, cisc_folder)
+    for filename in os.listdir(cisc_path):
+        if filename.endswith(".dcm"):
+            series_number = filename.split("_")[1]
+            series_numbers.append(series_number)
+    series_counts = {series_number: series_numbers.count(series_number) for series_number in set(series_numbers)}
+    series_with_210_files = [series_number for series_number, count in series_counts.items() if count == 210]
+    if len(series_with_210_files) == 0:
+        print("No dicom series with exactly 210 .dcm files found.")
+        exit(1)
+
+    # Step 3: Copy files from Run 1 to new folder
+    if len(series_with_210_files) == 2:
+        series_to_copy = min(series_with_210_files)
     else:
-        print("Invalid input for Run 1 sequence number.")
-        exit()
-# Convert Run 1 dicoms to Nifti.
-subprocess.run(['cd', f'{p_id}/neurofeedback/{cisc_directory_name}', '&&', 'dcm2niix', '-o',
-               f'{p_id}/susceptibility', '-z', 'y', '-f', 'run01', '-t', 's', f'0000{run_1_number}'], shell=True)
-# Merge Run 1 Nifi volumes.
-subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01.nii',
-               '-Tmean', f'{p_id}/susceptibility/run01_averaged'])
-# Read the .roi file and extract the voxel coordinates.
-def read_roi_file(roi_file):
-    voxel_coordinates = []
-    with open(roi_file, 'r') as file:
-        lines = file.readlines()
-        for line in lines:
-            if line.strip().isdigit():
-                coordinates = line.strip().split()
+        series_to_copy = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
+    destination_folder = os.path.join(os.getcwd(), p_id, "susceptibility", "run01_dicoms")
+    os.makedirs(destination_folder, exist_ok=True)
+    existing_files = os.listdir(destination_folder)
+    files_to_copy = []
+    for filename in os.listdir(cisc_path):
+        if filename.endswith(".dcm") and filename.split("_")[1] == series_to_copy:
+            if filename not in existing_files:
+                files_to_copy.append(filename)
+    if len(files_to_copy) == 0:
+        print("DICOM files already present in the destination folder. No files copied.")
+    else:
+        for filename in files_to_copy:
+            source_path = os.path.join(cisc_path, filename)
+            destination_path = os.path.join(destination_folder, filename)
+            shutil.copy2(source_path, destination_path)
+        print("DICOM files copied successfully.")
+
+    # Step 4: Convert DICOM files to Nifti format
+    output_folder = os.path.join(os.getcwd(), p_id, "susceptibility")
+    output_file = os.path.join(output_folder, "run01.nii")
+    if not os.path.exists(output_file):
+        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
+        print("DICOM files converted to Nifti format.")
+    else:
+        print("Output file already exists. Skipping conversion.")
+
+    # Step 5: Merge volumes using fslmaths
+    nifti_file = os.path.join(output_folder, "run01.nii")
+    averaged_file = os.path.join(output_folder, "run01_averaged.nii.gz")
+    if not os.path.exists(averaged_file):
+        subprocess.run(['fslmaths', nifti_file, '-Tmean', averaged_file])
+        print("Volumes merged successfully.")
+    else:
+        print("Output file already exists. Skipping merging operation.")
+
+    # Step 6: Read the .roi file and extract the voxel coordinates
+    def read_roi_file(roi_file):
+        voxel_coordinates = []
+        with open(roi_file, 'r') as file:
+            content = file.read()
+            matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
+            for match in matches:
+                coordinates = match.split()
                 voxel_coordinates.append(
                     (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
-    return voxel_coordinates
-roi_file = f'{p_id}/neurofeedback/{cisc_directory_name}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
-voxel_coordinates = read_roi_file(roi_file)
-# Get the dimensions of the functional data.
-functional_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
-functional_image_info = nib.load(functional_image)
-functional_dims = functional_image_info.shape
-# Create an empty binary volume.
-binary_volume = np.zeros(functional_dims)
-# Assign a value of 1 to the voxel coordinates in the binary volume.
-for voxel in voxel_coordinates:
-    x, y, z = voxel
-    binary_volume[x, y, z] = 1
-# Save the binary volume as a NIfTI file.
-# Assuming an identity affine (i.e. that there is no rotation, scaling, or translation applied to the image data. In other words, it assumes that the voxel coordinates directly correspond to the physical world coordinates without any additional transformation.)
-binary_nifti = nib.Nifti1Image(binary_volume, affine=np.eye(4))
-nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
-# Load the reference functional data.
-functional_data = functional_image_info.get_fdata()
-# Load the binary mask volume.
-binary_mask_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
-binary_mask_image_info = nib.load(binary_mask_image)
-binary_mask_data = binary_mask_image_info.get_fdata()
-# Overlay the binary mask onto the first volume of functional data.
-first_volume = functional_data[..., 0]
-overlay = np.ma.masked_where(binary_mask_data == 0, first_volume)
-# Plot the overlay.
-plt.figure()
-plt.imshow(first_volume, cmap='gray')
-plt.imshow(overlay, cmap='jet', alpha=0.5)
-plt.colorbar()
-plt.title('Overlay of Binary Mask on First Functional Volume')
-plt.savefig(f'{p_id}/susceptibility/overlay_plot.png')
-# Verify the orientation and alignment.
-plt.figure()
-plt.imshow(binary_mask_data[..., 0], cmap='gray')
-plt.title('Binary Mask Volume')
-plt.savefig(f'{p_id}/susceptibility/binary_mask_plot.png')
-# Flip the y-axis if required
-flipped_mask_data = np.flipud(binary_mask_data)
-# Plot the flipped binary mask
-plt.figure()
-plt.imshow(flipped_mask_data[..., 0], cmap='gray')
-plt.title('Flipped Binary Mask Volume')
-plt.savefig(f'{p_id}/susceptibility/flipped_binary_mask_plot.png')
+        return voxel_coordinates
+    roi_file = f'{cisc_path}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
+    voxel_coordinates = read_roi_file(roi_file)
+
+    # Step 7: Get the dimensions of the functional data and create the subject space ROI.
+    functional_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
+    functional_image_info = nib.load(functional_image)
+    functional_dims = functional_image_info.shape
+    binary_volume = np.zeros(functional_dims)
+    for voxel in voxel_coordinates:
+        x, y, z = voxel
+        binary_volume[x, y, z] = 1
+    binary_volume = np.flip(binary_volume, axis=1) #flipping mask across the y-axis
+    functional_affine = functional_image_info.affine
+    binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
+    nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
+
+    # Step 8: Save screenshot of the subject-space ROI on EPI image.
+    binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
+    screenshot_file = f'{p_id}/susceptibility/ROI_on_EPI.png'
+    result = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, '-size', '100%', '100%', functional_image, '-ot', 'mask', '-mc', '1', '0', '0', binary_nifti_image], capture_output=True, text=True)
+    if result.returncode == 0:
+        print("Screenshot saved as", screenshot_file)
+    else:
+        print("Error encountered:", result.stderr)
+
+#endregion

@@ -314,7 +314,7 @@ if answer3 == 'y':
     center_x = dimensions[0] // 2
     center_y = dimensions[1] // 2
     center_z = dimensions[2] // 2
-    result2 = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0', functional_image], capture_output=True, text=True)
+    result2 = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0', functional_image, '--displayCrosshairs', '--worldLoc', f'{center_x} {center_y} {center_z}'], capture_output=True, text=True)
     if result2.returncode == 0:
         print("Screenshot saved as", screenshot_file)
     else:

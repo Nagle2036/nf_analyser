@@ -305,10 +305,39 @@ if answer3 == 'y':
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
     binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
     screenshot_file = f'{p_id}/susceptibility/ROI_on_EPI.png'
-    result = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, '-size', '100%', '100%', functional_image, '-ot', 'mask', '-mc', '1', '0', '0', binary_nifti_image], capture_output=True, text=True)
+    result = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, functional_image, '-ot', 'mask', '-mc', '1', '0', '0', binary_nifti_image], capture_output=True, text=True)
     if result.returncode == 0:
         print("Screenshot saved as", screenshot_file)
     else:
         print("Error encountered:", result.stderr)
+
+
+    # Specify the input image path
+    input_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
+
+    # Run the nipype Docker container with the external drive mounted
+    subprocess.run(['docker', 'run', '-it', '--rm', '--name', 'nipype_container', '-v', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/neurofeedback/participant_data/P006/susceptibility:/output', 'nipype/nipype'])
+
+    # Create a nipype workflow
+    workflow = Workflow('brain_segmentation')
+
+    # Create the SPM segment interface
+    segment = Node(interface=spm.Segment(), name='segment')
+
+    # Set the input image
+    segment.inputs.data = input_image
+
+    # Set the output directory within the container
+    segment.inputs.output_dir = '/output/brain_segmentation'
+
+    # Connect the nodes in the workflow
+    workflow.connect(segment, 'native_class_images', 'outputnative')
+    workflow.connect(segment, 'dartel_input_images', 'outputdartel')
+
+    # Run the workflow
+    workflow.run(plugin='MultiProc', plugin_args={'n_procs': 4})
+
+    subprocess.run(['docker', 'stop', 'nipype_container'])
+
 
 #endregion

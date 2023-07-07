@@ -305,13 +305,13 @@ if answer3 == 'y':
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
     binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
     screenshot_file = f'{p_id}/susceptibility/ROI_on_EPI.png'
-    result = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, functional_image, '-ot', 'mask', '-mc', '1', '0', '0', binary_nifti_image], capture_output=True, text=True)
+    result = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0', functional_image], capture_output=True, text=True)
     if result.returncode == 0:
         print("Screenshot saved as", screenshot_file)
     else:
         print("Error encountered:", result.stderr)
 
-
+"""
     # Specify the input image path
     input_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
 
@@ -338,6 +338,6 @@ if answer3 == 'y':
     workflow.run(plugin='MultiProc', plugin_args={'n_procs': 4})
 
     subprocess.run(['docker', 'stop', 'nipype_container'])
-
+"""
 
 #endregion

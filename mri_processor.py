@@ -305,11 +305,20 @@ if answer3 == 'y':
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
     binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
     screenshot_file = f'{p_id}/susceptibility/ROI_on_EPI.png'
-    result = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0', functional_image], capture_output=True, text=True)
-    if result.returncode == 0:
+    # Get the dimensions of the binary_nifti_image
+    result1 = subprocess.run(['fslhd', binary_nifti_image], capture_output=True, text=True)
+    output_lines = result1.stdout.split("\n")
+    dimensions_line = [line for line in output_lines if line.startswith("dim1")][0]
+    dimensions = [int(dim) for dim in dimensions_line.split()[1:4]]
+    # Calculate the center coordinates
+    center_x = dimensions[0] // 2
+    center_y = dimensions[1] // 2
+    center_z = dimensions[2] // 2
+    result2 = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0', functional_image], capture_output=True, text=True)
+    if result2.returncode == 0:
         print("Screenshot saved as", screenshot_file)
     else:
-        print("Error encountered:", result.stderr)
+        print("Error encountered:", result2.stderr)
 
 """
     # Specify the input image path

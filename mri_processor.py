@@ -305,20 +305,18 @@ if answer3 == 'y':
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
     binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
     screenshot_file = f'{p_id}/susceptibility/ROI_on_EPI.png'
-    # Get the dimensions of the binary_nifti_image using fslval command
-    result1 = subprocess.run(['fslval', binary_nifti_image, 'dim1'], capture_output=True, text=True)
-    dim1 = int(result1.stdout.strip())
+    
+    # Load the binary_nifti_image using nibabel
+    binary_img = nib.load(binary_nifti_image)
+    binary_data = binary_img.get_fdata()
 
-    result2 = subprocess.run(['fslval', binary_nifti_image, 'dim2'], capture_output=True, text=True)
-    dim2 = int(result2.stdout.strip())
+    # Get the indices of the nonzero (signal) voxels
+    indices = np.nonzero(binary_data)
 
-    result3 = subprocess.run(['fslval', binary_nifti_image, 'dim3'], capture_output=True, text=True)
-    dim3 = int(result3.stdout.strip())
-
-    # Calculate the center coordinates
-    center_x = dim1 // 2
-    center_y = dim2 // 2
-    center_z = dim3 // 2
+    # Calculate the center coordinates based on the nonzero voxels
+    center_x = int(np.mean(indices[0]))
+    center_y = int(np.mean(indices[1]))
+    center_z = int(np.mean(indices[2]))
     result4 = subprocess.run(['fsleyes', 'render', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-of', screenshot_file, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0', functional_image], capture_output=True, text=True)
     if result4.returncode == 0:
         print("Screenshot saved as", screenshot_file)

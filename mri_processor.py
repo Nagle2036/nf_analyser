@@ -318,21 +318,7 @@ if answer3 == 'y':
     center_y = int(np.mean(indices[1]))
     center_z = int(np.mean(indices[2]))
 
-    zoom_factor = 2  # Adjust the zoom factor as desired
-
-    crop_size_x = int(binary_data.shape[0] / zoom_factor)
-    crop_size_y = int(binary_data.shape[1] / zoom_factor)
-    crop_size_z = int(binary_data.shape[2] / zoom_factor)
-
-    # Calculate the crop boundaries
-    crop_start_x = max(center_x - int(crop_size_x / 2), 0)
-    crop_start_y = max(center_y - int(crop_size_y / 2), 0)
-    crop_start_z = max(center_z - int(crop_size_z / 2), 0)
-    crop_end_x = min(crop_start_x + crop_size_x, binary_data.shape[0])
-    crop_end_y = min(crop_start_y + crop_size_y, binary_data.shape[1])
-    crop_end_z = min(crop_start_z + crop_size_z, binary_data.shape[2])
-
-    result4 = subprocess.run(['fsleyes', 'render', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '--crop', f'{crop_start_x}:{crop_end_x}', f'{crop_start_y}:{crop_end_y}', f'{crop_start_z}:{crop_end_z}', '-of', screenshot_file, functional_image, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0'], capture_output=True, text=True)
+    result4 = subprocess.run(['fsleyes', 'render', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-cg', '-of', screenshot_file, functional_image, binary_nifti_image, '-ot', 'mask', '--alpha', '40', '-mc', '1', '0', '0'], capture_output=True, text=True)
     if result4.returncode == 0:
         print("Screenshot saved as", screenshot_file)
     else:

@@ -318,7 +318,7 @@ if answer3 == 'y':
     center_y = int(np.mean(indices[1]))
     center_z = int(np.mean(indices[2]))
 
-    result4 = subprocess.run(['fsleyes', 'render', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-cg', '-of', screenshot_file, functional_image, binary_nifti_image, '-ot', 'mask', '--alpha', '40', '-mc', '1', '0', '0'], capture_output=True, text=True)
+    result4 = subprocess.run(['fsleyes', 'render', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-hc', '-of', screenshot_file, functional_image, binary_nifti_image, '-ot', 'mask', '--alpha', '40', '-mc', '1', '0', '0'], capture_output=True, text=True)
     if result4.returncode == 0:
         print("Screenshot saved as", screenshot_file)
     else:

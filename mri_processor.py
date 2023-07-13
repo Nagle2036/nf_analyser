@@ -319,7 +319,7 @@ if answer3 == 'y':
     center_x = dim1 // 2
     center_y = dim2 // 2
     center_z = dim3 // 2
-    result4 = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0', '--displayLocation', f'{center_x}', f'{center_y}', f'{center_z}', functional_image], capture_output=True, text=True)
+    result4 = subprocess.run(['fsleyes', 'render', '-of', screenshot_file, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0', '-vl', f'{center_x}', f'{center_y}', f'{center_z}', functional_image], capture_output=True, text=True)
     if result4.returncode == 0:
         print("Screenshot saved as", screenshot_file)
     else:

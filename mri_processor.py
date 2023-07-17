@@ -305,26 +305,19 @@ if answer3 == 'y':
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
     binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
     screenshot_file = f'{p_id}/susceptibility/ROI_on_EPI.png'
-    
-    # Load the binary_nifti_image using nibabel
     binary_img = nib.load(binary_nifti_image)
     binary_data = binary_img.get_fdata()
-
-    # Get the indices of the nonzero (signal) voxels
     indices = np.nonzero(binary_data)
-
-    # Calculate the center coordinates based on the nonzero voxels
     center_x = int(np.mean(indices[0]))
     center_y = int(np.mean(indices[1]))
     center_z = int(np.mean(indices[2]))
-
     result4 = subprocess.run(['fsleyes', 'render', '--scene', 'lightbox', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-hc', '-hl', '-of', screenshot_file, functional_image, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0'], capture_output=True, text=True)
     if result4.returncode == 0:
         print("Screenshot saved as", screenshot_file)
     else:
         print("Error encountered:", result4.stderr)
 
-"""
+    # Step 9: 
     # Specify the input image path
     input_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
 
@@ -351,6 +344,5 @@ if answer3 == 'y':
     workflow.run(plugin='MultiProc', plugin_args={'n_procs': 4})
 
     subprocess.run(['docker', 'stop', 'nipype_container'])
-"""
 
 #endregion

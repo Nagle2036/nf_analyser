@@ -324,7 +324,7 @@ if answer3 == 'y':
     input_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
 
     # Run the nipype Docker container with the external drive mounted
-    subprocess.run(['docker', 'run', '-it', '--rm', '--name', 'nipype_container', '-v', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/neurofeedback/participant_data/P006/susceptibility:/output', 'nipype/nipype'])
+    subprocess.run(['docker', 'run', '-d', '--rm', '--name', 'nipype_container', '-v', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/neurofeedback/participant_data/P006/susceptibility:/output', 'nipype/nipype'])
 
     # Create a nipype workflow
     workflow = Workflow('brain_segmentation')
@@ -346,12 +346,5 @@ if answer3 == 'y':
     workflow.run(plugin='MultiProc', plugin_args={'n_procs': 4})
 
     subprocess.run(['docker', 'stop', 'nipype_container'])
-
-    # Create a Docker client
-    client = docker.from_env()
-
-    # Stop the container
-    container = client.containers.get('nipype_container')
-    container.stop()
 
 #endregion

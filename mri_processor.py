@@ -326,6 +326,8 @@ if answer3 == 'y':
     # Run the nipype Docker container with the external drive mounted
     subprocess.run(['docker', 'run', '-d', '--rm', '--name', 'nipype_container', '-v', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/neurofeedback/participant_data/P006/susceptibility:/output', 'nipype/nipype'])
 
+    subprocess.run(['printf', 'hello there'])
+
     # Create a nipype workflow
     workflow = Workflow('brain_segmentation')
 

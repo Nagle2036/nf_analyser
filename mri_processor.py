@@ -28,6 +28,8 @@ import numpy as np
 import re
 import nibabel as nib
 import matplotlib.pyplot as plt
+import docker
+
 #endregion
 
 #region INSTRUCTIONS.
@@ -344,5 +346,12 @@ if answer3 == 'y':
     workflow.run(plugin='MultiProc', plugin_args={'n_procs': 4})
 
     subprocess.run(['docker', 'stop', 'nipype_container'])
+
+    # Create a Docker client
+    client = docker.from_env()
+
+    # Stop the container
+    container = client.containers.get('nipype_container')
+    container.stop()
 
 #endregion

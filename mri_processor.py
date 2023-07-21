@@ -326,9 +326,10 @@ if answer3 == 'y':
         print("Error encountered:", result.stderr)
 
     # Step 9: Calculate Percentage of ROI Voxels in Dropout Regions.
+    threshold = input("Please enter a threshold value for functional image binarisation.\n")
     bin_file = os.path.join(output_folder, "run01_averaged_betted_bin.nii.gz")
     if not os.path.exists(bin_file):
-        subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01_averaged_betted.nii.gz', '-thr', '100', '-bin', bin_file])
+        subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
         print("EPI binarisation completed.")
     else:
         print("Binarised EPI already present. Skipping binarisation operation.")
@@ -355,43 +356,9 @@ if answer3 == 'y':
     percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
     percentage_file = os.path.join(output_folder, "percentage_outside.txt")
     if not os.path.exists(percentage_file):
+        line1 = f"Threshold: {threshold}"
+        line2 = str(percentage_outside)
         with open(percentage_file, "w") as file:
-            file.write(str(percentage_outside))
+            file.writelines([line1, line2])
         print("Percentage of voxels outside the signal dropout mask saved to", percentage_file)
-
-
-
-
-"""
-    # Step 9: 
-    # Specify the input image path
-    input_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
-
-    # Run the nipype Docker container with the external drive mounted
-    subprocess.run(['docker', 'run', '-d', '--rm', '--name', 'nipype_container', '-v', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/neurofeedback/participant_data/P006/susceptibility:/output', 'nipype/nipype'])
-
-    subprocess.run(['printf', 'hello there'])
-
-    # Create a nipype workflow
-    workflow = Workflow('brain_segmentation')
-
-    # Create the SPM segment interface
-    segment = Node(interface=spm.Segment(), name='segment')
-
-    # Set the input image
-    segment.inputs.data = input_image
-
-    # Set the output directory within the container
-    segment.inputs.output_dir = '/output/brain_segmentation'
-
-    # Connect the nodes in the workflow
-    workflow.connect(segment, 'native_class_images', 'outputnative')
-    workflow.connect(segment, 'dartel_input_images', 'outputdartel')
-
-    # Run the workflow
-    workflow.run(plugin='MultiProc', plugin_args={'n_procs': 4})
-
-    subprocess.run(['docker', 'stop', 'nipype_container'])
-"""
-    
 #endregion

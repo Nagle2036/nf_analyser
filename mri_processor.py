@@ -304,6 +304,8 @@ if answer3 == 'y':
     nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
 
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
+    subprocess.run(['bet', f'{p_id}/susceptibility/run01_averaged.nii.gz', f'{p_id}/susceptibility/run01_averaged_betted'])
+    functional_image_betted = f'{p_id}/susceptibility/run01_averaged_betted.nii.gz'
     binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
     screenshot_file = f'{p_id}/susceptibility/ROI_on_EPI.png'
     binary_img = nib.load(binary_nifti_image)

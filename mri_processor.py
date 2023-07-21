@@ -319,6 +319,7 @@ if answer3 == 'y':
     else:
         print("Error encountered:", result4.stderr)
 
+"""
     # Step 9: 
     # Specify the input image path
     input_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
@@ -348,5 +349,6 @@ if answer3 == 'y':
     workflow.run(plugin='MultiProc', plugin_args={'n_procs': 4})
 
     subprocess.run(['docker', 'stop', 'nipype_container'])
-
+"""
+    
 #endregion

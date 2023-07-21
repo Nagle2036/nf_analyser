@@ -355,7 +355,7 @@ if answer3 == 'y':
     percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
     percentage_file = os.path.join(output_folder, "percentage_outside.txt")
     if not os.path.exists(percentage_file):
-        with open(output_file, "w") as file:
+        with open(percentage_file, "w") as file:
             file.write(str(percentage_outside))
         print("Percentage of voxels outside the signal dropout mask saved to", percentage_file)
 

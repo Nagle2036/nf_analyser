@@ -304,7 +304,11 @@ if answer3 == 'y':
     nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
 
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
-    subprocess.run(['bet', f'{p_id}/susceptibility/run01_averaged.nii.gz', f'{p_id}/susceptibility/run01_averaged_betted'])
+    if not f'{p_id}/susceptibility/run01_averaged_betted':
+        subprocess.run(['bet', f'{p_id}/susceptibility/run01_averaged.nii.gz', f'{p_id}/susceptibility/run01_averaged_betted'])
+        print("Brain extraction completed.")
+    else:
+        print("Brain-extracted file already exists. Skipping BET operation.")
     functional_image_betted = f'{p_id}/susceptibility/run01_averaged_betted.nii.gz'
     binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
     screenshot_file = f'{p_id}/susceptibility/ROI_on_EPI.png'
@@ -314,11 +318,45 @@ if answer3 == 'y':
     center_x = int(np.mean(indices[0]))
     center_y = int(np.mean(indices[1]))
     center_z = int(np.mean(indices[2]))
-    result4 = subprocess.run(['fsleyes', 'render', '--scene', 'lightbox', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-hc', '-hl', '-of', screenshot_file, functional_image, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0'], capture_output=True, text=True)
-    if result4.returncode == 0:
+    result = subprocess.run(['fsleyes', 'render', '--scene', 'lightbox', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-hc', '-hl', '-of', screenshot_file, functional_image, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0'], capture_output=True, text=True)
+    if result.returncode == 0:
         print("Screenshot saved as", screenshot_file)
     else:
-        print("Error encountered:", result4.stderr)
+        print("Error encountered:", result.stderr)
+
+    # Step 9: Calculate Percentage of ROI Voxels in Dropout Regions.
+    if not f'{p_id}/susceptibility/run01_averaged_betted_bin':
+        subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01_averaged_betted.nii.gz', '-thr', '100', '-bin', f'{p_id}/susceptibility/run01_averaged_betted_bin'])
+        print("EPI binarisation completed.")
+    else:
+        print("Binarised EPI already present. Skipping binarisation operation.")
+    if not f'{p_id}/susceptibility/run01_averaged_betted_bin_inverse':
+        subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', f'{p_id}/susceptibility/run01_averaged_betted_bin_inverse'])
+        print("EPI binarisation successfully inverted.")
+    else:
+        print("Inverted binary EPI already present. Skipping inversion procedure.")
+    result2 = subprocess.run(['fslstats', f'{p_id}/susceptibility/subject_space_ROI.nii.gz', '-k', f'{p_id}/susceptibility/run01_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
+    if result2.returncode == 0:
+        result2_output = result2.stdout.strip()
+    else:
+        print("Error executing second fslstats command.")
+    result2_output_values = result2_output.split()
+    voxels_outside = float(result2_output_values[0])
+    result3 = subprocess.run('fslstats' f'{p_id}/susceptibility/subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
+    if result3.returncode == 0:
+        result3_output = result3.stdout.strip()
+    else:
+        print("Error executing first fslstats command.")
+    result3_output_values = result3_output.split()
+    total_voxels_in_roi = float(result3_output_values[0])
+    percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
+    output_file = f'{p_id}/susceptibility/percentage_outside.txt'
+    with open(output_file, "w") as file:
+        file.write(str(percentage_outside))
+    print("Percentage of voxels outside the signal dropout mask saved to", output_file)
+
+
+
 
 """
     # Step 9: 

@@ -357,7 +357,7 @@ if answer3 == 'y':
     percentage_file = os.path.join(output_folder, "percentage_outside.txt")
     if not os.path.exists(percentage_file):
         line1 = f"Threshold: {threshold}\n"
-        line2 = "Percentage of ROI voxels in signal dropout regions:", str(percentage_outside)
+        line2 = f"Percentage of ROI voxels in signal dropout regions: {percentage_outside}"
         with open(percentage_file, "w") as file:
             file.writelines([line1, line2])
         print("Percentage of voxels outside the signal dropout mask saved to", percentage_file)

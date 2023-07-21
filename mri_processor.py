@@ -326,9 +326,9 @@ if answer3 == 'y':
         print("Error encountered:", result.stderr)
 
     # Step 9: Calculate Percentage of ROI Voxels in Dropout Regions.
-    threshold = input("Please enter a threshold value for functional image binarisation.\n")
     bin_file = os.path.join(output_folder, "run01_averaged_betted_bin.nii.gz")
     if not os.path.exists(bin_file):
+        threshold = input("Please enter a threshold value for functional image binarisation.\n")
         subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
         print("EPI binarisation completed.")
     else:

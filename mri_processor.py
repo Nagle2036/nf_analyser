@@ -334,7 +334,7 @@ if answer3 == 'y':
         print("Binarised EPI already present. Skipping binarisation operation.")
     inverse_file = os.path.join(output_folder, "run01_averaged_betted_bin_inverse.nii.gz")
     if not os.path.exists(inverse_file):
-        subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file'])
+        subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
         print("Binarised EPI successfully inverted.")
     else:
         print("Inverted binary EPI already present. Skipping inversion procedure.")

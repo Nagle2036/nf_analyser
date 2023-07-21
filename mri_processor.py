@@ -350,10 +350,11 @@ if answer3 == 'y':
     result3_output_values = result3_output.split()
     total_voxels_in_roi = float(result3_output_values[0])
     percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
-    output_file = f'{p_id}/susceptibility/percentage_outside.txt'
-    with open(output_file, "w") as file:
-        file.write(str(percentage_outside))
-    print("Percentage of voxels outside the signal dropout mask saved to", output_file)
+    if not f'{p_id}/susceptibility/percentage_outside.txt':
+        output_file = f'{p_id}/susceptibility/percentage_outside.txt'
+        with open(output_file, "w") as file:
+            file.write(str(percentage_outside))
+        print("Percentage of voxels outside the signal dropout mask saved to", output_file)
 
 
 

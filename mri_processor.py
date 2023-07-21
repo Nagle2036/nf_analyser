@@ -28,7 +28,6 @@ import numpy as np
 import re
 import nibabel as nib
 import matplotlib.pyplot as plt
-from nipype.pipeline.engine import Workflow
 
 #endregion
 

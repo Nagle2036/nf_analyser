@@ -279,6 +279,12 @@ if answer3 == 'y':
         copy_files(src_folder, run02_folder, min_238)
         copy_files(src_folder, run03_folder, max_238)
 
+        print("Run 1-4 dicoms copied to separate folders.")
+        print("Run01 Sequence Number:", min_210)
+        print("Run02 Sequence Number:", min_238)
+        print("Run03 Sequence Number:", max_238)
+        print("Run04 Sequence Number:", max_210)
+
     if __name__ == "__main__":
         main()
 

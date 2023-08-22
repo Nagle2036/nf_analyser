@@ -241,7 +241,6 @@ if answer3 == 'y':
             src_path = os.path.join(src_folder, file)
             dest_path = os.path.join(dest_folder, file)
             shutil.copy(src_path, dest_path)
-            print(f"Copying {file} to {dest_folder}")
 
 
     def main():

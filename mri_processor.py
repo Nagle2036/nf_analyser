@@ -41,14 +41,16 @@ if answer != 'y':
     sys.exit()
 #endregion
 
-#region INPUT INFORMATION.
+#region PREPARATION.
 p_id = input("Enter the participant's ID (e.g. P001).\n")
-#endregion
-
-#region CREATE FOLDERS.
 working_dir = os.getcwd()
-subprocess.run(['mkdir', f'{p_id}'])
-subprocess.run(['mkdir', f'{p_id}/susceptibility'])
+p_id_folder = os.path.join(os.getcwd(), p_id)
+if not os.path.exists(p_id_folder):
+    subprocess.run(['mkdir', f'{p_id}'])
+susceptibility_folder = os.path.join(os.getcwd(), p_id, "susceptibility")
+if not os.path.exists(susceptibility_folder):
+    subprocess.run(['mkdir', f'{p_id}/susceptibility'])
+    
 #endregion
 
 #region DOWNLOAD BOX FILES TO SERVER.
@@ -207,10 +209,17 @@ if answer2 == 'y':
     server_thread.join()
 #endregion
 
+#region SCC BOLD ANALYSIS.
+
+answer3 = input("Would you like to execute SCC BOLD ANALYSIS? (y/n)\n")
+if answer3 == 'y':
+
+#endregion
+
 #region SUSCEPTIBILITY.
 
-answer3 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
-if answer3 == 'y':
+answer4 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
+if answer4 == 'y':
 
     # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
     path = os.path.join(os.getcwd(), p_id, "neurofeedback")

@@ -267,7 +267,7 @@ if answer3 == 'y':
         copy_files(src_folder, run04_folder, max_210)
         copy_files(src_folder, run02_folder, min_238)
         copy_files(src_folder, run03_folder, max_238)
-        print("Run 1 dicoms copied to separate folder. Number of files:", len(os.listdir(run01_folder)))
+        print("Run 1 dicoms copied to separate folder. Number of files:", len(os.listdir(run01_folder)) + ".", "Sequence number:", min_210)
         print("Run 2 dicoms copied to separate folder. Number of files:", len(os.listdir(run02_folder)))
         print("Run 3 dicoms copied to separate folder. Number of files:", len(os.listdir(run03_folder)))
         print("Run 4 dicoms copied to separate folder. Number of files:", len(os.listdir(run04_folder)))

@@ -28,6 +28,7 @@ import numpy as np
 import re
 import nibabel as nib
 import matplotlib.pyplot as plt
+import fnmatch
 
 #endregion
 
@@ -214,7 +215,7 @@ if answer2 == 'y':
 
 #region SCC BOLD ANALYSIS.
 
-answer3 = input("Would you like to execute SCC BOLD ANALYSIS? (y/n)\n")
+answer3 = input("Would you like to execute SCC BOLD analysis? (y/n)\n")
 if answer3 == 'y':
 
     # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
@@ -256,7 +257,7 @@ if answer3 == 'y':
         os.makedirs(run04_folder, exist_ok=True)
 
         files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
-        
+    
         seq_vol_counts = {}
         for file in files:
             sequence_number, volume_number = get_sequence_numbers(file)
@@ -266,17 +267,16 @@ if answer3 == 'y':
 
         for sequence_number, volume_numbers in seq_vol_counts.items():
             if len(volume_numbers) == 210:
-                min_sequence = min(sequence_number, key=lambda x: x[0])
-                max_sequence = max(sequence_number, key=lambda x: x[0])
-                if len(volume_numbers) == 210:
-                    if sequence_number == min_sequence:
-                        copy_files(src_folder, run01_folder, [sequence_number])
-                    elif sequence_number == max_sequence:
-                        copy_files(src_folder, run04_folder, [sequence_number])
+                min_sequence = min(seq_vol_counts, key=lambda x: x)
+                max_sequence = max(seq_vol_counts, key=lambda x: x)
+                if sequence_number == min_sequence:
+                    copy_files(src_folder, run01_folder, [sequence_number])
+                elif sequence_number == max_sequence:
+                    copy_files(src_folder, run04_folder, [sequence_number])
             
             elif len(volume_numbers) == 238:
-                min_sequence = min(sequence_number, key=lambda x: x[0])
-                max_sequence = max(sequence_number, key=lambda x: x[0])
+                min_sequence = min(seq_vol_counts, key=lambda x: x)
+                max_sequence = max(seq_vol_counts, key=lambda x: x)
                 if sequence_number == min_sequence:
                     copy_files(src_folder, run02_folder, [sequence_number])
                 elif sequence_number == max_sequence:

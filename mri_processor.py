@@ -243,6 +243,7 @@ if answer3 == 'y':
             shutil.copy(src_path, dest_path)
             print(f"Copying {file} to {dest_folder}")
 
+
     def main():
         src_folder = os.path.join(path, cisc_folder)
         run01_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run01_dicoms")
@@ -264,14 +265,20 @@ if answer3 == 'y':
                 seq_vol_counts[sequence_number] = []
             seq_vol_counts[sequence_number].append(volume_number)
 
-        for sequence_number, volume_numbers in seq_vol_counts.items():
-            if len(volume_numbers) == 210:
-                copy_files(src_folder, run01_folder, sequence_number)
-                copy_files(src_folder, run04_folder, sequence_number)
-            
-            elif len(volume_numbers) == 238:
-                copy_files(src_folder, run02_folder, sequence_number)
-                copy_files(src_folder, run03_folder, sequence_number)
+        seq_210 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 210]
+        seq_238 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 238]
+        
+        min_210 = min(seq_210)
+        max_210 = max(seq_210)
+        
+        min_238 = min(seq_238)
+        max_238 = max(seq_238)
+        
+        copy_files(src_folder, run01_folder, min_210)
+        copy_files(src_folder, run04_folder, max_210)
+        
+        copy_files(src_folder, run02_folder, min_238)
+        copy_files(src_folder, run03_folder, max_238)
 
     if __name__ == "__main__":
         main()

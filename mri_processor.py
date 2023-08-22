@@ -263,10 +263,14 @@ if answer3 == 'y':
         max_210 = max(seq_210)
         min_238 = min(seq_238)
         max_238 = max(seq_238)
-        copy_files(src_folder, run01_folder, min_210)
-        copy_files(src_folder, run04_folder, max_210)
-        copy_files(src_folder, run02_folder, min_238)
-        copy_files(src_folder, run03_folder, max_238)
+        if not os.path.exists(src_folder, run01_folder, min_210):
+            copy_files(src_folder, run01_folder, min_210)
+        if not os.path.exists(src_folder, run04_folder, max_210):
+            copy_files(src_folder, run04_folder, max_210)
+        if not os.path.exists(src_folder, run02_folder, min_238):
+            copy_files(src_folder, run02_folder, min_238)
+        if not os.path.exists(src_folder, run03_folder, max_238):
+            copy_files(src_folder, run03_folder, max_238)
         print("Run 1 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
         print("Run 2 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
         print("Run 3 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
@@ -287,7 +291,7 @@ if answer3 == 'y':
     output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
     output_file = os.path.join(output_folder, "run02.nii")
     if not os.path.exists(output_file):
-        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
+        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run02', '-b', 'n', destination_folder])
         print("Run02 DICOM files converted to Nifti format.")
     else:
         print("Run02 Nifti file already exists. Skipping conversion.")
@@ -295,7 +299,7 @@ if answer3 == 'y':
     output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
     output_file = os.path.join(output_folder, "run03.nii")
     if not os.path.exists(output_file):
-        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
+        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run03', '-b', 'n', destination_folder])
         print("Run03 DICOM files converted to Nifti format.")
     else:
         print("Run03 Nifti file already exists. Skipping conversion.")
@@ -303,7 +307,7 @@ if answer3 == 'y':
     output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
     output_file = os.path.join(output_folder, "run04.nii")
     if not os.path.exists(output_file):
-        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
+        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run04', '-b', 'n', destination_folder])
         print("Run04 DICOM files converted to Nifti format.")
     else:
         print("Run04 Nifti file already exists. Skipping conversion.")

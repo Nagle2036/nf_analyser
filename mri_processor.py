@@ -50,6 +50,9 @@ if not os.path.exists(p_id_folder):
 susceptibility_folder = os.path.join(os.getcwd(), p_id, "susceptibility")
 if not os.path.exists(susceptibility_folder):
     subprocess.run(['mkdir', f'{p_id}/susceptibility'])
+scc_analysis_folder = os.path.join(os.getcwd(), p_id, "neurofeedback", "analysis")
+if not os.path.exists(scc_analysis_folder):
+    subprocess.run(['mkdir', f'{p_id}/susceptibility'])
     
 #endregion
 
@@ -213,6 +216,75 @@ if answer2 == 'y':
 
 answer3 = input("Would you like to execute SCC BOLD ANALYSIS? (y/n)\n")
 if answer3 == 'y':
+
+    # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
+    path = os.path.join(os.getcwd(), p_id, "neurofeedback")
+    cisc_folder = None
+    for folder_name in os.listdir(path):
+        if "CISC" in folder_name:
+            cisc_folder = folder_name
+            break
+    if cisc_folder is None:
+        print("No 'CISC' folder found in the 'neurofeedback' directory.")
+        exit(1)
+    
+    # Step 2: Copy Run 1, 2, 3, 4 dicoms into separate folders.
+    def get_sequence_numbers(file_name):
+        parts = file_name.split('_')
+        return int(parts[1]), int(parts[2].split('.')[0])
+
+    def copy_files(src_folder, dest_folder, sequence_numbers):
+        for sequence_number in sequence_numbers:
+            src_pattern = f'*_{sequence_number:06d}_*.dcm'
+            matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
+            for file in matching_files:
+                src_path = os.path.join(src_folder, file)
+                dest_path = os.path.join(dest_folder, file)
+                shutil.copy(src_path, dest_path)
+                print(f"Copying {file} to {dest_folder}")
+
+    def main():
+        src_folder = os.path.join(path, cisc_folder)
+        run01_folder = os.path.join(path, 'analysis', 'run01_dicoms')
+        run02_folder = os.path.join(path, 'analysis', 'run02_dicoms')
+        run03_folder = os.path.join(path, 'analysis', 'run03_dicoms')
+        run04_folder = os.path.join(path, 'analysis', 'run04_dicoms')
+        
+        os.makedirs(run01_folder, exist_ok=True)
+        os.makedirs(run02_folder, exist_ok=True)
+        os.makedirs(run03_folder, exist_ok=True)
+        os.makedirs(run04_folder, exist_ok=True)
+
+        files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
+        
+        seq_vol_counts = {}
+        for file in files:
+            sequence_number, volume_number = get_sequence_numbers(file)
+            if sequence_number not in seq_vol_counts:
+                seq_vol_counts[sequence_number] = []
+            seq_vol_counts[sequence_number].append(volume_number)
+
+        for sequence_number, volume_numbers in seq_vol_counts.items():
+            if len(volume_numbers) == 210:
+                min_sequence = min(sequence_number, key=lambda x: x[0])
+                max_sequence = max(sequence_number, key=lambda x: x[0])
+                if len(volume_numbers) == 210:
+                    if sequence_number == min_sequence:
+                        copy_files(src_folder, run01_folder, [sequence_number])
+                    elif sequence_number == max_sequence:
+                        copy_files(src_folder, run04_folder, [sequence_number])
+            
+            elif len(volume_numbers) == 238:
+                min_sequence = min(sequence_number, key=lambda x: x[0])
+                max_sequence = max(sequence_number, key=lambda x: x[0])
+                if sequence_number == min_sequence:
+                    copy_files(src_folder, run02_folder, [sequence_number])
+                elif sequence_number == max_sequence:
+                    copy_files(src_folder, run03_folder, [sequence_number])
+
+    if __name__ == "__main__":
+        main()
+
 
 #endregion
 

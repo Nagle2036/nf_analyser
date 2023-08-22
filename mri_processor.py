@@ -233,7 +233,6 @@ if answer3 == 'y':
     def get_sequence_numbers(file_name):
         parts = file_name.split('_')
         return int(parts[1]), int(parts[2].split('.')[0])
-
     def copy_files(src_folder, dest_folder, sequence_number):
         src_pattern = f'*_{sequence_number:06d}_*.dcm'
         matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
@@ -241,50 +240,41 @@ if answer3 == 'y':
             src_path = os.path.join(src_folder, file)
             dest_path = os.path.join(dest_folder, file)
             shutil.copy(src_path, dest_path)
-
-
     def main():
         src_folder = os.path.join(path, cisc_folder)
         run01_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run01_dicoms")
         run02_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run02_dicoms")
         run03_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run03_dicoms")
         run04_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run04_dicoms")
-        
         os.makedirs(run01_folder, exist_ok=True)
         os.makedirs(run02_folder, exist_ok=True)
         os.makedirs(run03_folder, exist_ok=True)
         os.makedirs(run04_folder, exist_ok=True)
-
         files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
-    
         seq_vol_counts = {}
         for file in files:
             sequence_number, volume_number = get_sequence_numbers(file)
             if sequence_number not in seq_vol_counts:
                 seq_vol_counts[sequence_number] = []
             seq_vol_counts[sequence_number].append(volume_number)
-
         seq_210 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 210]
         seq_238 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 238]
-        
         min_210 = min(seq_210)
         max_210 = max(seq_210)
-        
         min_238 = min(seq_238)
         max_238 = max(seq_238)
-        
         copy_files(src_folder, run01_folder, min_210)
         copy_files(src_folder, run04_folder, max_210)
-        
         copy_files(src_folder, run02_folder, min_238)
         copy_files(src_folder, run03_folder, max_238)
-
-        print("Run 1-4 dicoms copied to separate folders.")
+        print("Run 1 dicoms copied to separate folder. Number of files:", len(os.listdir(run01_folder)))
+        print("Run 2 dicoms copied to separate folder. Number of files:", len(os.listdir(run02_folder)))
+        print("Run 3 dicoms copied to separate folder. Number of files:", len(os.listdir(run03_folder)))
+        print("Run 4 dicoms copied to separate folder. Number of files:", len(os.listdir(run04_folder)))
         print("Run01 Sequence Number:", min_210)
         print("Run02 Sequence Number:", min_238)
         print("Run03 Sequence Number:", max_238)
         print("Run04 Sequence Number:", max_210)
-
     if __name__ == "__main__":
         main()
 

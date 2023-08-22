@@ -263,13 +263,13 @@ if answer3 == 'y':
         max_210 = max(seq_210)
         min_238 = min(seq_238)
         max_238 = max(seq_238)
-        if not os.path.exists(src_folder, run01_folder, min_210):
+        if not os.listdir(run01_folder):
             copy_files(src_folder, run01_folder, min_210)
-        if not os.path.exists(src_folder, run04_folder, max_210):
+        if not os.listdir(run04_folder):
             copy_files(src_folder, run04_folder, max_210)
-        if not os.path.exists(src_folder, run02_folder, min_238):
+        if not os.listdir(run02_folder):
             copy_files(src_folder, run02_folder, min_238)
-        if not os.path.exists(src_folder, run03_folder, max_238):
+        if not os.listdir(run03_folder):
             copy_files(src_folder, run03_folder, max_238)
         print("Run 1 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
         print("Run 2 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)

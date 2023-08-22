@@ -48,12 +48,12 @@ working_dir = os.getcwd()
 p_id_folder = os.path.join(os.getcwd(), p_id)
 if not os.path.exists(p_id_folder):
     subprocess.run(['mkdir', f'{p_id}'])
-susceptibility_folder = os.path.join(os.getcwd(), p_id, "susceptibility")
+susceptibility_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility")
 if not os.path.exists(susceptibility_folder):
     subprocess.run(['mkdir', f'{p_id}/susceptibility'])
-scc_analysis_folder = os.path.join(os.getcwd(), p_id, "neurofeedback", "analysis")
+scc_analysis_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
 if not os.path.exists(scc_analysis_folder):
-    subprocess.run(['mkdir', f'{p_id}/susceptibility'])
+    subprocess.run(['mkdir', f'{p_id}/analysis/scc'])
     
 #endregion
 
@@ -218,38 +218,25 @@ if answer2 == 'y':
 answer3 = input("Would you like to execute SCC BOLD analysis? (y/n)\n")
 if answer3 == 'y':
 
-    # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
-    path = os.path.join(os.getcwd(), p_id, "neurofeedback")
-    cisc_folder = None
-    for folder_name in os.listdir(path):
-        if "CISC" in folder_name:
-            cisc_folder = folder_name
-            break
-    if cisc_folder is None:
-        print("No 'CISC' folder found in the 'neurofeedback' directory.")
-        exit(1)
-    
-    # Step 2: Copy Run 1, 2, 3, 4 dicoms into separate folders.
     def get_sequence_numbers(file_name):
         parts = file_name.split('_')
         return int(parts[1]), int(parts[2].split('.')[0])
 
-    def copy_files(src_folder, dest_folder, sequence_numbers):
-        for sequence_number in sequence_numbers:
-            src_pattern = f'*_{sequence_number:06d}_*.dcm'
-            matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
-            for file in matching_files:
-                src_path = os.path.join(src_folder, file)
-                dest_path = os.path.join(dest_folder, file)
-                shutil.copy(src_path, dest_path)
-                print(f"Copying {file} to {dest_folder}")
+    def copy_files(src_folder, dest_folder, sequence_number):
+        src_pattern = f'*_{sequence_number:06d}_*.dcm'
+        matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
+        for file in matching_files:
+            src_path = os.path.join(src_folder, file)
+            dest_path = os.path.join(dest_folder, file)
+            shutil.copy(src_path, dest_path)
+            print(f"Copying {file} to {dest_folder}")
 
     def main():
         src_folder = os.path.join(path, cisc_folder)
-        run01_folder = os.path.join(path, 'analysis', 'run01_dicoms')
-        run02_folder = os.path.join(path, 'analysis', 'run02_dicoms')
-        run03_folder = os.path.join(path, 'analysis', 'run03_dicoms')
-        run04_folder = os.path.join(path, 'analysis', 'run04_dicoms')
+        run01_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run01_dicoms")
+        run02_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run02_dicoms")
+        run03_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run03_dicoms")
+        run04_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run04_dicoms")
         
         os.makedirs(run01_folder, exist_ok=True)
         os.makedirs(run02_folder, exist_ok=True)
@@ -267,20 +254,12 @@ if answer3 == 'y':
 
         for sequence_number, volume_numbers in seq_vol_counts.items():
             if len(volume_numbers) == 210:
-                min_sequence = min(seq_vol_counts, key=lambda x: x)
-                max_sequence = max(seq_vol_counts, key=lambda x: x)
-                if sequence_number == min_sequence:
-                    copy_files(src_folder, run01_folder, [sequence_number])
-                elif sequence_number == max_sequence:
-                    copy_files(src_folder, run04_folder, [sequence_number])
+                copy_files(src_folder, run01_folder, sequence_number)
+                copy_files(src_folder, run04_folder, sequence_number)
             
             elif len(volume_numbers) == 238:
-                min_sequence = min(seq_vol_counts, key=lambda x: x)
-                max_sequence = max(seq_vol_counts, key=lambda x: x)
-                if sequence_number == min_sequence:
-                    copy_files(src_folder, run02_folder, [sequence_number])
-                elif sequence_number == max_sequence:
-                    copy_files(src_folder, run03_folder, [sequence_number])
+                copy_files(src_folder, run02_folder, sequence_number)
+                copy_files(src_folder, run03_folder, sequence_number)
 
     if __name__ == "__main__":
         main()
@@ -294,7 +273,7 @@ answer4 = input("Would you like to execute susceptibility artifact analysis? (y/
 if answer4 == 'y':
 
     # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
-    path = os.path.join(os.getcwd(), p_id, "neurofeedback")
+    path = os.path.join(os.getcwd(), p_id, "data", "neurofeedback")
     cisc_folder = None
     for folder_name in os.listdir(path):
         if "CISC" in folder_name:
@@ -322,7 +301,7 @@ if answer4 == 'y':
         series_to_copy = min(series_with_210_files)
     else:
         series_to_copy = input("Input required: more than two runs contain 210 dicoms. Please specify which sequence number is Run 1 (e.g. 08, 09, 11).\n")
-    destination_folder = os.path.join(os.getcwd(), p_id, "susceptibility", "run01_dicoms")
+    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "run01_dicoms")
     os.makedirs(destination_folder, exist_ok=True)
     existing_files = os.listdir(destination_folder)
     files_to_copy = []
@@ -340,7 +319,7 @@ if answer4 == 'y':
         print("DICOM files copied successfully.")
 
     # Step 4: Convert DICOM files to Nifti format
-    output_folder = os.path.join(os.getcwd(), p_id, "susceptibility")
+    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility")
     output_file = os.path.join(output_folder, "run01.nii")
     if not os.path.exists(output_file):
         subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
@@ -372,7 +351,7 @@ if answer4 == 'y':
     voxel_coordinates = read_roi_file(roi_file)
 
     # Step 7: Get the dimensions of the functional data and create the subject space ROI.
-    functional_image = f'{p_id}/susceptibility/run01_averaged.nii.gz'
+    functional_image = f'{p_id}/analysis/susceptibility/run01_averaged.nii.gz'
     functional_image_info = nib.load(functional_image)
     functional_dims = functional_image_info.shape
     binary_volume = np.zeros(functional_dims)
@@ -382,18 +361,18 @@ if answer4 == 'y':
     binary_volume = np.flip(binary_volume, axis=1) #flipping mask across the y-axis
     functional_affine = functional_image_info.affine
     binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
-    nib.save(binary_nifti, f'{p_id}/susceptibility/subject_space_ROI.nii.gz')
+    nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/subject_space_ROI.nii.gz')
 
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
     betted_file = os.path.join(output_folder, "run01_averaged_betted.nii.gz")
     if not os.path.exists(betted_file):
-        subprocess.run(['bet', f'{p_id}/susceptibility/run01_averaged.nii.gz', betted_file])
+        subprocess.run(['bet', f'{p_id}/analysis/susceptibility/run01_averaged.nii.gz', betted_file])
         print("Brain extraction completed.")
     else:
         print("Brain-extracted file already exists. Skipping BET operation.")
-    functional_image_betted = f'{p_id}/susceptibility/run01_averaged_betted.nii.gz'
-    binary_nifti_image = f'{p_id}/susceptibility/subject_space_ROI.nii.gz'
-    screenshot_file = f'{p_id}/susceptibility/ROI_on_EPI.png'
+    functional_image_betted = f'{p_id}/analysis/susceptibility/run01_averaged_betted.nii.gz'
+    binary_nifti_image = f'{p_id}/analysis/susceptibility/subject_space_ROI.nii.gz'
+    screenshot_file = f'{p_id}/analysis/susceptibility/ROI_on_EPI.png'
     binary_img = nib.load(binary_nifti_image)
     binary_data = binary_img.get_fdata()
     indices = np.nonzero(binary_data)
@@ -410,24 +389,24 @@ if answer4 == 'y':
     bin_file = os.path.join(output_folder, "run01_averaged_betted_bin.nii.gz")
     if not os.path.exists(bin_file):
         threshold = input("Please enter a threshold value for functional image binarisation.\n")
-        subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
+        subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/run01_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
         print("EPI binarisation completed.")
     else:
         print("Binarised EPI already present. Skipping binarisation operation.")
     inverse_file = os.path.join(output_folder, "run01_averaged_betted_bin_inverse.nii.gz")
     if not os.path.exists(inverse_file):
-        subprocess.run(['fslmaths', f'{p_id}/susceptibility/run01_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
+        subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/run01_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
         print("Binarised EPI successfully inverted.")
     else:
         print("Inverted binary EPI already present. Skipping inversion procedure.")
-    result2 = subprocess.run(['fslstats', f'{p_id}/susceptibility/subject_space_ROI.nii.gz', '-k', f'{p_id}/susceptibility/run01_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
+    result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/subject_space_ROI.nii.gz', '-k', f'{p_id}/susceptibility/run01_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
     if result2.returncode == 0:
         result2_output = result2.stdout.strip()
     else:
         print("Error executing second fslstats command.")
     result2_output_values = result2_output.split()
     voxels_outside = float(result2_output_values[0])
-    result3 = subprocess.run(['fslstats', f'{p_id}/susceptibility/subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
+    result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
     if result3.returncode == 0:
         result3_output = result3.stdout.strip()
     else:

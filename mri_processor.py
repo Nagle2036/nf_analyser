@@ -218,6 +218,18 @@ if answer2 == 'y':
 answer3 = input("Would you like to execute SCC BOLD analysis? (y/n)\n")
 if answer3 == 'y':
 
+    # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
+    path = os.path.join(os.getcwd(), p_id, "data", "neurofeedback")
+    cisc_folder = None
+    for folder_name in os.listdir(path):
+        if "CISC" in folder_name:
+            cisc_folder = folder_name
+            break
+    if cisc_folder is None:
+        print("No 'CISC' folder found in the 'neurofeedback' directory.")
+        exit(1)
+
+    # Step 2: Copy Run 1, 2, 3, 4 dicoms into separate folders.
     def get_sequence_numbers(file_name):
         parts = file_name.split('_')
         return int(parts[1]), int(parts[2].split('.')[0])

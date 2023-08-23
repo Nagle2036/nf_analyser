@@ -229,7 +229,7 @@ if answer3 == 'y':
         print("No 'CISC' folder found in the 'neurofeedback' directory.")
         exit(1)
 
-    # Step 2: Copy Run 1, 2, 3, 4 dicoms into separate folders.
+    # Step 2: Copy Run 1-4 dicoms into separate folders.
     def get_sequence_numbers(file_name):
         parts = file_name.split('_')
         return int(parts[1]), int(parts[2].split('.')[0])
@@ -312,7 +312,7 @@ if answer3 == 'y':
     else:
         print("Run04 Nifti file already exists. Skipping conversion.")
     
-    # Step 4: Check that Nifti orientation is correct.
+    # Step 4: Check Nifti orientation.
     niftis = ['run01', 'run02', 'run03', 'run04']
     for image in niftis:
         png_path = f'{p_id}/analysis/scc/{image}.png'
@@ -334,28 +334,14 @@ if answer3 == 'y':
     src_folder = os.path.join(path, cisc_folder)
     destination_folder = f'{p_id}/analysis/scc'
     new_filename = 'structural.nii'
-
     if not os.path.exists(f'{p_id}/analysis/scc/structural.nii'):
-        # Construct the full path to the 'nifti' folder
         nifti_folder = os.path.join(src_folder, 'depression_neurofeedback', 'nifti')
-
-        # Get a list of all .nii files in the 'nifti' folder
         nii_files = [f for f in os.listdir(nifti_folder) if f.endswith('.nii')]
-
         if len(nii_files) == 1:
-            # Get the full path of the single .nii file in the 'nifti' folder
             source_file = os.path.join(nifti_folder, nii_files[0])
-
-            # Copy the file to the destination folder
             shutil.copy(source_file, destination_folder)
-
-            # Get the full path of the copied file in the destination folder
             copied_file_path = os.path.join(destination_folder, os.path.basename(source_file))
-
-            # Generate the new full path with the desired new filename
             new_file_path = os.path.join(destination_folder, new_filename)
-
-            # Rename the copied file with the new filename
             os.rename(copied_file_path, new_file_path)
             print('T1 Nifti copied and renamed to structural.nii.')
         else:

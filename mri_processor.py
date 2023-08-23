@@ -311,6 +311,22 @@ if answer3 == 'y':
         print("Run04 DICOM files converted to Nifti format.")
     else:
         print("Run04 Nifti file already exists. Skipping conversion.")
+    
+    # Step 4: Check that Nifti orientation is correct.
+    niftis = ['run01', 'run02', 'run03', 'run04']
+    for image in niftis:
+        png_path = f'{p_id}/analysis/scc/{image}.png'
+        nifti_path = f'{p_id}/analysis/scc/{image}.nii'
+        save_png = subprocess.run(['fsleyes', 'render', '--scene', 'ortho', '-of', png_path, nifti_path], capture_output=True, text=True)
+        if save_png.returncode == 0:
+            print("Screenshot saved as", png_path)
+        else:
+            print("Error encountered:", save_png.stderr)
+        answer = input(f"Check .png files in {p_id}/analysis/scc to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Does all appear correct? (y/n)\n")
+        if answer != 'y':
+            print("Error: please first address incorrect Nifti orientation using 'fslreorient2std' or 'fslswapdim' commands before proceeding.\n")
+            sys.exit()
+    
 
 #endregion
 

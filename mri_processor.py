@@ -322,10 +322,10 @@ if answer3 == 'y':
             print("Screenshot saved as", png_path)
         else:
             print("Error encountered:", save_png.stderr)
-        answer = input(f"Check .png files in {p_id}/analysis/scc to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Does all appear correct? (y/n)\n")
-        if answer != 'y':
-            print("Error: please first address incorrect Nifti orientation using 'fslreorient2std' or 'fslswapdim' commands before proceeding.\n")
-            sys.exit()
+    answer = input(f"Check .png files in {p_id}/analysis/scc to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Does all appear correct? (y/n)\n")
+    if answer != 'y':
+        print("Error: please first address incorrect Nifti orientation using 'fslreorient2std' or 'fslswapdim' commands before proceeding.\n")
+        sys.exit()
     
 
 #endregion

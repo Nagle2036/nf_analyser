@@ -348,7 +348,7 @@ if answer3 == 'y':
             print("No .nii file found or multiple .nii files found in the 'nifti' folder.")
     else:
         print('Structural Nifti file already exists. Skipping process.')
-    bet_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural_brain.nii"), 
+    bet_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural_brain.nii")
     structural_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural.nii")
     if not os.path.exists(f'{p_id}/analysis/scc/strutural_brain.nii.gz'):
         subprocess.run(['bet', structural_path, bet_path, '-m', '-R'])

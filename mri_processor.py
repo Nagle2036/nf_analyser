@@ -350,7 +350,7 @@ if answer3 == 'y':
         print('Structural Nifti file already exists. Skipping process.')
     bet_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural_brain.nii"), 
     structural_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural.nii")
-    if not os.path.exists(bet_path):
+    if not os.path.exists(f'{p_id}/analysis/scc/strutural_brain.nii.gz'):
         subprocess.run(['bet', structural_path, bet_path, '-m', '-R'])
         print("Structural image brain extracted.")
     else:

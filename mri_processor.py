@@ -355,7 +355,6 @@ if answer3 == 'y':
         print("Structural image brain extracted.")
     else:
         print("Structural image already brain extracted. Skipping process.")
-    
 
 #endregion
 
@@ -458,7 +457,7 @@ if answer4 == 'y':
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
     betted_file = os.path.join(output_folder, "run01_averaged_betted.nii.gz")
     if not os.path.exists(betted_file):
-        subprocess.run(['bet', f'{p_id}/analysis/susceptibility/run01_averaged.nii.gz', betted_file])
+        subprocess.run(['bet', f'{p_id}/analysis/susceptibility/run01_averaged.nii.gz', betted_file, '-R'])
         print("Brain extraction completed.")
     else:
         print("Brain-extracted file already exists. Skipping BET operation.")

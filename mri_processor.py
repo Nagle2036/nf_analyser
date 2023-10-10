@@ -3,8 +3,9 @@
 ###TO DO###
 # Create Python script to automatically generate PSC / thermometer level plots and blindedly show whether group allocation (a/b) matched training directions from scan.
 # Organise files in BIDS format.
-# Upload analysis outputs back to Box account.
+# Upload analysis outputs back to Box account. Or maybe not. Might be best to leave this, in order to protect Box data in case anything gets messed up.
 # Add percentage completion metric.
+# Count files present in participant folder
 
 #region IMPORT PACKAGES.
 
@@ -355,6 +356,49 @@ if answer3 == 'y':
         print("Structural image brain extracted.")
     else:
         print("Structural image already brain extracted. Skipping process.")
+
+    # Step 6: Create onset files.
+    sub_onsetfile = f'{p_id}/analysis/scc/sub_onsetfile.txt'
+    with open(sub_onsetfile, 'w') as file:
+        data_rows = [
+            [0, 20, 1],
+            [50, 20, 1],
+            [100, 20, 1],
+            [150, 20, 1],
+            [200, 20, 1],
+            [250, 20, 1],
+            [300, 20, 1],
+            [350, 20, 1],
+            [400, 20, 1]
+        ]
+        for row in data_rows:
+            formatted_row = "\t".join(row) + "\n"
+            file.write(formatted_row)
+    guilt_onsetfile = f'{p_id}/analysis/scc/guilt_onsetfile.txt'
+    with open(guilt_onsetfile, 'w') as file:
+        data_rows = [
+            [20, 30, 1],
+            [120, 30, 1],
+            [220, 30, 1],
+            [320, 30, 1]
+        ]
+        for row in data_rows:
+            formatted_row = "\t".join(row) + "\n"
+            file.write(formatted_row)
+    indig_onsetfile = f'{p_id}/analysis/scc/indig_onsetfile.txt'
+    with open(indig_onsetfile, 'w') as file:
+        data_rows = [
+            [70, 30, 1],
+            [170, 30, 1],
+            [270, 30, 1],
+            [370, 30, 1]
+        ]
+        for row in data_rows:
+            formatted_row = "\t".join(row) + "\n"
+            file.write(formatted_row)
+    print('Onset files created.')
+
+
 
 #endregion
 

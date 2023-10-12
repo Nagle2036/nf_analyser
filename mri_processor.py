@@ -398,7 +398,16 @@ if answer3 == 'y':
             file.write(formatted_row)
     print('Onset files created.')
 
-
+    # Step 7: Perform motion correction.
+    runs = ['run01', 'run02', 'run03', 'run04']
+    for run in runs:
+        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
+        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc') 
+        if not os.path.exists(output_path):
+            subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+            print(f"{run} motion corrected.")
+        else:
+            print(f"{run} already motion corrected. Skipping process.")
 
 #endregion
 

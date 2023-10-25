@@ -219,7 +219,7 @@ if answer2 == 'y':
 answer3 = input("Would you like to execute SCC BOLD analysis? (y/n)\n")
 if answer3 == 'y':
 
-    # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
+    # Step 1: Copy Run 1-4 dicoms into separate folders.
     path = os.path.join(os.getcwd(), p_id, "data", "neurofeedback")
     cisc_folder = None
     for folder_name in os.listdir(path):
@@ -229,8 +229,6 @@ if answer3 == 'y':
     if cisc_folder is None:
         print("No 'CISC' folder found in the 'neurofeedback' directory.")
         exit(1)
-
-    # Step 2: Copy Run 1-4 dicoms into separate folders.
     def get_sequence_numbers(file_name):
         parts = file_name.split('_')
         return int(parts[1]), int(parts[2].split('.')[0])
@@ -279,7 +277,7 @@ if answer3 == 'y':
     if __name__ == "__main__":
         main()
 
-    # Step 3: Convert DICOM files to Nifti format.
+    # Step 2: Convert DICOM files to Nifti format.
     destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run01_dicoms")
     output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
     output_file = os.path.join(output_folder, "run01.nii")
@@ -313,11 +311,11 @@ if answer3 == 'y':
     else:
         print("Run04 Nifti file already exists. Skipping conversion.")
     
-    # Step 4: Check Nifti orientation.
-    niftis = ['run01', 'run02', 'run03', 'run04']
-    for image in niftis:
-        png_path = f'{p_id}/analysis/scc/{image}.png'
-        nifti_path = f'{p_id}/analysis/scc/{image}.nii'
+    # Step 3: Check Nifti orientation.
+    runs = ['run01', 'run02', 'run03', 'run04']
+    for run in runs:
+        png_path = f'{p_id}/analysis/scc/{run}.png'
+        nifti_path = f'{p_id}/analysis/scc/{run}.nii'
         if not os.path.exists(png_path):
             save_png = subprocess.run(['fsleyes', 'render', '--scene', 'ortho', '-of', png_path, nifti_path], capture_output=True, text=True)
             if save_png.returncode == 0:
@@ -331,7 +329,7 @@ if answer3 == 'y':
         print("Error: please first address incorrect Nifti orientation using 'fslreorient2std' or 'fslswapdim' commands before proceeding.\n")
         sys.exit()
 
-    # Step 5: Brain extract structural Nifti.
+    # Step 4: Brain extract structural Nifti.
     src_folder = os.path.join(path, cisc_folder)
     destination_folder = f'{p_id}/analysis/scc'
     new_filename = 'structural.nii'
@@ -357,7 +355,7 @@ if answer3 == 'y':
     else:
         print("Structural image already brain extracted. Skipping process.")
 
-    # Step 6: Create onset files.
+    # Step 5: Create onset files.
     sub_onsetfile = f'{p_id}/analysis/scc/sub_onsetfile.txt'
     with open(sub_onsetfile, 'w') as file:
         data_rows = [
@@ -399,15 +397,26 @@ if answer3 == 'y':
     print('Onset files created.')
 
     # Step 7: Perform motion correction.
-    runs = ['run01', 'run02', 'run03', 'run04']
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc') 
         if not os.path.exists(output_path):
-            subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+            subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
             print(f"{run} motion corrected.")
         else:
             print(f"{run} already motion corrected. Skipping process.")
+
+    # Step 8: Perform motion scrubbing.
+    for run in runs:
+        input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc')
+        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc_ms')
+        text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_scrubbed_volumes.txt')
+        if not os.path.exists(output_path):
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, 's', text_output_path , '--fd', '--thresh=0.9', '--nomoco'])
+            print(f'{run} motion scrubbed.')
+        else:
+            print (f'{run} already motion scrubbed. Skipping process.')
+
 
 #endregion
 

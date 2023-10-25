@@ -263,21 +263,21 @@ if answer3 == 'y':
         min_238 = min(seq_238)
         max_238 = max(seq_238)
         if not os.listdir(run01_folder):
-            print("Copying Run 1 dicoms...")
+            print("Copying Run01 dicoms...")
             copy_files(src_folder, run01_folder, min_210)
-            print("Run 1 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
+            print("Run01 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
         if not os.listdir(run02_folder):
-            print("Copying Run 2 dicoms...")
+            print("Copying Run02 dicoms...")
             copy_files(src_folder, run02_folder, min_238)
-            print("Run 2 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
+            print("Run02 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
         if not os.listdir(run03_folder):
-            print("Copying Run 3 dicoms...")
+            print("Copying Run03 dicoms...")
             copy_files(src_folder, run03_folder, max_238)
-            print("Run 3 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
+            print("Run03 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
         if not os.listdir(run04_folder):
-            print("Copying Run 4 dicoms...")
+            print("Copying Run04 dicoms...")
             copy_files(src_folder, run04_folder, max_210)
-            print("Run 4 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
+            print("Run04 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
     if __name__ == "__main__":
         main()
 
@@ -286,6 +286,7 @@ if answer3 == 'y':
     output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
     output_file = os.path.join(output_folder, "run01.nii")
     if not os.path.exists(output_file):
+        print("Converting Run01 DICOM files to Nifti format...")
         subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
         print("Run01 DICOM files converted to Nifti format.")
     else:
@@ -294,6 +295,7 @@ if answer3 == 'y':
     output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
     output_file = os.path.join(output_folder, "run02.nii")
     if not os.path.exists(output_file):
+        print("Converting Run02 DICOM files to Nifti format...")
         subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run02', '-b', 'n', destination_folder])
         print("Run02 DICOM files converted to Nifti format.")
     else:
@@ -302,6 +304,7 @@ if answer3 == 'y':
     output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
     output_file = os.path.join(output_folder, "run03.nii")
     if not os.path.exists(output_file):
+        print("Converting Run03 DICOM files to Nifti format...")
         subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run03', '-b', 'n', destination_folder])
         print("Run03 DICOM files converted to Nifti format.")
     else:
@@ -310,6 +313,7 @@ if answer3 == 'y':
     output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
     output_file = os.path.join(output_folder, "run04.nii")
     if not os.path.exists(output_file):
+        print("Converting Run04 DICOM files to Nifti format...")
         subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run04', '-b', 'n', destination_folder])
         print("Run04 DICOM files converted to Nifti format.")
     else:
@@ -321,6 +325,7 @@ if answer3 == 'y':
         png_path = f'{p_id}/analysis/scc/{run}.png'
         nifti_path = f'{p_id}/analysis/scc/{run}.nii'
         if not os.path.exists(png_path):
+            print(f"Saving {run} Nifti as PNG...")
             save_png = subprocess.run(['fsleyes', 'render', '--scene', 'ortho', '-of', png_path, nifti_path], capture_output=True, text=True)
             if save_png.returncode == 0:
                 print("Screenshot saved as", png_path)
@@ -354,6 +359,7 @@ if answer3 == 'y':
     bet_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural_brain.nii")
     structural_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural.nii")
     if not os.path.exists(f'{p_id}/analysis/scc/strutural_brain.nii.gz'):
+        print("Performing brain extraction on structural image...")
         subprocess.run(['bet', structural_path, bet_path, '-m', '-R'])
         print("Structural image brain extracted.")
     else:
@@ -405,6 +411,7 @@ if answer3 == 'y':
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc') 
         if not os.path.exists(output_path):
+            print(f"Performing motion correction on {run} data...")
             subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
             print(f"{run} motion corrected.")
         else:
@@ -416,7 +423,8 @@ if answer3 == 'y':
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc_ms')
         text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_scrubbed_volumes.txt')
         if not os.path.exists(output_path):
-            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, 's', text_output_path , '--fd', '--thresh=0.9', '--nomoco'])
+            print(f"Performing motion scrubbing on {run} data...")
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path , '--fd', '--thresh=0.9', '--nomoco'])
             print(f'{run} motion scrubbed.')
         else:
             print (f'{run} already motion scrubbed. Skipping process.')

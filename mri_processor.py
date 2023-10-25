@@ -263,17 +263,21 @@ if answer3 == 'y':
         min_238 = min(seq_238)
         max_238 = max(seq_238)
         if not os.listdir(run01_folder):
+            print("Copying Run 1 dicoms...")
             copy_files(src_folder, run01_folder, min_210)
-        if not os.listdir(run04_folder):
-            copy_files(src_folder, run04_folder, max_210)
+            print("Run 1 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
         if not os.listdir(run02_folder):
+            print("Copying Run 2 dicoms...")
             copy_files(src_folder, run02_folder, min_238)
+            print("Run 2 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
         if not os.listdir(run03_folder):
+            print("Copying Run 3 dicoms...")
             copy_files(src_folder, run03_folder, max_238)
-        print("Run 1 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
-        print("Run 2 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
-        print("Run 3 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
-        print("Run 4 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
+            print("Run 3 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
+        if not os.listdir(run04_folder):
+            print("Copying Run 4 dicoms...")
+            copy_files(src_folder, run04_folder, max_210)
+            print("Run 4 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
     if __name__ == "__main__":
         main()
 

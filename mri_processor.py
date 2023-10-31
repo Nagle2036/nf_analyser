@@ -55,6 +55,9 @@ if not os.path.exists(susceptibility_folder):
 scc_analysis_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
 if not os.path.exists(scc_analysis_folder):
     subprocess.run(['mkdir', f'{p_id}/analysis/scc'])
+group_folder = os.path.join(os.getcwd(), "group")
+if not os.path.exists(group_folder):
+    subprocess.run(['mkdir', 'group'])
     
 #endregion
 
@@ -405,8 +408,21 @@ if answer3 == 'y':
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
     print('Onset files created.')
+    
+    # Step 6: Perform motion correction.
+    for run in runs:
 
-    # Step 7: Perform motion correction.
+    
+    
+    # First run fsl_motion_outliers on each run, export -s text file, and find whether middle volume is 0 or 1.
+    # Also find whether percentage of volumes with 1 is greater than 20%. 
+    # Create (if doesn't exist) or edit and save text file to participant_data/group/ folder with 2 columns where each row represents a participant.
+    # Put a 0 in the first column if middle volume is below FD threshold, and a 0 in the second column if perc. volumes is below 20%.
+    # Read the participant_data/group/ text file. If all participants have 0 in first column, then run MCFLIRT with mid volume ref.
+    # If all participants have 1 in first column, then run MCFLIRT with mean volume ref.
+    # If all participants have 0 in second column, then run MCFLIRT with 3 stages.
+    # If all participants have 1 in second column, then run MCFLIRT with 4 stages.
+    
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc') 
@@ -417,7 +433,7 @@ if answer3 == 'y':
         else:
             print(f"{run} already motion corrected. Skipping process.")
 
-    # Step 8: Perform motion scrubbing.
+    # Step 7: Perform motion scrubbing.
     for run in runs:
         input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc_ms')

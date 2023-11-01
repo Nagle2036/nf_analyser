@@ -58,6 +58,9 @@ if not os.path.exists(scc_analysis_folder):
 group_folder = os.path.join(os.getcwd(), "group")
 if not os.path.exists(group_folder):
     subprocess.run(['mkdir', 'group'])
+mc_test_folder = os.path.join(os.getcwd(), "group", "mc_test")
+if not os.path.exists(mc_test_folder):
+    subprocess.run(['mkdir', 'group/ms_test'])
     
 #endregion
 
@@ -409,31 +412,72 @@ if answer3 == 'y':
             file.write(formatted_row)
     print('Onset files created.')
     
-    # Step 6: Perform motion correction.
+    # Step 6: Find optimal motion correction parameters.
     for run in runs:
-
+        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
+        output_path = os.path.join (os.getcwd(), p_id, 'group', 'ms_test', f'{p_id}_{run}_ms_test')
+        text_output_path = os.path.join (os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test.txt') 
+        if not os.path.exists(output_path):
+            print("Finding optimal motion correction parameters...")
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path , '--fd', '--thresh=0.9', '--nomoco'])
+            df = pd.read_csv(text_output_path, delim_whitespace=True, names=["Volume", "Outlier"])
+            percentage_outliers = (df["Outlier"].sum() / len(df)) * 100
+            middle_vol = 0
+            much_motion = 0
+            if len(df) % 2 ==0:
+                middle_vol = len(df) // 2 - 1
+            else:
+                middle_vol = len(df) // 2
+            if percentage_outliers > 20:
+                much_motion = 1
+            result_file = "ms_test_master.txt"
+            file_exists = True
+            try:
+                with open(result_file, "r") as f:
+                    pass
+            except FileNotFoundError:
+                file_exists = False
+            with open(result_file, "a") as f:
+                if not file_exists:
+                    f.write("participant run middle_vol much_motion\n")
+                f.write(f"{participant} {run} {middle_vol} {much_motion}\n")
+        else:
+            print("Motion correction optimisation already performed. Skipping process.")
     
-    
-    # First run fsl_motion_outliers on each run, export -s text file, and find whether middle volume is 0 or 1.
-    # Also find whether percentage of volumes with 1 is greater than 20%. 
-    # Create (if doesn't exist) or edit and save text file to participant_data/group/ folder with 2 columns where each row represents a participant.
-    # Put a 0 in the first column if middle volume is below FD threshold, and a 0 in the second column if perc. volumes is below 20%.
-    # Read the participant_data/group/ text file. If all participants have 0 in first column, then run MCFLIRT with mid volume ref.
-    # If all participants have 1 in first column, then run MCFLIRT with mean volume ref.
-    # If all participants have 0 in second column, then run MCFLIRT with 3 stages.
-    # If all participants have 1 in second column, then run MCFLIRT with 4 stages.
-    
+    # Step 7: Perform motion correction. 
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc') 
         if not os.path.exists(output_path):
             print(f"Performing motion correction on {run} data...")
-            subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
-            print(f"{run} motion corrected.")
+            middle_vol_values = []
+            much_motion_values = []
+            with open("ms_test_master.txt", "r") as f:
+                next(f)
+                for line in f:
+                    parts = line.split()
+                    middle_vol_value = int(parts[2])
+                    much_motion_value = int(parts[3])
+                    middle_vol_values.append(middle_vol_value)
+                    much_motion_values.append(much_motion_value)
+            if all(middle_vol == 0 for middle_vol in middle_vol_values) and all(much_motion == 0 for much_motion in much_motion_values):
+                subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+                print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
+            elif all(middle_vol == 0 for middle_vol in middle_vol_values) and all(much_motion == 1 for much_motion in much_motion_values):
+                subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
+                print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
+            elif all(middle_vol == 1 for middle_vol in middle_vol_values) and all(much_motion == 0 for much_motion in much_motion_values):
+                subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
+                print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
+            elif all(middle_vol == 1 for middle_vol in middle_vol_values) and all(much_motion == 1 for much_motion in much_motion_values):
+                subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
+                print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
+            else:
+                print("Error: Not all middle_vol and much_motion values are 0 or 1. Cannot run MCFLIRT.")
         else:
             print(f"{run} already motion corrected. Skipping process.")
 
-    # Step 7: Perform motion scrubbing.
+    # Step 8: Perform motion scrubbing.
     for run in runs:
         input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc_ms')

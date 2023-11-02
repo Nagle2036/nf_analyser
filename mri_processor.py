@@ -372,8 +372,8 @@ if answer3 == 'y':
         print("Structural image already brain extracted. Skipping process.")
 
     # Step 5: Create onset files.
-    sub_onsetfile = f'{p_id}/analysis/scc/sub_onsetfile.txt'
-    with open(sub_onsetfile, 'w') as file:
+    onsetfile_sub = f'{p_id}/analysis/scc/onsetfile_sub.txt'
+    with open(onsetfile_sub, 'w') as file:
         data_rows = [
             ['0', '20', '1'],
             ['50', '20', '1'],
@@ -388,8 +388,8 @@ if answer3 == 'y':
         for row in data_rows:
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
-    guilt_onsetfile = f'{p_id}/analysis/scc/guilt_onsetfile.txt'
-    with open(guilt_onsetfile, 'w') as file:
+    onsetfile_guilt = f'{p_id}/analysis/scc/onsetfile_guilt.txt'
+    with open(onsetfile_guilt, 'w') as file:
         data_rows = [
             ['20', '30', '1'],
             ['120', '30', '1'],
@@ -399,8 +399,8 @@ if answer3 == 'y':
         for row in data_rows:
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
-    indig_onsetfile = f'{p_id}/analysis/scc/indig_onsetfile.txt'
-    with open(indig_onsetfile, 'w') as file:
+    onsetfile_indig = f'{p_id}/analysis/scc/onsetfile_indig.txt'
+    with open(onsetfile_indig, 'w') as file:
         data_rows = [
             ['70', '30', '1'],
             ['170', '30', '1'],
@@ -419,12 +419,12 @@ if answer3 == 'y':
         text_output_path = os.path.join (os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test.txt') 
         if not os.path.exists(output_path):
             print("Finding optimal motion correction parameters...")
-            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path , '--fd', '--thresh=0.9', '--nomoco'])
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path , '--fd', '--thresh=0.9'])
             df = pd.read_csv(text_output_path, delim_whitespace=True, names=["Volume", "Outlier"])
             percentage_outliers = (df["Outlier"].sum() / len(df)) * 100
             middle_vol = 0
             much_motion = 0
-            if len(df) % 2 ==0:
+            if len(df) % 2 == 0:
                 middle_vol = len(df) // 2 - 1
             else:
                 middle_vol = len(df) // 2
@@ -439,8 +439,8 @@ if answer3 == 'y':
                 file_exists = False
             with open(result_file, "a") as f:
                 if not file_exists:
-                    f.write("participant run middle_vol much_motion\n")
-                f.write(f"{participant} {run} {middle_vol} {much_motion}\n")
+                    f.write("p_id run middle_vol much_motion\n")
+                f.write(f"{p_id} {run} {middle_vol} {much_motion}\n")
         else:
             print("Motion correction optimisation already performed. Skipping process.")
     

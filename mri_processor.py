@@ -418,7 +418,7 @@ if answer3 == 'y':
         output_path = os.path.join (os.getcwd(), p_id, 'group', 'ms_test', f'{p_id}_{run}_ms_test')
         text_output_path = os.path.join (os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test.txt') 
         if not os.path.exists(output_path):
-            print("Finding optimal motion correction parameters...")
+            print(f"Finding optimal motion correction parameters for {run} data...")
             subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
             df = pd.read_csv(text_output_path, delim_whitespace=True, names=["Volume", "Outlier"])
             percentage_outliers = (df["Outlier"].sum() / len(df)) * 100
@@ -441,6 +441,7 @@ if answer3 == 'y':
                 if not file_exists:
                     f.write("p_id run middle_vol much_motion\n")
                 f.write(f"{p_id} {run} {middle_vol} {much_motion}\n")
+        elif:  
         else:
             print("Motion correction optimisation already performed. Skipping process.")
     
@@ -484,7 +485,7 @@ if answer3 == 'y':
         text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_scrubbed_volumes.txt')
         if not os.path.exists(output_path):
             print(f"Performing motion scrubbing on {run} data...")
-            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path , '--fd', '--thresh=0.9', '--nomoco'])
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path , '--nomoco'])
             print(f'{run} motion scrubbed.')
         else:
             print (f'{run} already motion scrubbed. Skipping process.')

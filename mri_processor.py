@@ -411,7 +411,7 @@ if answer3 == 'y':
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
     print('Onset files created.')
-    
+
     # Step 6: Find optimal motion correction parameters.
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
@@ -419,7 +419,7 @@ if answer3 == 'y':
         text_output_path = os.path.join (os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test.txt') 
         if not os.path.exists(output_path):
             print("Finding optimal motion correction parameters...")
-            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path , '--fd', '--thresh=0.9'])
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
             df = pd.read_csv(text_output_path, delim_whitespace=True, names=["Volume", "Outlier"])
             percentage_outliers = (df["Outlier"].sum() / len(df)) * 100
             middle_vol = 0

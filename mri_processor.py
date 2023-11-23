@@ -477,7 +477,7 @@ if answer3 == 'y':
             print(f"Performing motion correction on {run} data...")
             use_middle_vol_values = []
             use_sinc_interp_values = []
-            with open("ms_test_master.txt", "r") as f:
+            with open(f"{result_file}", "r") as f:
                 next(f)
                 for line in f:
                     parts = line.split()
@@ -499,6 +499,7 @@ if answer3 == 'y':
                 print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
             else:
                 print("Error: Not all use_middle_vol and use_sinc_interp values are 0 or 1. Cannot run MCFLIRT.")
+                sys.exit()
         else:
             print(f"{run} already motion corrected. Skipping process.")
 

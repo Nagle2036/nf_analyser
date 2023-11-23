@@ -415,7 +415,7 @@ if answer3 == 'y':
     # Step 6: Find optimal motion correction parameters.
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
-        output_path = os.path.join (os.getcwd(), p_id, 'group', 'ms_test', f'{p_id}_{run}_ms_test')
+        output_path = os.path.join (os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test')
         text_output_path = os.path.join (os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test.txt') 
         if not os.path.exists(output_path):
             print(f"Finding optimal motion correction parameters for {run} data...")
@@ -455,7 +455,7 @@ if answer3 == 'y':
             except FileNotFoundError:
                 use_middle_vol = 1
                 use_sinc_interp = 0
-                result_file = "ms_test_master.txt"
+                result_file = os.path.join (os.getcwd(), 'group', 'ms_test', 'ms_test_master.txt')
                 file_exists = True
                 try:
                     with open(result_file, "r") as f:

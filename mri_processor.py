@@ -420,28 +420,52 @@ if answer3 == 'y':
         if not os.path.exists(output_path):
             print(f"Finding optimal motion correction parameters for {run} data...")
             subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
-            df = pd.read_csv(text_output_path, delim_whitespace=True, names=["Volume", "Outlier"])
-            percentage_outliers = (df["Outlier"].sum() / len(df)) * 100
-            middle_vol = 0
-            much_motion = 0
-            if len(df) % 2 == 0:
-                middle_vol = len(df) // 2 - 1
-            else:
-                middle_vol = len(df) // 2
-            if percentage_outliers > 20:
-                much_motion = 1
-            result_file = "ms_test_master.txt"
-            file_exists = True
             try:
-                with open(result_file, "r") as f:
-                    pass
+                df = pd.read_csv(text_output_path, delim_whitespace=True, names=["vol_fd"])
+                use_middle_vol = 0
+                use_sinc_interp = 0
+                if len(df) % 2 == 0:
+                    middle_vol = len(df) // 2 - 1
+                    middle_vol_fd = df["vol_fd"].iloc[middle_vol]
+                    if middle_vol_fd <= 0.9:
+                        use_middle_vol = 1
+                else:
+                    middle_vol = len(df) // 2
+                    middle_vol_fd = df["vol_fd"].iloc[middle_vol]
+                    if middle_vol_fd <= 0.9:
+                        use_middle_vol = 1
+                high_motion_vols = 0
+                for value in df ["vol_fd"]:
+                    if value > 0.9:
+                        high_motion_vols += 1
+                percentage_outliers = (high_motion_vols / len(df)) * 100
+                if percentage_outliers > 20:
+                    use_sinc_interp = 1
+                result_file = "ms_test_master.txt"
+                file_exists = True
+                try:
+                    with open(result_file, "r") as f:
+                        pass
+                except FileNotFoundError:
+                    file_exists = False
+                with open(result_file, "a") as f:
+                    if not file_exists:
+                        f.write("p_id run use_middle_vol use_sinc_interp\n")
+                    f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
             except FileNotFoundError:
-                file_exists = False
-            with open(result_file, "a") as f:
-                if not file_exists:
-                    f.write("p_id run middle_vol much_motion\n")
-                f.write(f"{p_id} {run} {middle_vol} {much_motion}\n")
-        elif:  
+                use_middle_vol = 1
+                use_sinc_interp = 0
+                result_file = "ms_test_master.txt"
+                file_exists = True
+                try:
+                    with open(result_file, "r") as f:
+                        pass
+                except FileNotFoundError:
+                    file_exists = False
+                with open(result_file, "a") as f:
+                    if not file_exists:
+                        f.write("p_id run use_middle_vol use_sinc_interp\n")
+                    f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
         else:
             print("Motion correction optimisation already performed. Skipping process.")
     
@@ -451,30 +475,30 @@ if answer3 == 'y':
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc') 
         if not os.path.exists(output_path):
             print(f"Performing motion correction on {run} data...")
-            middle_vol_values = []
-            much_motion_values = []
+            use_middle_vol_values = []
+            use_sinc_interp_values = []
             with open("ms_test_master.txt", "r") as f:
                 next(f)
                 for line in f:
                     parts = line.split()
-                    middle_vol_value = int(parts[2])
-                    much_motion_value = int(parts[3])
-                    middle_vol_values.append(middle_vol_value)
-                    much_motion_values.append(much_motion_value)
-            if all(middle_vol == 0 for middle_vol in middle_vol_values) and all(much_motion == 0 for much_motion in much_motion_values):
+                    use_middle_vol_value = int(parts[2])
+                    use_sinc_interp_value = int(parts[3])
+                    use_middle_vol_values.append(use_middle_vol_value)
+                    use_sinc_interp_values.append(use_sinc_interp_value)
+            if all(use_middle_vol == 1 for use_middle_vol in use_middle_vol_values) and all(use_sinc_interp == 0 for use_sinc_interp in use_sinc_interp_values):
                 subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
                 print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
-            elif all(middle_vol == 0 for middle_vol in middle_vol_values) and all(much_motion == 1 for much_motion in much_motion_values):
+            elif all(use_middle_vol == 1 for use_middle_vol in use_middle_vol_values) and all(use_sinc_interp == 1 for use_sinc_interp in use_sinc_interp_values):
                 subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
                 print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
-            elif all(middle_vol == 1 for middle_vol in middle_vol_values) and all(much_motion == 0 for much_motion in much_motion_values):
+            elif all(use_middle_vol == 0 for use_middle_vol in use_middle_vol_values) and all(use_sinc_interp == 0 for use_sinc_interp in use_sinc_interp_values):
                 subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
                 print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
-            elif all(middle_vol == 1 for middle_vol in middle_vol_values) and all(much_motion == 1 for much_motion in much_motion_values):
+            elif all(use_middle_vol == 0 for use_middle_vol in use_middle_vol_values) and all(use_sinc_interp == 1 for use_sinc_interp in use_sinc_interp_values):
                 subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
                 print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
             else:
-                print("Error: Not all middle_vol and much_motion values are 0 or 1. Cannot run MCFLIRT.")
+                print("Error: Not all use_middle_vol and use_sinc_interp values are 0 or 1. Cannot run MCFLIRT.")
         else:
             print(f"{run} already motion corrected. Skipping process.")
 
@@ -485,7 +509,7 @@ if answer3 == 'y':
         text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_scrubbed_volumes.txt')
         if not os.path.exists(output_path):
             print(f"Performing motion scrubbing on {run} data...")
-            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path , '--nomoco'])
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '--nomoco'])
             print(f'{run} motion scrubbed.')
         else:
             print (f'{run} already motion scrubbed. Skipping process.')

@@ -415,8 +415,8 @@ if answer3 == 'y':
     # Step 6: Find optimal motion correction parameters.
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
-        output_path = os.path.join (os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test')
-        text_output_path = os.path.join (os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test.txt') 
+        output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test')
+        text_output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test.txt') 
         if not os.path.exists(output_path):
             print(f"Finding optimal motion correction parameters for {run} data...")
             subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
@@ -441,7 +441,7 @@ if answer3 == 'y':
                 percentage_outliers = (high_motion_vols / len(df)) * 100
                 if percentage_outliers > 20:
                     use_sinc_interp = 1
-                result_file = "ms_test_master.txt"
+                result_file = os.path.join(os.getcwd(), 'group', 'ms_test', 'ms_test_master.txt')
                 file_exists = True
                 try:
                     with open(result_file, "r") as f:
@@ -455,7 +455,7 @@ if answer3 == 'y':
             except FileNotFoundError:
                 use_middle_vol = 1
                 use_sinc_interp = 0
-                result_file = os.path.join (os.getcwd(), 'group', 'ms_test', 'ms_test_master.txt')
+                result_file = os.path.join(os.getcwd(), 'group', 'ms_test', 'ms_test_master.txt')
                 file_exists = True
                 try:
                     with open(result_file, "r") as f:

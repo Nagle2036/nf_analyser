@@ -510,7 +510,7 @@ if answer3 == 'y':
         text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_scrubbed_volumes.txt')
         if not os.path.exists(output_path):
             print(f"Performing motion scrubbing on {run} data...")
-            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '--nomoco'])
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--nomoco'])
             print(f'{run} motion scrubbed.')
         else:
             print (f'{run} already motion scrubbed. Skipping process.')

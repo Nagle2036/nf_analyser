@@ -517,12 +517,12 @@ if answer3 == 'y':
         else:
             print (f'{run} already motion scrubbed. Skipping process.')
         with open(output_path, 'r') as file:
-            for line in file:
-                print(line) #get rid
-                num_columns = len(line.split('\t'))
-                print(num_columns) #get rid
-                scrubbed_vols.append(num_columns)
-                print(scrubbed_vols) #get rid
+            first_row = file.readline().strip()
+            print(first_row) #get rid
+            num_columns = len(first_row.split('\t'))
+            print(num_columns) #get rid
+            scrubbed_vols.append(num_columns)
+            print(scrubbed_vols) #get rid
     sum_scrubbed_vols = sum(scrubbed_vols)
     print(sum_scrubbed_vols) #get rid
     scrubbed_vols_perc = (sum_scrubbed_vols / 896) * 100

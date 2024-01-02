@@ -6,6 +6,7 @@
 # Upload analysis outputs back to Box account. Or maybe not. Might be best to leave this, in order to protect Box data in case anything gets messed up.
 # Add percentage completion metric.
 # Count files present in participant folder
+# Output mri_processor.py Bash terminal outputs / prints into .txt log file
 
 #region IMPORT PACKAGES.
 
@@ -517,10 +518,15 @@ if answer3 == 'y':
             print (f'{run} already motion scrubbed. Skipping process.')
         with open(output_path, 'r') as file:
             first_row = file.readline().split('\t')
+            print(first_row) #get rid
             num_columns = len(first_row)
+            print(num_columns) #get rid
             scrubbed_vols.append(num_columns)
+            print(scrubbed_vols) #get rid
     sum_scrubbed_vols = sum(scrubbed_vols)
+    print(sum_scrubbed_vols) #get rid
     scrubbed_vols_perc = (sum_scrubbed_vols / 896) * 100
+    print(scrubbed_vols_perc) #get rid
     if scrubbed_vols_perc > 15:
         print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove participant from analysis.')
     else:

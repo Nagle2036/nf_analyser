@@ -519,7 +519,7 @@ if answer3 == 'y':
         with open(output_path, 'r') as file:
             first_row = file.readline().strip()
             print(first_row) #get rid
-            num_columns = len(first_row.split('\t'))
+            num_columns = len(first_row.split('   '))
             print(num_columns) #get rid
             scrubbed_vols.append(num_columns)
             print(scrubbed_vols) #get rid

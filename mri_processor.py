@@ -504,6 +504,7 @@ if answer3 == 'y':
             print(f"{run} already motion corrected. Skipping process.")
 
     # Step 8: Perform motion scrubbing.
+    scrubbed_vols = []
     for run in runs:
         input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc_ms')
@@ -514,6 +515,18 @@ if answer3 == 'y':
             print(f'{run} motion scrubbed.')
         else:
             print (f'{run} already motion scrubbed. Skipping process.')
+        with open(output_path, 'r') as file:
+            first_row = file.readline().split('\t')
+            num_columns = len(first_row)
+            scrubbed_vols.append(num_columns)
+    sum_scrubbed_vols = sum(scrubbed_vols)
+    scrubbed_vols_perc = (sum_scrubbed_vols / 896) * 100
+    if scrubbed_vols_perc > 15:
+        print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove participant from analysis.')
+    else:
+        print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
+        
+
 
 
 #endregion

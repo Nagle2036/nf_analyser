@@ -413,6 +413,36 @@ if answer3 == 'y':
             file.write(formatted_row)
     print('Onset files created.')
 
+    # Step 6: Calculate and apply field maps.
+    def get_nifti_data_type(file_path):
+        try:
+            result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                match = re.search(r'data_type\s*:\s*(\w+)', result.stdout)
+                if match:
+                    data_type = match.group(1)
+                    return data_type
+                else:
+                    print("Error: Unable to extract data_type from fslinfo output.")
+            else:
+                print(f"Error: fslinfo command failed with the following error:\n{result.stderr}")
+        except Exception as e:
+            print(f"Error: An exception occurred - {str(e)}")
+    for run in runs:
+        nifti_file_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
+        data_type_value = get_nifti_data_type(nifti_file_path)
+        output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}_nh.nii')
+        if not os.path.exists(output_path):
+            if data_type_value == 'INT16':
+                subprocess.run([nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path)
+            else:
+                print('Data type for Nifti image is not INT16. Cannot complete hole filling process.')
+                sys.exit()
+        else:
+        print('Holes already filled in raw Nifti images. Skipping process.')
+
+        
+
     # Step 6: Find optimal motion correction parameters.
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
@@ -518,21 +548,16 @@ if answer3 == 'y':
             print (f'{run} already motion scrubbed. Skipping process.')
         with open(output_path, 'r') as file:
             first_row = file.readline().strip()
-            print(first_row) #get rid
             num_columns = len(first_row.split('   '))
-            print(num_columns) #get rid
             scrubbed_vols.append(num_columns)
-            print(scrubbed_vols) #get rid
     sum_scrubbed_vols = sum(scrubbed_vols)
-    print(sum_scrubbed_vols) #get rid
     scrubbed_vols_perc = (sum_scrubbed_vols / 896) * 100
-    print(scrubbed_vols_perc) #get rid
     if scrubbed_vols_perc > 15:
         print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove participant from analysis.')
+        sys.exit()
     else:
         print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
         
-
 
 
 #endregion

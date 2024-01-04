@@ -418,12 +418,13 @@ if answer3 == 'y':
         try:
             result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if result.returncode == 0:
-                match = re.search(r'^\s*data_type\s*:\s*(\w+)', result.stdout, re.MULTILINE)
-                if match:
-                    data_type = match.group(1)
-                    return data_type
-                else:
-                    print("Error: Unable to extract data_type from fslinfo output.")
+                lines = result.stdout.splitlines()
+                for line in lines:
+                    if line.startswith('data_type'):
+                        data_type = line.split(':')[1].strip()
+                        return data_type
+                    else:
+                        print("Error: Unable to extract data_type from fslinfo output.")
             else:
                 print(f"Error: fslinfo command failed with the following error:\n{result.stderr}")
         except Exception as e:
@@ -434,12 +435,14 @@ if answer3 == 'y':
         output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}_nh.nii')
         if not os.path.exists(output_path):
             if data_type_value == 'INT16':
+                print(f'Filling holes in {run} raw Nifti image.')
                 subprocess.run(['fslmaths', nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path])
+                print(f'Holes filled in {run} raw Nifti image.')
             else:
-                print('Data type for Nifti image is not INT16. Cannot complete hole filling process.')
+                print(f'Data type for {run} Nifti image is not INT16. Cannot complete hole filling process.')
                 sys.exit()
         else:
-            print('Holes already filled in raw Nifti images. Skipping process.')
+            print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
 
         
 

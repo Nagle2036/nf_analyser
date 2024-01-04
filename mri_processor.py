@@ -418,7 +418,7 @@ if answer3 == 'y':
         try:
             result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if result.returncode == 0:
-                match = re.search(r'\bdata_type\s*:\s*(\w+)', result.stdout)
+                match = re.search(r'^\s*data_type\s*:\s*(\w+)', result.stdout, re.MULTILINE)
                 if match:
                     data_type = match.group(1)
                     return data_type

@@ -420,8 +420,8 @@ if answer3 == 'y':
             if result.returncode == 0:
                 lines = result.stdout.splitlines()
                 for line in lines:
-                    if line.startswith('data_type'):
-                        data_type = line.split(':')[1].strip()
+                    if 'data_type' in line:
+                        data_type = line.split()[-1].strip()
                         return data_type
                     else:
                         print("Error: Unable to extract data_type from fslinfo output.")

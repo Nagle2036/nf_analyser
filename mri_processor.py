@@ -365,7 +365,7 @@ if answer3 == 'y':
         print('Structural Nifti file already exists. Skipping process.')
     bet_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural_brain.nii")
     structural_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural.nii")
-    if not os.path.exists(f'{p_id}/analysis/scc/strutural_brain.nii.gz'):
+    if not os.path.exists(f'{p_id}/analysis/scc/structural_brain.nii.gz'):
         print("Performing brain extraction on structural image...")
         subprocess.run(['bet', structural_path, bet_path, '-m', '-R'])
         print("Structural image brain extracted.")
@@ -418,7 +418,7 @@ if answer3 == 'y':
         try:
             result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if result.returncode == 0:
-                match = re.search(r'data_type\s*:\s*(\w+)', result.stdout)
+                match = re.search(r'\bdata_type\s*:\s*(\w+)', result.stdout)
                 if match:
                     data_type = match.group(1)
                     return data_type
@@ -434,7 +434,7 @@ if answer3 == 'y':
         output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}_nh.nii')
         if not os.path.exists(output_path):
             if data_type_value == 'INT16':
-                subprocess.run([nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path])
+                subprocess.run(['fslmaths', nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path])
             else:
                 print('Data type for Nifti image is not INT16. Cannot complete hole filling process.')
                 sys.exit()

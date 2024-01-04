@@ -457,7 +457,10 @@ if answer3 == 'y':
                         print(f"Copied {filename} to {destination_folder}")
     source_folder = src_folder
     destination_folder = f'{p_id}/analysis/scc/fieldmaps'
-    copy_dicom_files(source_folder, destination_folder, target_volume_count=5)
+    if not os.path.exists(destination_folder):
+        os.makedirs(destination_folder, exist_ok=True)
+    if not os.listdir(destination_folder):
+        copy_dicom_files(source_folder, destination_folder, target_volume_count=5)
     
 
     # Step 6: Find optimal motion correction parameters.

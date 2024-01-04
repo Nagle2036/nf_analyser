@@ -433,7 +433,7 @@ if answer3 == 'y':
     for run in runs:
         nifti_file_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
         data_type_value = get_nifti_data_type(nifti_file_path)
-        output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}_nh.nii')
+        output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}_nh.nii.gz')
         if not os.path.exists(output_path):
             if data_type_value == 'INT16':
                 print(f'Filling holes in {run} raw Nifti image.')
@@ -528,7 +528,7 @@ if answer3 == 'y':
     # Step 7: Perform motion correction. 
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
-        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc') 
+        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc.nii.gz') 
         if not os.path.exists(output_path):
             print(f"Performing motion correction on {run} data...")
             use_middle_vol_values = []

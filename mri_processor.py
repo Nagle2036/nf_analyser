@@ -439,7 +439,7 @@ if answer3 == 'y':
                 print('Data type for Nifti image is not INT16. Cannot complete hole filling process.')
                 sys.exit()
         else:
-        print('Holes already filled in raw Nifti images. Skipping process.')
+            print('Holes already filled in raw Nifti images. Skipping process.')
 
         
 

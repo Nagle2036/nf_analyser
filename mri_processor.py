@@ -443,8 +443,22 @@ if answer3 == 'y':
                 sys.exit()
         else:
             print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
-
-        
+    def copy_dicom_files(source_folder, destination_folder, target_volume_count=5):
+        for filename in os.listdir(source_folder):
+            if filename.endswith('.dcm'):
+                file_parts = filename.split('_')
+                if len(file_parts) == 3:
+                    sequence_number = int(file_parts[1])
+                    volume_number = int(file_parts[2].split('.')[0])
+                    if volume_number == target_volume_count:
+                        source_path = os.path.join(source_folder, filename)
+                        destination_path = os.path.join(destination_folder, filename)
+                        shutil.copy2(source_path, destination_path)
+                        print(f"Copied {filename} to {destination_folder}")
+    source_folder = src_folder
+    destination_folder = f'{p_id}/analysis/scc/fieldmaps'
+    copy_dicom_files(source_folder, destination_folder, target_volume_count=5)
+    
 
     # Step 6: Find optimal motion correction parameters.
     for run in runs:
@@ -501,7 +515,7 @@ if answer3 == 'y':
                         f.write("p_id run use_middle_vol use_sinc_interp\n")
                     f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
         else:
-            print("Motion correction optimisation already performed. Skipping process.")
+            print(f"Motion correction optimisation for {run} already performed. Skipping process.")
     
     # Step 7: Perform motion correction. 
     for run in runs:

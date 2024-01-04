@@ -434,7 +434,7 @@ if answer3 == 'y':
         output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}_nh.nii')
         if not os.path.exists(output_path):
             if data_type_value == 'INT16':
-                subprocess.run([nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path)
+                subprocess.run([nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path])
             else:
                 print('Data type for Nifti image is not INT16. Cannot complete hole filling process.')
                 sys.exit()

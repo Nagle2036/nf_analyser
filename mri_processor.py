@@ -31,6 +31,7 @@ import re
 import nibabel as nib
 import matplotlib.pyplot as plt
 import fnmatch
+from collections import defaultdict
 
 #endregion
 
@@ -444,17 +445,21 @@ if answer3 == 'y':
         else:
             print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
     def copy_dicom_files(source_folder, destination_folder, target_volume_count=5):
+        sequences = defaultdict(list)
         for filename in os.listdir(source_folder):
             if filename.endswith('.dcm'):
                 file_parts = filename.split('_')
                 if len(file_parts) == 3:
                     sequence_number = int(file_parts[1])
                     volume_number = int(file_parts[2].split('.')[0])
-                    if volume_number == target_volume_count:
-                        source_path = os.path.join(source_folder, filename)
-                        destination_path = os.path.join(destination_folder, filename)
-                        shutil.copy2(source_path, destination_path)
-                        print(f"Copied {filename} to {destination_folder}")
+                    sequences[sequence_number].append((filename, volume_number))
+        for sequence_number, files_info in sequences.items():
+            if len(files_info) == target_volume_count:
+                for filename, _ in files_info:
+                    source_path = os.path.join(source_folder, filename)
+                    destination_path = os.path.join(destination_folder, filename)
+                    shutil.copy2(source_path, destination_path)
+                    print(f"Copied {filename} to {destination_folder}")
     source_folder = src_folder
     destination_folder = f'{p_id}/analysis/scc/fieldmaps'
     if not os.path.exists(destination_folder):

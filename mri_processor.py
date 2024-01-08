@@ -621,6 +621,8 @@ if answer4 == 'y':
     # Example usage:
     folder_path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', 'tbv_script', 'data')
     second_largest_file, third_largest_file = find_files_with_numbers(folder_path)
+    print(second_largest_file)
+    print(third_largest_file)
 
 #endregion
 

@@ -596,7 +596,7 @@ if answer4 == 'y':
 
     def find_second_and_third_largest(files):
         # Extract numeric part from filenames and sort
-        sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]))
+        sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]), reverse=True)
 
         # Get paths for the 2nd and 3rd largest numbers
         second_largest_path = os.path.join(folder_path, sorted_files[-2])

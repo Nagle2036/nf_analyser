@@ -466,13 +466,15 @@ if answer3 == 'y':
         os.makedirs(destination_folder, exist_ok=True)
     if not os.listdir(destination_folder):
         copy_dicom_files(source_folder, destination_folder, target_volume_count=5)
+
+    # Note on copying fieldmap dicom files to separate directory - the 02 sequence often also has 5 volumes. Need to find a way to ignore this sequence and only copy the fieldmap sequences.
     
 
     # Step 6: Find optimal motion correction parameters.
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
-        output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test')
-        text_output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test.txt') 
+        output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
+        text_output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
         if not os.path.exists(output_path):
             print(f"Finding optimal motion correction parameters for {run} data...")
             subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
@@ -587,10 +589,45 @@ if answer3 == 'y':
 
 #endregion
 
-#region SUSCEPTIBILITY.
+#region THERM ANALYSIS.
 
-answer4 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
+answer4 = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer4 == 'y':
+
+    # Step 1: Find Run 2 and 3 tbv_script thermometer files.
+    def find_second_and_third_largest(files):
+        # Extract numbers from filenames and sort them
+        numbers = sorted([int(file.split('_')[-1].split('.')[0]) for file in files])
+        
+        # Get the second and third largest numbers
+        second_largest = numbers[-2]
+        third_largest = numbers[-3]
+        
+        return second_largest, third_largest
+
+    def find_files_with_numbers(folder_path):
+        # Get the list of files in the folder
+        files = os.listdir(folder_path)
+        
+        # Find the second and third largest numbers
+        second_largest, third_largest = find_second_and_third_largest(files)
+        
+        # Create paths for files with the second and third largest numbers
+        second_largest_path = os.path.join(folder_path, [file for file in files if str(second_largest) in file][0])
+        third_largest_path = os.path.join(folder_path, [file for file in files if str(third_largest) in file][0])
+        
+        return second_largest_path, third_largest_path
+
+    # Example usage:
+    folder_path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', 'tbv_script', 'data')
+    second_largest_file, third_largest_file = find_files_with_numbers(folder_path)
+
+#endregion
+
+#region SUSCEPTIBILITY ANALYSIS.
+
+answer5 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
+if answer5 == 'y':
 
     # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
     path = os.path.join(os.getcwd(), p_id, "data", "neurofeedback")

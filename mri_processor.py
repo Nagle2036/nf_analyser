@@ -594,35 +594,33 @@ if answer3 == 'y':
 answer4 = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer4 == 'y':
 
-    # Step 1: Find Run 2 and 3 tbv_script thermometer files.
     def find_second_and_third_largest(files):
-        # Extract numbers from filenames and sort them
-        numbers = sorted([int(file.split('_')[-1].split('.')[0]) for file in files])
-        
-        # Get the second and third largest numbers
-        second_largest = numbers[-2]
-        third_largest = numbers[-3]
-        
-        return second_largest, third_largest
+        # Extract numeric part from filenames and sort
+        sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]))
 
-    def find_files_with_numbers(folder_path):
-        # Get the list of files in the folder
-        files = os.listdir(folder_path)
-        
-        # Find the second and third largest numbers
-        second_largest, third_largest = find_second_and_third_largest(files)
-        
-        # Create paths for files with the second and third largest numbers
-        second_largest_path = os.path.join(folder_path, [file for file in files if str(second_largest) in file][0])
-        third_largest_path = os.path.join(folder_path, [file for file in files if str(third_largest) in file][0])
-        
+        # Get paths for the 2nd and 3rd largest numbers
+        second_largest_path = os.path.join(folder_path, sorted_files[-2])
+        third_largest_path = os.path.join(folder_path, sorted_files[-3])
+
         return second_largest_path, third_largest_path
 
-    # Example usage:
+    # Specify the folder path
     folder_path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', 'tbv_script', 'data')
-    second_largest_file, third_largest_file = find_files_with_numbers(folder_path)
-    print(second_largest_file)
-    print(third_largest_file)
+
+    # Get the list of files in the folder
+    files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+
+    # Ensure that there are exactly 4 files in the folder
+    if len(files) == 4:
+        # Find paths for the 2nd and 3rd largest numbers
+        second_largest_path, third_largest_path = find_second_and_third_largest(files)
+
+        # Print or use the paths as needed
+        print("Second Largest Path:", second_largest_path)
+        print("Third Largest Path:", third_largest_path)
+    else:
+        print("Error: The folder should contain exactly 4 files.")
+
 
 #endregion
 

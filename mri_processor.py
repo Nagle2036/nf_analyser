@@ -198,6 +198,8 @@ if answer2 == 'y':
         # Get the set of downloaded files
         downloaded_files = get_downloaded_files(save_directory)
         # Download files recursively from the parent folder and its subfolders
+        MAX_RETRY_ATTEMPTS = 3
+        RETRY_DELAY_SECONDS = 5
         while True:
             download_files_from_folder(parent_folder, save_directory, downloaded_files)
             # Download the specific file eCRF.xlsx

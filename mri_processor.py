@@ -200,12 +200,32 @@ if answer2 == 'y':
         # Download files recursively from the parent folder and its subfolders
         while True:
             download_files_from_folder(parent_folder, save_directory, downloaded_files)
+            # Download the specific file eCRF.xlsx
+            ecrf_file_name = 'eCRF.xlsx'
+            ecrf_file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{ecrf_file_name}'
+            if ecrf_file_name not in downloaded_files:
+                ecrf_item = client.file(file_id='eCRF.xlsx')  # Replace 'file_id' with the actual ID of the eCRF.xlsx file
+                retry_attempts = 0
+                while retry_attempts < MAX_RETRY_ATTEMPTS:
+                    try:
+                        with open(ecrf_file_path, 'wb') as writeable_stream:
+                            ecrf_item.download_to(writeable_stream)
+                            downloaded_files.add(ecrf_file_name)
+                            print(f"Downloaded: {ecrf_file_name}")
+                        break
+                    except Exception as e:
+                        print(f"An error occurred while downloading '{ecrf_file_name}': {str(e)}")
+                        print("Retrying...")
+                        time.sleep(RETRY_DELAY_SECONDS)
+                        retry_attempts += 1
+                if retry_attempts == MAX_RETRY_ATTEMPTS:
+                    print(f"Failed to download '{ecrf_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
             # Get the updated folder information to check if all files have been downloaded
             parent_folder_info = client.folder(parent_folder.id).get()
             item_collection = parent_folder_info["item_collection"]
             total_items = item_collection["total_count"]
             # Check if all files have been downloaded
-            if len(downloaded_files) == total_items:
+            if len(downloaded_files) == total_items + 1:
                 break  # Break the loop if all files have been downloaded
             # Check if the access token needs refreshing
             try:
@@ -594,32 +614,37 @@ if answer3 == 'y':
 answer4 = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer4 == 'y':
 
+    # Step 1: Find Run 2 and 3 tbv_script thermometer files.
     def find_second_and_third_largest(files):
-        # Extract numeric part from filenames and sort
         sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]), reverse=True)
-
-        # Get paths for the 2nd and 3rd largest numbers
         second_largest_path = os.path.join(folder_path, sorted_files[-2])
         third_largest_path = os.path.join(folder_path, sorted_files[-3])
-
         return second_largest_path, third_largest_path
-
-    # Specify the folder path
     folder_path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', 'tbv_script', 'data')
-
-    # Get the list of files in the folder
     files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
-
-    # Ensure that there are exactly 4 files in the folder
     if len(files) == 4:
-        # Find paths for the 2nd and 3rd largest numbers
-        second_largest_path, third_largest_path = find_second_and_third_largest(files)
-
-        # Print or use the paths as needed
-        print("Second Largest Path:", second_largest_path)
-        print("Third Largest Path:", third_largest_path)
+        run2_path, run3_path = find_second_and_third_largest(files)
     else:
         print("Error: The folder should contain exactly 4 files.")
+
+
+    # Could the participants move the thermometer?
+    # How did this differ between guilt and indignation tasks?
+    # How did this differ between the two intervention groups?
+    # Did it vary based on any demographic or clinical factors?
+    # Did their actual success correlate with perceived success?
+    # Try different metrics for thermometer movement success (e.g. mean level, median level, level stability, level stability + mean / median level)
+    # Can also try: number of volumes where thermometer level was above 5. Or plot histogram of the frequency of different thermometer levels. Can include levels that are also outside of the thermometer range, and have these values in a slightly more faded colour.
+    # Find amount of time that participant spent above or below thermometer range to test whether thermometer range was suitable.
+    # Does thermometer movement success vary in accordance with memory intensity?
+    # Test if MeanSignal stabilises each time during rest blocks.
+    # Clearly define MeanSignal, Baseline, Value, Thermometer Level etc from tbv_script text file.
+    # Calculate the average number of blocks that the thermometer goes up or down each volume, in order to ascertain how erratically or stably the thermometer is moving. 
+    # Could create a heatmap overlayed onto the thermometer in order to provide a visual demonstration of the thermometer levels that were most frequently occupied.
+    # How well does thermometer success correlate with the different techniques used. Can try to classify the qualitative reports into several categories of techniques.
+    # Does perceived success correlate with any demographic or clinical factors?
+    # Does actual or perceived success correlate with improvements in self-esteem / depression ratings?
+
 
 
 #endregion

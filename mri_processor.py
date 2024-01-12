@@ -206,21 +206,22 @@ if answer2 == 'y':
             ecrf_file_name = 'eCRF.xlsx'
             ecrf_file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{ecrf_file_name}'
             if ecrf_file_name not in downloaded_files:
-                ecrf_item = client.file(file_id='eCRF.xlsx')  # Replace 'file_id' with the actual ID of the eCRF.xlsx file
-                retry_attempts = 0
-                while retry_attempts < MAX_RETRY_ATTEMPTS:
-                    try:
-                        with open(ecrf_file_path, 'wb') as writeable_stream:
-                            ecrf_item.download_to(writeable_stream)
-                            downloaded_files.add(ecrf_file_name)
-                            print(f"Downloaded: {ecrf_file_name}")
-                        break
-                    except Exception as e:
-                        print(f"An error occurred while downloading '{ecrf_file_name}': {str(e)}")
-                        print("Retrying...")
-                        time.sleep(RETRY_DELAY_SECONDS)
-                        retry_attempts += 1
-                if retry_attempts == MAX_RETRY_ATTEMPTS:
+                ecrf_item = next((item for item in client.folder(parent_folder.id).get_items() if item.name == ecrf_file_name), None)
+                if ecrf_item:             
+                    retry_attempts = 0
+                    while retry_attempts < MAX_RETRY_ATTEMPTS:
+                        try:
+                            with open(ecrf_file_path, 'wb') as writeable_stream:
+                                ecrf_item.download_to(writeable_stream)
+                                downloaded_files.add(ecrf_file_name)
+                                print(f"Downloaded: {ecrf_file_name}")
+                            break
+                        except Exception as e:
+                            print(f"An error occurred while downloading '{ecrf_file_name}': {str(e)}")
+                            print("Retrying...")
+                            time.sleep(RETRY_DELAY_SECONDS)
+                            retry_attempts += 1
+                    if retry_attempts == MAX_RETRY_ATTEMPTS:
                     print(f"Failed to download '{ecrf_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
             # Get the updated folder information to check if all files have been downloaded
             parent_folder_info = client.folder(parent_folder.id).get()

@@ -53,7 +53,7 @@ if not os.path.exists(p_id_folder):
     subprocess.run(['mkdir', f'{p_id}'])
 susceptibility_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility")
 if not os.path.exists(susceptibility_folder):
-    subprocess.run(['mkdir', f'{p_id}/susceptibility'])
+    subprocess.run(['mkdir', f'{p_id}/analysis/susceptibility'])
 scc_analysis_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
 if not os.path.exists(scc_analysis_folder):
     subprocess.run(['mkdir', f'{p_id}/analysis/scc'])
@@ -63,6 +63,9 @@ if not os.path.exists(group_folder):
 mc_test_folder = os.path.join(os.getcwd(), "group", "mc_test")
 if not os.path.exists(mc_test_folder):
     subprocess.run(['mkdir', 'group/ms_test'])
+therm_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'therm')
+if not os.path.exists(therm_folder):
+    subprocess.run(['mkdir', f'{p_id}/analysis/therm'])
     
 #endregion
 

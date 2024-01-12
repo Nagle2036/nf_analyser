@@ -222,7 +222,7 @@ if answer2 == 'y':
                             time.sleep(RETRY_DELAY_SECONDS)
                             retry_attempts += 1
                     if retry_attempts == MAX_RETRY_ATTEMPTS:
-                    print(f"Failed to download '{ecrf_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
+                        print(f"Failed to download '{ecrf_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
             # Get the updated folder information to check if all files have been downloaded
             parent_folder_info = client.folder(parent_folder.id).get()
             item_collection = parent_folder_info["item_collection"]

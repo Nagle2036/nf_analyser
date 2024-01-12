@@ -206,7 +206,7 @@ if answer2 == 'y':
             ecrf_file_name = 'eCRF.xlsx'
             ecrf_file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{ecrf_file_name}'
             if ecrf_file_name not in downloaded_files:
-                ecrf_item = next((item for item in client.folder(parent_folder.id).get_items() if item.name == ecrf_file_name), None)
+                ecrf_item = next((item for item in client.folder(parent_folder.parent.id).get_items() if item.name == ecrf_file_name), None)
                 if ecrf_item:             
                     retry_attempts = 0
                     while retry_attempts < MAX_RETRY_ATTEMPTS:
@@ -223,6 +223,10 @@ if answer2 == 'y':
                             retry_attempts += 1
                     if retry_attempts == MAX_RETRY_ATTEMPTS:
                         print(f"Failed to download '{ecrf_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
+                else:
+                    print(f'eCRF.xlsx not found in parent folder.')
+            else:
+                print(f'eCRF.xlsx already downloaded.')
             # Get the updated folder information to check if all files have been downloaded
             parent_folder_info = client.folder(parent_folder.id).get()
             item_collection = parent_folder_info["item_collection"]

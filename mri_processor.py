@@ -32,6 +32,7 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import fnmatch
 from collections import defaultdict
+import openpyxl
 
 #endregion
 
@@ -636,6 +637,25 @@ if answer4 == 'y':
         run2_path, run3_path = find_second_and_third_largest(files)
     else:
         print("Error: The folder should contain exactly 4 files.")
+    
+    # Step 2: Access eCRF document and extract relevant data into dataframe.
+    ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
+    password = 'SussexDepNF22'
+    try:
+        workbook = openpyxl.load_workbook(ecrf_file_path, read_only=True, data_only=True, password=password)
+        sheet_name = 'Pre-Screening'
+        sheet = workbook[sheet_name]
+        cell_value = sheet['C11'].value  # Example: Access the value of cell A1
+        print(f"Value in C11: {cell_value}")
+    except openpyxl.utils.exceptions.InvalidFileException:
+        print("Incorrect password or the file is not encrypted.")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+    finally:
+        if 'workbook' in locals():
+            workbook.close()
+    
+
 
 
     # Could the participants move the thermometer?

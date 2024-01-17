@@ -32,6 +32,7 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import fnmatch
 from collections import defaultdict
+import win32com.client
 
 #endregion
 
@@ -641,13 +642,19 @@ if answer4 == 'y':
     ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
     password = 'SussexDepNF22'
     try:
-        xls = pd.ExcelFile(ecrf_file_path, engine='pyxlsb', password=password)
+        excel_app = win32com.client.Dispatch("Excel.Application")
+        excel_app.Workbooks.Open(ecrf_file_path, False, True, None, password)
+        workbook = excel_app.ActiveWorkbook
         sheet_name = 'Pre-Screening'
-        df = pd.read_excel(xls, sheet_name)
-        cell_value = df.at[2, 10]  # Example: Access the value of the first cell
+        worksheet = workbook[sheet_name]
+        cell_value = worksheet.Cells(3, 11).Value
         print(f"Value in A1: {cell_value}")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
+    finally:
+        excel_app.Quit()
+            
+
 
 
 

@@ -32,7 +32,6 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import fnmatch
 from collections import defaultdict
-import openpyxl
 
 #endregion
 
@@ -642,19 +641,13 @@ if answer4 == 'y':
     ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
     password = 'SussexDepNF22'
     try:
-        workbook = openpyxl.load_workbook(ecrf_file_path, read_only=True, data_only=True, password=password)
+        xls = pd.ExcelFile(ecrf_file_path, engine='pyxlsb', password=password)
         sheet_name = 'Pre-Screening'
-        sheet = workbook[sheet_name]
-        cell_value = sheet['C11'].value  # Example: Access the value of cell A1
-        print(f"Value in C11: {cell_value}")
-    except openpyxl.utils.exceptions.InvalidFileException:
-        print("Incorrect password or the file is not encrypted.")
+        df = pd.read_excel(xls, sheet_name)
+        cell_value = df.at[2, 10]  # Example: Access the value of the first cell
+        print(f"Value in A1: {cell_value}")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-    finally:
-        if 'workbook' in locals():
-            workbook.close()
-    
 
 
 

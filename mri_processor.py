@@ -646,11 +646,11 @@ if answer4 == 'y':
     
     try:
         # Load the Excel file using openpyxl
-        workbook = openpyxl.load_workbook(ecrf_file_path, read_only=True, data_only=True, guess_types=True)
+        workbook = openpyxl.load_workbook(ecrf_file_path, read_only=True, data_only=True)
 
         # Access information from the workbook
         sheet = workbook['Pre-Screening']
-        cell_value = sheet.cell(row=3, column=11).value
+        cell_value = sheet.cell(row=3, column=11).value  # Example: Access the value of cell C11
         print(f"Value in C11: {cell_value}")
 
     except Exception as e:

@@ -32,8 +32,7 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import fnmatch
 from collections import defaultdict
-import openpyxl
-from pyexcel_ods3 import get_data
+import xlrd
 
 #endregion
 
@@ -645,12 +644,12 @@ if answer4 == 'y':
 
     
     try:
-        # Load the Excel file using openpyxl
-        workbook = openpyxl.load_workbook(ecrf_file_path, read_only=True, data_only=True)
+        # Open the Excel file using xlrd
+        workbook = xlrd.open_workbook(ecrf_file_path, on_demand=True, formatting_info=True, password=password)
 
         # Access information from the workbook
-        sheet = workbook['Pre-Screening']
-        cell_value = sheet.cell(row=3, column=11).value  # Example: Access the value of cell C11
+        sheet = workbook.sheet_by_index(0)
+        cell_value = sheet.cell_value(2, 10)  # Example: Access the value of cell C11
         print(f"Value in C11: {cell_value}")
 
     except Exception as e:
@@ -659,7 +658,7 @@ if answer4 == 'y':
     finally:
         # Close the workbook
         if 'workbook' in locals():
-            workbook.close()
+            workbook.release_resources()
             
 
 

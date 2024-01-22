@@ -32,7 +32,9 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import fnmatch
 from collections import defaultdict
-import xlrd
+import io
+import msoffcrypto
+import openpyxl
 
 #endregion
 
@@ -642,23 +644,23 @@ if answer4 == 'y':
     ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
     password = 'SussexDepNF22'
 
+    decrypted_workbook = io.BytesIO()
+    with open(ecrf_file_path, 'rb') as file:
+        office_file = msoffcrypto.OfficeFile(file)
+        office_file.load_key(password=password)
+        office_file.decrypt(decrypted_workbook)
     
-    try:
-        # Open the Excel file using xlrd
-        workbook = xlrd.open_workbook(ecrf_file_path, on_demand=True, formatting_info=True, password=password)
+    workbook = openpyxl.load_workbook(decrypted_workbook)
 
-        # Access information from the workbook
-        sheet = workbook.sheet_by_index(0)
-        cell_value = sheet.cell_value(2, 10)  # Example: Access the value of cell C11
-        print(f"Value in C11: {cell_value}")
+    # Access information from the workbook
+    sheet = workbook['Pre-Screening']
+    cell_value = sheet.cell(row=3, column=11).value  # Example: Access the value of cell C11
+    print(f"Value in C11: {cell_value}")
 
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
+    # Close the workbook
+    workbook.close()
 
-    finally:
-        # Close the workbook
-        if 'workbook' in locals():
-            workbook.release_resources()
+    
             
 
 

@@ -32,6 +32,8 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 import fnmatch
 from collections import defaultdict
+import openpyxl
+from pyexcel_ods3 import get_data
 
 #endregion
 
@@ -640,12 +642,24 @@ if answer4 == 'y':
     # Step 2: Access eCRF document and extract relevant data into dataframe.
     ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
     password = 'SussexDepNF22'
+
+    
     try:
-        df = pd.read_excel(ecrf_file_path, sheet_name='Pre-Screening', password=password)
-        cell_value = df.iloc[2, 10]  # Example: Access the value of the first cell
-        print(f"Value in A1: {cell_value}")
+        # Load the Excel file using openpyxl
+        workbook = openpyxl.load_workbook(ecrf_file_path, read_only=True, data_only=True, guess_types=True)
+
+        # Access information from the workbook
+        sheet = workbook['Pre-Screening']
+        cell_value = sheet.cell(row=3, column=11).value
+        print(f"Value in C11: {cell_value}")
+
     except Exception as e:
         print(f"An error occurred: {str(e)}")
+
+    finally:
+        # Close the workbook
+        if 'workbook' in locals():
+            workbook.close()
             
 
 

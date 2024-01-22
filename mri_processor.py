@@ -654,7 +654,7 @@ if answer4 == 'y':
 
     # Access information from the workbook
     sheet = workbook['Pre-Screening']
-    cell_value = sheet.cell(row=3, column=11).value  # Example: Access the value of cell C11
+    cell_value = sheet.cell(row=11, column=3).value  # Example: Access the value of cell C11
     print(f"Value in C11: {cell_value}")
 
     # Close the workbook

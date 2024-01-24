@@ -674,13 +674,13 @@ if answer4 == 'y':
 
         df_values_dict[f'{x}_df_values'] = vis_1_values + vis_2_values + vis_3_values
 
-        workbook.close()
+        for key, values in df_values_dict.items():
+            data_df[key] = values
+        
+        output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/test_output_sheet.xlsx'
+        data_df.to_excel(output_excel_path, index=True)
 
-    for key, values in df_values_dict.items():
-        data_df[key] = values
-    
-    output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/test_output_sheet.xlsx'
-    data_df.to_excel(output_excel_path, index=True)
+        workbook.close()
 
 
     

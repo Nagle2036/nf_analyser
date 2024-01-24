@@ -649,9 +649,11 @@ if answer4 == 'y':
     
     df_values_dict = {}
     
-    p004_vis_1_locations = {'dob': (77, 3), 'gender': (81, 3)}
-    p004_vis_2_locations = {'pre_memory_intensity_guilt_1': (38, 3), 'pre_memory_intensity_guilt_2': (43, 3)}
-    p004_vis_3_locations = {'panas_pos_vis_3': (36, 3), 'panas_neg_vis_3': (37, 3)}
+    location_dict = {
+        'p004_vis_1_locations': {'dob': (77, 3), 'gender': (81, 3)},
+        'p004_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 3), 'pre_memory_intensity_guilt_2': (43, 3)},
+        'p004_vis_3_locations': {'panas_pos_vis_3': (36, 3), 'panas_neg_vis_3': (37, 3)}
+    }
 
     for x in df_col_headers:
         decrypted_workbook = io.BytesIO()
@@ -662,13 +664,13 @@ if answer4 == 'y':
         workbook = openpyxl.load_workbook(decrypted_workbook)
 
         ecrf_sheet = workbook['Visit 1']
-        vis_1_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in getattr(locals(), f'{x}_vis_1_locations').values()]
+        vis_1_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_1_locations'].values()]
 
         ecrf_sheet = workbook['Visit 2']
-        vis_2_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in getattr(locals(), f'{x}_vis_2_locations').values()]
+        vis_2_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_2_locations'].values()]
 
         ecrf_sheet = workbook['Visit 3']
-        vis_3_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in getattr(locals(), f'{x}_vis_3_locations').values()]
+        vis_3_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_3_locations'].values()]
 
         df_values_dict[f'{x}_df_values'] = vis_1_values + vis_2_values + vis_3_values
 

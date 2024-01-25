@@ -643,7 +643,7 @@ if answer4 == 'y':
     # Step 2: Access eCRF document and extract relevant data into dataframe.
     df_col_headers = ['p004', 'p006', 'p020', 'p030', 'p059', 'p078', 'p093', 'p094', 'p100', 'p107', 'p122', 'p125', 'p127', 'p128', 'p136', 'p145', 'p155']
     df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3']
-    data_df = pd.DataFrame(index = df_row_headers, columns = df_col_headers)
+    data_df = pd.DataFrame(index = df_row_headers)
     ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
     password = 'SussexDepNF22'
     
@@ -736,7 +736,7 @@ if answer4 == 'y':
         ecrf_sheet = workbook['Visit 3']
         vis_3_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_3_locations'].values()]
 
-        df_values_dict[f'{x}_df_values'] = vis_1_values + vis_2_values + vis_3_values
+        df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values
 
         for key, values in df_values_dict.items():
             data_df[key] = values

@@ -725,7 +725,7 @@ if answer4 == 'y':
             office_file = msoffcrypto.OfficeFile(file)
             office_file.load_key(password=password)
             office_file.decrypt(decrypted_workbook)
-        workbook = openpyxl.load_workbook(decrypted_workbook)
+        workbook = openpyxl.load_workbook(decrypted_workbook, data_only = True)
 
         ecrf_sheet = workbook['Visit 1']
         vis_1_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_1_locations'].values()]

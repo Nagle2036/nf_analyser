@@ -624,7 +624,7 @@ answer4 = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer4 == 'y':
     
     # Step 1: Find Run 2 and 3 tbv_script thermometer files.
-    participants = ['p004', 'p006', 'p020', 'p030', 'p059', 'p078', 'p093', 'p094', 'p100', 'p107', 'p122', 'p125', 'p127', 'p128', 'p136', 'p145', 'p155']
+    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155']
     def find_second_and_third_largest(files):
         sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]), reverse=True)
         second_largest_path = os.path.join(folder_path, sorted_files[-2])

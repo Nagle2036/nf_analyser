@@ -49,34 +49,15 @@ if answer != 'y':
     sys.exit()
 #endregion
 
-#region PREPARATION.
-p_id = input("Enter the participant's ID (e.g. P001).\n")
-working_dir = os.getcwd()
-p_id_folder = os.path.join(os.getcwd(), p_id)
-if not os.path.exists(p_id_folder):
-    subprocess.run(['mkdir', f'{p_id}'])
-susceptibility_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility")
-if not os.path.exists(susceptibility_folder):
-    subprocess.run(['mkdir', f'{p_id}/analysis/susceptibility'])
-scc_analysis_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
-if not os.path.exists(scc_analysis_folder):
-    subprocess.run(['mkdir', f'{p_id}/analysis/scc'])
-group_folder = os.path.join(os.getcwd(), "group")
-if not os.path.exists(group_folder):
-    subprocess.run(['mkdir', 'group'])
-mc_test_folder = os.path.join(os.getcwd(), "group", "mc_test")
-if not os.path.exists(mc_test_folder):
-    subprocess.run(['mkdir', 'group/ms_test'])
-therm_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'therm')
-if not os.path.exists(therm_folder):
-    subprocess.run(['mkdir', f'{p_id}/analysis/therm'])
-    
-#endregion
-
 #region DOWNLOAD BOX FILES TO SERVER.
 
 answer2 = input("Would you like to update your files from Box? (y/n)\n")
 if answer2 == 'y':
+    p_id = input("Enter the participant's ID (e.g. P001).\n")
+    working_dir = os.getcwd()
+    p_id_folder = os.path.join(os.getcwd(), p_id)
+    if not os.path.exists(p_id_folder):
+        subprocess.run(['mkdir', f'{p_id}'])
     
     # Define the signal handler function
     def signal_handler(sig, frame):
@@ -258,8 +239,22 @@ if answer2 == 'y':
 
 #region SCC BOLD ANALYSIS.
 
-answer3 = input("Would you like to execute SCC BOLD analysis? (y/n)\n")
+answer3 = input("Would you like to execute first-level SCC BOLD analysis? (y/n)\n")
 if answer3 == 'y':
+    p_id = input("Enter the participant's ID (e.g. P001).\n")
+    working_dir = os.getcwd()
+    p_id_folder = os.path.join(os.getcwd(), p_id)
+    if not os.path.exists(p_id_folder):
+        subprocess.run(['mkdir', f'{p_id}'])
+    scc_analysis_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
+    if not os.path.exists(scc_analysis_folder):
+        subprocess.run(['mkdir', f'{p_id}/analysis/scc'])
+    group_folder = os.path.join(os.getcwd(), "group")
+    if not os.path.exists(group_folder):
+        subprocess.run(['mkdir', 'group'])
+    mc_test_folder = os.path.join(os.getcwd(), "group", "mc_test")
+    if not os.path.exists(mc_test_folder):
+        subprocess.run(['mkdir', 'group/ms_test'])
 
     # Step 1: Copy Run 1-4 dicoms into separate folders.
     path = os.path.join(os.getcwd(), p_id, "data", "neurofeedback")
@@ -627,23 +622,61 @@ if answer3 == 'y':
 
 answer4 = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer4 == 'y':
-
+    
     # Step 1: Find Run 2 and 3 tbv_script thermometer files.
+    participants = ['p004', 'p006', 'p020', 'p030', 'p059', 'p078', 'p093', 'p094', 'p100', 'p107', 'p122', 'p125', 'p127', 'p128', 'p136', 'p145', 'p155']
     def find_second_and_third_largest(files):
         sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]), reverse=True)
         second_largest_path = os.path.join(folder_path, sorted_files[-2])
         third_largest_path = os.path.join(folder_path, sorted_files[-3])
         return second_largest_path, third_largest_path
-    folder_path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', 'tbv_script', 'data')
-    files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
-    if len(files) == 4:
-        run2_path, run3_path = find_second_and_third_largest(files)
-    else:
-        print("Error: The folder should contain exactly 4 files.")
+    for x in participants:
+        therm_folder = os.path.join(os.getcwd(), f'{x}', 'analysis', 'therm')
+        if not os.path.exists(therm_folder):
+            subprocess.run(['mkdir', f'{x}/analysis/therm'])
+        folder_path = os.path.join(os.getcwd(), f'{x}', 'data', 'neurofeedback', 'tbv_script', 'data')
+        files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+        if len(files) == 4:
+            run2_path, run3_path = find_second_and_third_largest(files)
+        else:
+            print("Error: The folder should contain exactly 4 files.")
+
+
+
+        # Step 1: Create an empty DataFrame
+        df = pd.DataFrame(columns=participants)
+
+        # Check if the file exists
+        if os.path.exists(run2_path):
+            # Read the text file, skipping the first 11 lines
+            with open(run2_path, 'r') as file:
+                lines = file.readlines()[11:]
+
+            # Step 3: Extract and add data to the DataFrame
+            for line in lines:
+                values = line.strip().split(',')
+                row_header = values[1] + '_' + values[2] + '_' + values[3] + '_val'
+                feedback_lvl_header = values[1] + '_' + values[2] + '_' + values[3] + '_lvl'
+
+                # Extract the 'Value' and 'FeedbackLVL' values
+                value = float(values[8])
+                feedback_lvl = float(values[9])
+
+                # Step 4: Add the values to the DataFrame
+                if row_header not in df.index:
+                    df.loc[row_header] = [None] * len(participants)
+                df.at[row_header, f'{x}'] = value
+
+                if feedback_lvl_header not in df.index:
+                    df.loc[feedback_lvl_header] = [None] * len(participants)
+                df.at[feedback_lvl_header, f'{x}'] = feedback_lvl
+
+    # Display the resulting DataFrame
+    print(df)
+        
     
     # Step 2: Access eCRF document and extract relevant data into dataframe.
     warnings.simplefilter("ignore", UserWarning)
-    df_col_headers = ['p004', 'p006', 'p020', 'p030', 'p059', 'p078', 'p093', 'p094', 'p100', 'p107', 'p122', 'p125', 'p127', 'p128', 'p136', 'p145', 'p155']
     df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3']
     data_df = pd.DataFrame(index = df_row_headers)
     ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
@@ -718,7 +751,7 @@ if answer4 == 'y':
         'p155_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 19), 'pre_memory_intensity_guilt_2': (43, 19), 'pre_memory_intensity_indignation_1': (49, 19), 'pre_memory_intensity_indignation_2': (54, 19), 'techniques_guilt': (84, 19), 'techniques_indignation': (85, 19), 'perceived_success_guilt': (86, 19), 'perceived_success_indignation': (87, 19), 'post_memory_intensity_guilt_1': (88, 19), 'post_memory_intensity_guilt 2': (92, 19), 'post_memory_intensity_indignation_1': (97, 19), 'post_memory_indignation_2': (101, 19), 'rosenberg_vis_2': (104, 19)},
         'p155_vis_3_locations': {'panas_pos_vis_3': (36, 18), 'panas_neg_vis_3': (37, 18), 'qids_vis_3': (47, 18), 'gad_vis_3': (48, 18), 'rosenberg_vis_3': (49, 18), 'madrs_vis_3': (60, 18)},
     }
-    for x in df_col_headers:
+    for x in participants:
         print(f'Extracting {x} data from eCRF.xlsx.')
         decrypted_workbook = io.BytesIO()
         with open(ecrf_file_path, 'rb') as file:
@@ -767,8 +800,16 @@ if answer4 == 'y':
 
 #region SUSCEPTIBILITY ANALYSIS.
 
-answer5 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
+answer5 = input("Would you like to execute first-level susceptibility artifact analysis? (y/n)\n")
 if answer5 == 'y':
+    p_id = input("Enter the participant's ID (e.g. P001).\n")
+    working_dir = os.getcwd()
+    p_id_folder = os.path.join(os.getcwd(), p_id)
+    if not os.path.exists(p_id_folder):
+        subprocess.run(['mkdir', f'{p_id}'])
+    susceptibility_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility")
+    if not os.path.exists(susceptibility_folder):
+        subprocess.run(['mkdir', f'{p_id}/analysis/susceptibility'])
 
     # Step 1: Find the 'CISC' folder in the 'neurofeedback' directory
     path = os.path.join(os.getcwd(), p_id, "data", "neurofeedback")

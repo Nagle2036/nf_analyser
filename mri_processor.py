@@ -650,7 +650,7 @@ if answer4 == 'y':
         if os.path.exists(run2_path):
             # Read the text file, skipping the first 11 lines
             with open(run2_path, 'r') as file:
-                lines = file.readlines()[11:]
+                lines = file.readlines()[12:]
 
             # Step 3: Extract and add data to the DataFrame
             for line in lines:
@@ -673,6 +673,8 @@ if answer4 == 'y':
 
     # Display the resulting DataFrame
     print(df)
+    output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/therm_data.xlsx'
+    df.to_excel(output_excel_path, index=True)
         
     
     # Step 2: Access eCRF document and extract relevant data into dataframe.

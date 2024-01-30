@@ -739,7 +739,7 @@ if answer4 == 'y':
         data_df.to_excel(output_excel_path, index=True)
         print(f'{x} data from eCRF.xlsx successfully extracted.')
         workbook.close()
-        warnings.resetwarnings()
+    warnings.resetwarnings()
 
 
     

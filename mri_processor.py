@@ -656,10 +656,32 @@ if answer4 == 'y':
                 lines = file.readlines()[12:]
 
             # Step 3: Extract and add data to the DataFrame
+            current_value = None
+            value_counter = {}
+            
+            
             for line in lines:
                 values = line.strip().split(',')
-                row_header = values[1] + '_' + values[2] + '_' + values[3] + '_val'
-                feedback_lvl_header = values[1] + '_' + values[2] + '_' + values[3] + '_lvl'
+                
+                if values[2] != current_value:
+                    current_value = values[2]
+                    value_counter[current_value] = value_counter.get(current_value, 0) + 1
+
+                # Create variable name based on the current value and counter
+                variable_name = f"{current_value.lower()}{value_counter[current_value]:02d}"
+                print(f"{variable_name}: {line.strip()}")
+                
+                
+                if values[2] == 'rest':
+                    condition = 'sub'
+                if values[2] == 'guilt':
+                    condition = 'guilt'
+                if values[2] == 'indignation':
+                    condition = 'indig'
+                if values[2] == 'guilt first':
+                    condition = 'guilt01'
+                row_header = 'r' + values[1] + '_' + condition + values[2] + '_' + 'vol' + values[3] + '_val'
+                feedback_lvl_header = 'r' + values[1] + '_' + condition + values[2] + '_' + 'vol' + values[3] + '_lvl'
 
                 # Extract the 'Value' and 'FeedbackLVL' values
                 value = float(values[8])

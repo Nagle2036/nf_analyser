@@ -624,13 +624,16 @@ answer4 = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer4 == 'y':
     
     # Step 1: Find Run 2 and 3 tbv_script thermometer files.
-    participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155']
+    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155']
     def find_second_and_third_largest(files):
         sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]), reverse=True)
         second_largest_path = os.path.join(folder_path, sorted_files[-2])
         third_largest_path = os.path.join(folder_path, sorted_files[-3])
         return second_largest_path, third_largest_path
     for x in participants:
+        analysis_folder = os.path.join(os.getcwd(), f'{x}', 'analysis')
+        if not os.path.exists(analysis_folder):
+            subprocess.run(['mkdir', f'{x}/analysis'])
         therm_folder = os.path.join(os.getcwd(), f'{x}', 'analysis', 'therm')
         if not os.path.exists(therm_folder):
             subprocess.run(['mkdir', f'{x}/analysis/therm'])
@@ -679,6 +682,7 @@ if answer4 == 'y':
     
     # Step 2: Access eCRF document and extract relevant data into dataframe.
     warnings.simplefilter("ignore", UserWarning)
+    participants = ['p004', 'p006', 'p020', 'p030', 'p059', 'p078', 'p093', 'p094', 'p100', 'p107', 'p122', 'p125', 'p127', 'p128', 'p136', 'p145', 'p155']
     df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3']
     data_df = pd.DataFrame(index = df_row_headers)
     ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'

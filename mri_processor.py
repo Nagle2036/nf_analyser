@@ -630,6 +630,7 @@ if answer4 == 'y':
         second_largest_path = os.path.join(folder_path, sorted_files[-2])
         third_largest_path = os.path.join(folder_path, sorted_files[-3])
         return second_largest_path, third_largest_path
+    df = pd.DataFrame(columns=participants)
     for x in participants:
         analysis_folder = os.path.join(os.getcwd(), f'{x}', 'analysis')
         if not os.path.exists(analysis_folder):
@@ -644,11 +645,6 @@ if answer4 == 'y':
         else:
             print("Error: The folder should contain exactly 4 files.")
 
-
-
-        # Step 1: Create an empty DataFrame
-        df = pd.DataFrame(columns=participants)
-
         # Check if the file exists
         if os.path.exists(run2_path):
             # Read the text file, skipping the first 11 lines
@@ -659,7 +655,6 @@ if answer4 == 'y':
             current_value = None
             value_counter = {}
             
-            
             for line in lines:
                 values = line.strip().split(',')
                 
@@ -668,18 +663,18 @@ if answer4 == 'y':
                     value_counter[current_value] = value_counter.get(current_value, 0) + 1
 
                 # Create variable name based on the current value and counter
-                variable_name = f"{current_value.lower()}{value_counter[current_value]:02d}"
-                print(f"{variable_name}: {line.strip()}")
+                condition = f"{current_value.lower()}{value_counter[current_value]:02d}"
+                if 'rest' in condition:
+                    condition = condition.replace('rest', 'sub')
+                if 'guilt first' in condition:
+                    condition = condition.replace('guilt first', 'guilt_first')
+                if 'guilt second' in condition:
+                    condition = condition.replace('guilt second', 'guilt_second')
+                if 'indignation first' in condition:
+                    condition = condition.replace('indignation first', 'indignation_first')
+                if 'indignation second' in condition:
+                    condition = condition.replace('indignation second', 'indignation_second')
                 
-                
-                if values[2] == 'rest':
-                    condition = 'sub'
-                if values[2] == 'guilt':
-                    condition = 'guilt'
-                if values[2] == 'indignation':
-                    condition = 'indig'
-                if values[2] == 'guilt first':
-                    condition = 'guilt01'
                 row_header = 'r' + values[1] + '_' + condition + values[2] + '_' + 'vol' + values[3] + '_val'
                 feedback_lvl_header = 'r' + values[1] + '_' + condition + values[2] + '_' + 'vol' + values[3] + '_lvl'
 

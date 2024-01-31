@@ -644,26 +644,17 @@ if answer4 == 'y':
             run2_path, run3_path = find_second_and_third_largest(files)
         else:
             print("Error: The folder should contain exactly 4 files.")
-
         def process_file(file_path):
-            # Check if the file exists
             if os.path.exists(file_path):
-                # Read the text file, skipping the first 11 lines
                 with open(file_path, 'r') as file:
                     lines = file.readlines()[12:]
-
-                # Step 3: Extract and add data to the DataFrame
                 current_value = None
                 value_counter = {}
-                
                 for line in lines:
                     values = line.strip().split(',')
-                    
                     if values[2] != current_value:
                         current_value = values[2]
                         value_counter[current_value] = value_counter.get(current_value, 0) + 1
-
-                    # Create variable name based on the current value and counter
                     condition = f"{current_value.lower()}{value_counter[current_value]:02d}"
                     if 'rest' in condition:
                         condition = condition.replace('rest', 'sub')
@@ -672,29 +663,21 @@ if answer4 == 'y':
                     if 'guilt second' in condition:
                         condition = condition.replace('guilt second', 'guilt_second')
                     if 'indignation first' in condition:
-                        condition = condition.replace('indignation first', 'indignation_first')
+                        condition = condition.replace('indignation first', 'indig_first')
                     if 'indignation second' in condition:
-                        condition = condition.replace('indignation second', 'indignation_second')
-                    
+                        condition = condition.replace('indignation second', 'indig_second')
                     row_header = 'r' + values[1] + '_' + condition + '_' + 'vol' + values[3] + '_val'
                     feedback_lvl_header = 'r' + values[1] + '_' + condition + '_' + 'vol' + values[3] + '_lvl'
-
-                    # Extract the 'Value' and 'FeedbackLVL' values
                     value = float(values[8])
                     feedback_lvl = float(values[9])
-
-                    # Step 4: Add the values to the DataFrame
                     if row_header not in df.index:
                         df.loc[row_header] = [None] * len(participants)
                     df.at[row_header, f'{x}'] = value
-
                     if feedback_lvl_header not in df.index:
                         df.loc[feedback_lvl_header] = [None] * len(participants)
                     df.at[feedback_lvl_header, f'{x}'] = feedback_lvl
-        
         process_file(run2_path)
         process_file(run3_path)
-
     output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/therm_data.xlsx'
     df.to_excel(output_excel_path, index=True)
     
@@ -799,7 +782,6 @@ if answer4 == 'y':
     warnings.resetwarnings()
 
 
-    
     
     # Could the participants move the thermometer?
     # How did this differ between guilt and indignation tasks?

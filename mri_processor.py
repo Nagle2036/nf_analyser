@@ -624,7 +624,7 @@ answer4 = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer4 == 'y':
     
     # Step 1: Access Run 2 and 3 tbv_script thermometer files and extract relevant data into dataframe.
-    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155']
+    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215']
     def find_second_and_third_largest(files):
         sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]), reverse=True)
         second_largest_path = os.path.join(folder_path, sorted_files[-2])
@@ -683,7 +683,6 @@ if answer4 == 'y':
     
     # Step 2: Access eCRF document and extract relevant data into dataframe.
     warnings.simplefilter("ignore", UserWarning)
-    participants = ['p004', 'p006', 'p020', 'p030', 'p059', 'p078', 'p093', 'p094', 'p100', 'p107', 'p122', 'p125', 'p127', 'p128', 'p136', 'p145', 'p155']
     df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'intervention', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3']
     data_df = pd.DataFrame(index = df_row_headers)
     ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
@@ -757,6 +756,14 @@ if answer4 == 'y':
         'p155_vis_1_locations': {'dob': (77, 22), 'gender': (81, 22),  'handedness': (82, 22), 'exercise': (83, 22), 'education': (84, 22), 'work_status': (85, 22), 'panic': (132, 22), 'agoraphobia': (134, 22), 'social_anx': (135, 22), 'ocd': (137, 22), 'ptsd': (140, 22), 'gad': (141, 22), 'comorbid_anx': (142, 22), 'msm': (120, 22), 'psi_sociotropy': (151, 22), 'psi_autonomy': (152, 22), 'raads': (155, 22), 'panas_pos_vis_1': (161, 22), 'panas_neg_vis_1': (162, 22), 'qids_vis_1': (172, 22), 'gad_vis_1': (173, 22), 'rosenberg_vis_1': (174, 22), 'madrs_vis_1': (185, 22)},
         'p155_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 19), 'pre_memory_intensity_guilt_2': (43, 19), 'pre_memory_intensity_indignation_1': (49, 19), 'pre_memory_intensity_indignation_2': (54, 19), 'intervention': (78, 19), 'techniques_guilt': (84, 19), 'techniques_indignation': (85, 19), 'perceived_success_guilt': (86, 19), 'perceived_success_indignation': (87, 19), 'post_memory_intensity_guilt_1': (88, 19), 'post_memory_intensity_guilt 2': (92, 19), 'post_memory_intensity_indignation_1': (97, 19), 'post_memory_indignation_2': (101, 19), 'rosenberg_vis_2': (104, 19)},
         'p155_vis_3_locations': {'panas_pos_vis_3': (36, 18), 'panas_neg_vis_3': (37, 18), 'qids_vis_3': (47, 18), 'gad_vis_3': (48, 18), 'rosenberg_vis_3': (49, 18), 'madrs_vis_3': (60, 18)},
+    
+        'p199_vis_1_locations': {'dob': (77, 25), 'gender': (81, 25),  'handedness': (82, 25), 'exercise': (83, 25), 'education': (84, 25), 'work_status': (85, 25), 'panic': (132, 25), 'agoraphobia': (134, 25), 'social_anx': (135, 25), 'ocd': (137, 25), 'ptsd': (140, 25), 'gad': (141, 25), 'comorbid_anx': (142, 25), 'msm': (120, 25), 'psi_sociotropy': (151, 25), 'psi_autonomy': (152, 25), 'raads': (155, 25), 'panas_pos_vis_1': (161, 25), 'panas_neg_vis_1': (162, 25), 'qids_vis_1': (172, 25), 'gad_vis_1': (173, 25), 'rosenberg_vis_1': (174, 25), 'madrs_vis_1': (185, 25)},
+        'p199_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 22), 'pre_memory_intensity_guilt_2': (43, 22), 'pre_memory_intensity_indignation_1': (49, 22), 'pre_memory_intensity_indignation_2': (54, 22), 'intervention': (78, 22), 'techniques_guilt': (84, 22), 'techniques_indignation': (85, 22), 'perceived_success_guilt': (86, 22), 'perceived_success_indignation': (87, 22), 'post_memory_intensity_guilt_1': (88, 22), 'post_memory_intensity_guilt 2': (92, 22), 'post_memory_intensity_indignation_1': (97, 22), 'post_memory_indignation_2': (101, 22), 'rosenberg_vis_2': (104, 22)},
+        'p199_vis_3_locations': {'panas_pos_vis_3': (36, 21), 'panas_neg_vis_3': (37, 21), 'qids_vis_3': (47, 21), 'gad_vis_3': (48, 21), 'rosenberg_vis_3': (49, 21), 'madrs_vis_3': (60, 21)},
+
+        'p215_vis_1_locations': {'dob': (77, 24), 'gender': (81, 24),  'handedness': (82, 24), 'exercise': (83, 24), 'education': (84, 24), 'work_status': (85, 24), 'panic': (132, 24), 'agoraphobia': (134, 24), 'social_anx': (135, 24), 'ocd': (137, 24), 'ptsd': (140, 24), 'gad': (141, 24), 'comorbid_anx': (142, 24), 'msm': (120, 24), 'psi_sociotropy': (151, 24), 'psi_autonomy': (152, 24), 'raads': (155, 24), 'panas_pos_vis_1': (161, 24), 'panas_neg_vis_1': (162, 24), 'qids_vis_1': (172, 24), 'gad_vis_1': (173, 24), 'rosenberg_vis_1': (174, 24), 'madrs_vis_1': (185, 24)},
+        'p215_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 21), 'pre_memory_intensity_guilt_2': (43, 21), 'pre_memory_intensity_indignation_1': (49, 21), 'pre_memory_intensity_indignation_2': (54, 21), 'intervention': (78, 21), 'techniques_guilt': (84, 21), 'techniques_indignation': (85, 21), 'perceived_success_guilt': (86, 21), 'perceived_success_indignation': (87, 21), 'post_memory_intensity_guilt_1': (88, 21), 'post_memory_intensity_guilt 2': (92, 21), 'post_memory_intensity_indignation_1': (97, 21), 'post_memory_indignation_2': (101, 21), 'rosenberg_vis_2': (104, 21)},
+        'p215_vis_3_locations': {'panas_pos_vis_3': (36, 20), 'panas_neg_vis_3': (37, 20), 'qids_vis_3': (47, 20), 'gad_vis_3': (48, 20), 'rosenberg_vis_3': (49, 20), 'madrs_vis_3': (60, 20)}
     }
     for x in participants:
         print(f'Extracting {x} data from eCRF.xlsx.')

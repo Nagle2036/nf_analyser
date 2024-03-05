@@ -28,6 +28,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 from pingouin import mixed_anova
+from statsmodels.stats import multitest
+
 
 #%%
 
@@ -37,7 +39,7 @@ ecrf_data = pd.read_excel(ecrf_path, index_col='Unnamed: 0')
 therm_data = pd.read_excel(therm_path, index_col='Unnamed: 0')
 row_to_copy = ecrf_data.loc['intervention', :]
 therm_data.loc['intervention', :] = row_to_copy
-participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155']
+participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215']
 
 guilt_lvl_mean_list = []
 indig_lvl_mean_list = []
@@ -261,11 +263,16 @@ else:
 if a_guilt_lvl_mean_shap_p and a_indig_lvl_mean_shap_p > 0.05:
     _, a_guiltindig_p_value = stats.ttest_ind(a_guilt_lvl_mean_list, a_indig_lvl_mean_list)
 else:
-    _, a_guiltindig_p_value = stats.wilcoxon(a_guilt_lvl_mean_list, a_indig_lvl_mean_list)
+    _, a_guiltindig_p_value = stats.mannwhitneyu(a_guilt_lvl_mean_list, a_indig_lvl_mean_list)
 if b_guilt_lvl_mean_shap_p and b_indig_lvl_mean_shap_p > 0.05:
     _, b_guiltindig_p_value = stats.ttest_ind(b_guilt_lvl_mean_list, b_indig_lvl_mean_list)
 else:
-    _, b_guiltindig_p_value = stats.wilcoxon(b_guilt_lvl_mean_list, b_indig_lvl_mean_list)
+    _, b_guiltindig_p_value = stats.mannwhitneyu(b_guilt_lvl_mean_list, b_indig_lvl_mean_list)
+
+p_values = [ab_guilt_p_value, ab_indig_p_value, a_guiltindig_p_value, b_guiltindig_p_value]
+reject, adjusted_p_values, _, _ = multitest.multipletests(p_values, alpha=0.05, method='fdr_bh')
+for i, (p_value, adj_p_value, rej) in enumerate(zip(p_values, adjusted_p_values, reject)):
+    print(f"Comparison {i + 1}: p-value = {p_value:.4f}, Adjusted p-value = {adj_p_value:.4f}, Reject H0 = {rej}")
 
 plot_data = pd.DataFrame({'Condition': ['Guilt', 'Guilt', 'Indignation', 'Indignation'], 'Group': ['a', 'b', 'a', 'b'], 'Mean': [a_guilt_lvl_mean_overall, b_guilt_lvl_mean_overall, a_indig_lvl_mean_overall, b_indig_lvl_mean_overall]})
 condition_intervention_mean_plot = (ggplot(plot_data, aes(x='Condition', y='Mean', fill='Group')) +

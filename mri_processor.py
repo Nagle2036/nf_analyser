@@ -237,18 +237,18 @@ if answer2 == 'y':
     server_thread.join()
 #endregion
 
-#region SCC BOLD ANALYSIS.
+#region FMRI PREPROCESSING.
 
-answer3 = input("Would you like to execute first-level SCC BOLD analysis? (y/n)\n")
+answer3 = input("Would you like to execute fMRI preprocessing? (y/n)\n")
 if answer3 == 'y':
     p_id = input("Enter the participant's ID (e.g. P001).\n")
     working_dir = os.getcwd()
     p_id_folder = os.path.join(os.getcwd(), p_id)
     if not os.path.exists(p_id_folder):
         subprocess.run(['mkdir', f'{p_id}'])
-    scc_analysis_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
-    if not os.path.exists(scc_analysis_folder):
-        subprocess.run(['mkdir', f'{p_id}/analysis/scc'])
+    preproc_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc")
+    if not os.path.exists(preproc_folder):
+        subprocess.run(['mkdir', f'{p_id}/analysis/preproc'])
     group_folder = os.path.join(os.getcwd(), "group")
     if not os.path.exists(group_folder):
         subprocess.run(['mkdir', 'group'])
@@ -278,10 +278,12 @@ if answer3 == 'y':
             shutil.copy(src_path, dest_path)
     def main():
         src_folder = os.path.join(path, cisc_folder)
-        run01_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run01_dicoms")
-        run02_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run02_dicoms")
-        run03_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run03_dicoms")
-        run04_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run04_dicoms")
+        dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms")
+        run01_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run01_dicoms")
+        run02_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run02_dicoms")
+        run03_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run03_dicoms")
+        run04_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run04_dicoms")
+        os.makedirs(dicoms_folder, exist_ok=True)
         os.makedirs(run01_folder, exist_ok=True)
         os.makedirs(run02_folder, exist_ok=True)
         os.makedirs(run03_folder, exist_ok=True)
@@ -319,17 +321,20 @@ if answer3 == 'y':
         main()
 
     # Step 2: Convert DICOM files to Nifti format.
-    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run01_dicoms")
-    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
-    output_file = os.path.join(output_folder, "run01.nii")
+    nifti_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
+    if not os.path.exists(nifti_folder):
+        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "niftis"])
+    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run01_dicoms")
+    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
+    output_file = os.path.join(output_folder, "niftis", "run01.nii")
     if not os.path.exists(output_file):
         print("Converting Run01 DICOM files to Nifti format...")
         subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
         print("Run01 DICOM files converted to Nifti format.")
     else:
         print("Run01 Nifti file already exists. Skipping conversion.")
-    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run02_dicoms")
-    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
+    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run02_dicoms")
+    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
     output_file = os.path.join(output_folder, "run02.nii")
     if not os.path.exists(output_file):
         print("Converting Run02 DICOM files to Nifti format...")
@@ -337,8 +342,8 @@ if answer3 == 'y':
         print("Run02 DICOM files converted to Nifti format.")
     else:
         print("Run02 Nifti file already exists. Skipping conversion.")
-    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run03_dicoms")
-    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
+    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run03_dicoms")
+    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
     output_file = os.path.join(output_folder, "run03.nii")
     if not os.path.exists(output_file):
         print("Converting Run03 DICOM files to Nifti format...")
@@ -346,8 +351,8 @@ if answer3 == 'y':
         print("Run03 DICOM files converted to Nifti format.")
     else:
         print("Run03 Nifti file already exists. Skipping conversion.")
-    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc", "run04_dicoms")
-    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "scc")
+    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run04_dicoms")
+    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
     output_file = os.path.join(output_folder, "run04.nii")
     if not os.path.exists(output_file):
         print("Converting Run04 DICOM files to Nifti format...")
@@ -357,10 +362,13 @@ if answer3 == 'y':
         print("Run04 Nifti file already exists. Skipping conversion.")
     
     # Step 3: Check Nifti orientation.
+    png_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "pngs")
+    if not os.path.exists(png_folder):
+        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "pngs"])
     runs = ['run01', 'run02', 'run03', 'run04']
     for run in runs:
-        png_path = f'{p_id}/analysis/scc/{run}.png'
-        nifti_path = f'{p_id}/analysis/scc/{run}.nii'
+        png_path = f'{p_id}/analysis/preproc/pngs/{run}.png'
+        nifti_path = f'{p_id}/analysis/preproc/niftis/{run}.nii'
         if not os.path.exists(png_path):
             print(f"Saving {run} Nifti as PNG...")
             save_png = subprocess.run(['fsleyes', 'render', '--scene', 'ortho', '-of', png_path, nifti_path], capture_output=True, text=True)
@@ -370,16 +378,19 @@ if answer3 == 'y':
                 print("Error encountered:", save_png.stderr)
         else:
             print('PNG files already created. Skipping conversion.')
-    answer = input(f"Check PNG files in {p_id}/analysis/scc to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Does all appear correct? (y/n)\n")
+    answer = input(f"Check PNG files in {p_id}/analysis/preproc/pngs to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Does all appear correct? (y/n)\n")
     if answer != 'y':
         print("Error: please first address incorrect Nifti orientation using 'fslreorient2std' or 'fslswapdim' commands before proceeding.\n")
         sys.exit()
 
     # Step 4: Brain extract structural Nifti.
+    structural_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural")
+    if not os.path.exists(structural_folder):
+        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "structural"])
     src_folder = os.path.join(path, cisc_folder)
-    destination_folder = f'{p_id}/analysis/scc'
+    destination_folder = f'{p_id}/analysis/preproc/structural'
     new_filename = 'structural.nii'
-    if not os.path.exists(f'{p_id}/analysis/scc/structural.nii'):
+    if not os.path.exists(f'{p_id}/analysis/preproc/structural/structural.nii'):
         nifti_folder = os.path.join(src_folder, 'depression_neurofeedback', 'nifti')
         nii_files = [f for f in os.listdir(nifti_folder) if f.endswith('.nii')]
         if len(nii_files) == 1:
@@ -393,9 +404,9 @@ if answer3 == 'y':
             print("No .nii file found or multiple .nii files found in the 'nifti' folder.")
     else:
         print('Structural Nifti file already exists. Skipping process.')
-    bet_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural_brain.nii")
-    structural_path = os.path.join(os.getcwd(), p_id, "analysis", "scc", "structural.nii")
-    if not os.path.exists(f'{p_id}/analysis/scc/structural_brain.nii.gz'):
+    bet_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural", "structural_brain.nii")
+    structural_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural", "structural.nii")
+    if not os.path.exists(f'{p_id}/analysis/preproc/structural/structural_brain.nii.gz'):
         print("Performing brain extraction on structural image...")
         subprocess.run(['bet', structural_path, bet_path, '-m', '-R'])
         print("Structural image brain extracted.")
@@ -403,7 +414,10 @@ if answer3 == 'y':
         print("Structural image already brain extracted. Skipping process.")
 
     # Step 5: Create onset files.
-    onsetfile_sub = f'{p_id}/analysis/scc/onsetfile_sub.txt'
+    onset_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "onset_files")
+    if not os.path.exists(onset_folder):
+        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "onset_files"])
+    onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:
         data_rows = [
             ['0', '20', '1'],
@@ -419,7 +433,7 @@ if answer3 == 'y':
         for row in data_rows:
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
-    onsetfile_guilt = f'{p_id}/analysis/scc/onsetfile_guilt.txt'
+    onsetfile_guilt = f'{p_id}/analysis/preproc/onset_files/onsetfile_guilt.txt'
     with open(onsetfile_guilt, 'w') as file:
         data_rows = [
             ['20', '30', '1'],
@@ -430,7 +444,7 @@ if answer3 == 'y':
         for row in data_rows:
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
-    onsetfile_indig = f'{p_id}/analysis/scc/onsetfile_indig.txt'
+    onsetfile_indig = f'{p_id}/analysis/preproc/onset_files/onsetfile_indig.txt'
     with open(onsetfile_indig, 'w') as file:
         data_rows = [
             ['70', '30', '1'],
@@ -460,9 +474,9 @@ if answer3 == 'y':
         except Exception as e:
             print(f"Error: An exception occurred - {str(e)}")
     for run in runs:
-        nifti_file_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
+        nifti_file_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
         data_type_value = get_nifti_data_type(nifti_file_path)
-        output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}_nh.nii.gz')
+        output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'{run}_nh.nii.gz')
         if not os.path.exists(output_path):
             if data_type_value == 'INT16':
                 print(f'Filling holes in {run} raw Nifti image.')
@@ -490,7 +504,7 @@ if answer3 == 'y':
                     shutil.copy2(source_path, destination_path)
                     print(f"Copied {filename} to {destination_folder}")
     source_folder = src_folder
-    destination_folder = f'{p_id}/analysis/scc/fieldmaps'
+    destination_folder = f'{p_id}/analysis/preproc/dicoms/fieldmaps'
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder, exist_ok=True)
     if not os.listdir(destination_folder):
@@ -501,7 +515,7 @@ if answer3 == 'y':
 
     # Step 6: Find optimal motion correction parameters.
     for run in runs:
-        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
+        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
         output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
         text_output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
         if not os.path.exists(output_path):
@@ -557,9 +571,12 @@ if answer3 == 'y':
             print(f"Motion correction optimisation for {run} already performed. Skipping process.")
     
     # Step 7: Perform motion correction. 
+    mc_ms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms")
+    if not os.path.exists(mc_ms_folder):
+        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "mc_ms"])
     for run in runs:
-        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'scc', f'{run}.nii')
-        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc.nii.gz') 
+        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
+        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_mc.nii.gz') 
         if not os.path.exists(output_path):
             print(f"Performing motion correction on {run} data...")
             use_middle_vol_values = []
@@ -593,9 +610,9 @@ if answer3 == 'y':
     # Step 8: Perform motion scrubbing.
     scrubbed_vols = []
     for run in runs:
-        input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc')
-        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_mc_ms')
-        text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'scc', f'{run}_scrubbed_volumes.txt')
+        input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_mc')
+        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_mc_ms')
+        text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_scrubbed_volumes.txt')
         if not os.path.exists(output_path):
             print(f"Performing motion scrubbing on {run} data...")
             subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--nomoco'])

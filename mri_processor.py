@@ -243,21 +243,24 @@ answer3 = input("Would you like to execute fMRI preprocessing? (y/n)\n")
 if answer3 == 'y':
     p_id = input("Enter the participant's ID (e.g. P001).\n")
     working_dir = os.getcwd()
-    p_id_folder = os.path.join(os.getcwd(), p_id)
+    p_id_folder = os.path.join(os.getcwd(), f'{p_id}')
     if not os.path.exists(p_id_folder):
         subprocess.run(['mkdir', f'{p_id}'])
-    preproc_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc")
+    analysis_folder = os.path.join(os.getcwd(), f'{p_id}', 'analysis')
+    if not os.path.exists(analysis_folder):
+        subprocess.run(['mkdir', f'{p_id}', 'analysis'])
+    preproc_folder = os.path.join(os.getcwd(), f'{p_id}', 'analysis', 'preproc')
     if not os.path.exists(preproc_folder):
         subprocess.run(['mkdir', f'{p_id}', 'analysis', 'preproc'])
-    group_folder = os.path.join(os.getcwd(), "group")
+    group_folder = os.path.join(os.getcwd(), 'group')
     if not os.path.exists(group_folder):
         subprocess.run(['mkdir', 'group'])
-    mc_test_folder = os.path.join(os.getcwd(), "group", "mc_test")
-    if not os.path.exists(mc_test_folder):
+    ms_test_folder = os.path.join(os.getcwd(), 'group', 'ms_test')
+    if not os.path.exists(ms_test_folder):
         subprocess.run(['mkdir', 'group', 'ms_test'])
 
     # Step 1: Copy Run 1-4 dicoms into separate folders.
-    path = os.path.join(os.getcwd(), p_id, "data", "neurofeedback")
+    path = os.path.join(os.getcwd(), f'{p_id}', 'data', 'neurofeedback')
     cisc_folder = None
     for folder_name in os.listdir(path):
         if "CISC" in folder_name:

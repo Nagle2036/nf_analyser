@@ -248,13 +248,13 @@ if answer3 == 'y':
         subprocess.run(['mkdir', f'{p_id}'])
     preproc_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc")
     if not os.path.exists(preproc_folder):
-        subprocess.run(['mkdir', f'{p_id}/analysis/preproc'])
+        subprocess.run(['mkdir', f'{p_id}', 'analysis', 'preproc'])
     group_folder = os.path.join(os.getcwd(), "group")
     if not os.path.exists(group_folder):
         subprocess.run(['mkdir', 'group'])
     mc_test_folder = os.path.join(os.getcwd(), "group", "mc_test")
     if not os.path.exists(mc_test_folder):
-        subprocess.run(['mkdir', 'group/ms_test'])
+        subprocess.run(['mkdir', 'group', 'ms_test'])
 
     # Step 1: Copy Run 1-4 dicoms into separate folders.
     path = os.path.join(os.getcwd(), p_id, "data", "neurofeedback")
@@ -506,7 +506,7 @@ if answer3 == 'y':
     source_folder = src_folder
     destination_folder = f'{p_id}/analysis/preproc/dicoms/fieldmaps'
     if not os.path.exists(destination_folder):
-        os.makedirs(destination_folder, exist_ok=True)
+        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "dicoms", "fieldmaps"])
     if not os.listdir(destination_folder):
         copy_dicom_files(source_folder, destination_folder, target_volume_count=5)
 

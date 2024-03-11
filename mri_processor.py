@@ -57,7 +57,7 @@ if answer2 == 'y':
     working_dir = os.getcwd()
     p_id_folder = os.path.join(os.getcwd(), p_id)
     if not os.path.exists(p_id_folder):
-        subprocess.run(['mkdir', f'{p_id}'])
+        os.makedirs(p_id_folder)
     
     # Define the signal handler function
     def signal_handler(sig, frame):
@@ -243,24 +243,29 @@ answer3 = input("Would you like to execute fMRI preprocessing? (y/n)\n")
 if answer3 == 'y':
     p_id = input("Enter the participant's ID (e.g. P001).\n")
     working_dir = os.getcwd()
-    p_id_folder = os.path.join(os.getcwd(), f'{p_id}')
-    if not os.path.exists(p_id_folder):
-        subprocess.run(['mkdir', f'{p_id}'])
-    analysis_folder = os.path.join(os.getcwd(), f'{p_id}', 'analysis')
-    if not os.path.exists(analysis_folder):
-        subprocess.run(['mkdir', f'{p_id}', 'analysis'])
-    preproc_folder = os.path.join(os.getcwd(), f'{p_id}', 'analysis', 'preproc')
-    if not os.path.exists(preproc_folder):
-        subprocess.run(['mkdir', f'{p_id}', 'analysis', 'preproc'])
+    p_id_folder = os.path.join(os.getcwd(), p_id)
+    os.makedirs(p_id_folder, exist_ok=True)
+    analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
+    os.makedirs(analysis_folder, exist_ok=True)
+    preproc_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc')
+    os.makedirs(preproc_folder, exist_ok=True)
+    png_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'pngs')
+    os.makedirs(png_folder, exist_ok=True)
+    nifti_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis')
+    os.makedirs(nifti_folder, exist_ok=True)
+    structural_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural")
+    os.makedirs(structural_folder, exist_ok=True)
+    onset_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "onset_files")
+    os.makedirs(onset_folder, exist_ok=True)
+    mc_ms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms")
+    os.makedirs(mc_ms_folder, exist_ok=True)
     group_folder = os.path.join(os.getcwd(), 'group')
-    if not os.path.exists(group_folder):
-        subprocess.run(['mkdir', 'group'])
+    os.makedirs(group_folder, exist_ok=True)
     ms_test_folder = os.path.join(os.getcwd(), 'group', 'ms_test')
-    if not os.path.exists(ms_test_folder):
-        subprocess.run(['mkdir', 'group', 'ms_test'])
+    os.makedirs(ms_test_folder, exist_ok=True)
 
     # Step 1: Copy Run 1-4 dicoms into separate folders.
-    path = os.path.join(os.getcwd(), f'{p_id}', 'data', 'neurofeedback')
+    path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
     cisc_folder = None
     for folder_name in os.listdir(path):
         if "CISC" in folder_name:
@@ -281,11 +286,11 @@ if answer3 == 'y':
             shutil.copy(src_path, dest_path)
     def main():
         src_folder = os.path.join(path, cisc_folder)
-        dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms")
-        run01_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run01_dicoms")
-        run02_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run02_dicoms")
-        run03_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run03_dicoms")
-        run04_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run04_dicoms")
+        dicoms_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms')
+        run01_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run01_dicoms')
+        run02_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run02_dicoms')
+        run03_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run03_dicoms')
+        run04_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run04_dicoms')
         os.makedirs(dicoms_folder, exist_ok=True)
         os.makedirs(run01_folder, exist_ok=True)
         os.makedirs(run02_folder, exist_ok=True)
@@ -324,51 +329,19 @@ if answer3 == 'y':
         main()
 
     # Step 2: Convert DICOM files to Nifti format.
-    nifti_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
-    if not os.path.exists(nifti_folder):
-        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "niftis"])
-    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run01_dicoms")
-    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
-    output_file = os.path.join(output_folder, "niftis", "run01.nii")
-    if not os.path.exists(output_file):
-        print("Converting Run01 DICOM files to Nifti format...")
-        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run01', '-b', 'n', destination_folder])
-        print("Run01 DICOM files converted to Nifti format.")
-    else:
-        print("Run01 Nifti file already exists. Skipping conversion.")
-    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run02_dicoms")
-    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
-    output_file = os.path.join(output_folder, "run02.nii")
-    if not os.path.exists(output_file):
-        print("Converting Run02 DICOM files to Nifti format...")
-        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run02', '-b', 'n', destination_folder])
-        print("Run02 DICOM files converted to Nifti format.")
-    else:
-        print("Run02 Nifti file already exists. Skipping conversion.")
-    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run03_dicoms")
-    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
-    output_file = os.path.join(output_folder, "run03.nii")
-    if not os.path.exists(output_file):
-        print("Converting Run03 DICOM files to Nifti format...")
-        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run03', '-b', 'n', destination_folder])
-        print("Run03 DICOM files converted to Nifti format.")
-    else:
-        print("Run03 Nifti file already exists. Skipping conversion.")
-    destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "run04_dicoms")
-    output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
-    output_file = os.path.join(output_folder, "run04.nii")
-    if not os.path.exists(output_file):
-        print("Converting Run04 DICOM files to Nifti format...")
-        subprocess.run(['dcm2niix', '-o', output_folder, '-f', 'run04', '-b', 'n', destination_folder])
-        print("Run04 DICOM files converted to Nifti format.")
-    else:
-        print("Run04 Nifti file already exists. Skipping conversion.")
+    runs = ['run01', 'run02', 'run03', 'run04']
+    for run in runs:
+        destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", f"{run}_dicoms")
+        output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
+        output_file = os.path.join(output_folder, f"{run}.nii")
+        if not os.path.exists(output_file):
+            print(f"Converting {run.upper()} DICOM files to Nifti format...")
+            subprocess.run(['dcm2niix', '-o', output_folder, '-f', run, '-b', 'n', destination_folder])
+            print(f"{run.upper()} DICOM files converted to Nifti format.")
+        else:
+            print(f"{run.upper()} Nifti file already exists. Skipping conversion.")
     
     # Step 3: Check Nifti orientation.
-    png_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "pngs")
-    if not os.path.exists(png_folder):
-        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "pngs"])
-    runs = ['run01', 'run02', 'run03', 'run04']
     for run in runs:
         png_path = f'{p_id}/analysis/preproc/pngs/{run}.png'
         nifti_path = f'{p_id}/analysis/preproc/niftis/{run}.nii'
@@ -387,9 +360,6 @@ if answer3 == 'y':
         sys.exit()
 
     # Step 4: Brain extract structural Nifti.
-    structural_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural")
-    if not os.path.exists(structural_folder):
-        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "structural"])
     src_folder = os.path.join(path, cisc_folder)
     destination_folder = f'{p_id}/analysis/preproc/structural'
     new_filename = 'structural.nii'
@@ -417,9 +387,6 @@ if answer3 == 'y':
         print("Structural image already brain extracted. Skipping process.")
 
     # Step 5: Create onset files.
-    onset_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "onset_files")
-    if not os.path.exists(onset_folder):
-        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "onset_files"])
     onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:
         data_rows = [
@@ -507,11 +474,10 @@ if answer3 == 'y':
                     shutil.copy2(source_path, destination_path)
                     print(f"Copied {filename} to {destination_folder}")
     source_folder = src_folder
-    destination_folder = f'{p_id}/analysis/preproc/dicoms/fieldmaps'
-    if not os.path.exists(destination_folder):
-        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "dicoms", "fieldmaps"])
-    if not os.listdir(destination_folder):
-        copy_dicom_files(source_folder, destination_folder, target_volume_count=5)
+    fieldmaps_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps")
+    os.makedirs(fieldmaps_folder, exist_ok=True)
+    if not os.listdir(fieldmaps_folder):
+        copy_dicom_files(source_folder, fieldmaps_folder, target_volume_count=5)
 
     # Note on copying fieldmap dicom files to separate directory - the 02 sequence often also has 5 volumes. Need to find a way to ignore this sequence and only copy the fieldmap sequences.
     
@@ -574,9 +540,6 @@ if answer3 == 'y':
             print(f"Motion correction optimisation for {run} already performed. Skipping process.")
     
     # Step 7: Perform motion correction. 
-    mc_ms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms")
-    if not os.path.exists(mc_ms_folder):
-        subprocess.run(['mkdir', f'{p_id}', "analysis", "preproc", "mc_ms"])
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_mc.nii.gz') 

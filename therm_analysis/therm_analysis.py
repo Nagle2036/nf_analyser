@@ -255,11 +255,11 @@ _, b_indig_lvl_mean_shap_p = stats.shapiro(b_indig_lvl_mean_list)
 if a_guilt_lvl_mean_shap_p and b_guilt_lvl_mean_shap_p > 0.05:
     _, ab_guilt_p_value = stats.ttest_ind(a_guilt_lvl_mean_list, b_guilt_lvl_mean_list)
 else:
-    _, ab_guilt_p_value = stats.wilcoxon(a_guilt_lvl_mean_list, b_guilt_lvl_mean_list)
+    _, ab_guilt_p_value = stats.mannwhitneyu(a_guilt_lvl_mean_list, b_guilt_lvl_mean_list)
 if a_indig_lvl_mean_shap_p and b_indig_lvl_mean_shap_p > 0.05:
     _, ab_indig_p_value = stats.ttest_ind(a_indig_lvl_mean_list, b_indig_lvl_mean_list)
 else:
-    _, ab_indig_p_value = stats.wilcoxon(a_indig_lvl_mean_list, b_indig_lvl_mean_list)
+    _, ab_indig_p_value = stats.mannwhitneyu(a_indig_lvl_mean_list, b_indig_lvl_mean_list)
 if a_guilt_lvl_mean_shap_p and a_indig_lvl_mean_shap_p > 0.05:
     _, a_guiltindig_p_value = stats.ttest_ind(a_guilt_lvl_mean_list, a_indig_lvl_mean_list)
 else:
@@ -288,7 +288,7 @@ if ab_guilt_p_value < 0.001:
 elif ab_guilt_p_value < 0.01:
     condition_intervention_mean_plot = condition_intervention_mean_plot + annotate("text", x=1.0, y=max(a_guilt_lvl_mean_overall, b_guilt_lvl_mean_overall) + 0.3, label="**", size=16, color="black") + \
         annotate("segment", x=0.75, xend=1.25, y=max(a_guilt_lvl_mean_overall, b_guilt_lvl_mean_overall) +0.25, yend=max(a_guilt_lvl_mean_overall, b_guilt_lvl_mean_overall) + 0.25, color="black")
-elif ab_guilt_p_value < 0.05:
+elif ab_guilt_p_value < 0.0125:
     condition_intervention_mean_plot = condition_intervention_mean_plot + annotate("text", x=1.0, y=max(a_guilt_lvl_mean_overall, b_guilt_lvl_mean_overall) + 0.3, label="*", size=16, color="black") + \
         annotate("segment", x=0.75, xend=1.25, y=max(a_guilt_lvl_mean_overall, b_guilt_lvl_mean_overall) +0.25, yend=max(a_guilt_lvl_mean_overall, b_guilt_lvl_mean_overall) + 0.25, color="black")    
 
@@ -298,7 +298,7 @@ if ab_indig_p_value < 0.001:
 elif ab_indig_p_value < 0.01:
     condition_intervention_mean_plot = condition_intervention_mean_plot + annotate("text", x=2.0, y=max(a_indig_lvl_mean_overall, b_indig_lvl_mean_overall) + 0.3, label="**", size=16, color="black") + \
         annotate("segment", x=1.75, xend=2.25, y=max(a_indig_lvl_mean_overall, b_indig_lvl_mean_overall) +0.25, yend=max(a_indig_lvl_mean_overall, b_indig_lvl_mean_overall) + 0.25, color="black")
-elif ab_indig_p_value < 0.05:
+elif ab_indig_p_value < 0.0125:
     condition_intervention_mean_plot = condition_intervention_mean_plot + annotate("text", x=2.0, y=max(a_indig_lvl_mean_overall, b_indig_lvl_mean_overall) + 0.3, label="*", size=16, color="black") + \
         annotate("segment", x=1.75, xend=2.25, y=max(a_indig_lvl_mean_overall, b_indig_lvl_mean_overall) +0.25, yend=max(a_indig_lvl_mean_overall, b_indig_lvl_mean_overall) + 0.25, color="black")    
 
@@ -308,7 +308,7 @@ if a_guiltindig_p_value < 0.001:
 elif a_guiltindig_p_value < 0.01:
     condition_intervention_mean_plot = condition_intervention_mean_plot + annotate("text", x=1.25, y=max(a_guilt_lvl_mean_overall, a_indig_lvl_mean_overall) + 0.3, label="**", size=16, color="black") + \
         annotate("segment", x=0.75, xend=1.75, y=max(a_guilt_lvl_mean_overall, a_indig_lvl_mean_overall) +0.25, yend=max(a_guilt_lvl_mean_overall, a_indig_lvl_mean_overall) + 0.25, color="black")
-elif a_guiltindig_p_value < 0.05:
+elif a_guiltindig_p_value < 0.0125:
     condition_intervention_mean_plot = condition_intervention_mean_plot + annotate("text", x=1.25, y=max(a_guilt_lvl_mean_overall, a_indig_lvl_mean_overall) + 0.3, label="*", size=16, color="black") + \
         annotate("segment", x=0.75, xend=1.75, y=max(a_guilt_lvl_mean_overall, a_indig_lvl_mean_overall) +0.25, yend=max(a_guilt_lvl_mean_overall, a_indig_lvl_mean_overall) + 0.25, color="black")    
 
@@ -318,7 +318,7 @@ if b_guiltindig_p_value < 0.001:
 elif b_guiltindig_p_value < 0.01:
     condition_intervention_mean_plot = condition_intervention_mean_plot + annotate("text", x=1.7, y=max(b_guilt_lvl_mean_overall, b_indig_lvl_mean_overall) + 0.65, label="**", size=16, color="black") + \
         annotate("segment", x=1.2, xend=2.25, y=max(b_guilt_lvl_mean_overall, b_indig_lvl_mean_overall) +0.6, yend=max(b_guilt_lvl_mean_overall, b_indig_lvl_mean_overall) + 0.6, color="black")
-elif b_guiltindig_p_value < 0.05:
+elif b_guiltindig_p_value < 0.0125:
     condition_intervention_mean_plot = condition_intervention_mean_plot + annotate("text", x=1.7, y=max(b_guilt_lvl_mean_overall, b_indig_lvl_mean_overall) + 0.65, label="*", size=16, color="black") + \
         annotate("segment", x=1.2, xend=2.25, y=max(b_guilt_lvl_mean_overall, b_indig_lvl_mean_overall) +0.6, yend=max(b_guilt_lvl_mean_overall, b_indig_lvl_mean_overall) + 0.6, color="black")    
 
@@ -551,7 +551,7 @@ anova_df['intervention'] = pd.Categorical(anova_df['intervention'])
 anova_df['participant'] = pd.Categorical(anova_df['participant'])
 
 # Fit a linear mixed model
-formula = 'therm_lvl ~ condition * intervention'
+formula = 'therm_val ~ condition * intervention'
 random_formula = '0 + participant'
 lmm = sm.MixedLM.from_formula(formula, anova_df, groups=anova_df['participant'], re_formula=random_formula)
 result = lmm.fit()
@@ -573,5 +573,5 @@ else:
 print(result.summary())
 
 # Visualize results
-p = ggplot(anova_df, aes(x='condition', y='therm_lvl', color='intervention')) + geom_point() + geom_smooth(method='lm', se=False)
+p = ggplot(anova_df, aes(x='condition', y='therm_val', color='intervention')) + geom_point() + geom_smooth(method='lm', se=False)
 print(p)

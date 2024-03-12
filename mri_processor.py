@@ -7,6 +7,7 @@
 # Add percentage completion metric.
 # Count files present in participant folder
 # Output mri_processor.py Bash terminal outputs / prints into .txt log file
+# Add option to run analysis for all subjects. E.g. for fMRI preprocessing, the input question could be: "Enter the participant's ID (e.g. P001), or write 'ALL' to execute for all participants."
 
 #region IMPORT PACKAGES.
 
@@ -242,7 +243,8 @@ if answer2 == 'y':
 answer3 = input("Would you like to execute fMRI preprocessing? (y/n)\n")
 if answer3 == 'y':
     p_id = input("Enter the participant's ID (e.g. P001).\n")
-    working_dir = os.getcwd()
+    
+    # Step 1: Create directories.
     p_id_folder = os.path.join(os.getcwd(), p_id)
     os.makedirs(p_id_folder, exist_ok=True)
     analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
@@ -264,7 +266,7 @@ if answer3 == 'y':
     ms_test_folder = os.path.join(os.getcwd(), 'group', 'ms_test')
     os.makedirs(ms_test_folder, exist_ok=True)
 
-    # Step 1: Copy Run 1-4 dicoms into separate folders.
+    # Step 2: Copy Run 1-4 dicoms into separate folders.
     path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
     cisc_folder = None
     for folder_name in os.listdir(path):
@@ -328,7 +330,7 @@ if answer3 == 'y':
     if __name__ == "__main__":
         main()
 
-    # Step 2: Convert DICOM files to Nifti format.
+    # Step 3: Convert DICOM files to Nifti format.
     runs = ['run01', 'run02', 'run03', 'run04']
     for run in runs:
         destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", f"{run}_dicoms")
@@ -341,7 +343,7 @@ if answer3 == 'y':
         else:
             print(f"{run.upper()} Nifti file already exists. Skipping conversion.")
     
-    # Step 3: Check Nifti orientation.
+    # Step 4: Check Nifti orientation.
     for run in runs:
         png_path = f'{p_id}/analysis/preproc/pngs/{run}.png'
         nifti_path = f'{p_id}/analysis/preproc/niftis/{run}.nii'
@@ -359,7 +361,7 @@ if answer3 == 'y':
         print("Error: please first address incorrect Nifti orientation using 'fslreorient2std' or 'fslswapdim' commands before proceeding.\n")
         sys.exit()
 
-    # Step 4: Brain extract structural Nifti.
+    # Step 5: Brain extract structural Nifti.
     src_folder = os.path.join(path, cisc_folder)
     destination_folder = f'{p_id}/analysis/preproc/structural'
     new_filename = 'structural.nii'
@@ -386,7 +388,7 @@ if answer3 == 'y':
     else:
         print("Structural image already brain extracted. Skipping process.")
 
-    # Step 5: Create onset files.
+    # Step 6: Create onset files.
     onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:
         data_rows = [
@@ -427,7 +429,9 @@ if answer3 == 'y':
             file.write(formatted_row)
     print('Onset files created.')
 
-    # Step 6: Calculate and apply field maps.
+    # Step 7: Calculate and apply field maps.
+    fieldmaps_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps")
+    os.makedirs(fieldmaps_folder, exist_ok=True)
     def get_nifti_data_type(file_path):
         try:
             result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -474,15 +478,13 @@ if answer3 == 'y':
                     shutil.copy2(source_path, destination_path)
                     print(f"Copied {filename} to {destination_folder}")
     source_folder = src_folder
-    fieldmaps_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps")
-    os.makedirs(fieldmaps_folder, exist_ok=True)
     if not os.listdir(fieldmaps_folder):
         copy_dicom_files(source_folder, fieldmaps_folder, target_volume_count=5)
 
     # Note on copying fieldmap dicom files to separate directory - the 02 sequence often also has 5 volumes. Need to find a way to ignore this sequence and only copy the fieldmap sequences.
     
 
-    # Step 6: Find optimal motion correction parameters.
+    # Step 8: Find optimal motion correction parameters.
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
         output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
@@ -539,7 +541,7 @@ if answer3 == 'y':
         else:
             print(f"Motion correction optimisation for {run} already performed. Skipping process.")
     
-    # Step 7: Perform motion correction. 
+    # Step 9: Perform motion correction. 
     for run in runs:
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_mc.nii.gz') 
@@ -573,7 +575,7 @@ if answer3 == 'y':
         else:
             print(f"{run} already motion corrected. Skipping process.")
 
-    # Step 8: Perform motion scrubbing.
+    # Step 10: Perform motion scrubbing.
     scrubbed_vols = []
     for run in runs:
         input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_mc')
@@ -597,7 +599,6 @@ if answer3 == 'y':
     else:
         print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
         
-
 
 #endregion
 

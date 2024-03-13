@@ -489,6 +489,7 @@ epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'condition', 'e
 hist = ggplot(anova_df, aes(x='therm_lvl')) + \
     geom_histogram(binwidth=0.1, fill='#75AADB', color='black', alpha=0.7) + \
     theme_classic() + \
+    scale_y_continuous(expand=(0, 0)) + \
     ggtitle('Histogram of Therm Level')
 print(hist)
 hist.save('hist.png')

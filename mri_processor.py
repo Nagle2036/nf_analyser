@@ -591,6 +591,16 @@ if answer3 == 'y':
             first_row = file.readline().strip()
             num_columns = len(first_row.split('   '))
             scrubbed_vols.append(num_columns)
+            if run == 'run01' or 'run04':
+                vol_num = 210
+            elif run == 'run02' or 'run03':
+                vol_num = 238
+            run_scrubbed_vols_perc = (num_columns / vol_num) * 100
+            if run_scrubbed_vols_perc > 15:
+                print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove this run from analysis.')
+                sys.exit()
+            else:
+                print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This is within the tolerable threshold of 15%. Analysis of this run can continue.')
     sum_scrubbed_vols = sum(scrubbed_vols)
     scrubbed_vols_perc = (sum_scrubbed_vols / 896) * 100
     if scrubbed_vols_perc > 15:

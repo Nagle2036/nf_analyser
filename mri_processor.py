@@ -533,10 +533,11 @@ if answer3 == 'y':
                 matching_lines = [line for line in lines if line.startswith(f"{p_id} {run}")]
                 
                 if matching_lines:
-                    # If matching lines exist, remove them and append the new data line
+                    # If matching lines exist, replace them with the new data line
                     with open(result_file, "w") as f:
-                        for line in lines:
-                            if line not in matching_lines:
+                        f.write("p_id run use_middle_vol use_sinc_interp\n")
+                        for index, line in enumerate(lines):
+                            if index not in matching_lines:
                                 f.write(line)
                         f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
                 else:

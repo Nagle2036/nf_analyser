@@ -530,7 +530,8 @@ if answer3 == 'y':
                         if len(parts) == 4 and parts[0] == p_id and parts[1] == run:
                             f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
                         else:
-                            f.write(line)
+                            with open(result_file, "a") as f:
+                                f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
         else:
             print(f"Motion correction optimisation for {run} already performed. Skipping process.")
     

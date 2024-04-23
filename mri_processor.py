@@ -516,22 +516,33 @@ if answer3 == 'y':
                 use_sinc_interp = 1
             use_middle_vol_vals.append(use_middle_vol)
             use_sinc_interp_vals.append(use_sinc_interp)
+            
             result_file = os.path.join(os.getcwd(), 'group', 'ms_test', 'ms_test_master.txt')
+
             if not os.path.exists(result_file):
+                # If the file doesn't exist, create it and write the header and data lines
                 with open(result_file, "a") as f:
                     f.write("p_id run use_middle_vol use_sinc_interp\n")
                     f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
             else:
+                # If the file exists, read its content
                 with open(result_file, "r") as f:
                     lines = f.readlines()
-                with open(result_file, "w") as f:
-                    for line in lines:
-                        parts = line.split()
-                        if len(parts) == 4 and parts[0] == p_id and parts[1] == run:
-                            f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
-                        else:
-                            with open(result_file, "a") as f:
-                                f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
+
+                # Check if there are any lines that contain p_id and run
+                matching_lines = [line for line in lines if line.startswith(f"{p_id} {run}")]
+                
+                if matching_lines:
+                    # If matching lines exist, remove them and append the new data line
+                    with open(result_file, "w") as f:
+                        for line in lines:
+                            if line not in matching_lines:
+                                f.write(line)
+                        f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
+                else:
+                    # If no matching lines exist, simply append the new data line
+                    with open(result_file, "a") as f:
+                        f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
         else:
             print(f"Motion correction optimisation for {run} already performed. Skipping process.")
     

@@ -491,7 +491,7 @@ if answer3 == 'y':
         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
         output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
         text_output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
-        if not os.path.exists(output_path):
+        if not os.path.exists(text_output_path):
             print(f"Finding optimal motion correction parameters for {run} data...")
             subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
             df = pd.read_csv(text_output_path, delim_whitespace=True, names=["vol_fd"])
@@ -535,7 +535,6 @@ if answer3 == 'y':
                 if matching_lines:
                     # If matching lines exist, replace them with the new data line
                     with open(result_file, "w") as f:
-                        f.write("p_id run use_middle_vol use_sinc_interp\n")
                         for index, line in enumerate(lines):
                             if index not in matching_lines:
                                 f.write(line)

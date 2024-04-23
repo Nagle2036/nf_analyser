@@ -525,7 +525,6 @@ if answer3 == 'y':
                 with open(result_file, "r") as f:
                     lines = f.readlines()
                 with open(result_file, "w") as f:
-                    f.write("p_id run use_middle_vol use_sinc_interp\n")
                     for line in lines:
                         parts = line.split()
                         if len(parts) == 4 and parts[0] == p_id and parts[1] == run:

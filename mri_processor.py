@@ -995,7 +995,7 @@ if answer5 == 'y':
     for run in runs:
         bin_file = os.path.join(output_folder, f"{run}_averaged_betted_bin.nii.gz")
         if not os.path.exists(bin_file):
-            threshold = input("Please enter a threshold value for functional image binarisation.\n")
+            threshold = input("Please enter a threshold value for functional image binarisation (normally 100).\n")
             subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
             print(f"{run} EPI binarisation completed.")
         else:

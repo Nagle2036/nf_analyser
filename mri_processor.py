@@ -1013,7 +1013,7 @@ if answer5 == 'y':
             print(f"Error executing second fslstats command for {run}.")
         result2_output_values = result2_output.split()
         voxels_outside = float(result2_output_values[0])
-        result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/niftis/{run}subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
+        result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
         if result3.returncode == 0:
             result3_output = result3.stdout.strip()
         else:

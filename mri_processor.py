@@ -1013,7 +1013,7 @@ if answer5 == 'y':
         total_voxels_in_roi = float(result3_output_values[0])
         percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
         percentage_outside = round(percentage_outside, 2)
-        percentage_file = os.path.join(output_folder, "percentage_outside.txt")
+        percentage_file = os.path.join(susceptibility_folder, "percentage_outside.txt")
         if not os.path.exists(percentage_file):
             with open(percentage_file, "a") as f:
                 f.write("Percentage of ROI voxels in signal dropout regions of merged EPI images.\n\n")

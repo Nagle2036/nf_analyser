@@ -515,32 +515,23 @@ if answer3 == 'y':
             if percentage_outliers > 20:
                 use_sinc_interp = 1
             use_middle_vol_vals.append(use_middle_vol)
-            use_sinc_interp_vals.append(use_sinc_interp)
-            
+            use_sinc_interp_vals.append(use_sinc_interp)           
             result_file = os.path.join(os.getcwd(), 'group', 'ms_test', 'ms_test_master.txt')
-
             if not os.path.exists(result_file):
-                # If the file doesn't exist, create it and write the header and data lines
                 with open(result_file, "a") as f:
                     f.write("p_id run use_middle_vol use_sinc_interp\n")
                     f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
             else:
-                # If the file exists, read its content
                 with open(result_file, "r") as f:
                     lines = f.readlines()
-
-                # Check if there are any lines that contain p_id and run
-                matching_lines = [line for line in lines if line.startswith(f"{p_id} {run}")]
-                
+                matching_lines = [line for line in lines if line.startswith(f"{p_id} {run}")]  
                 if matching_lines:
-                    # If matching lines exist, replace them with the new data line
                     with open(result_file, "w") as f:
                         for index, line in enumerate(lines):
                             if index not in matching_lines:
                                 f.write(line)
                         f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
                 else:
-                    # If no matching lines exist, simply append the new data line
                     with open(result_file, "a") as f:
                         f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
         else:
@@ -1021,12 +1012,27 @@ if answer5 == 'y':
         result3_output_values = result3_output.split()
         total_voxels_in_roi = float(result3_output_values[0])
         percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
-        percentage_file = os.path.join(output_folder, f"{run}_percentage_outside.txt")
+        percentage_outside = round(percentage_outside, 2)
+        percentage_file = os.path.join(output_folder, "percentage_outside.txt")
         if not os.path.exists(percentage_file):
-            line1 = f"Threshold: {threshold}\n"
-            line2 = f"Percentage of ROI voxels in signal dropout regions of {run} EPI: {percentage_outside}"
-            with open(percentage_file, "w") as file:
-                file.writelines([line1, line2])
-            print(f"Percentage of voxels outside the signal dropout mask for {run} EPI saved to", percentage_file)
+            with open(percentage_file, "a") as f:
+                f.write("Percentage of ROI voxels in signal dropout regions of merged EPI images.\n\n")
+                f.write("run threshold percentage_outside\n")
+                f.write(f"{run} {threshold} {percentage_outside}\n")
+        else:
+            with open(percentage_file, "r") as f:
+                lines = f.readlines()
+                matching_lines = [line for line in lines if line.startswith(f"{run}")]
+                if matching_lines:
+                    with open(percentage_file, "w") as f:
+                        for index, line in enumerate(lines):
+                            if index not in matching_lines:
+                                f.write(line)
+                        f.write(f"{run} {threshold} {percentage_outside}\n")
+                else:
+                    with open(percentage_file, "a") as f:
+                        f.write(f"{run} {threshold} {percentage_outside}\n")
+        print("Percentage of ROI voxels in dropout regions saved in percentage_outside.txt file.")
+
 
 #endregion

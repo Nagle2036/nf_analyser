@@ -966,7 +966,7 @@ if answer5 == 'y':
         binary_volume = np.flip(binary_volume, axis=1) #flipping mask across the y-axis
         functional_affine = functional_image_info.affine
         binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
-        nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz')
+        nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/niftis/run0{num}_subject_space_ROI.nii.gz')
 
     # Step 8: Save screenshot of the subject-space ROI on EPI image.
     for run in runs:

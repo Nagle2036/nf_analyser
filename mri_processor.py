@@ -261,6 +261,8 @@ if answer3 == 'y':
     os.makedirs(onset_folder, exist_ok=True)
     mc_ms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms")
     os.makedirs(mc_ms_folder, exist_ok=True)
+    fieldmaps_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
+    os.makedirs(fieldmaps_folder, exist_ok=True)
     group_folder = os.path.join(os.getcwd(), 'group')
     os.makedirs(group_folder, exist_ok=True)
     ms_test_folder = os.path.join(os.getcwd(), 'group', 'ms_test')
@@ -429,57 +431,60 @@ if answer3 == 'y':
             file.write(formatted_row)
     print('Onset files created.')
 
-    # # Step 7: Calculate and apply field maps.
-    # fieldmaps_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps")
-    # os.makedirs(fieldmaps_folder, exist_ok=True)
-    # def get_nifti_data_type(file_path):
-    #     try:
-    #         result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    #         if result.returncode == 0:
-    #             lines = result.stdout.splitlines()
-    #             for line in lines:
-    #                 if 'data_type' in line:
-    #                     data_type = line.split()[-1].strip()
-    #                     return data_type
-    #                 else:
-    #                     print("Error: Unable to extract data_type from fslinfo output.")
-    #         else:
-    #             print(f"Error: fslinfo command failed with the following error:\n{result.stderr}")
-    #     except Exception as e:
-    #         print(f"Error: An exception occurred - {str(e)}")
-    # for run in runs:
-    #     nifti_file_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
-    #     data_type_value = get_nifti_data_type(nifti_file_path)
-    #     output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'{run}_nh.nii.gz')
-    #     if not os.path.exists(output_path):
-    #         if data_type_value == 'INT16':
-    #             print(f'Filling holes in {run} raw Nifti image.')
-    #             subprocess.run(['fslmaths', nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path])
-    #             print(f'Holes filled in {run} raw Nifti image.')
-    #         else:
-    #             print(f'Data type for {run} Nifti image is not INT16. Cannot complete hole filling process.')
-    #             sys.exit()
-    #     else:
-    #         print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
-    # def copy_dicom_files(source_folder, destination_folder, target_volume_count=5):
-    #     sequences = defaultdict(list)
-    #     for filename in os.listdir(source_folder):
-    #         if filename.endswith('.dcm'):
-    #             file_parts = filename.split('_')
-    #             if len(file_parts) == 3:
-    #                 sequence_number = int(file_parts[1])
-    #                 volume_number = int(file_parts[2].split('.')[0])
-    #                 sequences[sequence_number].append((filename, volume_number))
-    #     for sequence_number, files_info in sequences.items():
-    #         if len(files_info) == target_volume_count:
-    #             for filename, _ in files_info:
-    #                 source_path = os.path.join(source_folder, filename)
-    #                 destination_path = os.path.join(destination_folder, filename)
-    #                 shutil.copy2(source_path, destination_path)
-    #                 print(f"Copied {filename} to {destination_folder}")
-    # source_folder = src_folder
-    # if not os.listdir(fieldmaps_folder):
-    #     copy_dicom_files(source_folder, fieldmaps_folder, target_volume_count=5)
+    # Step 7: Calculate and apply field maps.
+    fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps")
+    os.makedirs(fieldmaps_dicoms_folder, exist_ok=True)
+    def get_nifti_data_type(file_path):
+        try:
+            result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0:
+                lines = result.stdout.splitlines()
+                for line in lines:
+                    if 'data_type' in line:
+                        data_type = line.split()[-1].strip()
+                        return data_type
+                    else:
+                        print("Error: Unable to extract data_type from fslinfo output.")
+            else:
+                print(f"Error: fslinfo command failed with the following error:\n{result.stderr}")
+        except Exception as e:
+            print(f"Error: An exception occurred - {str(e)}")
+    for run in runs:
+        nifti_file_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
+        data_type_value = get_nifti_data_type(nifti_file_path)
+        output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'{run}_nh.nii.gz')
+        if not os.path.exists(output_path):
+            if data_type_value == 'INT16':
+                print(f'Filling holes in {run} raw Nifti image.')
+                subprocess.run(['fslmaths', nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path])
+                print(f'Holes filled in {run} raw Nifti image.')
+            else:
+                print(f'Data type for {run} Nifti image is not INT16. Cannot complete hole filling process.')
+                sys.exit()
+        else:
+            print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
+    def copy_dicom_files(source_folder, destination_folder, target_volume_count=5):
+        sequences = defaultdict(list)
+        copied_sets = 0
+        for filename in os.listdir(source_folder):
+            if filename.endswith('.dcm'):
+                file_parts = filename.split('_')
+                if len(file_parts) == 3:
+                    sequence_number = int(file_parts[1])
+                    volume_number = int(file_parts[2].split('.')[0])
+                    sequences[sequence_number].append((filename, volume_number))
+        for sequence_number, files_info in sequences.items():
+            if len(files_info) == target_volume_count:
+                if copied_sets > 0:
+                    for filename, _ in files_info:
+                        source_path = os.path.join(source_folder, filename)
+                        destination_path = os.path.join(destination_folder, filename)
+                        shutil.copy2(source_path, destination_path)
+                        print(f"Copied {filename} to {destination_folder}")
+                copied_sets += 1
+    source_folder = src_folder
+    if not os.listdir(fieldmaps_dicoms_folder):
+        copy_dicom_files(source_folder, fieldmaps_dicoms_folder, target_volume_count=5)
 
     # Note on copying fieldmap dicom files to separate directory - the 02 sequence often also has 5 volumes. Need to find a way to ignore this sequence and only copy the fieldmap sequences.
     
@@ -632,6 +637,7 @@ if answer3 == 'y':
     else:
         print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
         
+# See if quality of the neurofeedback and ability to move the thermometer correlates negatively with the number of ROI voxels that lie within signal dropout regions of the EPI images.
 
 #endregion
 

@@ -954,7 +954,7 @@ if answer5 == 'y':
         return voxel_coordinates
     run_num = ['1', '2', '3', '4']
     for num in run_num:
-        roi_file = f'{src_folder}/depression_neurofeedback/target_folder_run-{num}/depnf_run-{num}.roi'
+        roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', f'target_folder_run-{num}', f'depnf_run-{num}.roi')
         voxel_coordinates = read_roi_file(roi_file)
         functional_image = f'{p_id}/analysis/susceptibility/niftis/{run}_averaged.nii.gz'
         functional_image_info = nib.load(functional_image)

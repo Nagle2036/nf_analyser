@@ -1000,13 +1000,13 @@ if answer5 == 'y':
             print(f"{run} EPI binarisation completed.")
         else:
             print(f"{run} binarised EPI already present. Skipping binarisation operation.")
-        inverse_file = os.path.join(output_folder, "niftis", f"{run}_averaged_betted_bin_inverse.nii.gz")
+        inverse_file = os.path.join(output_folder, f"{run}_averaged_betted_bin_inverse.nii.gz")
         if not os.path.exists(inverse_file):
             subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
             print(f"{run} binarised EPI successfully inverted.")
         else:
             print(f"{run} inverted binary EPI already present. Skipping inversion procedure.")
-        result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz', '-k', f'{p_id}/susceptibility/{run}_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
+        result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz', '-k', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
         if result2.returncode == 0:
             result2_output = result2.stdout.strip()
         else:

@@ -465,7 +465,7 @@ if answer3 == 'y':
             print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
     def copy_dicom_files(source_folder, destination_folder, target_volume_count=5):
         sequences = defaultdict(list)
-        copied_sets = 0
+        last_two_sets = []  # List to store the filenames of the last two sets of files meeting the criteria
         for filename in os.listdir(source_folder):
             if filename.endswith('.dcm'):
                 file_parts = filename.split('_')
@@ -475,13 +475,15 @@ if answer3 == 'y':
                     sequences[sequence_number].append((filename, volume_number))
         for sequence_number, files_info in sequences.items():
             if len(files_info) == target_volume_count:
-                if copied_sets > 0:
-                    for filename, _ in files_info:
-                        source_path = os.path.join(source_folder, filename)
-                        destination_path = os.path.join(destination_folder, filename)
-                        shutil.copy2(source_path, destination_path)
-                        print(f"Copied {filename} to {destination_folder}")
-                copied_sets += 1
+                last_two_sets.append(files_info)  # Store the files meeting the criteria
+                if len(last_two_sets) > 2:
+                    last_two_sets.pop(0)  # Keep only the last two sets
+        for files_info in last_two_sets:
+            for filename, _ in files_info:
+                source_path = os.path.join(source_folder, filename)
+                destination_path = os.path.join(destination_folder, filename)
+                shutil.copy2(source_path, destination_path)
+                print(f"Copied {filename} to {destination_folder}")
     source_folder = src_folder
     if not os.listdir(fieldmaps_dicoms_folder):
         copy_dicom_files(source_folder, fieldmaps_dicoms_folder, target_volume_count=5)

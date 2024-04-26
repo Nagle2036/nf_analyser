@@ -431,9 +431,14 @@ if answer3 == 'y':
             file.write(formatted_row)
     print('Onset files created.')
 
-    # Step 7: Calculate and apply field maps.
-    fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps")
-    os.makedirs(fieldmaps_dicoms_folder, exist_ok=True)
+    # Step 7: Check for binary number overflow and prepare Niftis for fieldmapping.
+    
+
+
+    ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
+    pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")
+    os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+    os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
     def get_nifti_data_type(file_path):
         try:
             result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -463,7 +468,7 @@ if answer3 == 'y':
                 sys.exit()
         else:
             print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
-    def copy_dicom_files(source_folder, destination_folder, target_volume_count=5):
+    def copy_dicom_files(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
         sequences = defaultdict(list)
         last_two_sets = []
         for filename in os.listdir(source_folder):
@@ -478,15 +483,32 @@ if answer3 == 'y':
                 last_two_sets.append(files_info)
                 if len(last_two_sets) > 2:
                     last_two_sets.pop(0)
-        for files_info in last_two_sets:
+        for idx, files_info in enumerate(last_two_sets):
             for filename, _ in files_info:
+                if idx == 0:
+                    destination_folder = destination_folder1
+                else:
+                    destination_folder = destination_folder2
                 source_path = os.path.join(source_folder, filename)
                 destination_path = os.path.join(destination_folder, filename)
                 shutil.copy2(source_path, destination_path)
                 print(f"Copied {filename} to {destination_folder}")
     source_folder = src_folder
-    if not os.listdir(fieldmaps_dicoms_folder):
-        copy_dicom_files(source_folder, fieldmaps_dicoms_folder, target_volume_count=5)
+    if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
+        copy_dicom_files(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
+    list = ['ap', 'pa']
+    for pe in list:
+        destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
+        output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
+        output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
+        if not os.path.exists(output_file):
+            print(f"Converting {pe.upper()} fieldmaps DICOM files to Nifti format...")
+            subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
+            print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
+        else:
+            print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
+    
+
 
     
 

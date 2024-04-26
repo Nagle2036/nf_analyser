@@ -37,6 +37,7 @@ import io
 import msoffcrypto
 import openpyxl
 import warnings
+import pydicom
 
 #endregion
 
@@ -432,9 +433,6 @@ if answer3 == 'y':
     print('Onset files created.')
 
     # Step 7: Check for binary number overflow and prepare Niftis for fieldmapping.
-    
-
-
     ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
     pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")
     os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
@@ -509,8 +507,10 @@ if answer3 == 'y':
             print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
     
 
-
-    
+    dicom_file = "P004/analysis/preproc/dicoms/fieldmaps/ap/001/000023/000001.dcm"
+    ds = pydicom.dcmread(dicom_file)
+    print(ds)
+    sys.exit()
 
     # Step 8: Find optimal motion correction parameters.
     use_middle_vol_vals = []

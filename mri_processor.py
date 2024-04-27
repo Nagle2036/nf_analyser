@@ -38,6 +38,7 @@ import msoffcrypto
 import openpyxl
 import warnings
 import pydicom
+import random
 
 #endregion
 
@@ -506,11 +507,25 @@ if answer3 == 'y':
         else:
             print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
     
+    # Step 8: Determine sequence phase encoding directions for stratification of distortion correction method.
+    ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
+    pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/pa"
+    run01 = f"{p_id}/analysis/preproc/dicoms/run01_dicoms"
+    run02 = f"{p_id}/analysis/preproc/dicoms/run02_dicoms"
+    run03 = f"{p_id}/analysis/preproc/dicoms/run03_dicoms"
+    run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
+    folder_list = [ap_fieldmaps, pa_fieldmaps, run01, run02, run03, run04]
+    for folder in folder_list:
+        dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswidth('.dcm')]
+        if len(dicom_files) == 0:
+            print("No DICOM files found in the directory.")
+        else:
+            random_file = random.choice(dicom_files)
+            ds = pydicom.dcmread(random_file)
+            pe_axis = ds.InPlanePhaseEncodingDirection
+            print("Phase Encoding Axis: ", pe_axis)
 
-    dicom_file = "P004/analysis/preproc/dicoms/fieldmaps/ap/001_000023_000001.dcm"
-    ds = pydicom.dcmread(dicom_file)
-    print(ds)
-    sys.exit()
+
 
     # Step 8: Find optimal motion correction parameters.
     use_middle_vol_vals = []

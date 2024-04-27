@@ -525,7 +525,7 @@ if answer3 == 'y':
             ds = pydicom.dcmread(random_file)
             pe_axis = ds.InPlanePhaseEncodingDirection
             print("Phase Encoding Axis: ", pe_axis)
-        if not os.path.exists(pe_file)
+        if not os.path.exists(pe_file):
             with open(pe_file, "a") as f:
                 f.write("sequence pe_axis\n")
                 f.write(f"{folder} {pe_axis}\n")

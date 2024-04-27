@@ -515,6 +515,7 @@ if answer3 == 'y':
     run03 = f"{p_id}/analysis/preproc/dicoms/run03_dicoms"
     run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
     folder_list = [ap_fieldmaps, pa_fieldmaps, run01, run02, run03, run04]
+    pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
     for folder in folder_list:
         dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
         if len(dicom_files) == 0:
@@ -524,8 +525,24 @@ if answer3 == 'y':
             ds = pydicom.dcmread(random_file)
             pe_axis = ds.InPlanePhaseEncodingDirection
             print("Phase Encoding Axis: ", pe_axis)
-
-
+        if not os.path.exists(pe_file)
+            with open(pe_file, "a") as f:
+                f.write("sequence pe_axis\n")
+                f.write(f"{folder} {pe_axis}\n")
+        else: 
+            with open(pe_file, "r") as f:
+                lines = f.readlines()
+            matching_lines = [line for line in lines if line.startswith(f"{folder}")]
+            if matching_lines:
+                with open(pe_file, "w") as f:
+                    for index, line in enumerate(lines):
+                        if index not in matching_lines:
+                            f.write(line)
+                    f.write(f"{folder} {pe_axis}\n")
+            else:
+                with open(pe_file, "a") as f:
+                    f.write(f"{folder} {pe_axis}\n")
+        print("Sequence PE axes saved to pe_axes.txt file.")
 
     # Step 8: Find optimal motion correction parameters.
     use_middle_vol_vals = []

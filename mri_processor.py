@@ -516,7 +516,7 @@ if answer3 == 'y':
     run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
     folder_list = [ap_fieldmaps, pa_fieldmaps, run01, run02, run03, run04]
     for folder in folder_list:
-        dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswidth('.dcm')]
+        dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
         if len(dicom_files) == 0:
             print("No DICOM files found in the directory.")
         else:

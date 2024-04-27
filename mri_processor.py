@@ -524,7 +524,13 @@ if answer3 == 'y':
             random_file = random.choice(dicom_files)
             ds = pydicom.dcmread(random_file)
             pe_axis = ds.InPlanePhaseEncodingDirection
-            print("Phase Encoding Axis: ", pe_axis)
+            start_index = folder.rfind('/') + 1  
+            end_index = folder.rfind('_')  
+            if end_index == -1 or end_index < start_index:
+                folder = folder[start_index:] + "_fieldmaps"
+            else:
+                folder = folder[start_index:end_index]
+            print(f"Phase Encoding Axis for {folder}: ", pe_axis)
         if not os.path.exists(pe_file):
             with open(pe_file, "a") as f:
                 f.write("sequence pe_axis\n")
@@ -542,7 +548,7 @@ if answer3 == 'y':
             else:
                 with open(pe_file, "a") as f:
                     f.write(f"{folder} {pe_axis}\n")
-        print("Sequence PE axes saved to pe_axes.txt file.")
+    print("Sequence PE axes saved to pe_axes.txt file.")
 
     # Step 8: Find optimal motion correction parameters.
     use_middle_vol_vals = []

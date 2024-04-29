@@ -519,7 +519,7 @@ if answer3 == 'y':
         os.makedirs(rl_fieldmaps_dicoms_folder, exist_ok=True)
         def copy_dicom_files(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
             sequences = defaultdict(list)
-            last_three_sets = []  # List to store the filenames of the last three sets of files meeting the criteria
+            last_three_sets = [] 
             for filename in os.listdir(source_folder):
                 if filename.endswith('.dcm'):
                     file_parts = filename.split('_')
@@ -529,9 +529,9 @@ if answer3 == 'y':
                         sequences[sequence_number].append((filename, volume_number))
             for sequence_number, files_info in sequences.items():
                 if len(files_info) == target_volume_count:
-                    last_three_sets.append(files_info)  # Store the files meeting the criteria
+                    last_three_sets.append(files_info)
                     if len(last_three_sets) > 3:
-                        last_three_sets.pop(0)  # Keep only the last three sets
+                        last_three_sets.pop(0)
             for idx, files_info in enumerate(last_three_sets):
                 if idx == 0:
                     destination_folder = destination_folder1
@@ -559,7 +559,7 @@ if answer3 == 'y':
             else:
                 print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
     
-    # Step 8: Confirm sequence phase encoding directions for stratification of distortion correction method.
+    # Step 9: Confirm sequence phase encoding directions for stratification of distortion correction method.
     if p_id in bad_participants:
         ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
         pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/badpa"
@@ -569,6 +569,7 @@ if answer3 == 'y':
         run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
         folder_list = [ap_fieldmaps, pa_fieldmaps, run01, run02, run03, run04]
         pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
+        pe_axes = []
         for folder in folder_list:
             dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
             if len(dicom_files) == 0:
@@ -577,6 +578,7 @@ if answer3 == 'y':
                 random_file = random.choice(dicom_files)
                 ds = pydicom.dcmread(random_file)
                 pe_axis = ds.InPlanePhaseEncodingDirection
+                pe_axes.append(pe_axis)
                 start_index = folder.rfind('/') + 1  
                 end_index = folder.rfind('_')  
                 if end_index == -1 or end_index < start_index:
@@ -602,6 +604,13 @@ if answer3 == 'y':
                     with open(pe_file, "a") as f:
                         f.write(f"{folder} {pe_axis}\n")
         print("Sequence PE axes saved to pe_axes.txt file.")
+        if pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'COL']:
+            print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, PA) for this participant. Stratification of distortion correction method can now take place.')
+        elif pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'ROW']:
+            print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, RL) for this participant. Stratification of distortion correction method can now take place.')
+        else:
+            print('Sequence PE directions are not as expected. Please investigate.')
+            sys.exit()
     if p_id not in bad_participants:
         ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
         pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/pa"
@@ -645,7 +654,53 @@ if answer3 == 'y':
                     with open(pe_file, "a") as f:
                         f.write(f"{folder} {pe_axis}\n")
         print("Sequence PE axes saved to pe_axes.txt file.")
+        if pe_axes == ['COL', 'COL', 'ROW', 'COL', 'COL', 'COL', 'COL']:
+            print('Sequence PE directions are correct as expected (AP, PA, RL, PA, PA, PA, PA) for this participant. Stratification of distortion correction method can now take place.')
+        else:
+            print('Sequence PE directions are not as expected. Please investigate.')
+            sys.exit()
 
+    # Step 10: Calculate and apply fieldmaps.
+        if p_id not in bad_participants:
+            ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.txt')
+            pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.txt')
+            output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'merged_fieldmaps')
+            if not os.path.exists(output_file):
+                print("Merging fieldmap sequences.")
+                subprocess.run(['fslmerge', '-t', output_file, ap_fieldmaps, pa_fieldmaps])
+                print("Fieldmap sequences merging completed.")
+            else:
+                print("Fieldmap sequences already merged. Skipping process.")
+            fov_phase = 1
+            base_res = 64
+            phase_res = 1
+            echo_spacing = 0.54
+            pe_steps = (fov_phase * base_res * phase_res) - 1
+            readout_time_s = (pe_steps * echo_spacing) / 1000
+            acqparams_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'acqparams.txt')
+            if not os.path.exists(acqparams_file):
+                with open(acqparams_file, "a") as f:
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}")
+            output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'topup_{p_id}')
+            if not os.path.exists(output_file):
+                print("Calculating fieldmaps...")
+                subprocess.run(["topup", f"--imain={p_id}/analysis/preproc/fieldmaps/merged_fieldmaps.nii", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--config=b02b0.cnf", f"--out={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", f"--iout={p_id}/analysis/preproc/fieldmaps/topup_{p_id}_unwarped"])
+                print("Fieldmap calculation completed.")
+                for run in runs:
+                    print("Applying fieldmaps...")
+                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/fieldmaps/{run}_nh_nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_undistorted"])
+                    print("Fieldmap application completed.")
+            else:
+                print("Fieldmaps already calculated and applied. Skipping process.")
 
     # Step 8: Find optimal motion correction parameters.
     use_middle_vol_vals = []

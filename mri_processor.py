@@ -433,11 +433,7 @@ if answer3 == 'y':
             file.write(formatted_row)
     print('Onset files created.')
 
-    # Step 7: Check for binary number overflow and prepare Niftis for fieldmapping.
-    ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
-    pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")
-    os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
-    os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
+    # Step 7: Check for binary number overflow.
     def get_nifti_data_type(file_path):
         try:
             result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -467,88 +463,188 @@ if answer3 == 'y':
                 sys.exit()
         else:
             print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
-    def copy_dicom_files(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
-        sequences = defaultdict(list)
-        last_two_sets = []
-        for filename in os.listdir(source_folder):
-            if filename.endswith('.dcm'):
-                file_parts = filename.split('_')
-                if len(file_parts) == 3:
-                    sequence_number = int(file_parts[1])
-                    volume_number = int(file_parts[2].split('.')[0])
-                    sequences[sequence_number].append((filename, volume_number))
-        for sequence_number, files_info in sequences.items():
-            if len(files_info) == target_volume_count:
-                last_two_sets.append(files_info)
-                if len(last_two_sets) > 2:
-                    last_two_sets.pop(0)
-        for idx, files_info in enumerate(last_two_sets):
-            for filename, _ in files_info:
+    
+    # Step 8: Copy fieldmap DICOMS and convert to Niftis.
+    bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
+    if p_id in bad_participants:
+        ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
+        pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "badpa")
+        os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+        os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
+        def copy_dicom_files(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
+            sequences = defaultdict(list)
+            last_two_sets = []
+            for filename in os.listdir(source_folder):
+                if filename.endswith('.dcm'):
+                    file_parts = filename.split('_')
+                    if len(file_parts) == 3:
+                        sequence_number = int(file_parts[1])
+                        volume_number = int(file_parts[2].split('.')[0])
+                        sequences[sequence_number].append((filename, volume_number))
+            for sequence_number, files_info in sequences.items():
+                if len(files_info) == target_volume_count:
+                    last_two_sets.append(files_info)
+                    if len(last_two_sets) > 2:
+                        last_two_sets.pop(0)
+            for idx, files_info in enumerate(last_two_sets):
+                for filename, _ in files_info:
+                    if idx == 0:
+                        destination_folder = destination_folder1
+                    else:
+                        destination_folder = destination_folder2
+                    source_path = os.path.join(source_folder, filename)
+                    destination_path = os.path.join(destination_folder, filename)
+                    shutil.copy2(source_path, destination_path)
+                    print(f"Copied {filename} to {destination_folder}")
+        source_folder = src_folder
+        if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
+            copy_dicom_files(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
+        list = ['ap', 'badpa']
+        for pe in list:
+            destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
+            output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
+            output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
+            if not os.path.exists(output_file):
+                print(f"Converting {pe.upper()} fieldmaps DICOM files to Nifti format...")
+                subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
+                print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
+            else:
+                print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
+    if p_id not in bad_participants:
+        ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
+        pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")
+        rl_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "rl")
+        os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+        os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
+        os.makedirs(rl_fieldmaps_dicoms_folder, exist_ok=True)
+        def copy_dicom_files(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
+            sequences = defaultdict(list)
+            last_three_sets = []  # List to store the filenames of the last three sets of files meeting the criteria
+            for filename in os.listdir(source_folder):
+                if filename.endswith('.dcm'):
+                    file_parts = filename.split('_')
+                    if len(file_parts) == 3:
+                        sequence_number = int(file_parts[1])
+                        volume_number = int(file_parts[2].split('.')[0])
+                        sequences[sequence_number].append((filename, volume_number))
+            for sequence_number, files_info in sequences.items():
+                if len(files_info) == target_volume_count:
+                    last_three_sets.append(files_info)  # Store the files meeting the criteria
+                    if len(last_three_sets) > 3:
+                        last_three_sets.pop(0)  # Keep only the last three sets
+            for idx, files_info in enumerate(last_three_sets):
                 if idx == 0:
                     destination_folder = destination_folder1
-                else:
+                elif idx == 1:
                     destination_folder = destination_folder2
-                source_path = os.path.join(source_folder, filename)
-                destination_path = os.path.join(destination_folder, filename)
-                shutil.copy2(source_path, destination_path)
-                print(f"Copied {filename} to {destination_folder}")
-    source_folder = src_folder
-    if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
-        copy_dicom_files(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
-    list = ['ap', 'pa']
-    for pe in list:
-        destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
-        output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
-        output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
-        if not os.path.exists(output_file):
-            print(f"Converting {pe.upper()} fieldmaps DICOM files to Nifti format...")
-            subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
-            print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
-        else:
-            print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
+                else:
+                    destination_folder = destination_folder3
+                for filename, _ in files_info:
+                    source_path = os.path.join(source_folder, filename)
+                    destination_path = os.path.join(destination_folder, filename)
+                    shutil.copy2(source_path, destination_path)
+                    print(f"Copied {filename} to {destination_folder}")
+        if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder) or not os.listdir(rl_fieldmaps_dicoms_folder):
+            copy_dicom_files(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, rl_fieldmaps_dicoms_folder, target_volume_count=5)
+        list = ['ap', 'pa', 'rl']
+        for pe in list:
+            destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
+            output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
+            output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
+            if not os.path.exists(output_file):
+                print(f"Converting {pe.upper()} fieldmaps DICOM files to Nifti format...")
+                subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
+                print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
+            else:
+                print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
     
-    # Step 8: Determine sequence phase encoding directions for stratification of distortion correction method.
-    ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
-    pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/pa"
-    run01 = f"{p_id}/analysis/preproc/dicoms/run01_dicoms"
-    run02 = f"{p_id}/analysis/preproc/dicoms/run02_dicoms"
-    run03 = f"{p_id}/analysis/preproc/dicoms/run03_dicoms"
-    run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
-    folder_list = [ap_fieldmaps, pa_fieldmaps, run01, run02, run03, run04]
-    pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
-    for folder in folder_list:
-        dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
-        if len(dicom_files) == 0:
-            print("No DICOM files found in the directory.")
-        else:
-            random_file = random.choice(dicom_files)
-            ds = pydicom.dcmread(random_file)
-            pe_axis = ds.InPlanePhaseEncodingDirection
-            start_index = folder.rfind('/') + 1  
-            end_index = folder.rfind('_')  
-            if end_index == -1 or end_index < start_index:
-                folder = folder[start_index:] + "_fieldmaps"
+    # Step 8: Confirm sequence phase encoding directions for stratification of distortion correction method.
+    if p_id in bad_participants:
+        ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
+        pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/badpa"
+        run01 = f"{p_id}/analysis/preproc/dicoms/run01_dicoms"
+        run02 = f"{p_id}/analysis/preproc/dicoms/run02_dicoms"
+        run03 = f"{p_id}/analysis/preproc/dicoms/run03_dicoms"
+        run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
+        folder_list = [ap_fieldmaps, pa_fieldmaps, run01, run02, run03, run04]
+        pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
+        for folder in folder_list:
+            dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
+            if len(dicom_files) == 0:
+                print("No DICOM files found in the directory.")
             else:
-                folder = folder[start_index:end_index]
-            print(f"Phase Encoding Axis for {folder}: ", pe_axis)
-        if not os.path.exists(pe_file):
-            with open(pe_file, "a") as f:
-                f.write("sequence pe_axis\n")
-                f.write(f"{folder} {pe_axis}\n")
-        else: 
-            with open(pe_file, "r") as f:
-                lines = f.readlines()
-            matching_lines = [line for line in lines if line.startswith(f"{folder}")]
-            if matching_lines:
-                with open(pe_file, "w") as f:
-                    for index, line in enumerate(lines):
-                        if index not in matching_lines:
-                            f.write(line)
-                    f.write(f"{folder} {pe_axis}\n")
-            else:
+                random_file = random.choice(dicom_files)
+                ds = pydicom.dcmread(random_file)
+                pe_axis = ds.InPlanePhaseEncodingDirection
+                start_index = folder.rfind('/') + 1  
+                end_index = folder.rfind('_')  
+                if end_index == -1 or end_index < start_index:
+                    folder = folder[start_index:] + "_fieldmaps"
+                else:
+                    folder = folder[start_index:end_index]
+                print(f"Phase Encoding Axis for {folder}: ", pe_axis)
+            if not os.path.exists(pe_file):
                 with open(pe_file, "a") as f:
+                    f.write("sequence pe_axis\n")
                     f.write(f"{folder} {pe_axis}\n")
-    print("Sequence PE axes saved to pe_axes.txt file.")
+            else: 
+                with open(pe_file, "r") as f:
+                    lines = f.readlines()
+                matching_lines = [line for line in lines if line.startswith(f"{folder}")]
+                if matching_lines:
+                    with open(pe_file, "w") as f:
+                        for index, line in enumerate(lines):
+                            if index not in matching_lines:
+                                f.write(line)
+                        f.write(f"{folder} {pe_axis}\n")
+                else:
+                    with open(pe_file, "a") as f:
+                        f.write(f"{folder} {pe_axis}\n")
+        print("Sequence PE axes saved to pe_axes.txt file.")
+    if p_id not in bad_participants:
+        ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
+        pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/pa"
+        rl_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/rl"
+        run01 = f"{p_id}/analysis/preproc/dicoms/run01_dicoms"
+        run02 = f"{p_id}/analysis/preproc/dicoms/run02_dicoms"
+        run03 = f"{p_id}/analysis/preproc/dicoms/run03_dicoms"
+        run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
+        folder_list = [ap_fieldmaps, pa_fieldmaps, rl_fieldmaps, run01, run02, run03, run04]
+        pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
+        for folder in folder_list:
+            dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
+            if len(dicom_files) == 0:
+                print("No DICOM files found in the directory.")
+            else:
+                random_file = random.choice(dicom_files)
+                ds = pydicom.dcmread(random_file)
+                pe_axis = ds.InPlanePhaseEncodingDirection
+                start_index = folder.rfind('/') + 1  
+                end_index = folder.rfind('_')  
+                if end_index == -1 or end_index < start_index:
+                    folder = folder[start_index:] + "_fieldmaps"
+                else:
+                    folder = folder[start_index:end_index]
+                print(f"Phase Encoding Axis for {folder}: ", pe_axis)
+            if not os.path.exists(pe_file):
+                with open(pe_file, "a") as f:
+                    f.write("sequence pe_axis\n")
+                    f.write(f"{folder} {pe_axis}\n")
+            else: 
+                with open(pe_file, "r") as f:
+                    lines = f.readlines()
+                matching_lines = [line for line in lines if line.startswith(f"{folder}")]
+                if matching_lines:
+                    with open(pe_file, "w") as f:
+                        for index, line in enumerate(lines):
+                            if index not in matching_lines:
+                                f.write(line)
+                        f.write(f"{folder} {pe_axis}\n")
+                else:
+                    with open(pe_file, "a") as f:
+                        f.write(f"{folder} {pe_axis}\n")
+        print("Sequence PE axes saved to pe_axes.txt file.")
+
 
     # Step 8: Find optimal motion correction parameters.
     use_middle_vol_vals = []

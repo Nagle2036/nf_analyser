@@ -544,6 +544,7 @@ if answer3 == 'y':
                     destination_path = os.path.join(destination_folder, filename)
                     shutil.copy2(source_path, destination_path)
                     print(f"Copied {filename} to {destination_folder}")
+        source_folder = src_folder
         if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder) or not os.listdir(rl_fieldmaps_dicoms_folder):
             copy_dicom_files(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, rl_fieldmaps_dicoms_folder, target_volume_count=5)
         list = ['ap', 'pa', 'rl']

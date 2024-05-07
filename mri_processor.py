@@ -726,6 +726,7 @@ if answer3 == 'y':
         run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
         folder_list = [ap_fieldmaps, pa_fieldmaps, rl_fieldmaps, run01, run02, run03, run04]
         pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
+        pe_axes = []
         for folder in folder_list:
             dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
             if len(dicom_files) == 0:
@@ -734,6 +735,7 @@ if answer3 == 'y':
                 random_file = random.choice(dicom_files)
                 ds = pydicom.dcmread(random_file)
                 pe_axis = ds.InPlanePhaseEncodingDirection
+                pe_axes.append(pe_axis)
                 start_index = folder.rfind('/') + 1  
                 end_index = folder.rfind('_')  
                 if end_index == -1 or end_index < start_index:
@@ -812,7 +814,7 @@ if answer3 == 'y':
 
 
 
-    # Step 6: Create onset files.
+    # Step 14: Create onset files.
     onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:
         data_rows = [

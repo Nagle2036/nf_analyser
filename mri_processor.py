@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
 ###TO DO###
-# Create Python script to automatically generate PSC / thermometer level plots and blindedly show whether group allocation (a/b) matched training directions from scan.
 # Organise files in BIDS format.
-# Upload analysis outputs back to Box account. Or maybe not. Might be best to leave this, in order to protect Box data in case anything gets messed up.
 # Add percentage completion metric.
-# Count files present in participant folder
 # Output mri_processor.py Bash terminal outputs / prints into .txt log file
 # Add option to run analysis for all subjects. E.g. for fMRI preprocessing, the input question could be: "Enter the participant's ID (e.g. P001), or write 'ALL' to execute for all participants."
+# Potentially recreate preprocessing pipeline with fmriprep just to show that I can use it. And maybe compare analysis results after my preprocessing and fmriprep preprocessing
 
 #region IMPORT PACKAGES.
 
@@ -392,48 +390,7 @@ if answer3 == 'y':
     else:
         print("Structural image already brain extracted. Skipping process.")
 
-    # Step 6: Create onset files.
-    onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'
-    with open(onsetfile_sub, 'w') as file:
-        data_rows = [
-            ['0', '20', '1'],
-            ['50', '20', '1'],
-            ['100', '20', '1'],
-            ['150', '20', '1'],
-            ['200', '20', '1'],
-            ['250', '20', '1'],
-            ['300', '20', '1'],
-            ['350', '20', '1'],
-            ['400', '20', '1']
-        ]
-        for row in data_rows:
-            formatted_row = "\t".join(row) + "\n"
-            file.write(formatted_row)
-    onsetfile_guilt = f'{p_id}/analysis/preproc/onset_files/onsetfile_guilt.txt'
-    with open(onsetfile_guilt, 'w') as file:
-        data_rows = [
-            ['20', '30', '1'],
-            ['120', '30', '1'],
-            ['220', '30', '1'],
-            ['320', '30', '1']
-        ]
-        for row in data_rows:
-            formatted_row = "\t".join(row) + "\n"
-            file.write(formatted_row)
-    onsetfile_indig = f'{p_id}/analysis/preproc/onset_files/onsetfile_indig.txt'
-    with open(onsetfile_indig, 'w') as file:
-        data_rows = [
-            ['70', '30', '1'],
-            ['170', '30', '1'],
-            ['270', '30', '1'],
-            ['370', '30', '1']
-        ]
-        for row in data_rows:
-            formatted_row = "\t".join(row) + "\n"
-            file.write(formatted_row)
-    print('Onset files created.')
-
-    # Step 7: Check for binary number overflow.
+    # Step 6: Check and correct for binary number overflow.
     def get_nifti_data_type(file_path):
         try:
             result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -452,7 +409,7 @@ if answer3 == 'y':
     for run in runs:
         nifti_file_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
         data_type_value = get_nifti_data_type(nifti_file_path)
-        output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'{run}_nh.nii.gz')
+        output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
         if not os.path.exists(output_path):
             if data_type_value == 'INT16':
                 print(f'Filling holes in {run} raw Nifti image.')
@@ -463,8 +420,156 @@ if answer3 == 'y':
                 sys.exit()
         else:
             print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
+
+    # Step 7: Find optimal motion correction parameters.
+    use_middle_vol_vals = []
+    use_sinc_interp_vals = []
+    for run in runs:
+        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii')
+        output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
+        text_output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
+        if not os.path.exists(text_output_path):
+            print(f"Finding optimal motion correction parameters for {run} data...")
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
+            df = pd.read_csv(text_output_path, delim_whitespace=True, names=["vol_fd"])
+            use_middle_vol = 0
+            use_sinc_interp = 0
+            if len(df) % 2 == 0:
+                middle_vol = len(df) // 2 - 1
+                middle_vol_fd = df["vol_fd"].iloc[middle_vol]
+                if middle_vol_fd <= 0.9:
+                    use_middle_vol = 1
+            else:
+                middle_vol = len(df) // 2
+                middle_vol_fd = df["vol_fd"].iloc[middle_vol]
+                if middle_vol_fd <= 0.9:
+                    use_middle_vol = 1
+            high_motion_vols = 0
+            for value in df ["vol_fd"]:
+                if value > 0.9:
+                    high_motion_vols += 1
+            percentage_outliers = (high_motion_vols / len(df)) * 100
+            if percentage_outliers > 20:
+                use_sinc_interp = 1
+            use_middle_vol_vals.append(use_middle_vol)
+            use_sinc_interp_vals.append(use_sinc_interp)           
+            result_file = os.path.join(os.getcwd(), 'group', 'ms_test', 'ms_test_master.txt')
+            if not os.path.exists(result_file):
+                with open(result_file, "a") as f:
+                    f.write("p_id run use_middle_vol use_sinc_interp\n")
+                    f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
+            else:
+                with open(result_file, "r") as f:
+                    lines = f.readlines()
+                matching_lines = [line for line in lines if line.startswith(f"{p_id} {run}")]  
+                if matching_lines:
+                    with open(result_file, "w") as f:
+                        for index, line in enumerate(lines):
+                            if index not in matching_lines:
+                                f.write(line)
+                        f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
+                else:
+                    with open(result_file, "a") as f:
+                        f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
+        else:
+            print(f"Motion correction optimisation for {run} already performed. Skipping process.")
     
-    # Step 8: Copy fieldmap DICOMS and convert to Niftis.
+    # Step 8: Perform motion correction. 
+    for run in runs:
+        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii')
+        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc.nii.gz') 
+        if not os.path.exists(output_path):
+            print(f"Performing motion correction on {run} data...")
+            if run == 'run01':
+                if use_middle_vol_vals[0] == 1 and use_sinc_interp_vals[0] == 0:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+                    print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
+                elif use_middle_vol_vals[0] == 1 and use_sinc_interp_vals[0] == 1:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
+                    print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
+                elif use_middle_vol_vals[0] == 0 and use_sinc_interp_vals[0] == 0:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
+                    print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
+                elif use_middle_vol_vals[0] == 0 and use_sinc_interp_vals[0] == 1:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
+                    print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
+            if run == 'run02':
+                if use_middle_vol_vals[1] == 1 and use_sinc_interp_vals[1] == 0:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+                    print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
+                elif use_middle_vol_vals[1] == 1 and use_sinc_interp_vals[1] == 1:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
+                    print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
+                elif use_middle_vol_vals[1] == 0 and use_sinc_interp_vals[1] == 0:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
+                    print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
+                elif use_middle_vol_vals[1] == 0 and use_sinc_interp_vals[1] == 1:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
+                    print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
+            if run == 'run03':
+                if use_middle_vol_vals[2] == 1 and use_sinc_interp_vals[2] == 0:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+                    print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
+                elif use_middle_vol_vals[2] == 1 and use_sinc_interp_vals[2] == 1:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
+                    print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
+                elif use_middle_vol_vals[2] == 0 and use_sinc_interp_vals[2] == 0:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
+                    print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
+                elif use_middle_vol_vals[2] == 0 and use_sinc_interp_vals[2] == 1:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
+                    print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
+            if run == 'run04':
+                if use_middle_vol_vals[3] == 1 and use_sinc_interp_vals[3] == 0:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+                    print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
+                elif use_middle_vol_vals[3] == 1 and use_sinc_interp_vals[3] == 1:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
+                    print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
+                elif use_middle_vol_vals[3] == 0 and use_sinc_interp_vals[3] == 0:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
+                    print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
+                elif use_middle_vol_vals[3] == 0 and use_sinc_interp_vals[3] == 1:
+                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
+                    print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
+        else:
+            print(f"{run} already motion corrected. Skipping process.")
+
+    # Step 9: Perform motion scrubbing.
+    scrubbed_vols = []
+    for run in runs:
+        input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc')
+        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc_ms')
+        text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_scrubbed_volumes.txt')
+        if not os.path.exists(output_path):
+            print(f"Performing motion scrubbing on {run} data...")
+            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--nomoco'])
+            print(f'{run} motion scrubbed.')
+        else:
+            print (f'{run} already motion scrubbed. Skipping process.')
+        with open(output_path, 'r') as file:
+            first_row = file.readline().strip()
+            num_columns = len(first_row.split('   '))
+            scrubbed_vols.append(num_columns)
+            if run == 'run01' or 'run04':
+                vol_num = 210
+            elif run == 'run02' or 'run03':
+                vol_num = 238
+            run_scrubbed_vols_perc = (num_columns / vol_num) * 100
+            if run_scrubbed_vols_perc > 15:
+                print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove this run from analysis.')
+                sys.exit()
+            else:
+                print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This is within the tolerable threshold of 15%. Analysis of this run can continue.')
+    sum_scrubbed_vols = sum(scrubbed_vols)
+    scrubbed_vols_perc = (sum_scrubbed_vols / 896) * 100
+    if scrubbed_vols_perc > 15:
+        print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove participant from analysis.')
+        sys.exit()
+    else:
+        print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
+    
+    # Step 10: Copy fieldmap DICOMS and convert to Niftis.
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
     if p_id in bad_participants:
         ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
@@ -559,7 +664,7 @@ if answer3 == 'y':
             else:
                 print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
     
-    # Step 9: Confirm sequence phase encoding directions for stratification of distortion correction method.
+    # Step 11: Confirm sequence phase encoding directions for stratification of distortion correction method.
     if p_id in bad_participants:
         ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
         pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/badpa"
@@ -605,7 +710,7 @@ if answer3 == 'y':
                         f.write(f"{folder} {pe_axis}\n")
         print("Sequence PE axes saved to pe_axes.txt file.")
         if pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'COL']:
-            print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, PA) for this participant. Stratification of distortion correction method can now take place.')
+            print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, AP) for this participant. Stratification of distortion correction method can now take place.')
         elif pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'ROW']:
             print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, RL) for this participant. Stratification of distortion correction method can now take place.')
         else:
@@ -660,7 +765,7 @@ if answer3 == 'y':
             print('Sequence PE directions are not as expected. Please investigate.')
             sys.exit()
 
-    # Step 10: Calculate and apply fieldmaps.
+    # Step 12: Calculate and apply fieldmaps for relevant participants.
         if p_id not in bad_participants:
             ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.txt')
             pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.txt')
@@ -697,160 +802,61 @@ if answer3 == 'y':
                 print("Fieldmap calculation completed.")
                 for run in runs:
                     print("Applying fieldmaps...")
-                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/fieldmaps/{run}_nh_nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_undistorted"])
+                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/niftis/{run}_nh_mc.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_nh_dc"])
                     print("Fieldmap application completed.")
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")
-
-    # Step 8: Find optimal motion correction parameters.
-    use_middle_vol_vals = []
-    use_sinc_interp_vals = []
-    for run in runs:
-        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
-        output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
-        text_output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
-        if not os.path.exists(text_output_path):
-            print(f"Finding optimal motion correction parameters for {run} data...")
-            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
-            df = pd.read_csv(text_output_path, delim_whitespace=True, names=["vol_fd"])
-            use_middle_vol = 0
-            use_sinc_interp = 0
-            if len(df) % 2 == 0:
-                middle_vol = len(df) // 2 - 1
-                middle_vol_fd = df["vol_fd"].iloc[middle_vol]
-                if middle_vol_fd <= 0.9:
-                    use_middle_vol = 1
-            else:
-                middle_vol = len(df) // 2
-                middle_vol_fd = df["vol_fd"].iloc[middle_vol]
-                if middle_vol_fd <= 0.9:
-                    use_middle_vol = 1
-            high_motion_vols = 0
-            for value in df ["vol_fd"]:
-                if value > 0.9:
-                    high_motion_vols += 1
-            percentage_outliers = (high_motion_vols / len(df)) * 100
-            if percentage_outliers > 20:
-                use_sinc_interp = 1
-            use_middle_vol_vals.append(use_middle_vol)
-            use_sinc_interp_vals.append(use_sinc_interp)           
-            result_file = os.path.join(os.getcwd(), 'group', 'ms_test', 'ms_test_master.txt')
-            if not os.path.exists(result_file):
-                with open(result_file, "a") as f:
-                    f.write("p_id run use_middle_vol use_sinc_interp\n")
-                    f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
-            else:
-                with open(result_file, "r") as f:
-                    lines = f.readlines()
-                matching_lines = [line for line in lines if line.startswith(f"{p_id} {run}")]  
-                if matching_lines:
-                    with open(result_file, "w") as f:
-                        for index, line in enumerate(lines):
-                            if index not in matching_lines:
-                                f.write(line)
-                        f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
-                else:
-                    with open(result_file, "a") as f:
-                        f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
-        else:
-            print(f"Motion correction optimisation for {run} already performed. Skipping process.")
     
-    # Step 9: Perform motion correction. 
-    for run in runs:
-        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
-        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_mc.nii.gz') 
-        if not os.path.exists(output_path):
-            print(f"Performing motion correction on {run} data...")
-            if run == 'run01':
-                if use_middle_vol_vals[0] == 1 and use_sinc_interp_vals[0] == 0:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
-                    print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
-                elif use_middle_vol_vals[0] == 1 and use_sinc_interp_vals[0] == 1:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
-                    print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
-                elif use_middle_vol_vals[0] == 0 and use_sinc_interp_vals[0] == 0:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
-                    print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
-                elif use_middle_vol_vals[0] == 0 and use_sinc_interp_vals[0] == 1:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
-                    print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
-            if run == 'run02':
-                if use_middle_vol_vals[1] == 1 and use_sinc_interp_vals[1] == 0:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
-                    print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
-                elif use_middle_vol_vals[1] == 1 and use_sinc_interp_vals[1] == 1:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
-                    print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
-                elif use_middle_vol_vals[1] == 0 and use_sinc_interp_vals[1] == 0:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
-                    print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
-                elif use_middle_vol_vals[1] == 0 and use_sinc_interp_vals[1] == 1:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
-                    print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
-            if run == 'run03':
-                if use_middle_vol_vals[2] == 1 and use_sinc_interp_vals[2] == 0:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
-                    print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
-                elif use_middle_vol_vals[2] == 1 and use_sinc_interp_vals[2] == 1:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
-                    print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
-                elif use_middle_vol_vals[2] == 0 and use_sinc_interp_vals[2] == 0:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
-                    print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
-                elif use_middle_vol_vals[2] == 0 and use_sinc_interp_vals[2] == 1:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
-                    print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
-            if run == 'run04':
-                if use_middle_vol_vals[3] == 1 and use_sinc_interp_vals[3] == 0:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
-                    print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
-                elif use_middle_vol_vals[3] == 1 and use_sinc_interp_vals[3] == 1:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
-                    print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
-                elif use_middle_vol_vals[3] == 0 and use_sinc_interp_vals[3] == 0:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
-                    print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
-                elif use_middle_vol_vals[3] == 0 and use_sinc_interp_vals[3] == 1:
-                    subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
-                    print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
-        else:
-            print(f"{run} already motion corrected. Skipping process.")
+    # Step 13: Test quality of alternate distortion correction method.
 
-    # Step 10: Perform motion scrubbing.
-    scrubbed_vols = []
-    for run in runs:
-        input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_mc')
-        output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_mc_ms')
-        text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_scrubbed_volumes.txt')
-        if not os.path.exists(output_path):
-            print(f"Performing motion scrubbing on {run} data...")
-            subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--nomoco'])
-            print(f'{run} motion scrubbed.')
-        else:
-            print (f'{run} already motion scrubbed. Skipping process.')
-        with open(output_path, 'r') as file:
-            first_row = file.readline().strip()
-            num_columns = len(first_row.split('   '))
-            scrubbed_vols.append(num_columns)
-            if run == 'run01' or 'run04':
-                vol_num = 210
-            elif run == 'run02' or 'run03':
-                vol_num = 238
-            run_scrubbed_vols_perc = (num_columns / vol_num) * 100
-            if run_scrubbed_vols_perc > 15:
-                print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove this run from analysis.')
-                sys.exit()
-            else:
-                print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This is within the tolerable threshold of 15%. Analysis of this run can continue.')
-    sum_scrubbed_vols = sum(scrubbed_vols)
-    scrubbed_vols_perc = (sum_scrubbed_vols / 896) * 100
-    if scrubbed_vols_perc > 15:
-        print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove participant from analysis.')
-        sys.exit()
-    else:
-        print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
-        
+
+
+
+    # Step 6: Create onset files.
+    onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'
+    with open(onsetfile_sub, 'w') as file:
+        data_rows = [
+            ['0', '20', '1'],
+            ['50', '20', '1'],
+            ['100', '20', '1'],
+            ['150', '20', '1'],
+            ['200', '20', '1'],
+            ['250', '20', '1'],
+            ['300', '20', '1'],
+            ['350', '20', '1'],
+            ['400', '20', '1']
+        ]
+        for row in data_rows:
+            formatted_row = "\t".join(row) + "\n"
+            file.write(formatted_row)
+    onsetfile_guilt = f'{p_id}/analysis/preproc/onset_files/onsetfile_guilt.txt'
+    with open(onsetfile_guilt, 'w') as file:
+        data_rows = [
+            ['20', '30', '1'],
+            ['120', '30', '1'],
+            ['220', '30', '1'],
+            ['320', '30', '1']
+        ]
+        for row in data_rows:
+            formatted_row = "\t".join(row) + "\n"
+            file.write(formatted_row)
+    onsetfile_indig = f'{p_id}/analysis/preproc/onset_files/onsetfile_indig.txt'
+    with open(onsetfile_indig, 'w') as file:
+        data_rows = [
+            ['70', '30', '1'],
+            ['170', '30', '1'],
+            ['270', '30', '1'],
+            ['370', '30', '1']
+        ]
+        for row in data_rows:
+            formatted_row = "\t".join(row) + "\n"
+            file.write(formatted_row)
+    print('Onset files created.')
+
+
 # See if quality of the neurofeedback and ability to move the thermometer correlates negatively with the number of ROI voxels that lie within signal dropout regions of the EPI images.
+# Have to remove voxels from ROI that are sitting in signal dropout regions and make note of this. Perhaps ROIs with 50% of voxels removed (for example) would have 50% of the normal weighting in the analysis - perhaps this weighting can be done quantitatively, or perhaps just noted qualitatively in the discussion.
+
 
 #endregion
 

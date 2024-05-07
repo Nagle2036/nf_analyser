@@ -805,7 +805,7 @@ if answer3 == 'y':
                 print("Fieldmap calculation completed.")
                 for run in runs:
                     print("Applying fieldmaps...")
-                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/niftis/{run}_nh_mc.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_nh_mc_dc"])
+                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/mc_ms/{run}_nh_mc.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_nh_mc_dc"])
                     print("Fieldmap application completed.")
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")

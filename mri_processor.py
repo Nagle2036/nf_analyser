@@ -799,13 +799,13 @@ if answer3 == 'y':
                     f.write(f"0 1 0 {readout_time_s}")
             fieldcoef_output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'topup_{p_id}_fieldcoef.nii.gz')
             movpar_output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'topup_{p_id}_movpar.txt')
-            if not os.path.exists(fieldcoef_output_file) and os.path.exists(movpar_output_file):
+            if not os.path.exists(fieldcoef_output_file) or not os.path.exists(movpar_output_file):
                 print("Calculating fieldmaps...")
                 subprocess.run(["topup", f"--imain={p_id}/analysis/preproc/fieldmaps/merged_fieldmaps.nii", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--config=b02b0.cnf", f"--out={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", f"--iout={p_id}/analysis/preproc/fieldmaps/topup_{p_id}_unwarped"])
                 print("Fieldmap calculation completed.")
                 for run in runs:
                     print("Applying fieldmaps...")
-                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/niftis/{run}_nh.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_nh_dc"])
+                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/niftis/{run}_nh_mc.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_nh_mc_dc"])
                     print("Fieldmap application completed.")
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")

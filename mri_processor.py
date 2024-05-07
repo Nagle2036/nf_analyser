@@ -769,8 +769,8 @@ if answer3 == 'y':
 
     # Step 12: Calculate and apply fieldmaps for relevant participants.
         if p_id not in bad_participants:
-            ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.txt')
-            pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.txt')
+            ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
+            pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.nii')
             output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'merged_fieldmaps')
             if not os.path.exists(output_file):
                 print("Merging fieldmap sequences.")

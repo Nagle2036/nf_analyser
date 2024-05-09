@@ -261,12 +261,18 @@ if answer3 == 'y':
     os.makedirs(onset_folder, exist_ok=True)
     mc_ms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms")
     os.makedirs(mc_ms_folder, exist_ok=True)
+    bet_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "bet")
+    os.makedirs(bet_folder, exist_ok=True)
     fieldmaps_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
     os.makedirs(fieldmaps_folder, exist_ok=True)
+    fieldmaps_pe_test_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test")
+    os.makedirs(fieldmaps_pe_test_folder, exist_ok=True)
     group_folder = os.path.join(os.getcwd(), 'group')
     os.makedirs(group_folder, exist_ok=True)
     ms_test_folder = os.path.join(os.getcwd(), 'group', 'ms_test')
     os.makedirs(ms_test_folder, exist_ok=True)
+    pe_test_folder = os.path.join(os.getcwd(), 'group', 'pe_test')
+    os.makedirs(pe_test_folder, exist_ok=True)
 
     # Step 2: Copy Run 1-4 dicoms into separate folders.
     path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
@@ -569,6 +575,18 @@ if answer3 == 'y':
     else:
         print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
     
+    # Step 10: Brain extraction of functional images.
+    #if p_id == 'ALL':
+    for run in runs:
+        output_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "bet", f"{run}_nh_mc_bet.nii.gz")
+        input_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms", f"{run}_nh_mc.nii.gz")
+        if not os.path.exists(output_path):
+            print(f"Performing brain extraction on {run} functional image.")
+            subprocess.run(["bet", input_path, output_path, "-m", "-R"])
+            print(f"{run} functional image brain extracted.")
+        else:
+            print(f"{run} functional image already brain extracted. Skipping process.")
+
     # Step 10: Copy fieldmap DICOMS and convert to Niftis.
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
     if p_id in bad_participants:
@@ -805,12 +823,25 @@ if answer3 == 'y':
                 print("Fieldmap calculation completed.")
                 for run in runs:
                     print("Applying fieldmaps...")
-                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/mc_ms/{run}_nh_mc.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_nh_mc_dc"])
+                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/bet/{run}_nh_mc_bet.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_nh_mc_bet_dc"])
                     print("Fieldmap application completed.")
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")
     
     # Step 13: Test quality of alternate distortion correction method.
+    good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    for participant in good_participants:
+        ap_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/ap_fieldmaps.nii"
+        pa_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/pa_fieldmaps.nii"
+        rl_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/rl_fieldmaps.nii"
+        flirted_rl_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/flirted_rl_fieldmaps.nii"
+        subprocess.run(["flirt", "-in", rl_fieldmaps, "-ref", pa_fieldmaps, "-out", flirted_rl_fieldmaps, "-omat", "flirted_rl_fieldmaps_transformation.mat"])
+        subprocess.run(["fast", "-t", ""])
+
+
+        
+fast -t 1 -n 3 -o output_directory image1.nii.gz image2.nii.gz image3.nii.gz
+
 
 
 
@@ -859,7 +890,7 @@ if answer3 == 'y':
 
 # See if quality of the neurofeedback and ability to move the thermometer correlates negatively with the number of ROI voxels that lie within signal dropout regions of the EPI images.
 # Have to remove voxels from ROI that are sitting in signal dropout regions and make note of this. Perhaps ROIs with 50% of voxels removed (for example) would have 50% of the normal weighting in the analysis - perhaps this weighting can be done quantitatively, or perhaps just noted qualitatively in the discussion.
-
+# Brain extraction
 
 #endregion
 

@@ -431,7 +431,7 @@ if answer3 == 'y':
     use_middle_vol_vals = []
     use_sinc_interp_vals = []
     for run in runs:
-        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii')
+        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
         output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
         text_output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
         if not os.path.exists(text_output_path):

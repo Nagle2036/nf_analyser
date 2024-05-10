@@ -843,7 +843,7 @@ if answer3 == 'y':
             print(f"Fieldmaps sequences for {participant} successfully brain extracted.")
         else: 
             print(f"Fieldmaps sequences for {participant} already brain extracted. Skipping process.")
-            flirted_rl_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/flirted_rl_fieldmaps.nii"
+        flirted_rl_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/flirted_rl_fieldmaps.nii"
         if not os.path.exists(flirted_rl_fieldmaps):
             print(f"Aligning RL Fieldmaps to PA Fieldmaps for {participant} for distortion correction test 1.")
             subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", betted_pa_fieldmaps, "-out", flirted_rl_fieldmaps, "-omat", "flirted_rl_fieldmaps_transformation.mat"])

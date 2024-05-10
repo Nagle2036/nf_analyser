@@ -834,12 +834,21 @@ if answer3 == 'y':
         ap_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
         pa_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"
         rl_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/rl_fieldmaps.nii"
+        averaged_pa_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/averaged_pa_fieldmaps.nii"
+        averaged_rl_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/averaged_rl_fieldmaps.nii"
+        if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps):
+            print(f"{participant} fieldmaps images being merged...")
+            subprocess.run(['fslmaths', pa_fieldmaps, '-Tmean', averaged_pa_fieldmaps])
+            subprocess.run(['flsmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
+            print(f"{participant} fieldmaps images successfully merged.")
+        else:
+            print(f"{participant} fieldmaps images already merged. Skipping process.")
         betted_pa_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/betted_pa_fieldmaps.nii"
         betted_rl_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/betted_rl_fieldmaps.nii"
         if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps):
             print(f"Fieldmaps sequences for {participant} being brain extracted fo distortion correction test 1.")
-            subprocess.run(["bet", pa_fieldmaps, betted_pa_fieldmaps, "-m", "-R"])
-            subprocess.run(["bet", rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
+            subprocess.run(["bet", averaged_pa_fieldmaps, betted_pa_fieldmaps, "-m", "-R"])
+            subprocess.run(["bet", averaged_rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
             print(f"Fieldmaps sequences for {participant} successfully brain extracted.")
         else: 
             print(f"Fieldmaps sequences for {participant} already brain extracted. Skipping process.")

@@ -249,6 +249,27 @@ if answer3 == 'y':
         participants_to_iterate = participants
     else:
         participants_to_iterate = [p_id]
+    restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
+    if restart == 'y':
+        double_check = input("Are you sure? (y/n)\n")
+        if double_check == 'y':
+            for p_id in participants_to_iterate:
+                preproc_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc')
+                if os.path.exists(preproc_folder):
+                    print(f"Deleting {p_id} preproc folder...")
+                    shutil.rmtree(preproc_folder)
+                    print(f"{p_id} preproc folder successfully deleted.")
+                else:
+                    print(f"{p_id} preproc folder does not exist.")
+                group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
+                if os.path.exists(group_preproc_folder):
+                    print(f"Deleting {p_id} group/preproc folder...")
+                    shutil.rmtree(group_preproc_folder)
+                    print(f"{p_id} group/preproc folder successfully deleted.")
+                else:
+                    print(f"{p_id} group/preproc folder does not exist.")
+        else:
+            sys.exit()
 
     # Step 1: Create directories.
     print("###### STEP 1: CREATING DIRECTORIES ######")
@@ -277,14 +298,18 @@ if answer3 == 'y':
         os.makedirs(fieldmaps_pe_test_folder, exist_ok=True)
         group_folder = os.path.join(os.getcwd(), 'group')
         os.makedirs(group_folder, exist_ok=True)
-        ms_test_folder = os.path.join(os.getcwd(), 'group', 'ms_test')
+        group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
+        os.makedirs(group_preproc_folder, exist_ok=True)
+        ms_test_folder = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test')
         os.makedirs(ms_test_folder, exist_ok=True)
-        pe_test_folder = os.path.join(os.getcwd(), 'group', 'pe_test')
+        pe_test_folder = os.path.join(os.getcwd(), 'group', 'preproc','pe_test')
         os.makedirs(pe_test_folder, exist_ok=True)
+    print("Directories created.")
 
     # Step 2: Prepare Nifti files.
     print("###### STEP 2: PREPARING NIFTI FILES ######")
     for p_id in participants_to_iterate:
+        print(f"Preparing Nifti files for {p_id}...")
         path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
         cisc_folder = None
         for folder_name in os.listdir(path):
@@ -330,21 +355,21 @@ if answer3 == 'y':
             min_238 = min(seq_238)
             max_238 = max(seq_238)
             if not os.listdir(run01_folder):
-                print("Copying Run01 dicoms...")
+                print(f"Copying Run01 dicoms for {p_id}...")
                 copy_files(src_folder, run01_folder, min_210)
-                print("Run01 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
+                print(f"{p_id} Run01 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
             if not os.listdir(run02_folder):
-                print("Copying Run02 dicoms...")
+                print(f"Copying Run02 dicoms for {p_id}...")
                 copy_files(src_folder, run02_folder, min_238)
-                print("Run02 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
+                print(f"{p_id} Run02 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
             if not os.listdir(run03_folder):
-                print("Copying Run03 dicoms...")
+                print(f"Copying Run03 dicoms for {p_id}...")
                 copy_files(src_folder, run03_folder, max_238)
-                print("Run03 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
+                print(f"{p_id} Run03 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
             if not os.listdir(run04_folder):
-                print("Copying Run04 dicoms...")
+                print(f"Copying Run04 dicoms for {p_id}...")
                 copy_files(src_folder, run04_folder, max_210)
-                print("Run04 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
+                print(f"{p_id} Run04 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
         if __name__ == "__main__":
             main()
         for run in runs:
@@ -352,15 +377,15 @@ if answer3 == 'y':
             output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
             output_file = os.path.join(output_folder, f"{run}.nii")
             if not os.path.exists(output_file):
-                print(f"Converting {run.upper()} DICOM files to Nifti format...")
+                print(f"Converting {run.upper()} DICOM files to Nifti format for {p_id}...")
                 subprocess.run(['dcm2niix', '-o', output_folder, '-f', run, '-b', 'n', destination_folder])
-                print(f"{run.upper()} DICOM files converted to Nifti format.")
+                print(f"{p_id} {run.upper()} DICOM files converted to Nifti format.")
             else:
-                print(f"{run.upper()} Nifti file already exists. Skipping conversion.")
+                print(f"{p_id} {run.upper()} Nifti file already exists. Skipping conversion.")
             png_path = f'{p_id}/analysis/preproc/pngs/{run}.png'
             nifti_path = f'{p_id}/analysis/preproc/niftis/{run}.nii'
             if not os.path.exists(png_path):
-                print(f"Saving {run} Nifti as PNG...")
+                print(f"Saving {p_id} {run} Nifti as PNG...")
                 save_png = subprocess.run(['fsleyes', 'render', '--scene', 'ortho', '-of', png_path, nifti_path], capture_output=True, text=True)
                 if save_png.returncode == 0:
                     print("Screenshot saved as", png_path)
@@ -368,7 +393,7 @@ if answer3 == 'y':
                     print("Error encountered:", save_png.stderr)
             else:
                 print('PNG files already created. Skipping conversion.')
-        print(f"Check PNG files in {p_id}/analysis/preproc/pngs to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Incorrect orientations can be corrected for using 'fslreorient2std' or 'fslswapdim' commands.\n")
+        print(f"Check PNG files in {p_id}/analysis/preproc/pngs to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Incorrect orientations can be corrected for using 'fslreorient2std' or 'fslswapdim' commands.")
 
     # Step 3: Brain extract structural Nifti.
     print("###### STEP 3: BRAIN EXTRACTING STRUCTURAL NIFTI ######")
@@ -439,8 +464,8 @@ if answer3 == 'y':
         use_sinc_interp_vals = []
         for run in runs:
             input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
-            output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
-            text_output_path = os.path.join(os.getcwd(), 'group', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
+            output_path = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
+            text_output_path = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
             if not os.path.exists(text_output_path):
                 print(f"Finding optimal motion correction parameters for {run} data...")
                 subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
@@ -466,7 +491,7 @@ if answer3 == 'y':
                     use_sinc_interp = 1
                 use_middle_vol_vals.append(use_middle_vol)
                 use_sinc_interp_vals.append(use_sinc_interp)           
-                result_file = os.path.join(os.getcwd(), 'group', 'ms_test', 'ms_test_master.txt')
+                result_file = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test', 'ms_test_master.txt')
                 if not os.path.exists(result_file):
                     with open(result_file, "a") as f:
                         f.write("p_id run use_middle_vol use_sinc_interp\n")

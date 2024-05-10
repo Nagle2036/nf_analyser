@@ -482,7 +482,7 @@ if answer3 == 'y':
     
     # Step 8: Perform motion correction. 
     for run in runs:
-        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii')
+        input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc.nii.gz') 
         if not os.path.exists(output_path):
             print(f"Performing motion correction on {run} data...")
@@ -855,9 +855,6 @@ if answer3 == 'y':
         rl_seg = f"{participant}/analysis/preproc/fieldmaps/pe_test/rl_seg"
         subprocess.run(["fast", "-n", "3", "-o", pa_seg, f"{participant}/analysis/preproc/structural/structural_brain.nii.gz", betted_pa_fieldmaps])
         subprocess.run(["fast", "-n", "3", "-o", rl_seg, f"{participant}/analysis/preproc/structural/structural_brain.nii.gz", flirted_rl_fieldmaps])
-
-
-
 
 
 

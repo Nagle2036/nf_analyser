@@ -831,9 +831,9 @@ if answer3 == 'y':
     # Step 13: Test quality of alternate distortion correction method.
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     for participant in good_participants:
-        ap_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/ap_fieldmaps.nii"
-        pa_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/pa_fieldmaps.nii"
-        rl_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/rl_fieldmaps.nii"
+        ap_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
+        pa_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"
+        rl_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/rl_fieldmaps.nii"
         betted_pa_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/betted_pa_fieldmaps.nii"
         betted_rl_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/betted_rl_fieldmaps.nii"
         if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps):

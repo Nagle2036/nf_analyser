@@ -834,13 +834,29 @@ if answer3 == 'y':
         ap_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/ap_fieldmaps.nii"
         pa_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/pa_fieldmaps.nii"
         rl_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/rl_fieldmaps.nii"
-        flirted_rl_fieldmaps = f"{participant}/analysis/preproc/dicoms/fieldmaps/flirted_rl_fieldmaps.nii"
-        subprocess.run(["flirt", "-in", rl_fieldmaps, "-ref", pa_fieldmaps, "-out", flirted_rl_fieldmaps, "-omat", "flirted_rl_fieldmaps_transformation.mat"])
-        subprocess.run(["fast", "-t", ""])
+        betted_pa_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/betted_pa_fieldmaps.nii"
+        betted_rl_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/betted_rl_fieldmaps.nii"
+        if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps):
+            print(f"Fieldmaps sequences for {participant} being brain extracted fo distortion correction test 1.")
+            subprocess.run(["bet", pa_fieldmaps, betted_pa_fieldmaps, "-m", "-R"])
+            subprocess.run(["bet", rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
+            print(f"Fieldmaps sequences for {participant} successfully brain extracted.")
+        else: 
+            print(f"Fieldmaps sequences for {participant} already brain extracted. Skipping process.")
+            flirted_rl_fieldmaps = f"{participant}/analysis/preproc/fieldmaps/pe_test/flirted_rl_fieldmaps.nii"
+        if not os.path.exists(flirted_rl_fieldmaps):
+            print(f"Aligning RL Fieldmaps to PA Fieldmaps for {participant} for distortion correction test 1.")
+            subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", betted_pa_fieldmaps, "-out", flirted_rl_fieldmaps, "-omat", "flirted_rl_fieldmaps_transformation.mat"])
+            print(f"RL fieldmaps aligned to PA fieldmaps successfully for {participant}")
+        else:
+            print(f"RL fieldmaps have already been aligned to PA fieldmaps for {participant}. Skipping progress.")
+        # if not os.path.exists()
+        pa_seg = f"{participant}/analysis/preproc/fieldmaps/pe_test/pa_seg"
+        rl_seg = f"{participant}/analysis/preproc/fieldmaps/pe_test/rl_seg"
+        subprocess.run(["fast", "-n", "3", "-o", pa_seg, f"{participant}/analysis/preproc/structural/structural_brain.nii.gz", betted_pa_fieldmaps])
+        subprocess.run(["fast", "-n", "3", "-o", rl_seg, f"{participant}/analysis/preproc/structural/structural_brain.nii.gz", flirted_rl_fieldmaps])
 
 
-        
-fast -t 1 -n 3 -o output_directory image1.nii.gz image2.nii.gz image3.nii.gz
 
 
 

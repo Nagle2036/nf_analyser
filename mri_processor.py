@@ -627,7 +627,7 @@ if answer3 == 'y':
     #     participants_to_check = bad_participants
     # else:
     #     participants_to_check = [p_id]
-    def copy_dicom_files(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
+    def copy_2_dicoms(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
                 sequences = defaultdict(list)
                 last_two_sets = []
                 for filename in os.listdir(source_folder):
@@ -652,6 +652,33 @@ if answer3 == 'y':
                         destination_path = os.path.join(destination_folder, filename)
                         shutil.copy2(source_path, destination_path)
                         print(f"Copied {filename} to {destination_folder}")
+    def copy_3_dicoms(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
+            sequences = defaultdict(list)
+            last_three_sets = [] 
+            for filename in os.listdir(source_folder):
+                if filename.endswith('.dcm'):
+                    file_parts = filename.split('_')
+                    if len(file_parts) == 3:
+                        sequence_number = int(file_parts[1])
+                        volume_number = int(file_parts[2].split('.')[0])
+                        sequences[sequence_number].append((filename, volume_number))
+            for sequence_number, files_info in sequences.items():
+                if len(files_info) == target_volume_count:
+                    last_three_sets.append(files_info)
+                    if len(last_three_sets) > 3:
+                        last_three_sets.pop(0)
+            for idx, files_info in enumerate(last_three_sets):
+                if idx == 0:
+                    destination_folder = destination_folder1
+                elif idx == 1:
+                    destination_folder = destination_folder2
+                else:
+                    destination_folder = destination_folder3
+                for filename, _ in files_info:
+                    source_path = os.path.join(source_folder, filename)
+                    destination_path = os.path.join(destination_folder, filename)
+                    shutil.copy2(source_path, destination_path)
+                    print(f"Copied {filename} to {destination_folder}")
     for p_id in participants_to_iterate:
         if p_id in bad_participants:
             ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
@@ -660,7 +687,7 @@ if answer3 == 'y':
             os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
             source_folder = src_folder
             if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
-                copy_dicom_files(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
+                copy_2_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
             list = ['ap', 'badpa']
             for pe in list:
                 destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
@@ -672,33 +699,6 @@ if answer3 == 'y':
                     print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
                 else:
                     print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
-        def copy_dicom_files(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
-                sequences = defaultdict(list)
-                last_three_sets = [] 
-                for filename in os.listdir(source_folder):
-                    if filename.endswith('.dcm'):
-                        file_parts = filename.split('_')
-                        if len(file_parts) == 3:
-                            sequence_number = int(file_parts[1])
-                            volume_number = int(file_parts[2].split('.')[0])
-                            sequences[sequence_number].append((filename, volume_number))
-                for sequence_number, files_info in sequences.items():
-                    if len(files_info) == target_volume_count:
-                        last_three_sets.append(files_info)
-                        if len(last_three_sets) > 3:
-                            last_three_sets.pop(0)
-                for idx, files_info in enumerate(last_three_sets):
-                    if idx == 0:
-                        destination_folder = destination_folder1
-                    elif idx == 1:
-                        destination_folder = destination_folder2
-                    else:
-                        destination_folder = destination_folder3
-                    for filename, _ in files_info:
-                        source_path = os.path.join(source_folder, filename)
-                        destination_path = os.path.join(destination_folder, filename)
-                        shutil.copy2(source_path, destination_path)
-                        print(f"Copied {filename} to {destination_folder}")
         if p_id not in bad_participants:
             ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
             pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")
@@ -708,7 +708,7 @@ if answer3 == 'y':
             os.makedirs(rl_fieldmaps_dicoms_folder, exist_ok=True)
             source_folder = src_folder
             if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder) or not os.listdir(rl_fieldmaps_dicoms_folder):
-                copy_dicom_files(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, rl_fieldmaps_dicoms_folder, target_volume_count=5)
+                copy_3_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, rl_fieldmaps_dicoms_folder, target_volume_count=5)
             list = ['ap', 'pa', 'rl']
             for pe in list:
                 destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)

@@ -636,8 +636,8 @@ if answer3 == 'y':
                         if len(file_parts) == 3:
                             sequence_number = int(file_parts[1])
                             volume_number = int(file_parts[2].split('.')[0])
-                            sequences[sequence_number].append((filename, volume_number))
-                for sequence_number, files_info in sequences.items():
+                            sequences2[sequence_number].append((filename, volume_number))
+                for sequence_number, files_info in sequences2.items():
                     if len(files_info) == target_volume_count:
                         last_two_sets.append(files_info)
                         if len(last_two_sets) > 2:
@@ -661,8 +661,8 @@ if answer3 == 'y':
                     if len(file_parts) == 3:
                         sequence_number = int(file_parts[1])
                         volume_number = int(file_parts[2].split('.')[0])
-                        sequences[sequence_number].append((filename, volume_number))
-            for sequence_number, files_info in sequences.items():
+                        sequences3[sequence_number].append((filename, volume_number))
+            for sequence_number, files_info in sequences3.items():
                 if len(files_info) == target_volume_count:
                     last_three_sets.append(files_info)
                     if len(last_three_sets) > 3:

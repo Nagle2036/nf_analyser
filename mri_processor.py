@@ -623,11 +623,11 @@ if answer3 == 'y':
     # Step 8: Confirm sequence phase encoding directions for stratification of distortion correction method.
     print("\n###### STEP 8: DETERMINING PHASE ENCODING DIRECTIONS ######")
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
-    if p_id == 'ALL':
-        participants_to_check = bad_participants
-    else:
-        participants_to_check = [p_id]
-    for p_id in participants_to_check:
+    # if p_id == 'ALL':
+    #     participants_to_check = bad_participants
+    # else:
+    #     participants_to_check = [p_id]
+    for p_id in participants_to_iterate:
         if p_id in bad_participants:
             ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
             pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "badpa")
@@ -720,7 +720,7 @@ if answer3 == 'y':
                     print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
                 else:
                     print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
-    for p_id in participants_to_check:
+    for p_id in participants_to_iterate:
         if p_id in bad_participants:
             ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
             pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/badpa"
@@ -825,7 +825,7 @@ if answer3 == 'y':
 
     # Step 9: Calculate and apply fieldmaps for relevant participants.
     print("\n###### STEP 9: APPLYING FIELDMAPS ######")
-    for p_id in participants_to_check:
+    for p_id in participants_to_iterate:
         if p_id not in bad_participants:
             ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
             pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.nii')
@@ -871,11 +871,11 @@ if answer3 == 'y':
     # Step 10: Test quality of alternate distortion correction method.
     print("\n###### STEP 10: TESTING ALTERNATE DISTORTION CORRECTION METHOD ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    if p_id == 'ALL':
-        participants_to_check = good_participants
-    else:
-        participants_to_check = [p_id]
-    for p_id in participants_to_check:
+    # if p_id == 'ALL':
+    #     participants_to_check = good_participants
+    # else:
+    #     participants_to_check = [p_id]
+    for p_id in participants_to_iterate:
         if p_id in good_participants:
             ap_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
             pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"

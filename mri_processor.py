@@ -627,13 +627,7 @@ if answer3 == 'y':
     #     participants_to_check = bad_participants
     # else:
     #     participants_to_check = [p_id]
-    for p_id in participants_to_iterate:
-        if p_id in bad_participants:
-            ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
-            pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "badpa")
-            os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
-            os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
-            def copy_dicom_files(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
+    def copy_dicom_files(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
                 sequences = defaultdict(list)
                 last_two_sets = []
                 for filename in os.listdir(source_folder):
@@ -658,6 +652,12 @@ if answer3 == 'y':
                         destination_path = os.path.join(destination_folder, filename)
                         shutil.copy2(source_path, destination_path)
                         print(f"Copied {filename} to {destination_folder}")
+    for p_id in participants_to_iterate:
+        if p_id in bad_participants:
+            ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
+            pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "badpa")
+            os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+            os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
             source_folder = src_folder
             if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
                 copy_dicom_files(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
@@ -672,14 +672,7 @@ if answer3 == 'y':
                     print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
                 else:
                     print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
-        if p_id not in bad_participants:
-            ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
-            pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")
-            rl_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "rl")
-            os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
-            os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
-            os.makedirs(rl_fieldmaps_dicoms_folder, exist_ok=True)
-            def copy_dicom_files(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
+        def copy_dicom_files(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
                 sequences = defaultdict(list)
                 last_three_sets = [] 
                 for filename in os.listdir(source_folder):
@@ -706,6 +699,13 @@ if answer3 == 'y':
                         destination_path = os.path.join(destination_folder, filename)
                         shutil.copy2(source_path, destination_path)
                         print(f"Copied {filename} to {destination_folder}")
+        if p_id not in bad_participants:
+            ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
+            pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")
+            rl_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "rl")
+            os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+            os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
+            os.makedirs(rl_fieldmaps_dicoms_folder, exist_ok=True)
             source_folder = src_folder
             if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder) or not os.listdir(rl_fieldmaps_dicoms_folder):
                 copy_dicom_files(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, rl_fieldmaps_dicoms_folder, target_volume_count=5)

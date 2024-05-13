@@ -901,7 +901,7 @@ if answer3 == 'y':
             flirted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/flirted_rl_fieldmaps.nii"
             if not os.path.exists(flirted_rl_fieldmaps):
                 print(f"Aligning RL Fieldmaps to PA Fieldmaps for {p_id} for distortion correction test 1.")
-                subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", betted_pa_fieldmaps, "-out", flirted_rl_fieldmaps, "-omat", "flirted_rl_fieldmaps_transformation.mat"])
+                subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", betted_pa_fieldmaps, "-out", flirted_rl_fieldmaps, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/flirted_rl_fieldmaps_transformation.mat"])
                 print(f"RL fieldmaps aligned to PA fieldmaps successfully for {p_id}")
             else:
                 print(f"RL fieldmaps have already been aligned to PA fieldmaps for {p_id}. Skipping progress.")

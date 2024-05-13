@@ -628,7 +628,7 @@ if answer3 == 'y':
     # else:
     #     participants_to_check = [p_id]
     def copy_2_dicoms(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
-                sequences = defaultdict(list)
+                sequences2 = defaultdict(list)
                 last_two_sets = []
                 for filename in os.listdir(source_folder):
                     if filename.endswith('.dcm'):
@@ -653,7 +653,7 @@ if answer3 == 'y':
                         shutil.copy2(source_path, destination_path)
                         print(f"Copied {filename} to {destination_folder}")
     def copy_3_dicoms(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
-            sequences = defaultdict(list)
+            sequences3 = defaultdict(list)
             last_three_sets = [] 
             for filename in os.listdir(source_folder):
                 if filename.endswith('.dcm'):

@@ -652,6 +652,26 @@ if answer3 == 'y':
                         destination_path = os.path.join(destination_folder, filename)
                         shutil.copy2(source_path, destination_path)
                         print(f"Copied {filename} to {destination_folder}")
+    for p_id in participants_to_iterate:
+        if p_id in bad_participants:
+            ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
+            pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "badpa")
+            os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+            os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
+            source_folder = src_folder
+            if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
+                copy_2_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
+            list = ['ap', 'badpa']
+            for pe in list:
+                destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
+                output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
+                output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
+                if not os.path.exists(output_file):
+                    print(f"Converting {pe.upper()} fieldmaps DICOM files to Nifti format...")
+                    subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
+                    print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
+                else:
+                    print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
     def copy_3_dicoms(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
             sequences3 = defaultdict(list)
             last_three_sets = [] 
@@ -680,25 +700,6 @@ if answer3 == 'y':
                     shutil.copy2(source_path, destination_path)
                     print(f"Copied {filename} to {destination_folder}")
     for p_id in participants_to_iterate:
-        if p_id in bad_participants:
-            ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
-            pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "badpa")
-            os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
-            os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
-            source_folder = src_folder
-            if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
-                copy_2_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
-            list = ['ap', 'badpa']
-            for pe in list:
-                destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
-                output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
-                output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
-                if not os.path.exists(output_file):
-                    print(f"Converting {pe.upper()} fieldmaps DICOM files to Nifti format...")
-                    subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
-                    print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
-                else:
-                    print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
         if p_id not in bad_participants:
             ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
             pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")

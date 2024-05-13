@@ -272,7 +272,7 @@ if answer3 == 'y':
             sys.exit()
 
     # Step 1: Create directories.
-    print("###### STEP 1: CREATING DIRECTORIES ######")
+    print("\n###### STEP 1: CREATING DIRECTORIES ######")
     for p_id in participants_to_iterate:
         p_id_folder = os.path.join(os.getcwd(), p_id)
         os.makedirs(p_id_folder, exist_ok=True)
@@ -307,7 +307,7 @@ if answer3 == 'y':
     print("Directories created.")
 
     # Step 2: Prepare Nifti files.
-    print("###### STEP 2: PREPARING NIFTI FILES ######")
+    print("\n###### STEP 2: PREPARING NIFTI FILES ######")
     for p_id in participants_to_iterate:
         print(f"Preparing Nifti files for {p_id}...")
         path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
@@ -396,7 +396,7 @@ if answer3 == 'y':
         print(f"Check PNG files in {p_id}/analysis/preproc/pngs to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Incorrect orientations can be corrected for using 'fslreorient2std' or 'fslswapdim' commands.")
 
     # Step 3: Brain extract structural Nifti.
-    print("###### STEP 3: BRAIN EXTRACTING STRUCTURAL NIFTI ######")
+    print("\n###### STEP 3: BRAIN EXTRACTING STRUCTURAL NIFTI ######")
     for p_id in participants_to_iterate:
         src_folder = os.path.join(path, cisc_folder)
         destination_folder = f'{p_id}/analysis/preproc/structural'
@@ -425,7 +425,7 @@ if answer3 == 'y':
             print("Structural image already brain extracted. Skipping process.")
 
     # Step 4: Check and correct for binary number overflow in functional data.
-    print("###### STEP 4: CORRECTING EPI BINARY NUMBER OVERFLOW ######")
+    print("\n###### STEP 4: CORRECTING EPI BINARY NUMBER OVERFLOW ######")
     for p_id in participants_to_iterate:
         def get_nifti_data_type(file_path):
             try:
@@ -458,7 +458,7 @@ if answer3 == 'y':
                 print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
 
     # Step 5: Perform motion correction.
-    print("###### STEP 5: PERFORMING MOTION CORRECTION ######")
+    print("\n###### STEP 5: PERFORMING MOTION CORRECTION ######")
     for p_id in participants_to_iterate:
         use_middle_vol_vals = []
         use_sinc_interp_vals = []
@@ -572,7 +572,7 @@ if answer3 == 'y':
                 print(f"{run} already motion corrected. Skipping process.")
 
     # Step 6: Perform motion scrubbing.
-    print("###### STEP 6: PERFORMING MOTION SCRUBBING ######")
+    print("\n###### STEP 6: PERFORMING MOTION SCRUBBING ######")
     for p_id in participants_to_iterate:
         scrubbed_vols = []
         for run in runs:
@@ -608,7 +608,7 @@ if answer3 == 'y':
             print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
         
     # Step 7: Brain extraction of functional images.
-    print("###### STEP 7: BRAIN EXTRACTING FUNCTIONAL IMAGES ######")
+    print("\n###### STEP 7: BRAIN EXTRACTING FUNCTIONAL IMAGES ######")
     for p_id in participants_to_iterate:
         for run in runs:
             output_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "bet", f"{run}_nh_mc_bet.nii.gz")
@@ -621,7 +621,7 @@ if answer3 == 'y':
                 print(f"{run} functional image already brain extracted. Skipping process.")
 
     # Step 8: Confirm sequence phase encoding directions for stratification of distortion correction method.
-    print("###### STEP 8: DETERMINING PHASE ENCODING DIRECTIONS ######")
+    print("\n###### STEP 8: DETERMINING PHASE ENCODING DIRECTIONS ######")
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
     if p_id == 'ALL':
         participants_to_check = bad_participants
@@ -824,7 +824,7 @@ if answer3 == 'y':
                 sys.exit()
 
     # Step 9: Calculate and apply fieldmaps for relevant participants.
-    print("###### STEP 9: APPLYING FIELDMAPS ######")
+    print("\n###### STEP 9: APPLYING FIELDMAPS ######")
     for p_id in participants_to_check:
         if p_id not in bad_participants:
             ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
@@ -869,7 +869,7 @@ if answer3 == 'y':
                 print("Fieldmaps already calculated and applied. Skipping process.")
     
     # Step 10: Test quality of alternate distortion correction method.
-    print("###### STEP 10: TESTING ALTERNATE DISTORTION CORRECTION METHOD ######")
+    print("\n###### STEP 10: TESTING ALTERNATE DISTORTION CORRECTION METHOD ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     if p_id == 'ALL':
         participants_to_check = good_participants
@@ -885,7 +885,7 @@ if answer3 == 'y':
             if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps):
                 print(f"{p_id} fieldmaps images being merged...")
                 subprocess.run(['fslmaths', pa_fieldmaps, '-Tmean', averaged_pa_fieldmaps])
-                subprocess.run(['flsmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
+                subprocess.run(['fslmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
                 print(f"{p_id} fieldmaps images successfully merged.")
             else:
                 print(f"{p_id} fieldmaps images already merged. Skipping process.")
@@ -914,7 +914,7 @@ if answer3 == 'y':
 
 
     # Step 11: Create onset files.
-    print("###### STEP 11: CREATING ONSET FILES ######")
+    print("\n###### STEP 11: CREATING ONSET FILES ######")
     onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:
         data_rows = [

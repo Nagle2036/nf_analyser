@@ -915,17 +915,17 @@ if answer3 == 'y':
             # if not os.path.exists
             pa_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_csf_pve_seg_bin"
             subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
-            pa_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_gm_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
             pa_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_wm_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
+            pa_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_gm_pve_seg_bin"
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
 
             rl_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_csf_pve_seg_bin"
             subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
-            rl_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_gm_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
             rl_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_wm_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
+            rl_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_gm_pve_seg_bin"
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
 
 
 

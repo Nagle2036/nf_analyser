@@ -830,7 +830,7 @@ if answer3 == 'y':
         if p_id not in bad_participants:
             ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
             pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.nii')
-            output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'merged_fieldmaps')
+            output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'merged_fieldmaps.nii.gz')
             if not os.path.exists(output_file):
                 print("Merging fieldmap sequences.")
                 subprocess.run(['fslmerge', '-t', output_file, ap_fieldmaps, pa_fieldmaps])
@@ -940,9 +940,9 @@ if answer3 == 'y':
             gm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/gm_intersect_mask.nii.gz"
             if not os.path.exists(csf_intersect_mask):
                 print(f"Creating CSF intersect mask for {p_id}...")
-                subprocess.run('fslmaths', pa_csf_pve_seg_bin, '-mul', rl_csf_pve_seg_bin, '-bin', csf_intersect_mask)
-                subprocess.run('fslmaths', pa_wm_pve_seg_bin, '-mul', rl_wm_pve_seg_bin, '-bin', wm_intersect_mask)
-                subprocess.run('fslmaths', pa_gm_pve_seg_bin, '-mul', rl_gm_pve_seg_bin, '-bin', gm_intersect_mask)
+                subprocess.run(['fslmaths', pa_csf_pve_seg_bin, '-mul', rl_csf_pve_seg_bin, '-bin', csf_intersect_mask])
+                subprocess.run(['fslmaths', pa_wm_pve_seg_bin, '-mul', rl_wm_pve_seg_bin, '-bin', wm_intersect_mask])
+                subprocess.run(['fslmaths', pa_gm_pve_seg_bin, '-mul', rl_gm_pve_seg_bin, '-bin', gm_intersect_mask])
                 print(f"CSF intersect mask for {p_id} successfully created.")
             else:
                 print(f"CSF intersect mask for {p_id} already created. Skipping process.")

@@ -889,7 +889,7 @@ if answer3 == 'y':
             betted_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/betted_pa_fieldmaps.nii"
             betted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/betted_rl_fieldmaps.nii"
             if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps):
-                print(f"Fieldmaps sequences for {p_id} being brain extracted fo distortion correction test 1.")
+                print(f"Fieldmaps sequences for {p_id} being brain extracted for distortion correction test 1.")
                 subprocess.run(["bet", averaged_pa_fieldmaps, betted_pa_fieldmaps, "-m", "-R"])
                 subprocess.run(["bet", averaged_rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
                 print(f"Fieldmaps sequences for {p_id} successfully brain extracted.")
@@ -914,7 +914,8 @@ if answer3 == 'y':
                 print(f"{p_id} segmentation of PA and RL segmentation already completed. Skipping process.")
             # if not os.path.exists
             pa_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_csf_pve_seg_bin"
-            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
+            pa_seg_pve_0 = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_0.nii.gz"
+            subprocess.run([pa_seg_pve_0, '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
             pa_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_gm_pve_seg_bin"
             subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
             pa_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_wm_pve_seg_bin"

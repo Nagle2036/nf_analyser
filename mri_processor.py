@@ -623,10 +623,6 @@ if answer3 == 'y':
     # Step 8: Confirm sequence phase encoding directions for stratification of distortion correction method.
     print("\n###### STEP 8: DETERMINING PHASE ENCODING DIRECTIONS ######")
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
-    # if p_id == 'ALL':
-    #     participants_to_check = bad_participants
-    # else:
-    #     participants_to_check = [p_id]
     def copy_2_dicoms(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
                 sequences2 = defaultdict(list)
                 last_two_sets = []
@@ -876,10 +872,6 @@ if answer3 == 'y':
     # Step 10: Test quality of alternate distortion correction method.
     print("\n###### STEP 10: TESTING ALTERNATE DISTORTION CORRECTION METHOD ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    # if p_id == 'ALL':
-    #     participants_to_check = good_participants
-    # else:
-    #     participants_to_check = [p_id]
     for p_id in participants_to_iterate:
         if p_id in good_participants:
             ap_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
@@ -910,11 +902,30 @@ if answer3 == 'y':
                 print(f"RL fieldmaps aligned to PA fieldmaps successfully for {p_id}")
             else:
                 print(f"RL fieldmaps have already been aligned to PA fieldmaps for {p_id}. Skipping progress.")
-            # if not os.path.exists()
-            pa_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg"
-            rl_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg"
-            subprocess.run(["fast", "-n", "3", "-o", pa_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", betted_pa_fieldmaps])
-            subprocess.run(["fast", "-n", "3", "-o", rl_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", flirted_rl_fieldmaps])
+            pa_csf_pve_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_0.nii.gz"
+            if not os.path.exists(pa_csf_pve_seg):
+                print(f"Segmenting {p_id} PA and RL fieldmaps...")
+                pa_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg"
+                rl_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg"
+                subprocess.run(["fast", "-n", "3", "-o", pa_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", betted_pa_fieldmaps])
+                subprocess.run(["fast", "-n", "3", "-o", rl_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", flirted_rl_fieldmaps])
+                print(f"{p_id} segmentation of PA and RL fieldmaps completed.")
+            else:
+                print(f"{p_id} segmentation of PA and RL segmentation already completed. Skipping process.")
+            # if not os.path.exists
+            pa_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_csf_pve_seg_bin"
+            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
+            pa_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_gm_pve_seg_bin"
+            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
+            pa_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_wm_pve_seg_bin"
+            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
+
+            rl_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_csf_pve_seg_bin"
+            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
+            rl_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_gm_pve_seg_bin"
+            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
+            rl_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_wm_pve_seg_bin"
+            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
 
 
 

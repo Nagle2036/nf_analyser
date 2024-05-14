@@ -983,18 +983,18 @@ if answer3 == 'y':
                 print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} saved to preproc/fieldmaps/pe_test folder.")
             else:
                 print(f"Text file containing percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} already created. Skipping process.")
-        group_overlap_perc_file = "group/preproc/pe_test/overlap_perc.txt"     
-        if not os.path.exists(group_overlap_perc_file):   
-            group_participant_col.append([p_id, p_id, p_id])
-            group_tissue_type_col.append(['csf', 'wm', 'gm'])
-            group_overlap_perc_col.append([csf_overlap_perc, wm_overlap_perc, gm_overlap_perc])          
-            group_overlap_perc_df = pd.DataFrame({'p_id': group_participant_col, 'tissue_type': group_tissue_type_col, 'overlap_perc': group_overlap_perc_col})
-            group_overlap_perc_df.to_csv(group_overlap_perc_file, sep='\t', index=False)
-            print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} appended to group file in group/preproc/pe_test folder.")
-        else:
-            print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} already appended to group file in group/preproc/pe_test folder. Skipping process.")
-            
-            
+            group_overlap_perc_file = "group/preproc/pe_test/overlap_perc.txt"     
+            if not os.path.exists(group_overlap_perc_file):   
+                group_participant_col.append([p_id, p_id, p_id])
+                group_tissue_type_col.append(['csf', 'wm', 'gm'])
+                group_overlap_perc_col.append([csf_overlap_perc, wm_overlap_perc, gm_overlap_perc])          
+                group_overlap_perc_df = pd.DataFrame({'p_id': group_participant_col, 'tissue_type': group_tissue_type_col, 'overlap_perc': group_overlap_perc_col})
+                group_overlap_perc_df.to_csv(group_overlap_perc_file, sep='\t', index=False)
+                print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} appended to group file in group/preproc/pe_test folder.")
+            else:
+                print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} already appended to group file in group/preproc/pe_test folder. Skipping process.")
+                
+                
 
 
     # Step 11: Create onset files.

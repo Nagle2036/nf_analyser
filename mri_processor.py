@@ -877,8 +877,8 @@ if answer3 == 'y':
             ap_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
             pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"
             rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/rl_fieldmaps.nii"
-            averaged_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/averaged_pa_fieldmaps.nii"
-            averaged_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/averaged_rl_fieldmaps.nii"
+            averaged_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/averaged_pa_fieldmaps.nii.gz"
+            averaged_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/averaged_rl_fieldmaps.nii.gz"
             if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps):
                 print(f"{p_id} fieldmaps images being merged...")
                 subprocess.run(['fslmaths', pa_fieldmaps, '-Tmean', averaged_pa_fieldmaps])
@@ -886,8 +886,8 @@ if answer3 == 'y':
                 print(f"{p_id} fieldmaps images successfully merged.")
             else:
                 print(f"{p_id} fieldmaps images already merged. Skipping process.")
-            betted_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/betted_pa_fieldmaps.nii"
-            betted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/betted_rl_fieldmaps.nii"
+            betted_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/betted_pa_fieldmaps.nii.gz"
+            betted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/betted_rl_fieldmaps.nii.gz"
             if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps):
                 print(f"Fieldmaps sequences for {p_id} being brain extracted for distortion correction test 1.")
                 subprocess.run(["bet", averaged_pa_fieldmaps, betted_pa_fieldmaps, "-m", "-R"])
@@ -895,7 +895,7 @@ if answer3 == 'y':
                 print(f"Fieldmaps sequences for {p_id} successfully brain extracted.")
             else: 
                 print(f"Fieldmaps sequences for {p_id} already brain extracted. Skipping process.")
-            flirted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/flirted_rl_fieldmaps.nii"
+            flirted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/flirted_rl_fieldmaps.nii.gz"
             if not os.path.exists(flirted_rl_fieldmaps):
                 print(f"Aligning RL Fieldmaps to PA Fieldmaps for {p_id} for distortion correction test 1.")
                 subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", betted_pa_fieldmaps, "-out", flirted_rl_fieldmaps, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/flirted_rl_fieldmaps_transformation.mat"])
@@ -911,22 +911,21 @@ if answer3 == 'y':
                 subprocess.run(["fast", "-n", "3", "-o", rl_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", flirted_rl_fieldmaps])
                 print(f"{p_id} segmentation of PA and RL fieldmaps completed.")
             else:
-                print(f"{p_id} segmentation of PA and RL segmentation already completed. Skipping process.")
+                print(f"{p_id} segmentation of PA and RL fieldmaps already completed. Skipping process.")
             # if not os.path.exists
             pa_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_csf_pve_seg_bin"
-            pa_seg_pve_0 = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_0.nii.gz"
-            subprocess.run([pa_seg_pve_0, '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
             pa_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_gm_pve_seg_bin"
-            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
             pa_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_wm_pve_seg_bin"
-            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
 
             rl_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_csf_pve_seg_bin"
-            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
             rl_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_gm_pve_seg_bin"
-            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
             rl_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_wm_pve_seg_bin"
-            subprocess.run([f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
+            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
 
 
 

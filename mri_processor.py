@@ -912,20 +912,62 @@ if answer3 == 'y':
                 print(f"{p_id} segmentation of PA and RL fieldmaps completed.")
             else:
                 print(f"{p_id} segmentation of PA and RL fieldmaps already completed. Skipping process.")
-            # if not os.path.exists
-            pa_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_csf_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
-            pa_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_wm_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
-            pa_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_gm_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
+            pa_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_csf_pve_seg_bin.nii.gz"
+            pa_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_wm_pve_seg_bin.nii.gz"
+            pa_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/pa_gm_pve_seg_bin.nii.gz"
+            if not os.path.exists(pa_csf_pve_seg_bin):
+                print(f"Binarising {p_id} CSF, WM and GM segmented PVE masks for PA fieldmaps...")
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/pa_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
+                print(f"{p_id} CSF, WM, and GM segmented PVE masks for PA fieldmaps successfully binarised.")
+            else:
+                print(f"{p_id} binarisation of CSF, WM and GM segmented PVE masks for PA fieldmaps already completed. Skipping process.")
+            rl_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_csf_pve_seg_bin.nii.gz"
+            rl_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_wm_pve_seg_bin.nii.gz"
+            rl_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_gm_pve_seg_bin.nii.gz"
+            if not os.path.exists(rl_csf_pve_seg_bin):
+                print(f"Binarising {p_id} CSF, WM and GM segmented PVE masks for RL fieldmaps...")
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
+                print(f"{p_id} CSF, WM, and GM segmented PVE masks for RL fieldmaps successfully binarised.")
+            else:
+                print(f"{p_id} binarisation of CSF, WM and GM segmented PVE masks for RL fieldmaps already completed. Skipping process.")
 
-            rl_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_csf_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
-            rl_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_wm_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
-            rl_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/rl_gm_pve_seg_bin"
-            subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/rl_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
+            csf_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/csf_intersect_mask.nii.gz"
+            wm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/wm_intersect_mask.nii.gz"
+            gm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/gm_intersect_mask.nii.gz"
+            if not os.path.exists(csf_intersect_mask):
+                print(f"Creating CSF intersect mask for {p_id}...")
+                subprocess.run('fslmaths', pa_csf_pve_seg_bin, '-mul', rl_csf_pve_seg_bin, '-bin', csf_intersect_mask)
+                subprocess.run('fslmaths', pa_wm_pve_seg_bin, '-mul', rl_wm_pve_seg_bin, '-bin', wm_intersect_mask)
+                subprocess.run('fslmaths', pa_gm_pve_seg_bin, '-mul', rl_gm_pve_seg_bin, '-bin', gm_intersect_mask)
+                print(f"CSF intersect mask for {p_id} successfully created.")
+            else:
+                print(f"CSF intersect mask for {p_id} already created. Skipping process.")
+            csf_intersect_vol = float(subprocess.run(['fslstats', csf_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+            wm_intersect_vol = float(subprocess.run(['fslstats', wm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+            gm_intersect_vol = float(subprocess.run(['fslstats', gm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+            pa_csf_mask_vol = float(subprocess.run(['fslstats', pa_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            rl_csf_mask_vol = float(subprocess.run(['fslstats', rl_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            if pa_csf_mask_vol < rl_csf_mask_vol:
+                csf_overlap_perc = (csf_intersect_vol / pa_csf_mask_vol) * 100
+            else: 
+                csf_overlap_perc = (csf_intersect_vol / rl_csf_mask_vol) * 100
+            pa_wm_mask_vol = float(subprocess.run(['fslstats', pa_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            rl_wm_mask_vol = float(subprocess.run(['fslstats', rl_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            if pa_wm_mask_vol < rl_wm_mask_vol:
+                wm_overlap_perc = (wm_intersect_vol / pa_wm_mask_vol) * 100
+            else: 
+                wm_overlap_perc = (wm_intersect_vol / rl_wm_mask_vol) * 100
+            pa_gm_mask_vol = float(subprocess.run(['fslstats', pa_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            rl_gm_mask_vol = float(subprocess.run(['fslstats', rl_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            if pa_gm_mask_vol < rl_gm_mask_vol:
+                gm_overlap_perc = (gm_intersect_vol / pa_gm_mask_vol) * 100
+            else: 
+                gm_overlap_perc = (gm_intersect_vol / rl_gm_mask_vol) * 100
+            
 
 
 

@@ -975,9 +975,15 @@ if answer3 == 'y':
                 participant_col = []
                 tissue_type_col = []
                 overlap_perc_col = []
-                participant_col.append([p_id, p_id, p_id])
-                tissue_type_col.append(['csf', 'wm', 'gm'])
-                overlap_perc_col.append([csf_overlap_perc, wm_overlap_perc, gm_overlap_perc])
+                participant_col.append(p_id)
+                participant_col.append(p_id)
+                participant_col.append(p_id)
+                tissue_type_col.append('csf')
+                tissue_type_col.append('wm')
+                tissue_type_col.append('gm')
+                overlap_perc_col.append(csf_overlap_perc)
+                overlap_perc_col.append(wm_overlap_perc)
+                overlap_perc_col.append(gm_overlap_perc)
                 overlap_perc_df = pd.DataFrame({'p_id': participant_col, 'tissue_type': tissue_type_col, 'overlap_perc': overlap_perc_col})
                 overlap_perc_df.to_csv(overlap_perc_file, sep='\t', index=False)
                 print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} saved to preproc/fieldmaps/pe_test folder.")
@@ -985,9 +991,15 @@ if answer3 == 'y':
                 print(f"Text file containing percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} already created. Skipping process.")
             group_overlap_perc_file = "group/preproc/pe_test/overlap_perc.txt"     
             if p_id not in group_participant_col:
-                group_participant_col.append(p_id, p_id, p_id)
-                group_tissue_type_col.append('csf', 'wm', 'gm')
-                group_overlap_perc_col.append(csf_overlap_perc, wm_overlap_perc, gm_overlap_perc)          
+                group_participant_col.append(p_id)
+                group_participant_col.append(p_id)
+                group_participant_col.append(p_id)
+                group_tissue_type_col.append('csf')
+                group_tissue_type_col.append('wm')
+                group_tissue_type_col.append('gm')
+                group_overlap_perc_col.append(csf_overlap_perc) 
+                group_overlap_perc_col.append(wm_overlap_perc) 
+                group_overlap_perc_col.append(gm_overlap_perc)          
                 group_overlap_perc_df = pd.DataFrame({'p_id': group_participant_col, 'tissue_type': group_tissue_type_col, 'overlap_perc': group_overlap_perc_col})
                 group_overlap_perc_df.to_csv(group_overlap_perc_file, sep='\t', index=False)
                 print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} appended to group file in group/preproc/pe_test folder.")

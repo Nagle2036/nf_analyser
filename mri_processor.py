@@ -655,7 +655,16 @@ if answer3 == 'y':
             pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "badpa")
             os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
             os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
-            source_folder = src_folder
+            path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
+            cisc_folder = None
+            for folder_name in os.listdir(path):
+                if "CISC" in folder_name:
+                    cisc_folder = folder_name
+                    break
+            if cisc_folder is None:
+                print("No 'CISC' folder found in the 'neurofeedback' directory.")
+                exit(1)
+            source_folder = os.path.join(path, cisc_folder)
             if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
                 copy_2_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
                 print(f"{p_id} fieldmap DICOMS successfully copied.")
@@ -707,7 +716,16 @@ if answer3 == 'y':
             os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
             os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
             os.makedirs(rl_fieldmaps_dicoms_folder, exist_ok=True)
-            source_folder = src_folder
+            path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
+            cisc_folder = None
+            for folder_name in os.listdir(path):
+                if "CISC" in folder_name:
+                    cisc_folder = folder_name
+                    break
+            if cisc_folder is None:
+                print("No 'CISC' folder found in the 'neurofeedback' directory.")
+                exit(1)
+            source_folder = os.path.join(path, cisc_folder)
             if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder) or not os.listdir(rl_fieldmaps_dicoms_folder):
                 copy_3_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, rl_fieldmaps_dicoms_folder, target_volume_count=5)
             pe_list = ['ap', 'pa', 'rl']

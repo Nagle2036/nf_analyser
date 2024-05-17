@@ -862,12 +862,19 @@ if answer3 == 'y':
     print("\n###### STEP 9: APPLYING FIELDMAPS ######")
     for p_id in participants_to_iterate:
         if p_id not in bad_participants:
-            ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
+            flirted_ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'flirted_ap_fieldmaps.nii')
             pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.nii')
+            if not os.path.exists(flirted_ap_fieldmaps):
+                ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
+                print(f"Aligning AP fieldmaps to PA fieldmaps for {p_id}...")
+                subprocess.run(["flirt", "-in", ap_fieldmaps, "-ref", pa_fieldmaps, "-out", flirted_ap_fieldmaps, "-omat", f"{p_id}/analysis/preproc/fieldmaps/flirted_ap_fieldmaps_transformation.mat"])
+                print(f"AP fieldmaps successfully aligned to PA fieldmaps for {p_id}.")
+            else:
+                print(f"AP fieldmaps already aligned to PA fieldmaps for {p_id}. Skipping process.")
             output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'merged_fieldmaps.nii.gz')
             if not os.path.exists(output_file):
-                print("Merging fieldmap sequences.")
-                subprocess.run(['fslmerge', '-t', output_file, ap_fieldmaps, pa_fieldmaps])
+                print("Merging fieldmap sequences...")
+                subprocess.run(['fslmerge', '-t', output_file, flirted_ap_fieldmaps, pa_fieldmaps])
                 print("Fieldmap sequences merging completed.")
             else:
                 print("Fieldmap sequences already merged. Skipping process.")
@@ -920,12 +927,12 @@ if answer3 == 'y':
             averaged_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/averaged_pa_fieldmaps.nii.gz"
             averaged_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/averaged_rl_fieldmaps.nii.gz"
             if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps):
-                print(f"{p_id} fieldmaps images being merged...")
+                print(f"{p_id} fieldmaps images being averaged...")
                 subprocess.run(['fslmaths', pa_fieldmaps, '-Tmean', averaged_pa_fieldmaps])
                 subprocess.run(['fslmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
-                print(f"{p_id} fieldmaps images successfully merged.")
+                print(f"{p_id} fieldmaps images successfully averaged.")
             else:
-                print(f"{p_id} fieldmaps images already merged. Skipping process.")
+                print(f"{p_id} fieldmaps images already averaged. Skipping process.")
             betted_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/betted_pa_fieldmaps.nii.gz"
             betted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/betted_rl_fieldmaps.nii.gz"
             if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps):
@@ -937,7 +944,7 @@ if answer3 == 'y':
                 print(f"Fieldmaps sequences for {p_id} already brain extracted. Skipping process.")
             flirted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/flirted_rl_fieldmaps.nii.gz"
             if not os.path.exists(flirted_rl_fieldmaps):
-                print(f"Aligning RL Fieldmaps to PA Fieldmaps for {p_id} for distortion correction test 1.")
+                print(f"Aligning RL fieldmaps to PA fieldmaps for {p_id} for distortion correction test 1.")
                 subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", betted_pa_fieldmaps, "-out", flirted_rl_fieldmaps, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/flirted_rl_fieldmaps_transformation.mat"])
                 print(f"RL fieldmaps aligned to PA fieldmaps successfully for {p_id}")
             else:

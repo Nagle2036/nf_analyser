@@ -867,7 +867,7 @@ if answer3 == 'y':
             output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'merged_fieldmaps.nii.gz')
             if not os.path.exists(output_file):
                 print("Merging fieldmap sequences...")
-                subprocess.run(['fslmerge', '-t', output_file, flirted_ap_fieldmaps, pa_fieldmaps])
+                subprocess.run(['fslmerge', '-t', output_file, ap_fieldmaps, pa_fieldmaps])
                 print("Fieldmap sequences merging completed.")
             else:
                 print("Fieldmap sequences already merged. Skipping process.")

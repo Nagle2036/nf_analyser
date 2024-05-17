@@ -862,15 +862,8 @@ if answer3 == 'y':
     print("\n###### STEP 9: APPLYING FIELDMAPS ######")
     for p_id in participants_to_iterate:
         if p_id not in bad_participants:
-            flirted_ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'flirted_ap_fieldmaps.nii')
+            ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
             pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.nii')
-            if not os.path.exists(flirted_ap_fieldmaps):
-                ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
-                print(f"Aligning AP fieldmaps to PA fieldmaps for {p_id}...")
-                subprocess.run(["flirt", "-in", ap_fieldmaps, "-ref", pa_fieldmaps, "-out", flirted_ap_fieldmaps, "-omat", f"{p_id}/analysis/preproc/fieldmaps/flirted_ap_fieldmaps_transformation.mat"])
-                print(f"AP fieldmaps successfully aligned to PA fieldmaps for {p_id}.")
-            else:
-                print(f"AP fieldmaps already aligned to PA fieldmaps for {p_id}. Skipping process.")
             output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'merged_fieldmaps.nii.gz')
             if not os.path.exists(output_file):
                 print("Merging fieldmap sequences...")

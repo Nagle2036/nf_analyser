@@ -1071,7 +1071,7 @@ if answer3 == 'y':
             nh_av_bet_dc_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_av_bet_dc.nii.gz")
             if not os.path.exists(nh_av_bet_dc_path):
                 print("Applying fieldmaps...")
-                subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_av_bet.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/run01_nh_av_bet_dc"])
+                subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_av_bet.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_av_bet_dc"])
                 print("Fieldmap application completed.")
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")

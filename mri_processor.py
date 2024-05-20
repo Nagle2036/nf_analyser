@@ -988,13 +988,13 @@ if answer3 == 'y':
             wm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/wm_intersect_mask.nii.gz"
             gm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/gm_intersect_mask.nii.gz"
             if not os.path.exists(csf_intersect_mask):
-                print(f"Creating CSF intersect mask for {p_id}...")
+                print(f"Creating Intersect masks for {p_id}...")
                 subprocess.run(['fslmaths', pa_csf_pve_seg_bin, '-mul', rl_csf_pve_seg_bin, '-bin', csf_intersect_mask])
                 subprocess.run(['fslmaths', pa_wm_pve_seg_bin, '-mul', rl_wm_pve_seg_bin, '-bin', wm_intersect_mask])
                 subprocess.run(['fslmaths', pa_gm_pve_seg_bin, '-mul', rl_gm_pve_seg_bin, '-bin', gm_intersect_mask])
-                print(f"CSF intersect mask for {p_id} successfully created.")
+                print(f"Intersect masks for {p_id} successfully created.")
             else:
-                print(f"CSF intersect mask for {p_id} already created. Skipping process.")
+                print(f"Intersect masks for {p_id} already created. Skipping process.")
             csf_intersect_vol = float(subprocess.run(['fslstats', csf_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
             wm_intersect_vol = float(subprocess.run(['fslstats', wm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
             gm_intersect_vol = float(subprocess.run(['fslstats', gm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
@@ -1091,53 +1091,40 @@ if answer3 == 'y':
                 print(f"Segmenting {p_id} uncorrected and corrected Run 1 sequence...")
                 uncorrected_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg"
                 corrected_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg"
-                subprocess.run(["fast", "-n", "3", "-o", uncorrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", t1_flirted_uncorrected_run])
-                subprocess.run(["fast", "-n", "3", "-o", corrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", t1_flirted_corrected_run])
+                subprocess.run(["fast", "-n", "2", "-o", uncorrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", t1_flirted_uncorrected_run])
+                subprocess.run(["fast", "-n", "2", "-o", corrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", t1_flirted_corrected_run])
                 print(f"{p_id} segmentation of uncorrected and corrected Run 1 sequence completed.")
             else:
                 print(f"{p_id} segmentation uncorrected and corrected Run 1 sequence already completed. Skipping process.")
-            uncorrected_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_csf_pve_seg_bin.nii.gz"
             uncorrected_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_wm_pve_seg_bin.nii.gz"
             uncorrected_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_gm_pve_seg_bin.nii.gz"
-            if not os.path.exists(uncorrected_csf_pve_seg_bin):
-                print(f"Binarising {p_id} CSF, WM and GM segmented PVE masks for uncorrected Run 1 sequence...")
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', uncorrected_csf_pve_seg_bin])
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', uncorrected_wm_pve_seg_bin])
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', uncorrected_gm_pve_seg_bin])
+            if not os.path.exists(uncorrected_wm_pve_seg_bin):
+                print(f"Binarising {p_id} WM and GM segmented PVE masks for uncorrected Run 1 sequence...")
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', uncorrected_wm_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', uncorrected_gm_pve_seg_bin])
                 print(f"{p_id} CSF, WM, and GM segmented PVE masks for uncorrected Run 1 sequence successfully binarised.")
             else:
-                print(f"{p_id} binarisation of CSF, WM and GM segmented PVE masks for uncorrected Run 1 sequence already completed. Skipping process.")
-            corrected_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_csf_pve_seg_bin.nii.gz"
+                print(f"{p_id} binarisation of WM and GM segmented PVE masks for uncorrected Run 1 sequence already completed. Skipping process.")
             corrected_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_wm_pve_seg_bin.nii.gz"
             corrected_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_gm_pve_seg_bin.nii.gz"
-            if not os.path.exists(corrected_csf_pve_seg_bin):
+            if not os.path.exists(corrected_wm_pve_seg_bin):
                 print(f"Binarising {p_id} CSF, WM and GM segmented PVE masks for corrected Run 1 sequence...")
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', corrected_csf_pve_seg_bin])
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', corrected_wm_pve_seg_bin])
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', corrected_gm_pve_seg_bin])
-                print(f"{p_id} CSF, WM, and GM segmented PVE masks for corrected Run 1 sequence successfully binarised.")
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', corrected_wm_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', corrected_gm_pve_seg_bin])
+                print(f"{p_id} WM and GM segmented PVE masks for corrected Run 1 sequence successfully binarised.")
             else:
-                print(f"{p_id} binarisation of CSF, WM and GM segmented PVE masks for corrected Run 1 sequence already completed. Skipping process.")
-            csf_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/csf_intersect_mask.nii.gz"
+                print(f"{p_id} binarisation of WM and GM segmented PVE masks for corrected Run 1 sequence already completed. Skipping process.")
             wm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/wm_intersect_mask.nii.gz"
             gm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/gm_intersect_mask.nii.gz"
             if not os.path.exists(csf_intersect_mask):
-                print(f"Creating CSF intersect mask for {p_id}...")
-                subprocess.run(['fslmaths', uncorrected_csf_pve_seg_bin, '-mul', corrected_csf_pve_seg_bin, '-bin', csf_intersect_mask])
+                print(f"Creating intersect masks for {p_id}...")
                 subprocess.run(['fslmaths', uncorrected_wm_pve_seg_bin, '-mul', corrected_wm_pve_seg_bin, '-bin', wm_intersect_mask])
                 subprocess.run(['fslmaths', uncorrected_gm_pve_seg_bin, '-mul', corrected_gm_pve_seg_bin, '-bin', gm_intersect_mask])
-                print(f"CSF intersect mask for {p_id} successfully created.")
+                print(f"Intersect masks for {p_id} successfully created.")
             else:
-                print(f"CSF intersect mask for {p_id} already created. Skipping process.")
-            csf_intersect_vol = float(subprocess.run(['fslstats', csf_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+                print(f"Intersect masks for {p_id} already created. Skipping process.")
             wm_intersect_vol = float(subprocess.run(['fslstats', wm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
             gm_intersect_vol = float(subprocess.run(['fslstats', gm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
-            uncorrected_csf_mask_vol = float(subprocess.run(['fslstats', uncorrected_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            corrected_csf_mask_vol = float(subprocess.run(['fslstats', corrected_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            if uncorrected_csf_mask_vol < corrected_csf_mask_vol:
-                csf_overlap_perc = (csf_intersect_vol / uncorrected_csf_mask_vol) * 100
-            else: 
-                csf_overlap_perc = (csf_intersect_vol / corrected_csf_mask_vol) * 100
             uncorrected_wm_mask_vol = float(subprocess.run(['fslstats', uncorrected_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
             corrected_wm_mask_vol = float(subprocess.run(['fslstats', corrected_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
             if uncorrected_wm_mask_vol < corrected_wm_mask_vol:
@@ -1156,11 +1143,8 @@ if answer3 == 'y':
             overlap_perc_col_2 = []
             participant_col_2.append(p_id)
             participant_col_2.append(p_id)
-            participant_col_2.append(p_id)
-            tissue_type_col_2.append('csf')
             tissue_type_col_2.append('wm')
             tissue_type_col_2.append('gm')
-            overlap_perc_col_2.append(csf_overlap_perc)
             overlap_perc_col_2.append(wm_overlap_perc)
             overlap_perc_col_2.append(gm_overlap_perc)
             overlap_perc_df_2 = pd.DataFrame({'p_id': participant_col_2, 'tissue_type': tissue_type_col_2, 'overlap_perc': overlap_perc_col_2})
@@ -1170,11 +1154,8 @@ if answer3 == 'y':
             if p_id not in group_participant_col:
                 group_participant_col_2.append(p_id)
                 group_participant_col_2.append(p_id)
-                group_participant_col_2.append(p_id)
-                group_tissue_type_col_2.append('csf')
                 group_tissue_type_col_2.append('wm')
                 group_tissue_type_col_2.append('gm')
-                group_overlap_perc_col_2.append(csf_overlap_perc) 
                 group_overlap_perc_col_2.append(wm_overlap_perc) 
                 group_overlap_perc_col_2.append(gm_overlap_perc)          
                 group_overlap_perc_df_2 = pd.DataFrame({'p_id': group_participant_col_2, 'tissue_type': group_tissue_type_col_2, 'overlap_perc': group_overlap_perc_col_2})

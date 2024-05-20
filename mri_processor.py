@@ -1049,35 +1049,43 @@ if answer3 == 'y':
             else:
                 print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} already appended to group file in group/preproc/pe_test folder. Skipping process.")
     for p_id in participants_to_iterate:
-        if p_id in good_participants:
-            nh_bet_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_bet.nii.gz")
-            if not os.path.exists(nh_bet_path):
-                nh_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis", "run01_nh.nii.gz")
+        if p_id in good_participants:            
+            
+            nh_av_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_av.nii"
+            if not os.path.exists(nh_av_path):
+                print(f"{p_id} Run 1 images being averaged...")
+                nh_path = f"{p_id}/analysis/preproc/niftis/run01_nh.nii.gz"
+                subprocess.run(['fslmaths', nh_path, '-Tmean', nh_av_path])
+                print(f"{p_id} Run 1 images successfully averaged.")
+            else:
+                print(f"{p_id} Run 1 images already averaged. Skipping process.")
+
+            nh_av_bet_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_av_bet.nii")
+            if not os.path.exists(nh_av_bet_path):
                 print(f"Performing brain extraction on Run 1 functional image.")
-                subprocess.run(["bet", nh_path, nh_bet_path, "-m", "-R"])
+                subprocess.run(["bet", nh_av_path, nh_av_bet_path, "-m", "-R"])
                 print("Run 1 functional image brain extracted.")
             else:
                 print("Run 1 functional image already brain extracted. Skipping process.")
             
-            nh_bet_dc_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_bet_dc.nii.gz")
-            if not os.path.exists():
+            nh_av_bet_dc_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_av_bet_dc.nii")
+            if not os.path.exists(nh_av_bet_dc_path):
                 print("Applying fieldmaps...")
-                subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_bet.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/run01_nh_bet_dc"])
+                subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_av_bet.nii", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/run01_nh_av_bet_dc"])
                 print("Fieldmap application completed.")
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")
         
-            t1_flirted_uncorrected_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/t1_flirted_uncorrected_run.nii.gz"
-            t1_flirted_corrected_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/t1_flirted_corrected_run.nii.gz"
+            t1_flirted_uncorrected_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/t1_flirted_uncorrected_run.nii"
+            t1_flirted_corrected_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/t1_flirted_corrected_run.nii"
             if not os.path.exists(t1_flirted_uncorrected_run):
-                uncorrected_run = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_bet.nii.gz'
-                corrected_run = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_bet_dc.nii.gz'
                 print(f"Aligning corrected and uncorrected Run 1 sequences to structural image for {p_id} distortion correction test 2...")
-                subprocess.run(["flirt", "-in", uncorrected_run, "-ref", structural_brain, "-out", t1_flirted_uncorrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/t1_flirted_uncorrected_run_transformation.mat"])
-                subprocess.run(["flirt", "-in", corrected_run, "-ref", structural_brain, "-out", t1_flirted_corrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/t1_flirted_corrected_run_transformation.mat"])
+                subprocess.run(["flirt", "-in", nh_av_bet_path, "-ref", structural_brain, "-out", t1_flirted_uncorrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/t1_flirted_uncorrected_run_transformation.mat"])
+                subprocess.run(["flirt", "-in", nh_av_bet_dc_path, "-ref", structural_brain, "-out", t1_flirted_corrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/t1_flirted_corrected_run_transformation.mat"])
                 print(f"Corrected and uncorrected Run 1 sequence aligned to structural image successfully for {p_id}.")
             else:
                 print(f"Corrected and uncorrected Run 1 sequences have already been aligned to structural image for {p_id}. Skipping process.")
+            
             uncorrected_csf_pve_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_0.nii.gz"
             if not os.path.exists(uncorrected_csf_pve_seg):
                 print(f"Segmenting {p_id} uncorrected and corrected Run 1 sequence...")

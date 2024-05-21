@@ -1086,54 +1086,52 @@ if answer3 == 'y':
             else:
                 print(f"Corrected and uncorrected Run 1 sequences have already been aligned to structural image for {p_id}. Skipping process.")
             
-            def get_image_stats(image_path):
-                """Calculate the mean and standard deviation of an image using fslstats."""
-                mean_result = subprocess.run(['fslstats', image_path, '-M'], capture_output=True, text=True)
-                std_result = subprocess.run(['fslstats', image_path, '-S'], capture_output=True, text=True)
-                
-                mean_intensity = float(mean_result.stdout.strip())
-                std_intensity = float(std_result.stdout.strip())
-                
-                return mean_intensity, std_intensity
+            
+            
+            import SimpleITK as sitk
 
-            def normalize_image(input_image, mean_orig, std_orig, mean_corr, std_corr, output_image):
-                """Normalize the intensity of the corrected image using the mean and std of the original image."""
-                temp_image = 'temp_scaled_image.nii.gz'
+            def histogram_matching(input_image_path, reference_image_path, output_image_path):
+                """
+                Perform histogram matching on the input image to match the reference image.
                 
-                # Subtract the mean of the corrected image
-                subprocess.run(['fslmaths', input_image, '-sub', str(mean_corr), temp_image])
+                Parameters:
+                    input_image_path (str): Path to the input image.
+                    reference_image_path (str): Path to the reference image.
+                    output_image_path (str): Path to save the output normalized image.
+                """
+                # Read the input and reference images
+                input_image = sitk.ReadImage(input_image_path)
+                reference_image = sitk.ReadImage(reference_image_path)
                 
-                # Scale by the standard deviation ratio
-                scale_factor = std_orig / std_corr
-                subprocess.run(['fslmaths', temp_image, '-mul', str(scale_factor), temp_image])
+                # Perform histogram matching
+                matcher = sitk.HistogramMatchingImageFilter()
+                matcher.SetNumberOfHistogramLevels(256)
+                matcher.SetNumberOfMatchPoints(10)
+                matcher.ThresholdAtMeanIntensityOn()
                 
-                # Add the mean of the original image
-                subprocess.run(['fslmaths', temp_image, '-add', str(mean_orig), output_image])
+                matched_image = matcher.Execute(input_image, reference_image)
                 
-                # Clean up temporary files
-                if os.path.exists(temp_image):
-                    os.remove(temp_image)
+                # Save the result
+                sitk.WriteImage(matched_image, output_image_path)
+                print(f"Histogram matching completed. The normalized image is saved as {output_image_path}")
 
             def main():
                 # File paths
                 uncorrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"
                 corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run.nii.gz"
                 normalised_corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run.nii.gz"
-
-                # Calculate mean and standard deviation of both images
-                mean_orig, std_orig = get_image_stats(uncorrected_image)
-                mean_corr, std_corr = get_image_stats(corrected_image)
-
-                # Normalize the corrected image
-                normalize_image(corrected_image, mean_orig, std_orig, mean_corr, std_corr, normalised_corrected_image)
-
-                print(f"Normalization completed. The normalized image is saved as {normalised_corrected_image}")
+                
+                # Perform histogram matching
+                histogram_matching(corrected_image, uncorrected_image, normalised_corrected_image)
 
             if __name__ == "__main__":
                 main()
-            
-            
-            
+
+
+
+
+
+
 
             uncorrected_csf_pve_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_0.nii.gz"
             if not os.path.exists(uncorrected_csf_pve_seg):

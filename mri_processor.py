@@ -1086,32 +1086,54 @@ if answer3 == 'y':
             else:
                 print(f"Corrected and uncorrected Run 1 sequences have already been aligned to structural image for {p_id}. Skipping process.")
             
-            def get_mean_intensity(image_path):
-                """Calculate the mean intensity of an image using fslstats."""
-                result = subprocess.run(['fslstats', image_path, '-M'], capture_output=True, text=True)
-                mean_intensity = float(result.stdout.strip())
-                return mean_intensity
+            def get_image_stats(image_path):
+                """Calculate the mean and standard deviation of an image using fslstats."""
+                mean_result = subprocess.run(['fslstats', image_path, '-M'], capture_output=True, text=True)
+                std_result = subprocess.run(['fslstats', image_path, '-S'], capture_output=True, text=True)
+                
+                mean_intensity = float(mean_result.stdout.strip())
+                std_intensity = float(std_result.stdout.strip())
+                
+                return mean_intensity, std_intensity
 
-            def scale_image(input_image, scale_factor, output_image):
-                """Scale the intensity of an image using fslmaths."""
-                subprocess.run(['fslmaths', input_image, '-mul', str(scale_factor), output_image])
+            def normalize_image(input_image, mean_orig, std_orig, mean_corr, std_corr, output_image):
+                """Normalize the intensity of the corrected image using the mean and std of the original image."""
+                temp_image = 'temp_scaled_image.nii.gz'
+                
+                # Subtract the mean of the corrected image
+                subprocess.run(['fslmaths', input_image, '-sub', str(mean_corr), temp_image])
+                
+                # Scale by the standard deviation ratio
+                scale_factor = std_orig / std_corr
+                subprocess.run(['fslmaths', temp_image, '-mul', str(scale_factor), temp_image])
+                
+                # Add the mean of the original image
+                subprocess.run(['fslmaths', temp_image, '-add', str(mean_orig), output_image])
+                
+                # Clean up temporary files
+                if os.path.exists(temp_image):
+                    os.remove(temp_image)
 
             def main():
+                # File paths
                 uncorrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"
                 corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run.nii.gz"
                 normalised_corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run.nii.gz"
 
-                mean_orig = get_mean_intensity(uncorrected_image)
-                mean_corr = get_mean_intensity(corrected_image)
+                # Calculate mean and standard deviation of both images
+                mean_orig, std_orig = get_image_stats(uncorrected_image)
+                mean_corr, std_corr = get_image_stats(corrected_image)
 
-                scale_factor = mean_orig / mean_corr
-
-                scale_image(corrected_image, scale_factor, normalised_corrected_image)
+                # Normalize the corrected image
+                normalize_image(corrected_image, mean_orig, std_orig, mean_corr, std_corr, normalised_corrected_image)
 
                 print(f"Normalization completed. The normalized image is saved as {normalised_corrected_image}")
 
             if __name__ == "__main__":
                 main()
+            
+            
+            
 
             uncorrected_csf_pve_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_0.nii.gz"
             if not os.path.exists(uncorrected_csf_pve_seg):

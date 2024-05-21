@@ -1088,7 +1088,7 @@ if answer3 == 'y':
             
             import SimpleITK as sitk
 
-            def histogram_matching(input_image_path, reference_image_path, output_image_path):
+            def histogram_matching(input_image_path, reference_image_path, output_image_path, levels=1024, match_points=20):
                 """
                 Perform histogram matching on the input image to match the reference image.
                 
@@ -1096,15 +1096,17 @@ if answer3 == 'y':
                     input_image_path (str): Path to the input image.
                     reference_image_path (str): Path to the reference image.
                     output_image_path (str): Path to save the output normalized image.
+                    levels (int): Number of histogram levels.
+                    match_points (int): Number of match points.
                 """
                 # Read the input and reference images
                 input_image = sitk.ReadImage(input_image_path)
                 reference_image = sitk.ReadImage(reference_image_path)
                 
-                # Perform histogram matching
+                # Perform histogram matching with more levels and match points
                 matcher = sitk.HistogramMatchingImageFilter()
-                matcher.SetNumberOfHistogramLevels(256)
-                matcher.SetNumberOfMatchPoints(10)
+                matcher.SetNumberOfHistogramLevels(levels)
+                matcher.SetNumberOfMatchPoints(match_points)
                 matcher.ThresholdAtMeanIntensityOn()
                 
                 matched_image = matcher.Execute(input_image, reference_image)
@@ -1120,7 +1122,7 @@ if answer3 == 'y':
                 normalised_corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run.nii.gz"
                 
                 # Perform histogram matching
-                histogram_matching(corrected_image, uncorrected_image, normalised_corrected_image)
+                histogram_matching(corrected_image, uncorrected_image, normalised_corrected_image, levels=1024, match_points=20)
 
             if __name__ == "__main__":
                 main()
@@ -1130,8 +1132,8 @@ if answer3 == 'y':
                 print(f"Segmenting {p_id} uncorrected and corrected Run 1 sequence...")
                 uncorrected_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg"
                 corrected_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg"
-                subprocess.run(["fast", "-n", "3", "-B", "-I", "4", "-o", uncorrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"])
-                subprocess.run(["fast", "-n", "3", "-B", "-I", "4", "-o", corrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run.nii.gz"])
+                subprocess.run(["fast", "-n", "3", "-B", "-I", "8", "-o", uncorrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"])
+                subprocess.run(["fast", "-n", "3", "-B", "-I", "8", "-o", corrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run.nii.gz"])
                 print(f"{p_id} segmentation of uncorrected and corrected Run 1 sequence completed.")
             else:
                 print(f"{p_id} segmentation uncorrected and corrected Run 1 sequence already completed. Skipping process.")

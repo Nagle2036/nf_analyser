@@ -1091,22 +1091,20 @@ if answer3 == 'y':
             def denoise_image(input_image_path, output_image_path):
                 """
                 Apply denoising filter to the input image.
-                
+
                 Parameters:
                     input_image_path (str): Path to the input image.
                     output_image_path (str): Path to save the denoised image.
                 """
                 input_image = sitk.ReadImage(input_image_path)
-                denoised_image = sitk.CurvatureFlow(image1=input_image,
-                                                    timeStep=0.125,
-                                                    numberOfIterations=5)
+                denoised_image = sitk.CurvatureFlow(image1=input_image, timeStep=0.125, numberOfIterations=5)
                 sitk.WriteImage(denoised_image, output_image_path)
                 print(f"Denoising completed. The denoised image is saved as {output_image_path}")
-            
+
             def histogram_matching(input_image_path, reference_image_path, output_image_path, levels=1024, match_points=20):
                 """
                 Perform histogram matching on the input image to match the reference image.
-                
+
                 Parameters:
                     input_image_path (str): Path to the input image.
                     reference_image_path (str): Path to the reference image.
@@ -1118,27 +1116,35 @@ if answer3 == 'y':
                 input_image = sitk.ReadImage(input_image_path)
                 reference_image = sitk.ReadImage(reference_image_path)
                 
+                # Ensure both images have the same pixel type
+                input_image = sitk.Cast(input_image, sitk.sitkFloat32)
+                reference_image = sitk.Cast(reference_image, sitk.sitkFloat32)
+
                 # Perform histogram matching with more levels and match points
                 matcher = sitk.HistogramMatchingImageFilter()
                 matcher.SetNumberOfHistogramLevels(levels)
                 matcher.SetNumberOfMatchPoints(match_points)
                 matcher.ThresholdAtMeanIntensityOn()
-                
+
                 matched_image = matcher.Execute(input_image, reference_image)
-                
+
                 # Save the result
                 sitk.WriteImage(matched_image, output_image_path)
                 print(f"Histogram matching completed. The normalized image is saved as {output_image_path}")
 
             def main():
+                # Define participant ID
+                p_id = "your_participant_id"  # Update this as necessary
+
                 # File paths
                 uncorrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"
                 corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run.nii.gz"
                 denoised_corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run_denoised.nii.gz"
                 normalised_corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run_denoised.nii.gz"
-                
+
+                # Perform denoising
                 denoise_image(corrected_image, denoised_corrected_image)
-                
+
                 # Perform histogram matching
                 histogram_matching(denoised_corrected_image, uncorrected_image, normalised_corrected_image, levels=1024, match_points=20)
 

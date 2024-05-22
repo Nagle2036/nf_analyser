@@ -1098,7 +1098,16 @@ if answer3 == 'y':
                         voxel_coordinates.append(
                             (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
                 return voxel_coordinates
-            roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', f'target_folder_run-1', f'depnf_run-1.roi')
+            path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
+            cisc_folder = None
+            for folder_name in os.listdir(path):
+                if "CISC" in folder_name:
+                    cisc_folder = folder_name
+                    break
+            if cisc_folder is None:
+                print("No 'CISC' folder found in the 'neurofeedback' directory.")
+                exit(1)
+            roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', 'target_folder_run-1', 'depnf_run-1.roi')
             voxel_coordinates = read_roi_file(roi_file)
             functional_image = f'{p_id}/analysis/susceptibility/niftis/run01_averaged.nii.gz'
             subprocess.run(['fslmaths', f"{p_id}/analysis/preproc/niftis/run01.nii", '-Tmean', functional_image])

@@ -1155,7 +1155,7 @@ if answer3 == 'y':
                 uncorrected_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg"
                 corrected_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg"
                 subprocess.run(["fast", "-n", "3", "-B", "-I", "8", "-o", uncorrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"])
-                subprocess.run(["fast", "-n", "3", "-B", "-I", "8", "-o", corrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run.nii.gz"])
+                subprocess.run(["fast", "-n", "3", "-B", "-I", "8", "-o", corrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run_denoised.nii.gz"])
                 print(f"{p_id} segmentation of uncorrected and corrected Run 1 sequence completed.")
             else:
                 print(f"{p_id} segmentation uncorrected and corrected Run 1 sequence already completed. Skipping process.")

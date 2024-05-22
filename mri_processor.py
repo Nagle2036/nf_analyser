@@ -1086,146 +1086,37 @@ if answer3 == 'y':
             else:
                 print(f"Corrected and uncorrected Run 1 sequences have already been aligned to structural image for {p_id}. Skipping process.")
             
-            import SimpleITK as sitk
 
-            def denoise_image(input_image_path, output_image_path):
-                """
-                Apply denoising filter to the input image.
+            def compute_difference_image(image1, image2, output_image):
+                """Function to compute difference image using fslmaths."""
+                subprocess.run(["fslmaths", image1, "-sub", image2, output_image], check=True)
 
-                Parameters:
-                    input_image_path (str): Path to the input image.
-                    output_image_path (str): Path to save the denoised image.
-                """
-                input_image = sitk.ReadImage(input_image_path)
-                denoised_image = sitk.CurvatureFlow(image1=input_image, timeStep=0.125, numberOfIterations=5)
-                sitk.WriteImage(denoised_image, output_image_path)
-                print(f"Denoising completed. The denoised image is saved as {output_image_path}")
-
-            def histogram_matching(input_image_path, reference_image_path, output_image_path, levels=1024, match_points=20):
-                """
-                Perform histogram matching on the input image to match the reference image.
-
-                Parameters:
-                    input_image_path (str): Path to the input image.
-                    reference_image_path (str): Path to the reference image.
-                    output_image_path (str): Path to save the output normalized image.
-                    levels (int): Number of histogram levels.
-                    match_points (int): Number of match points.
-                """
-                # Read the input and reference images
-                input_image = sitk.ReadImage(input_image_path)
-                reference_image = sitk.ReadImage(reference_image_path)
-                
-                # Ensure both images have the same pixel type
-                input_image = sitk.Cast(input_image, sitk.sitkFloat32)
-                reference_image = sitk.Cast(reference_image, sitk.sitkFloat32)
-
-                # Perform histogram matching with more levels and match points
-                matcher = sitk.HistogramMatchingImageFilter()
-                matcher.SetNumberOfHistogramLevels(levels)
-                matcher.SetNumberOfMatchPoints(match_points)
-                matcher.ThresholdAtMeanIntensityOn()
-
-                matched_image = matcher.Execute(input_image, reference_image)
-
-                # Save the result
-                sitk.WriteImage(matched_image, output_image_path)
-                print(f"Histogram matching completed. The normalized image is saved as {output_image_path}")
+            def compute_mutual_information(image1, image2, output_file):
+                """Function to compute mutual information using flirt with cost function mutualinfo."""
+                subprocess.run(["flirt", "-in", image1, "-ref", image2, "-out", output_file, "-cost", "mutualinfo"], check=True)
 
             def main():
 
-                # File paths
+                # Define file paths
                 uncorrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"
                 corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run.nii.gz"
-                denoised_corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run_denoised.nii.gz"
-                normalised_corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run_denoised.nii.gz"
+                
+                difference_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/difference_image.nii.gz"
+                mutual_info_output = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/mutual_info_output.txt"
 
-                # Perform denoising
-                denoise_image(corrected_image, denoised_corrected_image)
+                
+                # Step 2: Compute difference image
+                print("Computing difference image between aligned uncorrected and corrected images...")
+                compute_difference_image(uncorrected_image, corrected_image, difference_image)
 
-                # Perform histogram matching
-                histogram_matching(denoised_corrected_image, uncorrected_image, normalised_corrected_image, levels=1024, match_points=20)
+                # Step 3: Compute mutual information
+                print("Computing mutual information between uncorrected and corrected images...")
+                compute_mutual_information(uncorrected_image, corrected_image, mutual_info_output)
+
+                print("Analysis completed successfully.")
 
             if __name__ == "__main__":
                 main()
-
-            uncorrected_csf_pve_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_0.nii.gz"
-            if not os.path.exists(uncorrected_csf_pve_seg):
-                print(f"Segmenting {p_id} uncorrected and corrected Run 1 sequence...")
-                uncorrected_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg"
-                corrected_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg"
-                subprocess.run(["fast", "-n", "3", "-B", "-I", "8", "-o", uncorrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"])
-                subprocess.run(["fast", "-n", "3", "-B", "-I", "8", "-o", corrected_seg, f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_normalised_corrected_run_denoised.nii.gz"])
-                print(f"{p_id} segmentation of uncorrected and corrected Run 1 sequence completed.")
-            else:
-                print(f"{p_id} segmentation uncorrected and corrected Run 1 sequence already completed. Skipping process.")
-            uncorrected_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_wm_pve_seg_bin.nii.gz"
-            uncorrected_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_gm_pve_seg_bin.nii.gz"
-            if not os.path.exists(uncorrected_wm_pve_seg_bin):
-                print(f"Binarising {p_id} WM and GM segmented PVE masks for uncorrected Run 1 sequence...")
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', uncorrected_wm_pve_seg_bin])
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', uncorrected_gm_pve_seg_bin])
-                print(f"{p_id} CSF, WM, and GM segmented PVE masks for uncorrected Run 1 sequence successfully binarised.")
-            else:
-                print(f"{p_id} binarisation of WM and GM segmented PVE masks for uncorrected Run 1 sequence already completed. Skipping process.")
-            corrected_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_wm_pve_seg_bin.nii.gz"
-            corrected_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_gm_pve_seg_bin.nii.gz"
-            if not os.path.exists(corrected_wm_pve_seg_bin):
-                print(f"Binarising {p_id} CSF, WM and GM segmented PVE masks for corrected Run 1 sequence...")
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', corrected_wm_pve_seg_bin])
-                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', corrected_gm_pve_seg_bin])
-                print(f"{p_id} WM and GM segmented PVE masks for corrected Run 1 sequence successfully binarised.")
-            else:
-                print(f"{p_id} binarisation of WM and GM segmented PVE masks for corrected Run 1 sequence already completed. Skipping process.")
-            wm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/wm_intersect_mask.nii.gz"
-            gm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/gm_intersect_mask.nii.gz"
-            if not os.path.exists(csf_intersect_mask):
-                print(f"Creating intersect masks for {p_id}...")
-                subprocess.run(['fslmaths', uncorrected_wm_pve_seg_bin, '-mul', corrected_wm_pve_seg_bin, '-bin', wm_intersect_mask])
-                subprocess.run(['fslmaths', uncorrected_gm_pve_seg_bin, '-mul', corrected_gm_pve_seg_bin, '-bin', gm_intersect_mask])
-                print(f"Intersect masks for {p_id} successfully created.")
-            else:
-                print(f"Intersect masks for {p_id} already created. Skipping process.")
-            wm_intersect_vol = float(subprocess.run(['fslstats', wm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
-            gm_intersect_vol = float(subprocess.run(['fslstats', gm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
-            uncorrected_wm_mask_vol = float(subprocess.run(['fslstats', uncorrected_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            corrected_wm_mask_vol = float(subprocess.run(['fslstats', corrected_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            if uncorrected_wm_mask_vol < corrected_wm_mask_vol:
-                wm_overlap_perc = (wm_intersect_vol / uncorrected_wm_mask_vol) * 100
-            else: 
-                wm_overlap_perc = (wm_intersect_vol / corrected_wm_mask_vol) * 100
-            uncorrected_gm_mask_vol = float(subprocess.run(['fslstats', uncorrected_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            corrected_gm_mask_vol = float(subprocess.run(['fslstats', corrected_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            if uncorrected_gm_mask_vol < corrected_gm_mask_vol:
-                gm_overlap_perc = (gm_intersect_vol / uncorrected_gm_mask_vol) * 100
-            else: 
-                gm_overlap_perc = (gm_intersect_vol / corrected_gm_mask_vol) * 100
-            overlap_perc_file_2 = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/overlap_perc.txt"
-            participant_col_2 = []
-            tissue_type_col_2 = []
-            overlap_perc_col_2 = []
-            participant_col_2.append(p_id)
-            participant_col_2.append(p_id)
-            tissue_type_col_2.append('wm')
-            tissue_type_col_2.append('gm')
-            overlap_perc_col_2.append(wm_overlap_perc)
-            overlap_perc_col_2.append(gm_overlap_perc)
-            overlap_perc_df_2 = pd.DataFrame({'p_id': participant_col_2, 'tissue_type': tissue_type_col_2, 'overlap_perc': overlap_perc_col_2})
-            overlap_perc_df_2.to_csv(overlap_perc_file_2, sep='\t', index=False)
-            print(f"Percentage of overlap between uncorrected and corrected Run 1 sequence segmentation masks for {p_id} saved to preproc/fieldmaps/pe_test/2 folder.")
-            group_overlap_perc_file_2 = "group/preproc/pe_test/2/overlap_perc.txt"
-            if p_id not in group_participant_col:
-                group_participant_col_2.append(p_id)
-                group_participant_col_2.append(p_id)
-                group_tissue_type_col_2.append('wm')
-                group_tissue_type_col_2.append('gm')
-                group_overlap_perc_col_2.append(wm_overlap_perc) 
-                group_overlap_perc_col_2.append(gm_overlap_perc)          
-                group_overlap_perc_df_2 = pd.DataFrame({'p_id': group_participant_col_2, 'tissue_type': group_tissue_type_col_2, 'overlap_perc': group_overlap_perc_col_2})
-                group_overlap_perc_df_2.to_csv(group_overlap_perc_file_2, sep='\t', index=False)
-                print(f"Percentage of overlap between uncorrected and corrected Run 1 sequence segmentation masks for {p_id} appended to group file in group/preproc/pe_test/2 folder.")
-            else:
-                print(f"Percentage of overlap between uncorrected and corrected Run 1 sequence segmentation masks for {p_id} already appended to group file in group/preproc/pe_test/2 folder. Skipping process.")
 
     # Step 11: Create onset files.
     print("\n###### STEP 11: CREATING ONSET FILES ######")

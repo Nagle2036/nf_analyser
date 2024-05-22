@@ -1057,7 +1057,7 @@ if answer3 == 'y':
             uncorrected_run = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_av_bet.nii.gz")
             if not os.path.exists(uncorrected_run):
                 print(f"Performing brain extraction on Run 1 functional image.")
-                subprocess.run(["bet", nh_av_path, uncorrected_run, "-m", "-R"])
+                subprocess.run(["bet", nh_av_path, uncorrected_run, "-m", "-R", "-Z"])
                 print("Run 1 functional image brain extracted.")
             else:
                 print("Run 1 functional image already brain extracted. Skipping process.")

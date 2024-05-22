@@ -37,6 +37,8 @@ import openpyxl
 import warnings
 import pydicom
 import random
+import nibabel as nib
+from skimage.metrics import structural_similarity as ssim
 
 #endregion
 
@@ -1094,6 +1096,26 @@ if answer3 == 'y':
             def compute_mutual_information(image1, image2, output_file):
                 """Function to compute mutual information using flirt with cost function mutualinfo."""
                 subprocess.run(["flirt", "-in", image1, "-ref", image2, "-out", output_file, "-cost", "mutualinfo"], check=True)
+            
+            def calculate_ssim(image1_path, image2_path, ssim_output_path):
+                """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
+                # Load the NIfTI images
+                image1 = nib.load(image1_path).get_fdata()
+                image2 = nib.load(image2_path).get_fdata()
+
+                # Ensure the images have the same shape
+                if image1.shape != image2.shape:
+                    raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+
+                # Calculate SSIM and the SSIM map
+                ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+
+                # Save the SSIM map as a NIfTI file
+                ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=np.eye(4))
+                nib.save(ssim_map_nifti, ssim_output_path)
+
+                print(f"SSIM Index: {ssim_index}")
+                print(f"SSIM map saved to: {ssim_output_path}")
 
             def main():
 
@@ -1103,8 +1125,8 @@ if answer3 == 'y':
                 
                 difference_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/difference_image.nii.gz"
                 mutual_info_output = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/mutual_info_output.txt"
+                ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_map.nii.gz"
 
-                
                 # Step 2: Compute difference image
                 print("Computing difference image between aligned uncorrected and corrected images...")
                 compute_difference_image(uncorrected_image, corrected_image, difference_image)
@@ -1112,6 +1134,10 @@ if answer3 == 'y':
                 # Step 3: Compute mutual information
                 print("Computing mutual information between uncorrected and corrected images...")
                 compute_mutual_information(uncorrected_image, corrected_image, mutual_info_output)
+
+                # Step 4: Calculate SSIM
+                print("Calculating SSIM between uncorrected and corrected images...")
+                calculate_ssim(uncorrected_image, corrected_image, ssim_output_path)
 
                 print("Analysis completed successfully.")
 

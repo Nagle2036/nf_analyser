@@ -308,12 +308,6 @@ if answer3 == 'y':
         os.makedirs(group_folder, exist_ok=True)
         group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
         os.makedirs(group_preproc_folder, exist_ok=True)
-        group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc', '1')
-        os.makedirs(group_preproc_folder, exist_ok=True)
-        group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc', '2')
-        os.makedirs(group_preproc_folder, exist_ok=True)
-        group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc', '3')
-        os.makedirs(group_preproc_folder, exist_ok=True)
         ms_test_folder = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test')
         os.makedirs(ms_test_folder, exist_ok=True)
         pe_test_folder = os.path.join(os.getcwd(), 'group', 'preproc','pe_test', '1')
@@ -905,15 +899,12 @@ if answer3 == 'y':
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")
     
-    # Step 10: Test quality of alternate distortion correction method.
-    print("\n###### STEP 10: TESTING ALTERNATE DISTORTION CORRECTION METHOD ######")
+    # Step 10: Test quality of alternate distortion correction method (Stage 1).
+    print("\n###### STEP 10: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 1) ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     group_participant_col = []
     group_tissue_type_col = []
     group_overlap_perc_col = []
-    group_participant_col_2 = []
-    group_tissue_type_col_2 = []
-    group_overlap_perc_col_2 = []
     for p_id in participants_to_iterate:
         if p_id in good_participants:
             ap_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
@@ -1050,9 +1041,11 @@ if answer3 == 'y':
                 print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} appended to group file in group/preproc/pe_test folder.")
             else:
                 print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} already appended to group file in group/preproc/pe_test folder. Skipping process.")
+    
+    # Step 11: Test quality of alternate distortion correction method (Stage 2).
+    print("\n###### STEP 11: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
     for p_id in participants_to_iterate:
         if p_id in good_participants:            
-            
             nh_av_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_av.nii.gz"
             if not os.path.exists(nh_av_path):
                 print(f"{p_id} Run 1 images being averaged...")
@@ -1061,7 +1054,6 @@ if answer3 == 'y':
                 print(f"{p_id} Run 1 images successfully averaged.")
             else:
                 print(f"{p_id} Run 1 images already averaged. Skipping process.")
-
             nh_av_bet_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_av_bet.nii.gz")
             if not os.path.exists(nh_av_bet_path):
                 print(f"Performing brain extraction on Run 1 functional image.")
@@ -1069,7 +1061,6 @@ if answer3 == 'y':
                 print("Run 1 functional image brain extracted.")
             else:
                 print("Run 1 functional image already brain extracted. Skipping process.")
-            
             nh_av_bet_dc_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_av_bet_dc.nii.gz")
             if not os.path.exists(nh_av_bet_dc_path):
                 print("Applying fieldmaps...")
@@ -1077,7 +1068,6 @@ if answer3 == 'y':
                 print("Fieldmap application completed.")
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")
-        
             flirted_uncorrected_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"
             flirted_corrected_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run.nii.gz"
             if not os.path.exists(flirted_uncorrected_run):
@@ -1087,64 +1077,61 @@ if answer3 == 'y':
                 print(f"Corrected and uncorrected Run 1 sequence aligned to structural image successfully for {p_id}.")
             else:
                 print(f"Corrected and uncorrected Run 1 sequences have already been aligned to structural image for {p_id}. Skipping process.")
-            
-
-            def compute_difference_image(image1, image2, output_image):
-                """Function to compute difference image using fslmaths."""
-                subprocess.run(["fslmaths", image1, "-sub", image2, output_image], check=True)
-
-            def compute_mutual_information(image1, image2, output_file):
-                """Function to compute mutual information using flirt with cost function mutualinfo."""
-                subprocess.run(["flirt", "-in", image1, "-ref", image2, "-out", output_file, "-cost", "mutualinfo"], check=True)
-            
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
-                # Load the NIfTI images
                 image1 = nib.load(image1_path).get_fdata()
                 image2 = nib.load(image2_path).get_fdata()
-
-                # Ensure the images have the same shape
                 if image1.shape != image2.shape:
                     raise ValueError("Input images must have the same dimensions for SSIM calculation.")
-
-                # Calculate SSIM and the SSIM map
                 ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
-
-                # Save the SSIM map as a NIfTI file
                 ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=np.eye(4))
                 nib.save(ssim_map_nifti, ssim_output_path)
-
                 print(f"SSIM Index: {ssim_index}")
                 print(f"SSIM map saved to: {ssim_output_path}")
+            def read_roi_file(roi_file):
+                voxel_coordinates = []
+                with open(roi_file, 'r') as file:
+                    content = file.read()
+                    matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
+                    for match in matches:
+                        coordinates = match.split()
+                        voxel_coordinates.append(
+                            (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
+                return voxel_coordinates
+            roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', f'target_folder_run-1', f'depnf_run-1.roi')
+            voxel_coordinates = read_roi_file(roi_file)
+            functional_image = f'{p_id}/analysis/susceptibility/niftis/run01_averaged.nii.gz'
+            subprocess.run(['fslmaths', f"{p_id}/analysis/preproc/niftis/run01.nii", '-Tmean', functional_image])
+            functional_image_info = nib.load(functional_image)
+            functional_dims = functional_image_info.shape
+            binary_volume = np.zeros(functional_dims)
+            for voxel in voxel_coordinates:
+                x, y, z = voxel
+                binary_volume[x, y, z] = 1
+            binary_volume = np.flip(binary_volume, axis=1)
+            functional_affine = functional_image_info.affine
+            binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
+            nib.save(binary_nifti, f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz')
+            ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_map.nii.gz"
+            if not os.path.exists(ssim_output_path):
+                print(f"Calculating SSIM between uncorrected and corrected images for {p_id}...")
+                calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)
+                binarised_ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/binarised_ssim_mask.nii.gz"
+                subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", binarised_ssim_output_path])
+                voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+                print(voxels_in_whole_mask)
+                intersection_mask_path = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_roi_intersect.nii.gz'
+                subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz', intersection_mask_path])
+                voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+                print(voxels_in_roi_in_mask)
+                print(f"SSIM successfully calculated between uncorrected and corrected images for {p_id}.")
+            else:
+                print(f"SSIM between uncorrected and corrected images for {p_id} already calculated. Skipping process.")
 
-            def main():
 
-                # Define file paths
-                uncorrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"
-                corrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run.nii.gz"
-                
-                difference_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/difference_image.nii.gz"
-                mutual_info_output = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/mutual_info_output.txt"
-                ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_map.nii.gz"
 
-                # Step 2: Compute difference image
-                print("Computing difference image between aligned uncorrected and corrected images...")
-                compute_difference_image(uncorrected_image, corrected_image, difference_image)
 
-                # Step 3: Compute mutual information
-                print("Computing mutual information between uncorrected and corrected images...")
-                compute_mutual_information(uncorrected_image, corrected_image, mutual_info_output)
-
-                # Step 4: Calculate SSIM
-                print("Calculating SSIM between uncorrected and corrected images...")
-                calculate_ssim(uncorrected_image, corrected_image, ssim_output_path)
-
-                print("Analysis completed successfully.")
-
-            if __name__ == "__main__":
-                main()
-
-    # Step 11: Create onset files.
+    # Step 12: Create onset files.
     print("\n###### STEP 11: CREATING ONSET FILES ######")
     onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:

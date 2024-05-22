@@ -1133,8 +1133,6 @@ if answer3 == 'y':
                 print(f"Histogram matching completed. The normalized image is saved as {output_image_path}")
 
             def main():
-                # Define participant ID
-                p_id = "your_participant_id"  # Update this as necessary
 
                 # File paths
                 uncorrected_image = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"

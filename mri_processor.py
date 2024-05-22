@@ -1061,22 +1061,20 @@ if answer3 == 'y':
                 print("Run 1 functional image brain extracted.")
             else:
                 print("Run 1 functional image already brain extracted. Skipping process.")
-            nh_av_bet_dc_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_av_bet_dc.nii.gz")
-            if not os.path.exists(nh_av_bet_dc_path):
+            corrected_run = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "2", "run01_nh_av_bet_dc.nii.gz")
+            if not os.path.exists(corrected_run):
                 print("Applying fieldmaps...")
                 subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_av_bet.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_nh_av_bet_dc"])
                 print("Fieldmap application completed.")
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")
             flirted_uncorrected_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz"
-            flirted_corrected_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run.nii.gz"
             if not os.path.exists(flirted_uncorrected_run):
-                print(f"Aligning corrected and uncorrected Run 1 sequences to structural image for {p_id} distortion correction test 2...")
-                subprocess.run(["flirt", "-in", nh_av_bet_path, "-ref", structural_brain, "-out", flirted_uncorrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run_transformation.mat"])
-                subprocess.run(["flirt", "-in", nh_av_bet_dc_path, "-ref", structural_brain, "-out", flirted_corrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run_transformation.mat"])
-                print(f"Corrected and uncorrected Run 1 sequence aligned to structural image successfully for {p_id}.")
+                print(f"Aligning corrected and uncorrected Run 1 sequences to each other for {p_id} distortion correction test 2...")
+                subprocess.run(["flirt", "-in", nh_av_bet_path, "-ref", corrected_run, "-out", flirted_uncorrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run_transformation.mat"])
+                print(f"Corrected and uncorrected Run 1 sequence aligned to each other successfully for {p_id}.")
             else:
-                print(f"Corrected and uncorrected Run 1 sequences have already been aligned to structural image for {p_id}. Skipping process.")
+                print(f"Corrected and uncorrected Run 1 sequences have already been aligned to each other for {p_id}. Skipping process.")
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
                 image1 = nib.load(image1_path).get_fdata()
@@ -1109,8 +1107,8 @@ if answer3 == 'y':
                 exit(1)
             roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', 'target_folder_run-1', 'depnf_run-1.roi')
             voxel_coordinates = read_roi_file(roi_file)
-            functional_image = f'{p_id}/analysis/susceptibility/niftis/run01_averaged.nii.gz'
-            subprocess.run(['fslmaths', f"{p_id}/analysis/preproc/niftis/run01.nii", '-Tmean', functional_image])
+            functional_image = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run_averaged.nii.gz'
+            subprocess.run(['fslmaths', f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz", '-Tmean', functional_image])
             functional_image_info = nib.load(functional_image)
             functional_dims = functional_image_info.shape
             binary_volume = np.zeros(functional_dims)
@@ -1124,7 +1122,7 @@ if answer3 == 'y':
             ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 print(f"Calculating SSIM between uncorrected and corrected images for {p_id}...")
-                calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)
+                calculate_ssim(flirted_uncorrected_run, corrected_run, ssim_output_path)
                 binarised_ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/binarised_ssim_mask.nii.gz"
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", binarised_ssim_output_path])
                 voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]

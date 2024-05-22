@@ -1107,8 +1107,7 @@ if answer3 == 'y':
                 exit(1)
             roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', 'target_folder_run-1', 'depnf_run-1.roi')
             voxel_coordinates = read_roi_file(roi_file)
-            functional_image = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run_averaged.nii.gz'
-            subprocess.run(['fslmaths', f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz", '-Tmean', functional_image])
+            functional_image = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run.nii.gz'
             functional_image_info = nib.load(functional_image)
             functional_dims = functional_image_info.shape
             binary_volume = np.zeros(functional_dims)

@@ -1080,13 +1080,21 @@ if answer3 == 'y':
                 print(f"Corrected and uncorrected Run 1 sequences have already been aligned to structural image for {p_id}. Skipping process.")
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
-                image1 = nib.load(image1_path).get_fdata()
-                image2 = nib.load(image2_path).get_fdata()
+                image1_nii = nib.load(image1_path)
+                image2_nii = nib.load(image2_path)
+                image1 = image1_nii.get_fdata()
+                image2 = image2_nii.get_fdata()
+                
                 if image1.shape != image2.shape:
                     raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+                
                 ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
-                ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=np.eye(4))
+                
+                # Use the affine matrix from the first input image
+                ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine)
+                
                 nib.save(ssim_map_nifti, ssim_output_path)
+                
                 print(f"SSIM Index: {ssim_index}")
                 print(f"SSIM map saved to: {ssim_output_path}")
             def read_roi_file(roi_file):
@@ -1137,7 +1145,6 @@ if answer3 == 'y':
                 print(f"SSIM successfully calculated between uncorrected and corrected images for {p_id}.")
             else:
                 print(f"SSIM between uncorrected and corrected images for {p_id} already calculated. Skipping process.")
-
 
 
 

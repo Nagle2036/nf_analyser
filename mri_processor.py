@@ -1047,7 +1047,7 @@ if answer3 == 'y':
     for p_id in participants_to_iterate:
         if p_id in good_participants:            
             averaged_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/averaged_run.nii.gz"
-            if not os.path.exists(nh_av_path):
+            if not os.path.exists(averaged_run):
                 print(f"{p_id} Run 1 images being averaged...")
                 run = f"{p_id}/analysis/preproc/niftis/run01_nh.nii.gz"
                 subprocess.run(['fslmaths', run, '-Tmean', averaged_run])

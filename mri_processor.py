@@ -1074,7 +1074,7 @@ if answer3 == 'y':
                 print(f"Aligning corrected and uncorrected Run 1 sequences to structural image for {p_id} distortion correction test 2...")
                 structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
                 subprocess.run(["flirt", "-in", corrected_run, "-ref", structural_brain, "-out", flirted_corrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run_transformation.mat"])
-                subprocess.run(["flirt", "-in", uncorrected_run, "-ref", structural_brain, "-out", flirted_uncorrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_run_transformation.mat"])
+                subprocess.run(["flirt", "-in", uncorrected_run, "-ref", structural_brain, "-out", flirted_uncorrected_run, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_run_transformation.mat"])
                 print(f"Corrected and uncorrected Run 1 sequence aligned to structural image successfully for {p_id}.")
             else:
                 print(f"Corrected and uncorrected Run 1 sequences have already been aligned to structural image for {p_id}. Skipping process.")
@@ -1121,7 +1121,7 @@ if answer3 == 'y':
             binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
             nib.save(binary_nifti, f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz')
             subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', '/dev/null', '-omat', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/roi_transformation'])
-            subprocess.run(['flirt', '-in', 'run01_subject_space_ROI.nii', '-ref', structural_brain, '-applyxfm', '-init', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/roi_transformation.mat', '-out', 'transformed_roi_mask.nii.gz', '-interp', 'nearestneighbour'])
+            subprocess.run(['flirt', '-in', 'run01_subject_space_ROI.nii.gz', '-ref', structural_brain, '-applyxfm', '-init', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/roi_transformation.mat', '-out', 'transformed_roi_mask.nii.gz', '-interp', 'nearestneighbour'])
             ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 print(f"Calculating SSIM between uncorrected and corrected images for {p_id}...")
@@ -1131,7 +1131,7 @@ if answer3 == 'y':
                 voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
                 print(voxels_in_whole_mask)
                 intersection_mask_path = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_roi_intersect.nii.gz'
-                subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz', intersection_mask_path])
+                subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/transformed_ROI_mask.nii.gz', intersection_mask_path])
                 voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
                 print(voxels_in_roi_in_mask)
                 print(f"SSIM successfully calculated between uncorrected and corrected images for {p_id}.")

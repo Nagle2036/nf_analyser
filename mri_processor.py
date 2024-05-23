@@ -1121,7 +1121,7 @@ if answer3 == 'y':
             binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
             nib.save(binary_nifti, f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz')
             subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/temp_file.nii.gz', '-omat', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/roi_transformation.mat'])
-            subprocess.run(['flirt', '-in', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz', '-ref', structural_brain, '-applyxfm', '-init', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/roi_transformation.mat', '-out', 'transformed_roi_mask.nii.gz', '-interp', 'nearestneighbour'])
+            subprocess.run(['flirt', '-in', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz', '-ref', structural_brain, '-applyxfm', '-init', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/roi_transformation.mat', '-out', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/transformed_roi_mask.nii.gz', '-interp', 'nearestneighbour'])
             ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 print(f"Calculating SSIM between uncorrected and corrected images for {p_id}...")

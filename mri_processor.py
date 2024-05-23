@@ -1139,7 +1139,7 @@ if answer3 == 'y':
                 voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
                 print(voxels_in_whole_mask)
                 intersection_mask_path = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_roi_intersect.nii.gz'
-                subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/transformed_ROI_mask.nii.gz', intersection_mask_path])
+                subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/transformed_roi_mask.nii.gz', intersection_mask_path])
                 voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
                 print(voxels_in_roi_in_mask)
                 print(f"SSIM successfully calculated between uncorrected and corrected images for {p_id}.")

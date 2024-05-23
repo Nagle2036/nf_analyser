@@ -1084,17 +1084,11 @@ if answer3 == 'y':
                 image2_nii = nib.load(image2_path)
                 image1 = image1_nii.get_fdata()
                 image2 = image2_nii.get_fdata()
-                
                 if image1.shape != image2.shape:
                     raise ValueError("Input images must have the same dimensions for SSIM calculation.")
-                
                 ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
-                
-                # Use the affine matrix from the first input image
-                ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine)
-                
+                ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
                 nib.save(ssim_map_nifti, ssim_output_path)
-                
                 print(f"SSIM Index: {ssim_index}")
                 print(f"SSIM map saved to: {ssim_output_path}")
             def read_roi_file(roi_file):

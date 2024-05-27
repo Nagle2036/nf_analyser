@@ -1139,7 +1139,11 @@ if answer3 == 'y':
                 print(f"SSIM successfully calculated between uncorrected and corrected images for {p_id}.")
             else:
                 print(f"SSIM between uncorrected and corrected images for {p_id} already calculated. Skipping process.")
-
+            
+            corrected_roi_signal = subprocess.run([flirted_corrected_run, '-k', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/transformed_roi_mask.nii.gz', '-M'])
+            print(f"Average voxel intensity within ROI for fieldmap-corrected sequence: {corrected_roi_signal}")
+            uncorrected_roi_signal = subprocess.run([flirted_uncorrected_run, '-k', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/transformed_roi_mask.nii.gz', '-M'])
+            print(f"Average voxel intensity within ROI for fieldmap-corrected sequence: {uncorrected_roi_signal}")
 
 
     # Step 12: Create onset files.

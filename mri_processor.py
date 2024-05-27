@@ -1146,17 +1146,6 @@ if answer3 == 'y':
             uncorrected_roi_signal = subprocess.run(['fslstats', flirted_uncorrected_run, '-k', transformed_roi_mask, '-M'], capture_output=True, text=True).stdout.split()[0]
             print(f"Average voxel intensity within ROI for uncorrected sequence: {uncorrected_roi_signal}")
 
-            def get_voxel_intensities(epi_image_path, mask_image_path):
-                result = subprocess.run(
-                    ["fslstats", epi_image_path, "-k", mask_image_path, "-l", "0", "-u", "1000000000"], capture_output=True, text=True)
-                if result.returncode != 0:
-                    raise RuntimeError(f"fslstats failed with error: {result.stderr}")
-                voxel_intensities = list(map(float, result.stdout.strip().split()))
-                return voxel_intensities
-            corrected_voxel_intensities = get_voxel_intensities(flirted_corrected_run, transformed_roi_mask)
-            uncorrected_voxel_intensities = get_voxel_intensities(flirted_uncorrected_run, transformed_roi_mask)
-            print(corrected_voxel_intensities)
-            print(uncorrected_voxel_intensities)
 
             def extract_voxel_intensities(epi_image_path, mask_image_path):
                 epi_img = nib.load(epi_image_path)
@@ -1169,8 +1158,8 @@ if answer3 == 'y':
                 return voxel_intensity_list
             corrected_voxel_intensities = extract_voxel_intensities(flirted_corrected_run, transformed_roi_mask)
             uncorrected_voxel_intensities = extract_voxel_intensities(flirted_uncorrected_run, transformed_roi_mask)
-            print(corrected_voxel_intensities)
-            print(uncorrected_voxel_intensities)
+            print(np.mean(corrected_voxel_intensities))
+            print(np.mean(uncorrected_voxel_intensities))
 
 
 

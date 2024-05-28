@@ -1122,8 +1122,9 @@ if answer3 == 'y':
             functional_affine = functional_image_info.affine
             binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
             nib.save(binary_nifti, f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz')
+            transformed_roi_mask = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/transformed_roi_mask.nii.gz'
             subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/temp_file.nii.gz', '-omat', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/roi_transformation.mat'])
-            subprocess.run(['flirt', '-in', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz', '-ref', structural_brain, '-applyxfm', '-init', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/roi_transformation.mat', '-out', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/transformed_roi_mask.nii.gz', '-interp', 'nearestneighbour'])
+            subprocess.run(['flirt', '-in', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/run01_subject_space_ROI.nii.gz', '-ref', structural_brain, '-applyxfm', '-init', f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/roi_transformation.mat', '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
             ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 print(f"Calculating SSIM between uncorrected and corrected images for {p_id}...")
@@ -1139,14 +1140,6 @@ if answer3 == 'y':
                 print(f"SSIM successfully calculated between uncorrected and corrected images for {p_id}.")
             else:
                 print(f"SSIM between uncorrected and corrected images for {p_id} already calculated. Skipping process.")
-            
-            transformed_roi_mask = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/transformed_roi_mask.nii.gz'
-            corrected_roi_signal = subprocess.run(['fslstats', flirted_corrected_run, '-k', transformed_roi_mask, '-M'], capture_output=True, text=True).stdout.split()[0]
-            print(f"Average voxel intensity within ROI for fieldmap-corrected sequence: {corrected_roi_signal}")
-            uncorrected_roi_signal = subprocess.run(['fslstats', flirted_uncorrected_run, '-k', transformed_roi_mask, '-M'], capture_output=True, text=True).stdout.split()[0]
-            print(f"Average voxel intensity within ROI for uncorrected sequence: {uncorrected_roi_signal}")
-
-
             def extract_voxel_intensities(epi_image_path, mask_image_path):
                 epi_img = nib.load(epi_image_path)
                 epi_data = epi_img.get_fdata()
@@ -1158,8 +1151,12 @@ if answer3 == 'y':
                 return voxel_intensity_list
             corrected_voxel_intensities = extract_voxel_intensities(flirted_corrected_run, transformed_roi_mask)
             uncorrected_voxel_intensities = extract_voxel_intensities(flirted_uncorrected_run, transformed_roi_mask)
-            print(np.mean(corrected_voxel_intensities))
-            print(np.mean(uncorrected_voxel_intensities))
+            print(np.mean(f"Average voxel intensity within ROI for fieldmap-corrected sequence: {corrected_voxel_intensities}"))
+            print(np.mean(f"Average voxel intensity within ROI for uncorrected sequence: {uncorrected_voxel_intensities}"))
+            values = corrected_voxel_intensities + uncorrected_voxel_intensities
+            sources = ['corrected'] * len(corrected_voxel_intensities) + ['uncorrected'] * len(uncorrected_voxel_intensities)
+            voxel_intensity_df = pd.DataFrame({'value': values, 'source': sources})
+            voxel_intensity_df.to_csv(f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/voxel_intensity_df.txt', sep='\t', index=False)
 
 
 

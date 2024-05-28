@@ -1155,8 +1155,8 @@ if answer3 == 'y':
             uncorrected_voxel_intensities = extract_voxel_intensities(flirted_uncorrected_run, transformed_roi_mask)
             corrected_voxel_intensities_mean = np.mean(corrected_voxel_intensities)
             uncorrected_voxel_intensities_mean = np.mean(uncorrected_voxel_intensities)
-            print(f"Average voxel intensity within ROI for {p_id} fieldmap-corrected sequence: {corrected_voxel_intensities_mean}"))
-            print(f"Average voxel intensity within ROI for {p_id} uncorrected sequence: {uncorrected_voxel_intensities_mean}"))
+            print(f"Average voxel intensity within ROI for {p_id} fieldmap-corrected sequence: {corrected_voxel_intensities_mean}")
+            print(f"Average voxel intensity within ROI for {p_id} uncorrected sequence: {uncorrected_voxel_intensities_mean}")
             values = corrected_voxel_intensities + uncorrected_voxel_intensities
             sequence = ['corrected'] * len(corrected_voxel_intensities) + ['uncorrected'] * len(uncorrected_voxel_intensities)
             subject = [f'{p_id}'] * len(corrected_voxel_intensities) + [f'{p_id}'] * len(uncorrected_voxel_intensities)

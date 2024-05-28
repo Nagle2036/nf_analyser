@@ -1162,7 +1162,7 @@ if answer3 == 'y':
             subject = [f'{p_id}'] * len(corrected_voxel_intensities) + [f'{p_id}'] * len(uncorrected_voxel_intensities)
             voxel_intensity_df = pd.DataFrame({'p_id': subject, 'source': sequence, 'value': values})
             voxel_intensity_df.to_csv(f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/voxel_intensity_df.txt', sep='\t', index=False)
-            group_voxel_intensity_df = group_voxel_intensity_df.concat(voxel_intensity_df, ignore_index=True)
+            group_voxel_intensity_df = pd.concact([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
     group_voxel_intensity_df.to_csv('group/preproc/pe_test/2/group_voxel_intensity_df.txt', sep='\t', index=False)
 
     # Step 12: Create onset files.

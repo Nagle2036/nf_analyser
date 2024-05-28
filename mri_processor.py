@@ -1044,6 +1044,8 @@ if answer3 == 'y':
     
     # Step 11: Test quality of alternate distortion correction method (Stage 2).
     print("\n###### STEP 11: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
+    column_headers = ['p_id', 'sequence', 'value']
+    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)
     for p_id in participants_to_iterate:
         if p_id in good_participants:            
             averaged_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/averaged_run.nii.gz"
@@ -1151,14 +1153,17 @@ if answer3 == 'y':
                 return voxel_intensity_list
             corrected_voxel_intensities = extract_voxel_intensities(flirted_corrected_run, transformed_roi_mask)
             uncorrected_voxel_intensities = extract_voxel_intensities(flirted_uncorrected_run, transformed_roi_mask)
-            print(np.mean(f"Average voxel intensity within ROI for fieldmap-corrected sequence: {corrected_voxel_intensities}"))
-            print(np.mean(f"Average voxel intensity within ROI for uncorrected sequence: {uncorrected_voxel_intensities}"))
+            corrected_voxel_intensities_mean = np.mean(corrected_voxel_intensities)
+            uncorrected_voxel_intensities_mean = np.mean(uncorrected_voxel_intensities)
+            print(f"Average voxel intensity within ROI for {p_id} fieldmap-corrected sequence: {corrected_voxel_intensities_mean}"))
+            print(f"Average voxel intensity within ROI for {p_id} uncorrected sequence: {uncorrected_voxel_intensities_mean}"))
             values = corrected_voxel_intensities + uncorrected_voxel_intensities
-            sources = ['corrected'] * len(corrected_voxel_intensities) + ['uncorrected'] * len(uncorrected_voxel_intensities)
-            voxel_intensity_df = pd.DataFrame({'value': values, 'source': sources})
+            sequence = ['corrected'] * len(corrected_voxel_intensities) + ['uncorrected'] * len(uncorrected_voxel_intensities)
+            subject = [f'{p_id}'] * len(corrected_voxel_intensities) + [f'{p_id}'] * len(uncorrected_voxel_intensities)
+            voxel_intensity_df = pd.DataFrame({'p_id': subject, 'source': sequence, 'value': values})
             voxel_intensity_df.to_csv(f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/voxel_intensity_df.txt', sep='\t', index=False)
-
-
+    group_voxel_intensity_df = group_voxel_intensity_df.append(voxel_intensity_df, ignore_index=True)
+    group_voxel_intensity_df.to_csv('group/preproc/pe_test/2/group_voxel_intensity_df.txt', sep='\t', index=False)
 
     # Step 12: Create onset files.
     print("\n###### STEP 11: CREATING ONSET FILES ######")

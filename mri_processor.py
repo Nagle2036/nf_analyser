@@ -1044,6 +1044,11 @@ if answer3 == 'y':
     
     # Step 11: Test quality of alternate distortion correction method (Stage 2).
     print("\n###### STEP 11: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
+    
+    percentage_outside_corrected_list = []
+    percentage_outside_uncorrected_list = []
+    
+    
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)
     for p_id in participants_to_iterate:
@@ -1160,10 +1165,66 @@ if answer3 == 'y':
             values = corrected_voxel_intensities + uncorrected_voxel_intensities
             sequence = ['corrected'] * len(corrected_voxel_intensities) + ['uncorrected'] * len(uncorrected_voxel_intensities)
             subject = [f'{p_id}'] * len(corrected_voxel_intensities) + [f'{p_id}'] * len(uncorrected_voxel_intensities)
-            voxel_intensity_df = pd.DataFrame({'p_id': subject, 'source': sequence, 'value': values})
+            voxel_intensity_df = pd.DataFrame({'p_id': subject, 'sequence': sequence, 'value': values})
             voxel_intensity_df.to_csv(f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/voxel_intensity_df.txt', sep='\t', index=False)
             group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
+    
+
+            flirted_corrected_bin = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_corrected_bin.nii.gz'
+            if not os.path.exists(flirted_corrected_bin):
+                subprocess.run(['fslmaths', flirted_corrected_run, '-thr', '100', '-bin', flirted_corrected_bin])
+            flirted_uncorrected_bin = os.path.join(f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/flirted_uncorrected_bin.nii.gz')
+            if not os.path.exists(flirted_uncorrected_bin):
+                subprocess.run(['fslmaths', flirted_uncorrected_run, '-thr', '100', '-bin', flirted_uncorrected_bin])
+
+            corrected_bin_inv = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_bin_inv.nii.gz'
+            if not os.path.exists(corrected_bin_inv):
+                subprocess.run(['fslmaths', flirted_corrected_bin, '-sub', '1', '-abs', corrected_bin_inv])
+            uncorrected_bin_inv = f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_bin_inv.nii.gz'
+            if not os.path.exists(uncorrected_bin_inv):
+                subprocess.run(['fslmaths', flirted_uncorrected_bin, '-sub', '1', '-abs', uncorrected_bin_inv])
+
+            corrected_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', corrected_bin_inv, '-V'], capture_output=True, text=True)
+            if corrected_result.returncode == 0:
+                corrected_result_output = corrected_result.stdout.strip()
+            else:
+                print("Error executing fslstats command.")
+            corrected_result_output_values = corrected_result_output.split()
+            corrected_voxels_outside = float(corrected_result_output_values[0])
+            uncorrected_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', uncorrected_bin_inv, '-V'], capture_output=True, text=True)
+            if uncorrected_result.returncode == 0:
+                uncorrected_result_output = uncorrected_result.stdout.strip()
+            else:
+                print("Error executing fslstats command.")
+            uncorrected_result_output_values = uncorrected_result_output.split()
+            uncorrected_voxels_outside = float(uncorrected_result_output_values[0])
+
+            result2 = subprocess.run(['fslstats', transformed_roi_mask, '-V'], capture_output=True, text=True)
+            if result2.returncode == 0:
+                result2_output = result2.stdout.strip()
+            else:
+                print("Error executing fslstats command.")
+            result2_output_values = result2_output.split()
+            total_voxels_in_roi = float(result2_output_values[0])
+            
+            percentage_outside_corrected = (corrected_voxels_outside / total_voxels_in_roi) * 100
+            percentage_outside_corrected = round(percentage_outside_corrected, 2)
+            percentage_outside_corrected_list.append(percentage_outside_corrected)
+
+            percentage_outside_uncorrected = (uncorrected_voxels_outside / total_voxels_in_roi) * 100
+            percentage_outside_uncorrected = round(percentage_outside_uncorrected, 2)
+            percentage_outside_uncorrected_list.append(percentage_outside_uncorrected)
+            
+        
+    
     group_voxel_intensity_df.to_csv('group/preproc/pe_test/2/group_voxel_intensity_df.txt', sep='\t', index=False)
+    print(percentage_outside_corrected_list)
+    print(percentage_outside_uncorrected_list)
+
+
+    
+
+
 
     # Step 12: Create onset files.
     print("\n###### STEP 11: CREATING ONSET FILES ######")

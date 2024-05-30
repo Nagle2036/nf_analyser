@@ -1159,8 +1159,8 @@ if answer3 == 'y':
             corrected_trimmed_roi_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_trimmed_roi_mask.nii.gz"
             uncorrected_trimmed_roi_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_trimmed_roi_mask.nii.gz"
             if not os.path.exists(corrected_trimmed_roi_mask) or not os.path.exists(uncorrected_trimmed_roi_mask):
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', corrected_bin_inv, corrected_trimmed_roi_mask])
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', uncorrected_bin_inv, uncorrected_trimmed_roi_mask])
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_corrected_bin, corrected_trimmed_roi_mask])
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_uncorrected_bin, uncorrected_trimmed_roi_mask])
 
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
@@ -1201,7 +1201,7 @@ if answer3 == 'y':
                 print(f'Intersect mask of SSIM and ROI for {p_id} already exists. Skipping process.')
             print(f'Counting voxels in transformed ROI mask for {p_id}...')
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
-            print(f'Voxels in transformed ROI mask for {p_id}:', voxels_in_roi_in_mask)
+            print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
             def extract_voxel_intensities(epi_image_path, mask_image_path):
                 epi_img = nib.load(epi_image_path)
                 epi_data = epi_img.get_fdata()

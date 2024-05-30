@@ -39,6 +39,8 @@ import pydicom
 import random
 import nibabel as nib
 from skimage.metrics import structural_similarity as ssim
+from plotnine import *
+from scipy import stats
 
 #endregion
 
@@ -1155,13 +1157,11 @@ if answer3 == 'y':
             percentage_outside_uncorrected = (uncorrected_voxels_outside / total_voxels_in_roi) * 100
             percentage_outside_uncorrected = round(percentage_outside_uncorrected, 2)
             percentage_outside_uncorrected_list.append(percentage_outside_uncorrected)
-            
             corrected_trimmed_roi_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/corrected_trimmed_roi_mask.nii.gz"
             uncorrected_trimmed_roi_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/2/uncorrected_trimmed_roi_mask.nii.gz"
             if not os.path.exists(corrected_trimmed_roi_mask) or not os.path.exists(uncorrected_trimmed_roi_mask):
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_corrected_bin, corrected_trimmed_roi_mask])
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_uncorrected_bin, uncorrected_trimmed_roi_mask])
-
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
                 image1_nii = nib.load(image1_path)
@@ -1226,7 +1226,94 @@ if answer3 == 'y':
     group_voxel_intensity_df.to_csv('group/preproc/pe_test/2/group_voxel_intensity_df.txt', sep='\t', index=False)
     print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants following fieldmap correction:', percentage_outside_corrected_list)
     print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants in absence of fieldmap correction:', percentage_outside_uncorrected_list)
-
+    good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    corrected_means = []
+    uncorrected_means= []
+    p_values = []
+    corrected_std_errors = []
+    uncorrected_std_errors = []
+    for participant in good_participants:
+        filtered_corrected = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{participant}') & (group_voxel_intensity_df['sequence'] == 'corrected')]
+        mean_value_corrected = filtered_corrected['value'].mean()
+        corrected_means.append(mean_value_corrected)
+        _, corrected_shap_p = stats.shapiro(filtered_corrected['value'])
+        corrected_std_error = np.std(filtered_corrected['value']) / np.sqrt(len(filtered_corrected['value']))
+        corrected_std_errors.append(corrected_std_error)
+        filtered_uncorrected = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{participant}') & (group_voxel_intensity_df['sequence'] == 'uncorrected')]
+        mean_value_uncorrected = filtered_uncorrected['value'].mean()
+        uncorrected_means.append(mean_value_uncorrected)
+        _, uncorrected_shap_p = stats.shapiro(filtered_uncorrected['value'])
+        uncorrected_std_error = np.std(filtered_uncorrected['value']) / np.sqrt(len(filtered_uncorrected['value']))
+        uncorrected_std_errors.append(uncorrected_std_error)
+        if corrected_shap_p and uncorrected_shap_p > 0.05:
+            _, p_value = stats.ttest_rel(filtered_corrected['value'], filtered_uncorrected['value'])
+            p_values.append(p_value)
+        else:
+            _, p_value = stats.wilcoxon(filtered_corrected['value'], filtered_uncorrected['value'])
+            p_values.append(p_value)
+    plot_data = pd.DataFrame({
+        'Participant': good_participants * 2,
+        'Mean_Value': corrected_means + uncorrected_means,
+        'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
+        'Significance': ['' for _ in range(len(good_participants) * 2)],
+        'Std_Error': corrected_std_errors + uncorrected_std_errors
+    })
+    for idx, p_value in enumerate(p_values):
+        if p_value < 0.001:
+            plot_data.at[idx, 'Significance'] = '***'
+        elif p_value < 0.01:
+            plot_data.at[idx, 'Significance'] = '**'
+        elif p_value < 0.05:
+            plot_data.at[idx, 'Significance'] = '*'
+    mean_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
+        theme_classic() +
+        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0)) +
+        geom_text(
+            aes(x='Participant', y='Mean_Value', label='Significance'),
+            position=position_dodge(width=0.9),
+            color='black',
+            size=12,
+            ha='center',
+            va='bottom',
+            show_legend=False))
+    print(mean_plot)
+    mean_plot.save('mean_plot.png')
+    mean_plot.draw()
+    corrected_means_overall = np.mean(corrected_means)
+    uncorrected_means_overall = np.mean(uncorrected_means)
+    corrected_std_error_overall = np.std(corrected_means) / np.sqrt(len(corrected_means))
+    uncorrected_std_error_overall = np.std(uncorrected_means) / np.sqrt(len(uncorrected_means))
+    _, corrected_means_overall_shap_p = stats.shapiro(corrected_means)
+    _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
+    if corrected_means_overall_shap_p and uncorrected_means_overall_shap_p < 0.5:
+        _, p_value = stats.ttest_rel(corrected_means, uncorrected_means)
+    else:
+        _, p_value = stats.wilcoxon(corrected_means, uncorrected_means)
+    plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
+    overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+                        geom_bar(stat='identity', position='dodge') +
+                        geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
+                        theme_classic() +
+                        labs(title='Mean of Voxel Intensities Across Participants.') +
+                        scale_y_continuous(expand=(0, 0), limits=[0,350])
+                        )
+    if p_value < 0.001:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+    elif p_value < 0.01:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+    elif p_value < 0.05:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
+    print(overall_mean_plot)
+    overall_mean_plot.save('overall_mean_plot.png')
+    overall_mean_plot.draw()
 
     
 

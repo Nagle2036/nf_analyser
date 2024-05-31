@@ -933,7 +933,7 @@ if answer3 == 'y':
             flirted_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/flirted_pa_fieldmaps.nii.gz"
             flirted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/flirted_rl_fieldmaps.nii.gz"
             structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
-            if not os.path.exists(t1_flirted_pa_fieldmaps):
+            if not os.path.exists(flirted_pa_fieldmaps):
                 print(f"Aligning PA and RL fieldmaps to structural image for {p_id} distortion correction test 1...")
                 subprocess.run(["flirt", "-in", betted_pa_fieldmaps, "-ref", structural_brain, "-out", flirted_pa_fieldmaps, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/t1_flirted_pa_fieldmaps_transformation.mat"])
                 subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", structural_brain, "-out", flirted_rl_fieldmaps, "-omat", f"{p_id}/analysis/preproc/fieldmaps/pe_test/1/t1_flirted_rl_fieldmaps_transformation.mat"])

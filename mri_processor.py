@@ -1239,10 +1239,6 @@ if answer3 == 'y':
         filtered_uncorrected = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{participant}') & (group_voxel_intensity_df['sequence'] == 'uncorrected')]
         mean_value_uncorrected = filtered_uncorrected['value'].mean()
         uncorrected_means.append(mean_value_uncorrected)
-        
-        print(len(filtered_corrected['value']))
-        print(len(filtered_uncorrected['value']))
-
         anderson_corrected = stats.anderson(filtered_corrected['value'])
         print(f"Anderson-Darling test for corrected values: Statistic={anderson_corrected.statistic}, Critical Values={anderson_corrected.critical_values}, Significance Levels={anderson_corrected.significance_level}")
         anderson_uncorrected = stats.anderson(filtered_uncorrected['value'])
@@ -1252,21 +1248,19 @@ if answer3 == 'y':
             anderson_corrected.significance_level.tolist().index(significance_level * 100)]
         is_uncorrected_normal = anderson_uncorrected.statistic < anderson_uncorrected.critical_values[
             anderson_uncorrected.significance_level.tolist().index(significance_level * 100)]
-
-        
-        
         if is_corrected_normal and is_uncorrected_normal:
-            print(f'Running t-test for {p_id}...')
+            print(f'Running t-test for {participant}...')
             _, p_value = stats.ttest_ind(filtered_corrected['value'], filtered_uncorrected['value'], equal_var=False)
             p_values.append(p_value)
         else:
-            print(f'Running Mann Whitney U test for {p_id}...')
+            print(f'Running Mann Whitney U test for {participant}...')
             _, p_value = stats.mannwhitneyu(filtered_corrected['value'], filtered_uncorrected['value'], alternative='two-sided')
             p_values.append(p_value)
-    corrected_std_error = np.std(filtered_corrected['value']) / np.sqrt(len(filtered_corrected['value']))
-    corrected_std_errors.append(corrected_std_error)
-    uncorrected_std_error = np.std(filtered_uncorrected['value']) / np.sqrt(len(filtered_uncorrected['value']))
-    uncorrected_std_errors.append(uncorrected_std_error)
+        corrected_std_error = np.std(filtered_corrected['value']) / np.sqrt(len(filtered_corrected['value']))
+        corrected_std_errors.append(corrected_std_error)
+        uncorrected_std_error = np.std(filtered_uncorrected['value']) / np.sqrt(len(filtered_uncorrected['value']))
+        uncorrected_std_errors.append(uncorrected_std_error)
+
     plot_data = pd.DataFrame({
         'Participant': good_participants * 2,
         'Mean_Value': corrected_means + uncorrected_means,
@@ -1288,7 +1282,7 @@ if answer3 == 'y':
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-        scale_y_continuous(expand=(0, 0)) +
+        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
             position=position_dodge(width=0.9),
@@ -1298,8 +1292,9 @@ if answer3 == 'y':
             va='bottom',
             show_legend=False))
     print(mean_plot)
-    mean_plot.save('mean_plot.png')
+    mean_plot.save(f'{p_id}/analysis/preproc/fieldmaps/pe_test/2/mean_plot.png')
     mean_plot.draw()
+
     corrected_means_overall = np.mean(corrected_means)
     uncorrected_means_overall = np.mean(uncorrected_means)
     corrected_std_error_overall = np.std(corrected_means) / np.sqrt(len(corrected_means))
@@ -1328,10 +1323,10 @@ if answer3 == 'y':
         overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
     print(overall_mean_plot)
-    overall_mean_plot.save('overall_mean_plot.png')
+    overall_mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
     overall_mean_plot.draw()
 
-    
+
 
     # Step 12: Create onset files.
     print("\n###### STEP 11: CREATING ONSET FILES ######")

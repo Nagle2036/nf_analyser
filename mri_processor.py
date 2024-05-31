@@ -1236,21 +1236,37 @@ if answer3 == 'y':
         filtered_corrected = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{participant}') & (group_voxel_intensity_df['sequence'] == 'corrected')]
         mean_value_corrected = filtered_corrected['value'].mean()
         corrected_means.append(mean_value_corrected)
-        _, corrected_shap_p = stats.shapiro(filtered_corrected['value'])
-        corrected_std_error = np.std(filtered_corrected['value']) / np.sqrt(len(filtered_corrected['value']))
-        corrected_std_errors.append(corrected_std_error)
         filtered_uncorrected = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{participant}') & (group_voxel_intensity_df['sequence'] == 'uncorrected')]
         mean_value_uncorrected = filtered_uncorrected['value'].mean()
         uncorrected_means.append(mean_value_uncorrected)
-        _, uncorrected_shap_p = stats.shapiro(filtered_uncorrected['value'])
-        uncorrected_std_error = np.std(filtered_uncorrected['value']) / np.sqrt(len(filtered_uncorrected['value']))
-        uncorrected_std_errors.append(uncorrected_std_error)
-        if corrected_shap_p and uncorrected_shap_p > 0.05:
-            _, p_value = stats.ttest_rel(filtered_corrected['value'], filtered_uncorrected['value'])
+        
+        print(len(filtered_corrected['value']))
+        print(len(filtered_uncorrected['value']))
+
+        anderson_corrected = stats.anderson(filtered_corrected['value'])
+        print(f"Anderson-Darling test for corrected values: Statistic={anderson_corrected.statistic}, Critical Values={anderson_corrected.critical_values}, Significance Levels={anderson_corrected.significance_level}")
+        anderson_uncorrected = stats.anderson(filtered_uncorrected['value'])
+        print(f"Anderson-Darling test for uncorrected values: Statistic={anderson_uncorrected.statistic}, Critical Values={anderson_uncorrected.critical_values}, Significance Levels={anderson_uncorrected.significance_level}")
+        significance_level = 0.05
+        is_corrected_normal = anderson_corrected.statistic < anderson_corrected.critical_values[
+            anderson_corrected.significance_level.tolist().index(significance_level * 100)]
+        is_uncorrected_normal = anderson_uncorrected.statistic < anderson_uncorrected.critical_values[
+            anderson_uncorrected.significance_level.tolist().index(significance_level * 100)]
+
+        
+        
+        if is_corrected_normal and is_uncorrected_normal:
+            print(f'Running t-test for {p_id}...')
+            _, p_value = stats.ttest_ind(filtered_corrected['value'], filtered_uncorrected['value'], equal_var=False)
             p_values.append(p_value)
         else:
-            _, p_value = stats.wilcoxon(filtered_corrected['value'], filtered_uncorrected['value'])
+            print(f'Running Mann Whitney U test for {p_id}...')
+            _, p_value = stats.mannwhitneyu(filtered_corrected['value'], filtered_uncorrected['value'], alternative='two-sided')
             p_values.append(p_value)
+    corrected_std_error = np.std(filtered_corrected['value']) / np.sqrt(len(filtered_corrected['value']))
+    corrected_std_errors.append(corrected_std_error)
+    uncorrected_std_error = np.std(filtered_uncorrected['value']) / np.sqrt(len(filtered_uncorrected['value']))
+    uncorrected_std_errors.append(uncorrected_std_error)
     plot_data = pd.DataFrame({
         'Participant': good_participants * 2,
         'Mean_Value': corrected_means + uncorrected_means,

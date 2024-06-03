@@ -1563,6 +1563,55 @@ if answer3 == 'y':
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
     overall_mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
 
+    # Step 12: Test quality of alternate distortion correction method (Stage 3).
+    print("\n###### STEP 12: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 3) ######")
+    group_participant_col = []
+    group_tissue_type_col = []
+    group_overlap_perc_col = []
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:
+            ap_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
+            pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"
+            rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/rl_fieldmaps.nii"
+            averaged_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/averaged_pa_fieldmaps.nii.gz"
+            averaged_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/averaged_rl_fieldmaps.nii.gz"
+            if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps):
+                print(f"{p_id} fieldmaps images being averaged...")
+                subprocess.run(['fslmaths', pa_fieldmaps, '-Tmean', averaged_pa_fieldmaps])
+                subprocess.run(['fslmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
+                print(f"{p_id} fieldmaps images successfully averaged.")
+            else:
+                print(f"{p_id} fieldmaps images already averaged. Skipping process.")
+            betted_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/betted_pa_fieldmaps.nii.gz"
+            betted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/betted_rl_fieldmaps.nii.gz"
+            if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps):
+                print(f"Fieldmaps sequences for {p_id} being brain extracted for distortion correction test 1.")
+                subprocess.run(["bet", averaged_pa_fieldmaps, betted_pa_fieldmaps, "-m", "-R"])
+                subprocess.run(["bet", averaged_rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
+                print(f"Fieldmaps sequences for {p_id} successfully brain extracted.")
+            else: 
+                print(f"Fieldmaps sequences for {p_id} already brain extracted. Skipping process.")
+            corrected_pa_fieldmaps = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "3", "corrected_pa_fieldmaps.nii.gz")
+            if not os.path.exists(corrected_run):
+                print("Applying fieldmaps...")
+                subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/fieldmaps/pe_test/3/betted_pa_fieldmaps.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/pe_test/3/corrected_pa_fieldmaps"])
+                print("Fieldmap application completed.")
+            else:
+                print("Fieldmaps already calculated and applied. Skipping process.")
+            
+            structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
+            func2struct = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/func2strut.mat"
+            subprocess.run(['flirt', '-in', corrected_pa_fieldmaps, '-ref', structural_brain, '-omat', func2struct, '-dof', '6'])
+            subprocess.run(['flirt', structural_brain, '-ref', '${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz', '-omat', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/struct2standard.mat'])
+            subprocess.run(['fnirt', f'--in={p_id}/analysis/preproc/structural/structural_brain.nii.gz', '--ref=${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz', f'--aff={p_id}/analysis/preproc/fieldmaps/pe_test/3/struct2standard.mat', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={p_id}/analysis/preproc/fieldmaps/pe_test/3/warp_struct2standard'])
+            subprocess.run(['applywarp', f'--in={p_id}/analysis/preproc/fieldmaps/pe_test/3/corrected_pa_fieldmaps.nii.gz', '--ref=${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz', f'--warp={p_id}/analysis/preproc/fieldmaps/pe_test/3/warp_struct2standard.nii.gz', f'--premat={p_id}/analysis/preproc/fieldmaps/pe_test/3/func2strut.mat', f'--out={p_id}/analysis/preproc/fieldmaps/pe_test/3/transformed_pa_fieldmaps'])
+
+
+
+
+
+
+
     # Step 12: Create onset files.
     print("\n###### STEP 11: CREATING ONSET FILES ######")
     onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'

@@ -1128,7 +1128,6 @@ if answer3 == 'y':
             if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_fieldmaps_bin, pa_trimmed_roi_mask])
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
-            
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
                 image1_nii = nib.load(image1_path)
@@ -1227,67 +1226,67 @@ if answer3 == 'y':
             pa_std_errors.append(pa_std_error)
             rl_std_error = np.std(filtered_rl['value']) / np.sqrt(len(filtered_rl['value']))
             rl_std_errors.append(rl_std_error)
-        plot_data = pd.DataFrame({
-            'Participant': good_participants * 2,
-            'Mean_Value': pa_means + rl_means,
-            'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
-            'Significance': ['' for _ in range(len(good_participants) * 2)],
-            'Std_Error': pa_std_errors + rl_std_errors
-        })
-        for idx, p_value in enumerate(p_values):
-            if p_value < 0.001:
-                plot_data.at[idx, 'Significance'] = '***'
-            elif p_value < 0.01:
-                plot_data.at[idx, 'Significance'] = '**'
-            elif p_value < 0.05:
-                plot_data.at[idx, 'Significance'] = '*'
-        mean_plot = (
-            ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
-            geom_bar(stat='identity', position='dodge') +
-            geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
-            theme_classic() +
-            labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-            theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-            scale_y_continuous(expand=(0, 0), limits=[0,350]) +
-            geom_text(
-                aes(x='Participant', y='Mean_Value', label='Significance'),
-                position=position_dodge(width=0.9),
-                color='black',
-                size=12,
-                ha='center',
-                va='bottom',
-                show_legend=False))
-        mean_plot.save('group/preproc/pe_test/1/overall_mean_plot.png')
-        pa_means_overall = np.mean(pa_means)
-        rl_means_overall = np.mean(rl_means)
-        pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
-        rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
-        _, pa_means_overall_shap_p = stats.shapiro(pa_means)
-        _, rl_means_overall_shap_p = stats.shapiro(rl_means)
-        if pa_means_overall_shap_p and rl_means_overall_shap_p < 0.5:
-            print(f'Running t-test for {p_id}...')
-            _, p_value = stats.ttest_ind(pa_means, rl_means, equal_var=False)
-        else:
-            print(f'Running Mann-Whitney U test for {p_id}...')
-            _, p_value = stats.mannwhitneyu(pa_means, rl_means, alternative='two-sided')
-        plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
-        overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
-                            geom_bar(stat='identity', position='dodge') +
-                            geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
-                            theme_classic() +
-                            labs(title='Mean of Voxel Intensities Across Participants.') +
-                            scale_y_continuous(expand=(0, 0), limits=[0,350])
-                            )
+    plot_data = pd.DataFrame({
+        'Participant': good_participants * 2,
+        'Mean_Value': pa_means + rl_means,
+        'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
+        'Significance': ['' for _ in range(len(good_participants) * 2)],
+        'Std_Error': pa_std_errors + rl_std_errors
+    })
+    for idx, p_value in enumerate(p_values):
         if p_value < 0.001:
-            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
-                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+            plot_data.at[idx, 'Significance'] = '***'
         elif p_value < 0.01:
-            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
-                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+            plot_data.at[idx, 'Significance'] = '**'
         elif p_value < 0.05:
-            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
-                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-        overall_mean_plot.save('group/preproc/pe_test/1/overall_mean_plot.png')
+            plot_data.at[idx, 'Significance'] = '*'
+    mean_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
+        theme_classic() +
+        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+        geom_text(
+            aes(x='Participant', y='Mean_Value', label='Significance'),
+            position=position_dodge(width=0.9),
+            color='black',
+            size=12,
+            ha='center',
+            va='bottom',
+            show_legend=False))
+    mean_plot.save('group/preproc/pe_test/1/overall_mean_plot.png')
+    pa_means_overall = np.mean(pa_means)
+    rl_means_overall = np.mean(rl_means)
+    pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
+    rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
+    _, pa_means_overall_shap_p = stats.shapiro(pa_means)
+    _, rl_means_overall_shap_p = stats.shapiro(rl_means)
+    if pa_means_overall_shap_p and rl_means_overall_shap_p < 0.5:
+        print(f'Running t-test for {p_id}...')
+        _, p_value = stats.ttest_ind(pa_means, rl_means, equal_var=False)
+    else:
+        print(f'Running Mann-Whitney U test for {p_id}...')
+        _, p_value = stats.mannwhitneyu(pa_means, rl_means, alternative='two-sided')
+    plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
+    overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+                        geom_bar(stat='identity', position='dodge') +
+                        geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
+                        theme_classic() +
+                        labs(title='Mean of Voxel Intensities Across Participants.') +
+                        scale_y_continuous(expand=(0, 0), limits=[0,350])
+                        )
+    if p_value < 0.001:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+    elif p_value < 0.01:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+    elif p_value < 0.05:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
+    overall_mean_plot.save('group/preproc/pe_test/1/overall_mean_plot.png')
 
     # Step 11: Test quality of alternate distortion correction method (Stage 2).
     print("\n###### STEP 11: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
@@ -1505,65 +1504,65 @@ if answer3 == 'y':
             corrected_std_errors.append(corrected_std_error)
             uncorrected_std_error = np.std(filtered_uncorrected['value']) / np.sqrt(len(filtered_uncorrected['value']))
             uncorrected_std_errors.append(uncorrected_std_error)
-        plot_data = pd.DataFrame({
-            'Participant': good_participants * 2,
-            'Mean_Value': corrected_means + uncorrected_means,
-            'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
-            'Significance': ['' for _ in range(len(good_participants) * 2)],
-            'Std_Error': corrected_std_errors + uncorrected_std_errors
-        })
-        for idx, p_value in enumerate(p_values):
-            if p_value < 0.001:
-                plot_data.at[idx, 'Significance'] = '***'
-            elif p_value < 0.01:
-                plot_data.at[idx, 'Significance'] = '**'
-            elif p_value < 0.05:
-                plot_data.at[idx, 'Significance'] = '*'
-        mean_plot = (
-            ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
-            geom_bar(stat='identity', position='dodge') +
-            geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
-            theme_classic() +
-            labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-            theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-            scale_y_continuous(expand=(0, 0), limits=[0,350]) +
-            geom_text(
-                aes(x='Participant', y='Mean_Value', label='Significance'),
-                position=position_dodge(width=0.9),
-                color='black',
-                size=12,
-                ha='center',
-                va='bottom',
-                show_legend=False))
-        mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
-        corrected_means_overall = np.mean(corrected_means)
-        uncorrected_means_overall = np.mean(uncorrected_means)
-        corrected_std_error_overall = np.std(corrected_means) / np.sqrt(len(corrected_means))
-        uncorrected_std_error_overall = np.std(uncorrected_means) / np.sqrt(len(uncorrected_means))
-        _, corrected_means_overall_shap_p = stats.shapiro(corrected_means)
-        _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
-        if corrected_means_overall_shap_p and uncorrected_means_overall_shap_p < 0.5:
-            _, p_value = stats.ttest_ind(corrected_means, uncorrected_means, equal_var=False)
-        else:
-            _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means, alternative='two-sided')
-        plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
-        overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
-                            geom_bar(stat='identity', position='dodge') +
-                            geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
-                            theme_classic() +
-                            labs(title='Mean of Voxel Intensities Across Participants.') +
-                            scale_y_continuous(expand=(0, 0), limits=[0,350])
-                            )
+    plot_data = pd.DataFrame({
+        'Participant': good_participants * 2,
+        'Mean_Value': corrected_means + uncorrected_means,
+        'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
+        'Significance': ['' for _ in range(len(good_participants) * 2)],
+        'Std_Error': corrected_std_errors + uncorrected_std_errors
+    })
+    for idx, p_value in enumerate(p_values):
         if p_value < 0.001:
-            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
-                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+            plot_data.at[idx, 'Significance'] = '***'
         elif p_value < 0.01:
-            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
-                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+            plot_data.at[idx, 'Significance'] = '**'
         elif p_value < 0.05:
-            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
-                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-        overall_mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
+            plot_data.at[idx, 'Significance'] = '*'
+    mean_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
+        theme_classic() +
+        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+        geom_text(
+            aes(x='Participant', y='Mean_Value', label='Significance'),
+            position=position_dodge(width=0.9),
+            color='black',
+            size=12,
+            ha='center',
+            va='bottom',
+            show_legend=False))
+    mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
+    corrected_means_overall = np.mean(corrected_means)
+    uncorrected_means_overall = np.mean(uncorrected_means)
+    corrected_std_error_overall = np.std(corrected_means) / np.sqrt(len(corrected_means))
+    uncorrected_std_error_overall = np.std(uncorrected_means) / np.sqrt(len(uncorrected_means))
+    _, corrected_means_overall_shap_p = stats.shapiro(corrected_means)
+    _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
+    if corrected_means_overall_shap_p and uncorrected_means_overall_shap_p < 0.5:
+        _, p_value = stats.ttest_ind(corrected_means, uncorrected_means, equal_var=False)
+    else:
+        _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means, alternative='two-sided')
+    plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
+    overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+                        geom_bar(stat='identity', position='dodge') +
+                        geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
+                        theme_classic() +
+                        labs(title='Mean of Voxel Intensities Across Participants.') +
+                        scale_y_continuous(expand=(0, 0), limits=[0,350])
+                        )
+    if p_value < 0.001:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+    elif p_value < 0.01:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+    elif p_value < 0.05:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
+    overall_mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
 
     # Step 12: Test quality of alternate distortion correction method (Stage 3).
     print("\n###### STEP 12: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 3) ######")
@@ -1921,67 +1920,67 @@ if answer3 == 'y':
             pa_std_errors.append(pa_std_error)
             rl_std_error = np.std(filtered_rl['value']) / np.sqrt(len(filtered_rl['value']))
             rl_std_errors.append(rl_std_error)
-        plot_data = pd.DataFrame({
-            'Participant': good_participants * 2,
-            'Mean_Value': pa_means + rl_means,
-            'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
-            'Significance': ['' for _ in range(len(good_participants) * 2)],
-            'Std_Error': pa_std_errors + rl_std_errors
-        })
-        for idx, p_value in enumerate(p_values):
-            if p_value < 0.001:
-                plot_data.at[idx, 'Significance'] = '***'
-            elif p_value < 0.01:
-                plot_data.at[idx, 'Significance'] = '**'
-            elif p_value < 0.05:
-                plot_data.at[idx, 'Significance'] = '*'
-        mean_plot = (
-            ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
-            geom_bar(stat='identity', position='dodge') +
-            geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
-            theme_classic() +
-            labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-            theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-            scale_y_continuous(expand=(0, 0), limits=[0,350]) +
-            geom_text(
-                aes(x='Participant', y='Mean_Value', label='Significance'),
-                position=position_dodge(width=0.9),
-                color='black',
-                size=12,
-                ha='center',
-                va='bottom',
-                show_legend=False))
-        mean_plot.save('group/preproc/pe_test/3/overall_mean_plot.png')
-        pa_means_overall = np.mean(pa_means)
-        rl_means_overall = np.mean(rl_means)
-        pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
-        rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
-        _, pa_means_overall_shap_p = stats.shapiro(pa_means)
-        _, rl_means_overall_shap_p = stats.shapiro(rl_means)
-        if pa_means_overall_shap_p and rl_means_overall_shap_p < 0.5:
-            print(f'Running t-test for {p_id}...')
-            _, p_value = stats.ttest_ind(pa_means, rl_means, equal_var=False)
-        else:
-            print(f'Running Mann-Whitney U test for {p_id}...')
-            _, p_value = stats.mannwhitneyu(pa_means, rl_means, alternative='two-sided')
-        plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
-        overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
-                            geom_bar(stat='identity', position='dodge') +
-                            geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
-                            theme_classic() +
-                            labs(title='Mean of Voxel Intensities Across Participants.') +
-                            scale_y_continuous(expand=(0, 0), limits=[0,350])
-                            )
+    plot_data = pd.DataFrame({
+        'Participant': good_participants * 2,
+        'Mean_Value': pa_means + rl_means,
+        'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
+        'Significance': ['' for _ in range(len(good_participants) * 2)],
+        'Std_Error': pa_std_errors + rl_std_errors
+    })
+    for idx, p_value in enumerate(p_values):
         if p_value < 0.001:
-            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
-                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+            plot_data.at[idx, 'Significance'] = '***'
         elif p_value < 0.01:
-            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
-                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+            plot_data.at[idx, 'Significance'] = '**'
         elif p_value < 0.05:
-            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
-                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-        overall_mean_plot.save('group/preproc/pe_test/3/overall_mean_plot.png')
+            plot_data.at[idx, 'Significance'] = '*'
+    mean_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
+        theme_classic() +
+        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+        geom_text(
+            aes(x='Participant', y='Mean_Value', label='Significance'),
+            position=position_dodge(width=0.9),
+            color='black',
+            size=12,
+            ha='center',
+            va='bottom',
+            show_legend=False))
+    mean_plot.save('group/preproc/pe_test/3/overall_mean_plot.png')
+    pa_means_overall = np.mean(pa_means)
+    rl_means_overall = np.mean(rl_means)
+    pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
+    rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
+    _, pa_means_overall_shap_p = stats.shapiro(pa_means)
+    _, rl_means_overall_shap_p = stats.shapiro(rl_means)
+    if pa_means_overall_shap_p and rl_means_overall_shap_p < 0.5:
+        print(f'Running t-test for {p_id}...')
+        _, p_value = stats.ttest_ind(pa_means, rl_means, equal_var=False)
+    else:
+        print(f'Running Mann-Whitney U test for {p_id}...')
+        _, p_value = stats.mannwhitneyu(pa_means, rl_means, alternative='two-sided')
+    plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
+    overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+                        geom_bar(stat='identity', position='dodge') +
+                        geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
+                        theme_classic() +
+                        labs(title='Mean of Voxel Intensities Across Participants.') +
+                        scale_y_continuous(expand=(0, 0), limits=[0,350])
+                        )
+    if p_value < 0.001:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+    elif p_value < 0.01:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+    elif p_value < 0.05:
+        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
+    overall_mean_plot.save('group/preproc/pe_test/3/overall_mean_plot.png')
 
     # Step 13: Create onset files.
     print("\n###### STEP 11: CREATING ONSET FILES ######")

@@ -1592,7 +1592,7 @@ if answer3 == 'y':
             else: 
                 print(f"Fieldmaps sequences for {p_id} already brain extracted. Skipping process.")
             corrected_pa_fieldmaps = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps", "pe_test", "3", "corrected_pa_fieldmaps.nii.gz")
-            if not os.path.exists(corrected_run):
+            if not os.path.exists(corrected_pa_fieldmaps):
                 print("Applying fieldmaps...")
                 subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/fieldmaps/pe_test/3/betted_pa_fieldmaps.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/pe_test/3/corrected_pa_fieldmaps"])
                 print("Fieldmap application completed.")

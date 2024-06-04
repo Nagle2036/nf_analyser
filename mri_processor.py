@@ -1604,7 +1604,7 @@ if answer3 == 'y':
             rl_to_pa_warp = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_to_pa_warp.nii.gz"
             fnirted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/fnirted_rl_fieldmaps.nii.gz"
             subprocess.run(['flirt', '-in', betted_rl_fieldmaps, '-ref', corrected_pa_fieldmaps, '-omat', rl_to_pa_affine, '-out', flirted_rl_fieldmaps, '-dof', '6'])
-            subprocess.run(['fnirt', f'--in={betted_pa_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--aff={rl_to_pa_affine}', f'--cout={rl_to_pa_warp}'])
+            subprocess.run(['fnirt', f'--in={betted_rl_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--aff={rl_to_pa_affine}', f'--cout={rl_to_pa_warp}'])
             subprocess.run(['applywarp', f'--in={betted_rl_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--warp={rl_to_pa_warp}', f'--out={fnirted_rl_fieldmaps}'])
             
             FSLDIR = os.getenv('FSLDIR')

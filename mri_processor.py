@@ -1198,95 +1198,96 @@ if answer3 == 'y':
     p_values = []
     pa_std_errors = []
     rl_std_errors = []
-    for participant in good_participants:
-        filtered_pa = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{participant}') & (group_voxel_intensity_df['sequence'] == 'pa')]
-        mean_value_pa = filtered_pa['value'].mean()
-        pa_means.append(mean_value_pa)
-        filtered_rl = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{participant}') & (group_voxel_intensity_df['sequence'] == 'rl')]
-        mean_value_rl = filtered_rl['value'].mean()
-        rl_means.append(mean_value_rl)
-        anderson_pa = stats.anderson(filtered_pa['value'])
-        print(f"Anderson-Darling test for PA sequence values: Statistic={anderson_pa.statistic}, Critical Values={anderson_pa.critical_values}, Significance Levels={anderson_pa.significance_level}")
-        anderson_rl = stats.anderson(filtered_rl['value'])
-        print(f"Anderson-Darling test for RL sequence values: Statistic={anderson_rl.statistic}, Critical Values={anderson_rl.critical_values}, Significance Levels={anderson_rl.significance_level}")
-        significance_level = 0.05
-        is_pa_normal = anderson_pa.statistic < anderson_pa.critical_values[
-            anderson_pa.significance_level.tolist().index(significance_level * 100)]
-        is_rl_normal = anderson_rl.statistic < anderson_rl.critical_values[
-            anderson_rl.significance_level.tolist().index(significance_level * 100)]
-        if is_pa_normal and is_rl_normal:
-            print(f'Running t-test for {participant}...')
-            _, p_value = stats.ttest_ind(filtered_pa['value'], filtered_rl['value'], equal_var=False)
-            p_values.append(p_value)
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:
+            filtered_pa = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'pa')]
+            mean_value_pa = filtered_pa['value'].mean()
+            pa_means.append(mean_value_pa)
+            filtered_rl = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'rl')]
+            mean_value_rl = filtered_rl['value'].mean()
+            rl_means.append(mean_value_rl)
+            anderson_pa = stats.anderson(filtered_pa['value'])
+            print(f"Anderson-Darling test for PA sequence values: Statistic={anderson_pa.statistic}, Critical Values={anderson_pa.critical_values}, Significance Levels={anderson_pa.significance_level}")
+            anderson_rl = stats.anderson(filtered_rl['value'])
+            print(f"Anderson-Darling test for RL sequence values: Statistic={anderson_rl.statistic}, Critical Values={anderson_rl.critical_values}, Significance Levels={anderson_rl.significance_level}")
+            significance_level = 0.05
+            is_pa_normal = anderson_pa.statistic < anderson_pa.critical_values[
+                anderson_pa.significance_level.tolist().index(significance_level * 100)]
+            is_rl_normal = anderson_rl.statistic < anderson_rl.critical_values[
+                anderson_rl.significance_level.tolist().index(significance_level * 100)]
+            if is_pa_normal and is_rl_normal:
+                print(f'Running t-test for {p_id}...')
+                _, p_value = stats.ttest_ind(filtered_pa['value'], filtered_rl['value'], equal_var=False)
+                p_values.append(p_value)
+            else:
+                print(f'Running Mann Whitney U test for {p_id}...')
+                _, p_value = stats.mannwhitneyu(filtered_pa['value'], filtered_rl['value'], alternative='two-sided')
+                p_values.append(p_value)
+            pa_std_error = np.std(filtered_pa['value']) / np.sqrt(len(filtered_pa['value']))
+            pa_std_errors.append(pa_std_error)
+            rl_std_error = np.std(filtered_rl['value']) / np.sqrt(len(filtered_rl['value']))
+            rl_std_errors.append(rl_std_error)
+        plot_data = pd.DataFrame({
+            'Participant': good_participants * 2,
+            'Mean_Value': pa_means + rl_means,
+            'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
+            'Significance': ['' for _ in range(len(good_participants) * 2)],
+            'Std_Error': pa_std_errors + rl_std_errors
+        })
+        for idx, p_value in enumerate(p_values):
+            if p_value < 0.001:
+                plot_data.at[idx, 'Significance'] = '***'
+            elif p_value < 0.01:
+                plot_data.at[idx, 'Significance'] = '**'
+            elif p_value < 0.05:
+                plot_data.at[idx, 'Significance'] = '*'
+        mean_plot = (
+            ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
+            geom_bar(stat='identity', position='dodge') +
+            geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
+            theme_classic() +
+            labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+            theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+            scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+            geom_text(
+                aes(x='Participant', y='Mean_Value', label='Significance'),
+                position=position_dodge(width=0.9),
+                color='black',
+                size=12,
+                ha='center',
+                va='bottom',
+                show_legend=False))
+        mean_plot.save('group/preproc/pe_test/1/overall_mean_plot.png')
+        pa_means_overall = np.mean(pa_means)
+        rl_means_overall = np.mean(rl_means)
+        pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
+        rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
+        _, pa_means_overall_shap_p = stats.shapiro(pa_means)
+        _, rl_means_overall_shap_p = stats.shapiro(rl_means)
+        if pa_means_overall_shap_p and rl_means_overall_shap_p < 0.5:
+            print(f'Running t-test for {p_id}...')
+            _, p_value = stats.ttest_ind(pa_means, rl_means, equal_var=False)
         else:
-            print(f'Running Mann Whitney U test for {participant}...')
-            _, p_value = stats.mannwhitneyu(filtered_pa['value'], filtered_rl['value'], alternative='two-sided')
-            p_values.append(p_value)
-        pa_std_error = np.std(filtered_pa['value']) / np.sqrt(len(filtered_pa['value']))
-        pa_std_errors.append(pa_std_error)
-        rl_std_error = np.std(filtered_rl['value']) / np.sqrt(len(filtered_rl['value']))
-        rl_std_errors.append(rl_std_error)
-    plot_data = pd.DataFrame({
-        'Participant': good_participants * 2,
-        'Mean_Value': pa_means + rl_means,
-        'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
-        'Significance': ['' for _ in range(len(good_participants) * 2)],
-        'Std_Error': pa_std_errors + rl_std_errors
-    })
-    for idx, p_value in enumerate(p_values):
+            print(f'Running Mann-Whitney U test for {p_id}...')
+            _, p_value = stats.mannwhitneyu(pa_means, rl_means, alternative='two-sided')
+        plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
+        overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+                            geom_bar(stat='identity', position='dodge') +
+                            geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
+                            theme_classic() +
+                            labs(title='Mean of Voxel Intensities Across Participants.') +
+                            scale_y_continuous(expand=(0, 0), limits=[0,350])
+                            )
         if p_value < 0.001:
-            plot_data.at[idx, 'Significance'] = '***'
+            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
+                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
         elif p_value < 0.01:
-            plot_data.at[idx, 'Significance'] = '**'
+            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
+                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
         elif p_value < 0.05:
-            plot_data.at[idx, 'Significance'] = '*'
-    mean_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
-        theme_classic() +
-        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
-        geom_text(
-            aes(x='Participant', y='Mean_Value', label='Significance'),
-            position=position_dodge(width=0.9),
-            color='black',
-            size=12,
-            ha='center',
-            va='bottom',
-            show_legend=False))
-    mean_plot.save('group/preproc/pe_test/1/overall_mean_plot.png')
-    pa_means_overall = np.mean(pa_means)
-    rl_means_overall = np.mean(rl_means)
-    pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
-    rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
-    _, pa_means_overall_shap_p = stats.shapiro(pa_means)
-    _, rl_means_overall_shap_p = stats.shapiro(rl_means)
-    if pa_means_overall_shap_p and rl_means_overall_shap_p < 0.5:
-        print(f'Running t-test for {participant}...')
-        _, p_value = stats.ttest_ind(pa_means, rl_means, equal_var=False)
-    else:
-        print(f'Running Mann-Whitney U test for {participant}...')
-        _, p_value = stats.mannwhitneyu(pa_means, rl_means, alternative='two-sided')
-    plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
-    overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
-                        geom_bar(stat='identity', position='dodge') +
-                        geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
-                        theme_classic() +
-                        labs(title='Mean of Voxel Intensities Across Participants.') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,350])
-                        )
-    if p_value < 0.001:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
-    elif p_value < 0.01:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
-    elif p_value < 0.05:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-    overall_mean_plot.save('group/preproc/pe_test/1/overall_mean_plot.png')
+            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
+                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
+        overall_mean_plot.save('group/preproc/pe_test/1/overall_mean_plot.png')
 
     # Step 11: Test quality of alternate distortion correction method (Stage 2).
     print("\n###### STEP 11: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
@@ -1475,93 +1476,94 @@ if answer3 == 'y':
     p_values = []
     corrected_std_errors = []
     uncorrected_std_errors = []
-    for participant in good_participants:
-        filtered_corrected = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{participant}') & (group_voxel_intensity_df['sequence'] == 'corrected')]
-        mean_value_corrected = filtered_corrected['value'].mean()
-        corrected_means.append(mean_value_corrected)
-        filtered_uncorrected = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{participant}') & (group_voxel_intensity_df['sequence'] == 'uncorrected')]
-        mean_value_uncorrected = filtered_uncorrected['value'].mean()
-        uncorrected_means.append(mean_value_uncorrected)
-        anderson_corrected = stats.anderson(filtered_corrected['value'])
-        print(f"Anderson-Darling test for corrected values: Statistic={anderson_corrected.statistic}, Critical Values={anderson_corrected.critical_values}, Significance Levels={anderson_corrected.significance_level}")
-        anderson_uncorrected = stats.anderson(filtered_uncorrected['value'])
-        print(f"Anderson-Darling test for uncorrected values: Statistic={anderson_uncorrected.statistic}, Critical Values={anderson_uncorrected.critical_values}, Significance Levels={anderson_uncorrected.significance_level}")
-        significance_level = 0.05
-        is_corrected_normal = anderson_corrected.statistic < anderson_corrected.critical_values[
-            anderson_corrected.significance_level.tolist().index(significance_level * 100)]
-        is_uncorrected_normal = anderson_uncorrected.statistic < anderson_uncorrected.critical_values[
-            anderson_uncorrected.significance_level.tolist().index(significance_level * 100)]
-        if is_corrected_normal and is_uncorrected_normal:
-            print(f'Running t-test for {participant}...')
-            _, p_value = stats.ttest_ind(filtered_corrected['value'], filtered_uncorrected['value'], equal_var=False)
-            p_values.append(p_value)
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:
+            filtered_corrected = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'corrected')]
+            mean_value_corrected = filtered_corrected['value'].mean()
+            corrected_means.append(mean_value_corrected)
+            filtered_uncorrected = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'uncorrected')]
+            mean_value_uncorrected = filtered_uncorrected['value'].mean()
+            uncorrected_means.append(mean_value_uncorrected)
+            anderson_corrected = stats.anderson(filtered_corrected['value'])
+            print(f"Anderson-Darling test for corrected values: Statistic={anderson_corrected.statistic}, Critical Values={anderson_corrected.critical_values}, Significance Levels={anderson_corrected.significance_level}")
+            anderson_uncorrected = stats.anderson(filtered_uncorrected['value'])
+            print(f"Anderson-Darling test for uncorrected values: Statistic={anderson_uncorrected.statistic}, Critical Values={anderson_uncorrected.critical_values}, Significance Levels={anderson_uncorrected.significance_level}")
+            significance_level = 0.05
+            is_corrected_normal = anderson_corrected.statistic < anderson_corrected.critical_values[
+                anderson_corrected.significance_level.tolist().index(significance_level * 100)]
+            is_uncorrected_normal = anderson_uncorrected.statistic < anderson_uncorrected.critical_values[
+                anderson_uncorrected.significance_level.tolist().index(significance_level * 100)]
+            if is_corrected_normal and is_uncorrected_normal:
+                print(f'Running t-test for {p_id}...')
+                _, p_value = stats.ttest_ind(filtered_corrected['value'], filtered_uncorrected['value'], equal_var=False)
+                p_values.append(p_value)
+            else:
+                print(f'Running Mann Whitney U test for {p_id}...')
+                _, p_value = stats.mannwhitneyu(filtered_corrected['value'], filtered_uncorrected['value'], alternative='two-sided')
+                p_values.append(p_value)
+            corrected_std_error = np.std(filtered_corrected['value']) / np.sqrt(len(filtered_corrected['value']))
+            corrected_std_errors.append(corrected_std_error)
+            uncorrected_std_error = np.std(filtered_uncorrected['value']) / np.sqrt(len(filtered_uncorrected['value']))
+            uncorrected_std_errors.append(uncorrected_std_error)
+        plot_data = pd.DataFrame({
+            'Participant': good_participants * 2,
+            'Mean_Value': corrected_means + uncorrected_means,
+            'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
+            'Significance': ['' for _ in range(len(good_participants) * 2)],
+            'Std_Error': corrected_std_errors + uncorrected_std_errors
+        })
+        for idx, p_value in enumerate(p_values):
+            if p_value < 0.001:
+                plot_data.at[idx, 'Significance'] = '***'
+            elif p_value < 0.01:
+                plot_data.at[idx, 'Significance'] = '**'
+            elif p_value < 0.05:
+                plot_data.at[idx, 'Significance'] = '*'
+        mean_plot = (
+            ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
+            geom_bar(stat='identity', position='dodge') +
+            geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
+            theme_classic() +
+            labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+            theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+            scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+            geom_text(
+                aes(x='Participant', y='Mean_Value', label='Significance'),
+                position=position_dodge(width=0.9),
+                color='black',
+                size=12,
+                ha='center',
+                va='bottom',
+                show_legend=False))
+        mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
+        corrected_means_overall = np.mean(corrected_means)
+        uncorrected_means_overall = np.mean(uncorrected_means)
+        corrected_std_error_overall = np.std(corrected_means) / np.sqrt(len(corrected_means))
+        uncorrected_std_error_overall = np.std(uncorrected_means) / np.sqrt(len(uncorrected_means))
+        _, corrected_means_overall_shap_p = stats.shapiro(corrected_means)
+        _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
+        if corrected_means_overall_shap_p and uncorrected_means_overall_shap_p < 0.5:
+            _, p_value = stats.ttest_ind(corrected_means, uncorrected_means, equal_var=False)
         else:
-            print(f'Running Mann Whitney U test for {participant}...')
-            _, p_value = stats.mannwhitneyu(filtered_corrected['value'], filtered_uncorrected['value'], alternative='two-sided')
-            p_values.append(p_value)
-        corrected_std_error = np.std(filtered_corrected['value']) / np.sqrt(len(filtered_corrected['value']))
-        corrected_std_errors.append(corrected_std_error)
-        uncorrected_std_error = np.std(filtered_uncorrected['value']) / np.sqrt(len(filtered_uncorrected['value']))
-        uncorrected_std_errors.append(uncorrected_std_error)
-    plot_data = pd.DataFrame({
-        'Participant': good_participants * 2,
-        'Mean_Value': corrected_means + uncorrected_means,
-        'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
-        'Significance': ['' for _ in range(len(good_participants) * 2)],
-        'Std_Error': corrected_std_errors + uncorrected_std_errors
-    })
-    for idx, p_value in enumerate(p_values):
+            _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means, alternative='two-sided')
+        plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
+        overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+                            geom_bar(stat='identity', position='dodge') +
+                            geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
+                            theme_classic() +
+                            labs(title='Mean of Voxel Intensities Across Participants.') +
+                            scale_y_continuous(expand=(0, 0), limits=[0,350])
+                            )
         if p_value < 0.001:
-            plot_data.at[idx, 'Significance'] = '***'
+            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
+                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
         elif p_value < 0.01:
-            plot_data.at[idx, 'Significance'] = '**'
+            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
+                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
         elif p_value < 0.05:
-            plot_data.at[idx, 'Significance'] = '*'
-    mean_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
-        theme_classic() +
-        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
-        geom_text(
-            aes(x='Participant', y='Mean_Value', label='Significance'),
-            position=position_dodge(width=0.9),
-            color='black',
-            size=12,
-            ha='center',
-            va='bottom',
-            show_legend=False))
-    mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
-    corrected_means_overall = np.mean(corrected_means)
-    uncorrected_means_overall = np.mean(uncorrected_means)
-    corrected_std_error_overall = np.std(corrected_means) / np.sqrt(len(corrected_means))
-    uncorrected_std_error_overall = np.std(uncorrected_means) / np.sqrt(len(uncorrected_means))
-    _, corrected_means_overall_shap_p = stats.shapiro(corrected_means)
-    _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
-    if corrected_means_overall_shap_p and uncorrected_means_overall_shap_p < 0.5:
-        _, p_value = stats.ttest_ind(corrected_means, uncorrected_means, equal_var=False)
-    else:
-        _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means, alternative='two-sided')
-    plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
-    overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
-                        geom_bar(stat='identity', position='dodge') +
-                        geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
-                        theme_classic() +
-                        labs(title='Mean of Voxel Intensities Across Participants.') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,350])
-                        )
-    if p_value < 0.001:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
-    elif p_value < 0.01:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
-    elif p_value < 0.05:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-    overall_mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
+            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
+                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
+        overall_mean_plot.save('group/preproc/pe_test/2/overall_mean_plot.png')
 
     # Step 12: Test quality of alternate distortion correction method (Stage 3).
     print("\n###### STEP 12: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 3) ######")
@@ -1598,7 +1600,6 @@ if answer3 == 'y':
                 print("Fieldmap application completed.")
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")
-            
             rl_to_pa_affine = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_to_pa_affine.mat"
             flirted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/flirted_rl_fieldmaps.nii.gz"
             rl_to_pa_warp = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_to_pa_warp.nii.gz"
@@ -1606,7 +1607,6 @@ if answer3 == 'y':
             subprocess.run(['flirt', '-in', betted_rl_fieldmaps, '-ref', corrected_pa_fieldmaps, '-omat', rl_to_pa_affine, '-out', flirted_rl_fieldmaps, '-dof', '6'])
             subprocess.run(['fnirt', f'--in={betted_rl_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--aff={rl_to_pa_affine}', f'--cout={rl_to_pa_warp}'])
             subprocess.run(['applywarp', f'--in={betted_rl_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--warp={rl_to_pa_warp}', f'--out={fnirted_rl_fieldmaps}'])
-            
             FSLDIR = os.getenv('FSLDIR')
             if not FSLDIR:
                 raise EnvironmentError("FSLDIR is not set. Make sure FSL is installed and FSLDIR is set correctly.")
@@ -1620,7 +1620,6 @@ if answer3 == 'y':
             subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', pa_struct2standard_mat])
             subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={pa_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={pa_warp_struct2standard}'])
             subprocess.run(['applywarp', f'--in={corrected_pa_fieldmaps}', f'--ref={mni_template}', f'--warp={pa_warp_struct2standard}', f'--premat={pa_func2struct}', f'--out={standard_pa_fieldmaps}'])
-
             rl_func2struct = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_func2struct.mat"
             rl_struct2standard_mat = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_struct2standard.mat"
             rl_warp_struct2standard = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_warp_struct2standard.nii.gz"
@@ -1628,10 +1627,361 @@ if answer3 == 'y':
             subprocess.run(['flirt', '-in', fnirted_rl_fieldmaps, '-ref', structural_brain, '-omat', rl_func2struct, '-dof', '6'])
             subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', rl_struct2standard_mat])
             subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={rl_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={rl_warp_struct2standard}'])
-            subprocess.run(['applywarp', f'--in={fnirted_rl_fieldmaps}', f'--ref={mni_template}', f'--warp={rl_warp_struct2standard}', f'--premat={rl_func2struct}', f'--out={standard_rl_fieldmaps}'])
-
-
-
+            subprocess.run(['applywarp', f'--in={fnirted_rl_fieldmaps}', f'--ref={mni_template}', f'--warp={rl_warp_struct2standard}', f'--premat={rl_func2struct}', f'--out={standard_rl_fieldmaps}']) 
+            pa_csf_pve_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_seg_pve_0.nii.gz"
+            if not os.path.exists(pa_csf_pve_seg):
+                print(f"Segmenting {p_id} PA and RL fieldmaps...")
+                pa_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_seg"
+                rl_seg = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_seg"
+                subprocess.run(["fast", "-n", "3", "-o", pa_seg, mni_template, standard_pa_fieldmaps])
+                subprocess.run(["fast", "-n", "3", "-o", rl_seg, mni_template, standard_rl_fieldmaps])
+                print(f"{p_id} segmentation of PA and RL fieldmaps completed.")
+            else:
+                print(f"{p_id} segmentation of PA and RL fieldmaps already completed. Skipping process.")
+            pa_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_csf_pve_seg_bin.nii.gz"
+            pa_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_wm_pve_seg_bin.nii.gz"
+            pa_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_gm_pve_seg_bin.nii.gz"
+            if not os.path.exists(pa_csf_pve_seg_bin):
+                print(f"Binarising {p_id} CSF, WM and GM segmented PVE masks for PA fieldmaps...")
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
+                print(f"{p_id} CSF, WM, and GM segmented PVE masks for PA fieldmaps successfully binarised.")
+            else:
+                print(f"{p_id} binarisation of CSF, WM and GM segmented PVE masks for PA fieldmaps already completed. Skipping process.")
+            rl_csf_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_csf_pve_seg_bin.nii.gz"
+            rl_wm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_wm_pve_seg_bin.nii.gz"
+            rl_gm_pve_seg_bin = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_gm_pve_seg_bin.nii.gz"
+            if not os.path.exists(rl_csf_pve_seg_bin):
+                print(f"Binarising {p_id} CSF, WM and GM segmented PVE masks for RL fieldmaps...")
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_seg_pve_0.nii.gz', '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_seg_pve_1.nii.gz', '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
+                subprocess.run(['fslmaths', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_seg_pve_2.nii.gz', '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
+                print(f"{p_id} CSF, WM, and GM segmented PVE masks for RL fieldmaps successfully binarised.")
+            else:
+                print(f"{p_id} binarisation of CSF, WM and GM segmented PVE masks for RL fieldmaps already completed. Skipping process.")
+            csf_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/csf_intersect_mask.nii.gz"
+            wm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/wm_intersect_mask.nii.gz"
+            gm_intersect_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/gm_intersect_mask.nii.gz"
+            if not os.path.exists(csf_intersect_mask):
+                print(f"Creating Intersect masks for {p_id}...")
+                subprocess.run(['fslmaths', pa_csf_pve_seg_bin, '-mul', rl_csf_pve_seg_bin, '-bin', csf_intersect_mask])
+                subprocess.run(['fslmaths', pa_wm_pve_seg_bin, '-mul', rl_wm_pve_seg_bin, '-bin', wm_intersect_mask])
+                subprocess.run(['fslmaths', pa_gm_pve_seg_bin, '-mul', rl_gm_pve_seg_bin, '-bin', gm_intersect_mask])
+                print(f"Intersect masks for {p_id} successfully created.")
+            else:
+                print(f"Intersect masks for {p_id} already created. Skipping process.")
+            csf_intersect_vol = float(subprocess.run(['fslstats', csf_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+            wm_intersect_vol = float(subprocess.run(['fslstats', wm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+            gm_intersect_vol = float(subprocess.run(['fslstats', gm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+            pa_csf_mask_vol = float(subprocess.run(['fslstats', pa_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            rl_csf_mask_vol = float(subprocess.run(['fslstats', rl_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            if pa_csf_mask_vol < rl_csf_mask_vol:
+                csf_overlap_perc = (csf_intersect_vol / pa_csf_mask_vol) * 100
+            else: 
+                csf_overlap_perc = (csf_intersect_vol / rl_csf_mask_vol) * 100
+            pa_wm_mask_vol = float(subprocess.run(['fslstats', pa_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            rl_wm_mask_vol = float(subprocess.run(['fslstats', rl_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            if pa_wm_mask_vol < rl_wm_mask_vol:
+                wm_overlap_perc = (wm_intersect_vol / pa_wm_mask_vol) * 100
+            else: 
+                wm_overlap_perc = (wm_intersect_vol / rl_wm_mask_vol) * 100
+            pa_gm_mask_vol = float(subprocess.run(['fslstats', pa_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            rl_gm_mask_vol = float(subprocess.run(['fslstats', rl_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            if pa_gm_mask_vol < rl_gm_mask_vol:
+                gm_overlap_perc = (gm_intersect_vol / pa_gm_mask_vol) * 100
+            else: 
+                gm_overlap_perc = (gm_intersect_vol / rl_gm_mask_vol) * 100
+            overlap_perc_file = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/overlap_perc.txt"
+            participant_col = []
+            tissue_type_col = []
+            overlap_perc_col = []
+            participant_col.append(p_id)
+            participant_col.append(p_id)
+            participant_col.append(p_id)
+            tissue_type_col.append('csf')
+            tissue_type_col.append('wm')
+            tissue_type_col.append('gm')
+            overlap_perc_col.append(csf_overlap_perc)
+            overlap_perc_col.append(wm_overlap_perc)
+            overlap_perc_col.append(gm_overlap_perc)
+            overlap_perc_df = pd.DataFrame({'p_id': participant_col, 'tissue_type': tissue_type_col, 'overlap_perc': overlap_perc_col})
+            overlap_perc_df.to_csv(overlap_perc_file, sep='\t', index=False)
+            print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} saved to preproc/fieldmaps/pe_test/3 folder.")
+            group_overlap_perc_file = "group/preproc/pe_test/3/overlap_perc.txt"     
+            if p_id not in group_participant_col:
+                group_participant_col.append(p_id)
+                group_participant_col.append(p_id)
+                group_participant_col.append(p_id)
+                group_tissue_type_col.append('csf')
+                group_tissue_type_col.append('wm')
+                group_tissue_type_col.append('gm')
+                group_overlap_perc_col.append(csf_overlap_perc) 
+                group_overlap_perc_col.append(wm_overlap_perc) 
+                group_overlap_perc_col.append(gm_overlap_perc)          
+                group_overlap_perc_df = pd.DataFrame({'p_id': group_participant_col, 'tissue_type': group_tissue_type_col, 'overlap_perc': group_overlap_perc_col})
+                group_overlap_perc_df.to_csv(group_overlap_perc_file, sep='\t', index=False)
+                print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} appended to group file in group/preproc/pe_test/3 folder.")
+            else:
+                print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} already appended to group file in group/preproc/pe_test/3 folder. Skipping process.")
+    percentage_outside_pa_list = []
+    percentage_outside_rl_list = []
+    column_headers = ['p_id', 'sequence', 'value']
+    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:
+            def read_roi_file(roi_file):
+                voxel_coordinates = []
+                with open(roi_file, 'r') as file:
+                    content = file.read()
+                    matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
+                    for match in matches:
+                        coordinates = match.split()
+                        voxel_coordinates.append(
+                            (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
+                return voxel_coordinates
+            path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
+            cisc_folder = None
+            for folder_name in os.listdir(path):
+                if "CISC" in folder_name:
+                    cisc_folder = folder_name
+                    break
+            if cisc_folder is None:
+                print("No 'CISC' folder found in the 'neurofeedback' directory.")
+                exit(1)
+            roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', 'target_folder_run-1', 'depnf_run-1.roi')
+            voxel_coordinates = read_roi_file(roi_file)
+            averaged_run = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/averaged_run.nii.gz"
+            if not os.path.exists(averaged_run):
+                print(f"{p_id} Run 1 images being averaged...")
+                run = f"{p_id}/analysis/preproc/niftis/run01_nh.nii.gz"
+                subprocess.run(['fslmaths', run, '-Tmean', averaged_run])
+                print(f"{p_id} Run 1 images successfully averaged.")
+            else:
+                print(f"{p_id} Run 1 images already averaged. Skipping process.")
+            functional_image_info = nib.load(averaged_run)
+            functional_dims = functional_image_info.shape
+            binary_volume = np.zeros(functional_dims)
+            for voxel in voxel_coordinates:
+                x, y, z = voxel
+                binary_volume[x, y, z] = 1
+            binary_volume = np.flip(binary_volume, axis=1)
+            functional_affine = functional_image_info.affine
+            binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
+            nib.save(binary_nifti, f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/run01_subject_space_ROI.nii.gz')
+            transformed_roi_mask = f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/transformed_roi_mask.nii.gz'
+            subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/temp_file.nii.gz', '-omat', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/roi_transformation.mat'])
+            subprocess.run(['flirt', '-in', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/run01_subject_space_ROI.nii.gz', '-ref', structural_brain, '-applyxfm', '-init', f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/roi_transformation.mat', '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
+            run1_struct2standard_mat = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/run1_struct2standard.mat"
+            run1_warp_struct2standard = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/run1_warp_struct2standard.nii.gz"
+            subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', run1_struct2standard_mat])
+            subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={run1_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={run1_warp_struct2standard}'])
+            subprocess.run(['applywarp', f'--in={averaged_run}', f'--ref={mni_template}', f'--warp={rl_warp_struct2standard}', f'--premat={p_id}/analysis/preproc/fieldmaps/pe_test/3/roi_transformation.mat', f'--out={p_id}/analysis/preproc/fieldmaps/pe_test/3/temp_file2.nii.gz'])
+            standard_roi_mask = f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/standard_roi_mask.nii.gz'
+            subprocess.run(['applywarp', '-in', transformed_roi_mask, '-ref', mni_template, '-warp', run1_warp_struct2standard, '-out', standard_roi_mask])
+            standard_pa_fieldmaps_bin = f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/standard_pa_fieldmaps_bin.nii.gz'
+            if not os.path.exists(standard_pa_fieldmaps_bin):
+                subprocess.run(['fslmaths', standard_pa_fieldmaps, '-thr', '100', '-bin', standard_pa_fieldmaps_bin])
+            standard_rl_fieldmaps_bin = os.path.join(f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/standard_rl_fieldmaps_bin.nii.gz')
+            if not os.path.exists(standard_rl_fieldmaps_bin):
+                subprocess.run(['fslmaths', standard_rl_fieldmaps, '-thr', '100', '-bin', standard_rl_fieldmaps_bin])
+            pa_bin_inv = f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_bin_inv.nii.gz'
+            if not os.path.exists(pa_bin_inv):
+                subprocess.run(['fslmaths', standard_pa_fieldmaps_bin, '-sub', '1', '-abs', pa_bin_inv])
+            rl_bin_inv = f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_bin_inv.nii.gz'
+            if not os.path.exists(rl_bin_inv):
+                subprocess.run(['fslmaths', standard_rl_fieldmaps_bin, '-sub', '1', '-abs', rl_bin_inv])
+            pa_result = subprocess.run(['fslstats', standard_roi_mask, '-k', pa_bin_inv, '-V'], capture_output=True, text=True)
+            if pa_result.returncode == 0:
+                pa_result_output = pa_result.stdout.strip()
+            else:
+                print("Error executing fslstats command.")
+            pa_result_output_values = pa_result_output.split()
+            pa_voxels_outside = float(pa_result_output_values[0])
+            rl_result = subprocess.run(['fslstats', standard_roi_mask, '-k', rl_bin_inv, '-V'], capture_output=True, text=True)
+            if rl_result.returncode == 0:
+                rl_result_output = rl_result.stdout.strip()
+            else:
+                print("Error executing fslstats command.")
+            rl_result_output_values = rl_result_output.split()
+            rl_voxels_outside = float(rl_result_output_values[0])
+            result2 = subprocess.run(['fslstats', standard_roi_mask, '-V'], capture_output=True, text=True)
+            if result2.returncode == 0:
+                result2_output = result2.stdout.strip()
+            else:
+                print("Error executing fslstats command.")
+            result2_output_values = result2_output.split()
+            total_voxels_in_roi = float(result2_output_values[0])
+            percentage_outside_pa = (pa_voxels_outside / total_voxels_in_roi) * 100
+            percentage_outside_pa = round(percentage_outside_pa, 2)
+            percentage_outside_pa_list.append(percentage_outside_pa)
+            percentage_outside_rl = (rl_voxels_outside / total_voxels_in_roi) * 100
+            percentage_outside_rl = round(percentage_outside_rl, 2)
+            percentage_outside_rl_list.append(percentage_outside_rl)
+            pa_trimmed_roi_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_trimmed_roi_mask.nii.gz"
+            rl_trimmed_roi_mask = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_trimmed_roi_mask.nii.gz"
+            if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
+                subprocess.run(['fslmaths', standard_roi_mask, '-mul', standard_pa_fieldmaps_bin, pa_trimmed_roi_mask])
+                subprocess.run(['fslmaths', standard_roi_mask, '-mul', standard_rl_fieldmaps_bin, rl_trimmed_roi_mask])
+            def calculate_ssim(image1_path, image2_path, ssim_output_path):
+                """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
+                image1_nii = nib.load(image1_path)
+                image2_nii = nib.load(image2_path)
+                image1 = image1_nii.get_fdata()
+                image2 = image2_nii.get_fdata()
+                if image1.shape != image2.shape:
+                    raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+                ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+                ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+                nib.save(ssim_map_nifti, ssim_output_path)
+                print(f"SSIM Index: {ssim_index}")
+                print(f"SSIM map saved to: {ssim_output_path}")
+            ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/ssim_map.nii.gz"
+            if not os.path.exists(ssim_output_path):
+                print(f"Calculating SSIM between PA and RL images for {p_id}...")
+                calculate_ssim(standard_rl_fieldmaps, standard_pa_fieldmaps, ssim_output_path)
+                print(f'SSIM between PA and RL images for {p_id} successfully calculated.')
+            else:
+                print(f"SSIM between PA and RL images for {p_id} already calculated. Skipping process.")
+            binarised_ssim_output_path = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/binarised_ssim_mask.nii.gz"
+            if not os.path.exists(binarised_ssim_output_path):
+                print(f'Binarising {p_id} SSIM mask...')
+                subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", binarised_ssim_output_path])
+                print(f'{p_id} SSIM mask successfully binarised.')
+            else:
+                print(f'{p_id} SSIM mask already binarised. Skipping process.')
+            print(f'Counting voxels in binarised SSIM mask...')
+            voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+            print(f'Voxels in whole binarised SSIM mask for {p_id}:', voxels_in_whole_mask)
+            intersection_mask_path = f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/ssim_roi_intersect.nii.gz'
+            if not os.path.exists(intersection_mask_path):
+                print(f'Creating intersect mask of SSIM and ROI for {p_id}...')
+                subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/standard_roi_mask.nii.gz', intersection_mask_path])
+                print(f'Intersect mask of SSIM and ROI for {p_id} successfully created.')
+            else:
+                print(f'Intersect mask of SSIM and ROI for {p_id} already exists. Skipping process.')
+            print(f'Counting voxels in transformed ROI mask for {p_id}...')
+            voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+            print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
+            def extract_voxel_intensities(epi_image_path, mask_image_path):
+                epi_img = nib.load(epi_image_path)
+                epi_data = epi_img.get_fdata()
+                mask_img = nib.load(mask_image_path)
+                mask_data = mask_img.get_fdata()
+                mask_data = mask_data > 0
+                roi_voxel_intensities = epi_data[mask_data]
+                voxel_intensity_list = roi_voxel_intensities.tolist()
+                return voxel_intensity_list
+            pa_voxel_intensities = extract_voxel_intensities(standard_pa_fieldmaps, pa_trimmed_roi_mask)
+            rl_voxel_intensities = extract_voxel_intensities(standard_rl_fieldmaps, rl_trimmed_roi_mask)
+            pa_voxel_intensities_mean = np.mean(pa_voxel_intensities)
+            rl_voxel_intensities_mean = np.mean(rl_voxel_intensities)
+            print(f"Average voxel intensity within ROI for {p_id} PA fieldmap sequence: {pa_voxel_intensities_mean}")
+            print(f"Average voxel intensity within ROI for {p_id} RL fieldmap sequence: {rl_voxel_intensities_mean}")
+            values = pa_voxel_intensities + rl_voxel_intensities
+            sequence = ['pa'] * len(pa_voxel_intensities) + ['rl'] * len(rl_voxel_intensities)
+            subject = [f'{p_id}'] * len(pa_voxel_intensities) + [f'{p_id}'] * len(rl_voxel_intensities)
+            voxel_intensity_df = pd.DataFrame({'p_id': subject, 'sequence': sequence, 'value': values})
+            voxel_intensity_df.to_csv(f'{p_id}/analysis/preproc/fieldmaps/pe_test/3/voxel_intensity_df.txt', sep='\t', index=False)
+            group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
+    group_voxel_intensity_df.to_csv('group/preproc/pe_test/3/group_voxel_intensity_df.txt', sep='\t', index=False)
+    print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants in PA fieldmap sequence:', percentage_outside_pa_list)
+    print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants in RL fieldmap sequence:', percentage_outside_rl_list)
+    pa_means = []
+    rl_means= []
+    p_values = []
+    pa_std_errors = []
+    rl_std_errors = []
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:
+            filtered_pa = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'pa')]
+            mean_value_pa = filtered_pa['value'].mean()
+            pa_means.append(mean_value_pa)
+            filtered_rl = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'rl')]
+            mean_value_rl = filtered_rl['value'].mean()
+            rl_means.append(mean_value_rl)
+            anderson_pa = stats.anderson(filtered_pa['value'])
+            print(f"Anderson-Darling test for PA sequence values: Statistic={anderson_pa.statistic}, Critical Values={anderson_pa.critical_values}, Significance Levels={anderson_pa.significance_level}")
+            anderson_rl = stats.anderson(filtered_rl['value'])
+            print(f"Anderson-Darling test for RL sequence values: Statistic={anderson_rl.statistic}, Critical Values={anderson_rl.critical_values}, Significance Levels={anderson_rl.significance_level}")
+            significance_level = 0.05
+            is_pa_normal = anderson_pa.statistic < anderson_pa.critical_values[
+                anderson_pa.significance_level.tolist().index(significance_level * 100)]
+            is_rl_normal = anderson_rl.statistic < anderson_rl.critical_values[
+                anderson_rl.significance_level.tolist().index(significance_level * 100)]
+            if is_pa_normal and is_rl_normal:
+                print(f'Running t-test for {p_id}...')
+                _, p_value = stats.ttest_ind(filtered_pa['value'], filtered_rl['value'], equal_var=False)
+                p_values.append(p_value)
+            else:
+                print(f'Running Mann Whitney U test for {p_id}...')
+                _, p_value = stats.mannwhitneyu(filtered_pa['value'], filtered_rl['value'], alternative='two-sided')
+                p_values.append(p_value)
+            pa_std_error = np.std(filtered_pa['value']) / np.sqrt(len(filtered_pa['value']))
+            pa_std_errors.append(pa_std_error)
+            rl_std_error = np.std(filtered_rl['value']) / np.sqrt(len(filtered_rl['value']))
+            rl_std_errors.append(rl_std_error)
+        plot_data = pd.DataFrame({
+            'Participant': good_participants * 2,
+            'Mean_Value': pa_means + rl_means,
+            'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
+            'Significance': ['' for _ in range(len(good_participants) * 2)],
+            'Std_Error': pa_std_errors + rl_std_errors
+        })
+        for idx, p_value in enumerate(p_values):
+            if p_value < 0.001:
+                plot_data.at[idx, 'Significance'] = '***'
+            elif p_value < 0.01:
+                plot_data.at[idx, 'Significance'] = '**'
+            elif p_value < 0.05:
+                plot_data.at[idx, 'Significance'] = '*'
+        mean_plot = (
+            ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
+            geom_bar(stat='identity', position='dodge') +
+            geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
+            theme_classic() +
+            labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+            theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+            scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+            geom_text(
+                aes(x='Participant', y='Mean_Value', label='Significance'),
+                position=position_dodge(width=0.9),
+                color='black',
+                size=12,
+                ha='center',
+                va='bottom',
+                show_legend=False))
+        mean_plot.save('group/preproc/pe_test/3/overall_mean_plot.png')
+        pa_means_overall = np.mean(pa_means)
+        rl_means_overall = np.mean(rl_means)
+        pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
+        rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
+        _, pa_means_overall_shap_p = stats.shapiro(pa_means)
+        _, rl_means_overall_shap_p = stats.shapiro(rl_means)
+        if pa_means_overall_shap_p and rl_means_overall_shap_p < 0.5:
+            print(f'Running t-test for {p_id}...')
+            _, p_value = stats.ttest_ind(pa_means, rl_means, equal_var=False)
+        else:
+            print(f'Running Mann-Whitney U test for {p_id}...')
+            _, p_value = stats.mannwhitneyu(pa_means, rl_means, alternative='two-sided')
+        plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
+        overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+                            geom_bar(stat='identity', position='dodge') +
+                            geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
+                            theme_classic() +
+                            labs(title='Mean of Voxel Intensities Across Participants.') +
+                            scale_y_continuous(expand=(0, 0), limits=[0,350])
+                            )
+        if p_value < 0.001:
+            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
+                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+        elif p_value < 0.01:
+            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
+                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
+        elif p_value < 0.05:
+            overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
+                annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
+        overall_mean_plot.save('group/preproc/pe_test/3/overall_mean_plot.png')
 
     # Step 13: Create onset files.
     print("\n###### STEP 11: CREATING ONSET FILES ######")

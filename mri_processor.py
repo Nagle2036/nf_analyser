@@ -1599,27 +1599,41 @@ if answer3 == 'y':
             else:
                 print("Fieldmaps already calculated and applied. Skipping process.")
             
+            rl_to_pa_affine = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_to_pa_affine.mat"
+            flirted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/flirted_rl_fieldmaps.nii.gz"
+            rl_to_pa_warp = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_to_pa_warp.nii.gz"
+            fnirted_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/fnirted_rl_fieldmaps.nii.gz"
+            subprocess.run(['flirt', '-in', betted_rl_fieldmaps, '-ref', corrected_pa_fieldmaps, '-omat', rl_to_pa_affine, '-out', flirted_rl_fieldmaps, '-dof', '6'])
+            subprocess.run(['fnirt', f'--in={betted_pa_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--aff={rl_to_pa_affine}', f'--cout={rl_to_pa_warp}'])
+            subprocess.run(['applywarp', f'--in={betted_rl_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--warp={rl_to_pa_warp}', f'--out={fnirted_rl_fieldmaps}'])
+            
             FSLDIR = os.getenv('FSLDIR')
             if not FSLDIR:
                 raise EnvironmentError("FSLDIR is not set. Make sure FSL is installed and FSLDIR is set correctly.")
             structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
-            func2struct = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/func2strut.mat"
             mni_template = f"{FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz"
-            struct2standard_mat = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/struct2standard.mat"
-            warp_struct2standard = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/warp_struct2standard.nii.gz"
-            corrected_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/corrected_pa_fieldmaps.nii.gz"
-            transformed_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/transformed_pa_fieldmaps.nii.gz"
-            subprocess.run(['flirt', '-in', corrected_pa_fieldmaps, '-ref', structural_brain, '-omat', func2struct, '-dof', '6'])
-            subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', struct2standard_mat])
-            subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={warp_struct2standard}'])
-            subprocess.run(['applywarp', f'--in={corrected_pa_fieldmaps}', f'--ref={mni_template}', f'--warp={warp_struct2standard}', f'--premat={func2struct}', f'--out={transformed_pa_fieldmaps}'])
+            pa_func2struct = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_func2struct.mat"
+            pa_struct2standard_mat = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_struct2standard.mat"
+            pa_warp_struct2standard = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/pa_warp_struct2standard.nii.gz"
+            standard_pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/standard_pa_fieldmaps.nii.gz"
+            subprocess.run(['flirt', '-in', corrected_pa_fieldmaps, '-ref', structural_brain, '-omat', pa_func2struct, '-dof', '6'])
+            subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', pa_struct2standard_mat])
+            subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={pa_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={pa_warp_struct2standard}'])
+            subprocess.run(['applywarp', f'--in={corrected_pa_fieldmaps}', f'--ref={mni_template}', f'--warp={pa_warp_struct2standard}', f'--premat={pa_func2struct}', f'--out={standard_pa_fieldmaps}'])
+
+            rl_func2struct = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_func2struct.mat"
+            rl_struct2standard_mat = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_struct2standard.mat"
+            rl_warp_struct2standard = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/rl_warp_struct2standard.nii.gz"
+            standard_rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pe_test/3/standard_rl_fieldmaps.nii.gz"
+            subprocess.run(['flirt', '-in', fnirted_rl_fieldmaps, '-ref', structural_brain, '-omat', rl_func2struct, '-dof', '6'])
+            subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', rl_struct2standard_mat])
+            subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={rl_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={rl_warp_struct2standard}'])
+            subprocess.run(['applywarp', f'--in={fnirted_rl_fieldmaps}', f'--ref={mni_template}', f'--warp={rl_warp_struct2standard}', f'--premat={rl_func2struct}', f'--out={standard_rl_fieldmaps}'])
 
 
 
 
-
-
-    # Step 12: Create onset files.
+    # Step 13: Create onset files.
     print("\n###### STEP 11: CREATING ONSET FILES ######")
     onsetfile_sub = f'{p_id}/analysis/preproc/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:

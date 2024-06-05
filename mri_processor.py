@@ -1563,8 +1563,9 @@ if answer5 == 'y':
                 binary_volume[x, y, z] = 1
             binary_volume = np.flip(binary_volume, axis=1)
             functional_affine = functional_image_info.affine
-            roi_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
-            nib.save(roi_mask, f'{p_id}/analysis/susceptibility/fnirt_test/1/run01_subject_space_ROI.nii.gz')
+            binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
+            nib.save(binary_mask, f'{p_id}/analysis/susceptibility/fnirt_test/1/run01_subject_space_ROI.nii.gz')
+            roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/1/run01_subject_space_ROI.nii.gz'
             transformed_roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/1/transformed_roi_mask.nii.gz'
             temp_file = f'{p_id}/analysis/susceptibility/fnirt_test/1/temp_file.nii.gz'
             roi_transformation = f'{p_id}/analysis/susceptibility/fnirt_test/1/roi_transformation.mat'
@@ -1846,8 +1847,9 @@ if answer5 == 'y':
                 binary_volume[x, y, z] = 1
             binary_volume = np.flip(binary_volume, axis=1)
             functional_affine = functional_image_info.affine
-            roi_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
-            nib.save(roi_mask, f'{p_id}/analysis/susceptibility/fnirt_test/2/run01_subject_space_ROI.nii.gz')
+            binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
+            nib.save(binary_mask, f'{p_id}/analysis/susceptibility/fnirt_test/2/run01_subject_space_ROI.nii.gz')
+            roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/2/run01_subject_space_ROI.nii.gz'
             transformed_roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/2/transformed_roi_mask.nii.gz'
             temp_file = f'{p_id}/analysis/susceptibility/fnirt_test/2/temp_file.nii.gz'
             roi_transformation = f'{p_id}/analysis/susceptibility/fnirt_test/2/roi_transformation.mat'
@@ -2157,8 +2159,9 @@ if answer5 == 'y':
                 binary_volume[x, y, z] = 1
             binary_volume = np.flip(binary_volume, axis=1)
             functional_affine = functional_image_info.affine
-            roi_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
-            nib.save(roi_mask, f'{p_id}/analysis/susceptibility/fnirt_test/3/run01_subject_space_ROI.nii.gz')
+            binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
+            nib.save(binary_mask, f'{p_id}/analysis/susceptibility/fnirt_test/3/run01_subject_space_ROI.nii.gz')
+            roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/3/run01_subject_space_ROI.nii.gz'
             transformed_roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/3/transformed_roi_mask.nii.gz'
             temp_file = f'{p_id}/analysis/susceptibility/fnirt_test/3/temp_file.nii.gz'
             roi_transformation = f'{p_id}/analysis/susceptibility/fnirt_test/3/roi_transformation.mat'

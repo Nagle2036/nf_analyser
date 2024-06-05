@@ -1146,7 +1146,7 @@ if answer5 == 'y':
         participants_to_iterate = participants
     else:
         participants_to_iterate = [p_id]
-    restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
+    restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/susceptibility' and 'group' folders associated with them. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
@@ -1328,7 +1328,7 @@ if answer5 == 'y':
             print("Error encountered:", result.stderr)
     for run in runs:
         bin_file = os.path.join(output_folder, f"{run}_averaged_betted_bin.nii.gz")
-        threshold = 100
+        threshold = '100'
         if not os.path.exists(bin_file):
             subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
             print(f"{run} EPI binarisation completed.")

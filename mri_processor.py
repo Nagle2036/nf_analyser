@@ -5,7 +5,7 @@
 # Add percentage completion metric.
 # Output mri_processor.py Bash terminal outputs / prints into .txt log file
 # Add option to run analysis for all subjects. E.g. for fMRI preprocessing, the input question could be: "Enter the participant's ID (e.g. P001), or write 'ALL' to execute for all participants."
-# Potentially recreate preprocessing pipeline with fmriprep just to show that I can use it. And maybe compare analysis results after my preprocessing and fmriprep preprocessing
+# Potentially recreate preprocessing pipeline with fmriprep just to show that I ca n use it. And maybe compare analysis results after my preprocessing and fmriprep preprocessing
 
 #region IMPORT PACKAGES.
 
@@ -265,13 +265,13 @@ if answer3 == 'y':
                     print(f"{p_id} preproc folder successfully deleted.")
                 else:
                     print(f"{p_id} preproc folder does not exist.")
-                group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
-                if os.path.exists(group_preproc_folder):
-                    print(f"Deleting {p_id} group/preproc folder...")
-                    shutil.rmtree(group_preproc_folder)
-                    print(f"{p_id} group/preproc folder successfully deleted.")
-                else:
-                    print(f"{p_id} group/preproc folder does not exist.")
+            group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
+            if os.path.exists(group_preproc_folder):
+                print(f"Deleting {p_id} group/preproc folder...")
+                shutil.rmtree(group_preproc_folder)
+                print(f"{p_id} group/preproc folder successfully deleted.")
+            else:
+                print(f"{p_id} group/preproc folder does not exist.")
         else:
             sys.exit()
 
@@ -607,18 +607,18 @@ if answer3 == 'y':
         else:
             print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
         
-    # Step 7: Brain extraction of functional images.
-    print("\n###### STEP 7: BRAIN EXTRACTING FUNCTIONAL IMAGES ######")
-    for p_id in participants_to_iterate:
-        for run in runs:
-            output_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "bet", f"{run}_nh_mc_bet.nii.gz")
-            input_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms", f"{run}_nh_mc.nii.gz")
-            if not os.path.exists(output_path):
-                print(f"Performing brain extraction on {run} functional image.")
-                subprocess.run(["bet", input_path, output_path, "-m", "-R"])
-                print(f"{run} functional image brain extracted.")
-            else:
-                print(f"{run} functional image already brain extracted. Skipping process.")
+    # # Step 7: Brain extraction of functional images.
+    # print("\n###### STEP 7: BRAIN EXTRACTING FUNCTIONAL IMAGES ######")
+    # for p_id in participants_to_iterate:
+    #     for run in runs:
+    #         output_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "bet", f"{run}_nh_mc_bet.nii.gz")
+    #         input_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms", f"{run}_nh_mc.nii.gz")
+    #         if not os.path.exists(output_path):
+    #             print(f"Performing brain extraction on {run} functional image.")
+    #             subprocess.run(["bet", input_path, output_path, "-m", "-R"])
+    #             print(f"{run} functional image brain extracted.")
+    #         else:
+    #             print(f"{run} functional image already brain extracted. Skipping process.")
 
     # Step 8: Confirm sequence phase encoding directions for stratification of distortion correction method.
     print("\n###### STEP 8: DETERMINING PHASE ENCODING DIRECTIONS ######")
@@ -1137,7 +1137,7 @@ if answer4 == 'y':
 
 #region SUSCEPTIBILITY ANALYSIS.
 
-answer5 = input("Would you like to execute first-level susceptibility artifact analysis? (y/n)\n")
+answer5 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
 if answer5 == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
@@ -1159,12 +1159,12 @@ if answer5 == 'y':
                 else:
                     print(f"{p_id} susceptibility folder does not exist.")
                 group_susceptibility_folder = os.path.join(os.getcwd(), 'group', 'susceptibility')
-                if os.path.exists(group_susceptibility_folder):
-                    print(f"Deleting {p_id} group/susceptibility folder...")
-                    shutil.rmtree(group_susceptibility_folder)
-                    print(f"{p_id} group/susceptibility folder successfully deleted.")
-                else:
-                    print(f"{p_id} group/susceptibility folder does not exist.")
+            if os.path.exists(group_susceptibility_folder):
+                print(f"Deleting {p_id} group/susceptibility folder...")
+                shutil.rmtree(group_susceptibility_folder)
+                print(f"{p_id} group/susceptibility folder successfully deleted.")
+            else:
+                print(f"{p_id} group/susceptibility folder does not exist.")
         else:
             sys.exit()
 
@@ -1328,8 +1328,8 @@ if answer5 == 'y':
             print("Error encountered:", result.stderr)
     for run in runs:
         bin_file = os.path.join(output_folder, f"{run}_averaged_betted_bin.nii.gz")
+        threshold = 100
         if not os.path.exists(bin_file):
-            threshold = input("Please enter a threshold value for functional image binarisation (normally 100).\n")
             subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
             print(f"{run} EPI binarisation completed.")
         else:

@@ -2098,9 +2098,10 @@ if answer5 == 'y':
             flirted_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/3/flirted_rl_fieldmaps.nii.gz"
             rl_to_pa_warp = f"{p_id}/analysis/susceptibility/fnirt_test/3/rl_to_pa_warp.nii.gz"
             fnirted_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/3/fnirted_rl_fieldmaps.nii.gz"
-            subprocess.run(['flirt', '-in', betted_rl_fieldmaps, '-ref', corrected_pa_fieldmaps, '-omat', rl_to_pa_affine, '-out', flirted_rl_fieldmaps, '-dof', '6'])
-            subprocess.run(['fnirt', f'--in={betted_rl_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--aff={rl_to_pa_affine}', f'--cout={rl_to_pa_warp}'])
-            subprocess.run(['applywarp', f'--in={betted_rl_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--warp={rl_to_pa_warp}', f'--out={fnirted_rl_fieldmaps}'])
+            if not os.path.exists(fnirted_rl_fieldmaps):
+                subprocess.run(['flirt', '-in', betted_rl_fieldmaps, '-ref', corrected_pa_fieldmaps, '-omat', rl_to_pa_affine, '-out', flirted_rl_fieldmaps, '-dof', '6'])
+                subprocess.run(['fnirt', f'--in={betted_rl_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--aff={rl_to_pa_affine}', f'--cout={rl_to_pa_warp}'])
+                subprocess.run(['applywarp', f'--in={betted_rl_fieldmaps}', f'--ref={corrected_pa_fieldmaps}', f'--warp={rl_to_pa_warp}', f'--out={fnirted_rl_fieldmaps}'])
             FSLDIR = os.getenv('FSLDIR')
             if not FSLDIR:
                 raise EnvironmentError("FSLDIR is not set. Make sure FSL is installed and FSLDIR is set correctly.")
@@ -2110,18 +2111,20 @@ if answer5 == 'y':
             pa_struct2standard_mat = f"{p_id}/analysis/susceptibility/fnirt_test/3/pa_struct2standard.mat"
             pa_warp_struct2standard = f"{p_id}/analysis/susceptibility/fnirt_test/3/pa_warp_struct2standard.nii.gz"
             standard_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/3/standard_pa_fieldmaps.nii.gz"
-            subprocess.run(['flirt', '-in', corrected_pa_fieldmaps, '-ref', structural_brain, '-omat', pa_func2struct, '-dof', '6'])
-            subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', pa_struct2standard_mat])
-            subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={pa_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={pa_warp_struct2standard}'])
-            subprocess.run(['applywarp', f'--in={corrected_pa_fieldmaps}', f'--ref={mni_template}', f'--warp={pa_warp_struct2standard}', f'--premat={pa_func2struct}', f'--out={standard_pa_fieldmaps}'])
+            if not os.path.exists(standard_pa_fieldmaps):
+                subprocess.run(['flirt', '-in', corrected_pa_fieldmaps, '-ref', structural_brain, '-omat', pa_func2struct, '-dof', '6'])
+                subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', pa_struct2standard_mat])
+                subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={pa_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={pa_warp_struct2standard}'])
+                subprocess.run(['applywarp', f'--in={corrected_pa_fieldmaps}', f'--ref={mni_template}', f'--warp={pa_warp_struct2standard}', f'--premat={pa_func2struct}', f'--out={standard_pa_fieldmaps}'])
             rl_func2struct = f"{p_id}/analysis/susceptibility/fnirt_test/3/rl_func2struct.mat"
             rl_struct2standard_mat = f"{p_id}/analysis/susceptibility/fnirt_test/3/rl_struct2standard.mat"
             rl_warp_struct2standard = f"{p_id}/analysis/susceptibility/fnirt_test/3/rl_warp_struct2standard.nii.gz"
             standard_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/3/standard_rl_fieldmaps.nii.gz"
-            subprocess.run(['flirt', '-in', fnirted_rl_fieldmaps, '-ref', structural_brain, '-omat', rl_func2struct, '-dof', '6'])
-            subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', rl_struct2standard_mat])
-            subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={rl_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={rl_warp_struct2standard}'])
-            subprocess.run(['applywarp', f'--in={fnirted_rl_fieldmaps}', f'--ref={mni_template}', f'--warp={rl_warp_struct2standard}', f'--premat={rl_func2struct}', f'--out={standard_rl_fieldmaps}']) 
+            if not os.path.exists(standard_rl_fieldmaps):
+                subprocess.run(['flirt', '-in', fnirted_rl_fieldmaps, '-ref', structural_brain, '-omat', rl_func2struct, '-dof', '6'])
+                subprocess.run(['flirt', '-in', structural_brain, '-ref', mni_template, '-omat', rl_struct2standard_mat])
+                subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={rl_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={rl_warp_struct2standard}'])
+                subprocess.run(['applywarp', f'--in={fnirted_rl_fieldmaps}', f'--ref={mni_template}', f'--warp={rl_warp_struct2standard}', f'--premat={rl_func2struct}', f'--out={standard_rl_fieldmaps}']) 
             def read_roi_file(roi_file):
                 voxel_coordinates = []
                 with open(roi_file, 'r') as file:
@@ -2167,8 +2170,6 @@ if answer5 == 'y':
             roi_transformation = f'{p_id}/analysis/susceptibility/fnirt_test/3/roi_transformation.mat'
             subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', temp_file, '-omat', roi_transformation])
             subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', roi_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
-            
-            
             run1_struct2standard_mat = f"{p_id}/analysis/susceptibility/fnirt_test/3/run1_struct2standard.mat"
             run1_warp_struct2standard = f"{p_id}/analysis/susceptibility/fnirt_test/3/run1_warp_struct2standard.nii.gz"
             temp_file2 = f'{p_id}/analysis/susceptibility/fnirt_test/3/temp_file2.nii.gz'
@@ -2176,7 +2177,7 @@ if answer5 == 'y':
             subprocess.run(['fnirt', f'--in={structural_brain}', f'--ref={mni_template}', f'--aff={run1_struct2standard_mat}', '--config=T1_2_MNI152_2mm', '--lambda=400,200,150,75,60,45', f'--cout={run1_warp_struct2standard}'])
             subprocess.run(['applywarp', f'--in={averaged_run}', f'--ref={mni_template}', f'--warp={rl_warp_struct2standard}', f'--premat={roi_transformation}', f'--out={temp_file2}'])
             standard_roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/3/standard_roi_mask.nii.gz'
-            subprocess.run(['applywarp', f'--in={transformed_roi_mask}', f'--ref={mni_template}', f'--warp={run1_warp_struct2standard}', f'--out{standard_roi_mask}'])
+            subprocess.run(['applywarp', f'--in={transformed_roi_mask}', f'--ref={mni_template}', f'--warp={run1_warp_struct2standard}', f'--out={standard_roi_mask}'])
             standard_pa_fieldmaps_bin = f'{p_id}/analysis/susceptibility/fnirt_test/3/standard_pa_fieldmaps_bin.nii.gz'
             if not os.path.exists(standard_pa_fieldmaps_bin):
                 subprocess.run(['fslmaths', standard_pa_fieldmaps, '-thr', '100', '-bin', standard_pa_fieldmaps_bin])

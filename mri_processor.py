@@ -1751,12 +1751,12 @@ if answer5 == 'y':
     rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
     _, pa_means_overall_shap_p = stats.shapiro(pa_means)
     _, rl_means_overall_shap_p = stats.shapiro(rl_means)
-    if pa_means_overall_shap_p and rl_means_overall_shap_p < 0.5:
+    if pa_means_overall_shap_p > 0.05 and rl_means_overall_shap_p > 0.5:
         print(f'Running t-test for {p_id}...')
-        _, p_value = stats.ttest_ind(pa_means, rl_means, equal_var=False)
+        _, p_value = stats.ttest_ind(pa_means, rl_means)
     else:
         print(f'Running Mann-Whitney U test for {p_id}...')
-        _, p_value = stats.mannwhitneyu(pa_means, rl_means, alternative='two-sided')
+        _, p_value = stats.mannwhitneyu(pa_means, rl_means)
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
     overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -2035,10 +2035,10 @@ if answer5 == 'y':
     uncorrected_std_error_overall = np.std(uncorrected_means) / np.sqrt(len(uncorrected_means))
     _, corrected_means_overall_shap_p = stats.shapiro(corrected_means)
     _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
-    if corrected_means_overall_shap_p and uncorrected_means_overall_shap_p < 0.5:
-        _, p_value = stats.ttest_ind(corrected_means, uncorrected_means, equal_var=False)
+    if corrected_means_overall_shap_p > 0.05 and uncorrected_means_overall_shap_p > 0.5:
+        _, p_value = stats.ttest_ind(corrected_means, uncorrected_means)
     else:
-        _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means, alternative='two-sided')
+        _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means)
     plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
     overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -2358,12 +2358,12 @@ if answer5 == 'y':
     rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
     _, pa_means_overall_shap_p = stats.shapiro(pa_means)
     _, rl_means_overall_shap_p = stats.shapiro(rl_means)
-    if pa_means_overall_shap_p and rl_means_overall_shap_p < 0.5:
+    if pa_means_overall_shap_p > 0.5 and rl_means_overall_shap_p > 0.5:
         print(f'Running t-test for {p_id}...')
-        _, p_value = stats.ttest_ind(pa_means, rl_means, equal_var=False)
+        _, p_value = stats.ttest_ind(pa_means, rl_means)
     else:
         print(f'Running Mann-Whitney U test for {p_id}...')
-        _, p_value = stats.mannwhitneyu(pa_means, rl_means, alternative='two-sided')
+        _, p_value = stats.mannwhitneyu(pa_means, rl_means)
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
     overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
                         geom_bar(stat='identity', position='dodge') +

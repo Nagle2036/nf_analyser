@@ -1522,8 +1522,8 @@ if answer5 == 'y':
     
     percentage_outside_pa_list = []
     percentage_outside_rl_list = []
-    column_headers = ['p_id', 'sequence', 'value']
-    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)
+    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
+    group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
         if p_id in good_participants:
             def read_roi_file(roi_file):
@@ -1628,10 +1628,11 @@ if answer5 == 'y':
                 nib.save(ssim_map_nifti, ssim_output_path)
                 print(f"SSIM Index: {ssim_index}")
                 print(f"SSIM map saved to: {ssim_output_path}")
+                return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 print(f"Calculating SSIM between PA and RL images for {p_id}...")
-                calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, ssim_output_path)
+                ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, ssim_output_path)
                 print(f'SSIM between PA and RL images for {p_id} successfully calculated.')
             else:
                 print(f"SSIM between PA and RL images for {p_id} already calculated. Skipping process.")
@@ -1655,6 +1656,16 @@ if answer5 == 'y':
             print(f'Counting voxels in transformed ROI mask for {p_id}...')
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
+            perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
+            ssim_df = pd.DataFrame({'p_id': p_id, 'ssim_index': ssim_index, 'voxels_in_bin_ssim_mask': voxels_in_whole_mask, 'perc_roi_voxels_in_bin_ssim_mask': perc_roi_voxels_in_mask})
+            ssim_df.tocsv((f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', sep='\t', index=False))
+            group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
+    group_ssim_df.to_csv('group/susceptibility/fnirt_test/1/group_ssim_df.txt', sep='\t', index=False)
+        
+    column_headers = ['p_id', 'sequence', 'value']
+    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:     
             def extract_voxel_intensities(epi_image_path, mask_image_path):
                 epi_img = nib.load(epi_image_path)
                 epi_data = epi_img.get_fdata()
@@ -1679,7 +1690,6 @@ if answer5 == 'y':
     group_voxel_intensity_df.to_csv('group/susceptibility/fnirt_test/1/group_voxel_intensity_df.txt', sep='\t', index=False)
     print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants in PA fieldmap sequence:', percentage_outside_pa_list)
     print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants in RL fieldmap sequence:', percentage_outside_rl_list)
-    
     pa_means = []
     rl_means= []
     p_values = []
@@ -1780,8 +1790,8 @@ if answer5 == 'y':
     print("\n###### STEP 4: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
     percentage_outside_corrected_list = []
     percentage_outside_uncorrected_list = []
-    column_headers = ['p_id', 'sequence', 'value']
-    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)
+    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
+    group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
         if p_id in good_participants:            
             averaged_run = f"{p_id}/analysis/susceptibility/fnirt_test/2/averaged_run.nii.gz"
@@ -1912,10 +1922,11 @@ if answer5 == 'y':
                 nib.save(ssim_map_nifti, ssim_output_path)
                 print(f"SSIM Index: {ssim_index}")
                 print(f"SSIM map saved to: {ssim_output_path}")
+                return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/2/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 print(f"Calculating SSIM between corrected and uncorrected images for {p_id}...")
-                calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)
+                ssim_index = calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)
                 print(f'SSIM between corrected and uncorrected images for {p_id} successfully calculated.')
             else:
                 print(f"SSIM between uncorrected and corrected images for {p_id} already calculated. Skipping process.")
@@ -1939,6 +1950,16 @@ if answer5 == 'y':
             print(f'Counting voxels in transformed ROI mask for {p_id}...')
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
+            perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
+            ssim_df = pd.DataFrame({'p_id': p_id, 'ssim_index': ssim_index, 'voxels_in_bin_ssim_mask': voxels_in_whole_mask, 'perc_roi_voxels_in_bin_ssim_mask': perc_roi_voxels_in_mask})
+            ssim_df.tocsv((f'{p_id}/analysis/susceptibility/fnirt_test/2/ssim_df.txt', sep='\t', index=False))
+            group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
+    group_ssim_df.to_csv('group/susceptibility/fnirt_test/2/group_ssim_df.txt', sep='\t', index=False)
+
+    column_headers = ['p_id', 'sequence', 'value']
+    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:             
             def extract_voxel_intensities(epi_image_path, mask_image_path):
                 epi_img = nib.load(epi_image_path)
                 epi_data = epi_img.get_fdata()
@@ -1963,7 +1984,6 @@ if answer5 == 'y':
     group_voxel_intensity_df.to_csv('group/susceptibility/fnirt_test/2/group_voxel_intensity_df.txt', sep='\t', index=False)
     print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants following fieldmap correction:', percentage_outside_corrected_list)
     print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants in absence of fieldmap correction:', percentage_outside_uncorrected_list)
-    
     corrected_means = []
     uncorrected_means= []
     p_values = []
@@ -2062,8 +2082,8 @@ if answer5 == 'y':
     print("\n###### STEP 5: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 3) ######")
     percentage_outside_pa_list = []
     percentage_outside_rl_list = []
-    column_headers = ['p_id', 'sequence', 'value']
-    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)
+    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
+    group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
         if p_id in good_participants:
             ap_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
@@ -2235,10 +2255,11 @@ if answer5 == 'y':
                 nib.save(ssim_map_nifti, ssim_output_path)
                 print(f"SSIM Index: {ssim_index}")
                 print(f"SSIM map saved to: {ssim_output_path}")
+                return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/3/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 print(f"Calculating SSIM between PA and RL images for {p_id}...")
-                calculate_ssim(standard_rl_fieldmaps, standard_pa_fieldmaps, ssim_output_path)
+                ssim_index = calculate_ssim(standard_rl_fieldmaps, standard_pa_fieldmaps, ssim_output_path)
                 print(f'SSIM between PA and RL images for {p_id} successfully calculated.')
             else:
                 print(f"SSIM between PA and RL images for {p_id} already calculated. Skipping process.")
@@ -2262,6 +2283,16 @@ if answer5 == 'y':
             print(f'Counting voxels in transformed ROI mask for {p_id}...')
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
+            perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
+            ssim_df = pd.DataFrame({'p_id': p_id, 'ssim_index': ssim_index, 'voxels_in_bin_ssim_mask': voxels_in_whole_mask, 'perc_roi_voxels_in_bin_ssim_mask': perc_roi_voxels_in_mask})
+            ssim_df.tocsv((f'{p_id}/analysis/susceptibility/fnirt_test/3/ssim_df.txt', sep='\t', index=False))
+            group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
+    group_ssim_df.to_csv('group/susceptibility/fnirt_test/3/group_ssim_df.txt', sep='\t', index=False)
+
+    column_headers = ['p_id', 'sequence', 'value']
+    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:             
             def extract_voxel_intensities(epi_image_path, mask_image_path):
                 epi_img = nib.load(epi_image_path)
                 epi_data = epi_img.get_fdata()

@@ -1656,6 +1656,7 @@ if answer5 == 'y':
             print(f'Counting voxels in transformed ROI mask for {p_id}...')
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
+            float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
             ssim_df = pd.DataFrame({'p_id': p_id, 'ssim_index': ssim_index, 'voxels_in_bin_ssim_mask': voxels_in_whole_mask, 'perc_roi_voxels_in_bin_ssim_mask': perc_roi_voxels_in_mask})
             ssim_df.tocsv(f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', sep='\t', index=False)
@@ -1950,6 +1951,7 @@ if answer5 == 'y':
             print(f'Counting voxels in transformed ROI mask for {p_id}...')
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
+            float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
             ssim_df = pd.DataFrame({'p_id': p_id, 'ssim_index': ssim_index, 'voxels_in_bin_ssim_mask': voxels_in_whole_mask, 'perc_roi_voxels_in_bin_ssim_mask': perc_roi_voxels_in_mask})
             ssim_df.tocsv(f'{p_id}/analysis/susceptibility/fnirt_test/2/ssim_df.txt', sep='\t', index=False)
@@ -2283,6 +2285,7 @@ if answer5 == 'y':
             print(f'Counting voxels in transformed ROI mask for {p_id}...')
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
+            float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
             ssim_df = pd.DataFrame({'p_id': p_id, 'ssim_index': ssim_index, 'voxels_in_bin_ssim_mask': voxels_in_whole_mask, 'perc_roi_voxels_in_bin_ssim_mask': perc_roi_voxels_in_mask})
             ssim_df.tocsv(f'{p_id}/analysis/susceptibility/fnirt_test/3/ssim_df.txt', sep='\t', index=False)

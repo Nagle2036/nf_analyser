@@ -606,19 +606,6 @@ if answer3 == 'y':
             sys.exit()
         else:
             print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
-        
-    # # Step 7: Brain extraction of functional images.
-    # print("\n###### STEP 7: BRAIN EXTRACTING FUNCTIONAL IMAGES ######")
-    # for p_id in participants_to_iterate:
-    #     for run in runs:
-    #         output_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "bet", f"{run}_nh_mc_bet.nii.gz")
-    #         input_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms", f"{run}_nh_mc.nii.gz")
-    #         if not os.path.exists(output_path):
-    #             print(f"Performing brain extraction on {run} functional image.")
-    #             subprocess.run(["bet", input_path, output_path, "-m", "-R"])
-    #             print(f"{run} functional image brain extracted.")
-    #         else:
-    #             print(f"{run} functional image already brain extracted. Skipping process.")
 
     # Step 8: Confirm sequence phase encoding directions for stratification of distortion correction method.
     print("\n###### STEP 8: DETERMINING PHASE ENCODING DIRECTIONS ######")
@@ -1187,9 +1174,9 @@ if answer5 == 'y':
         os.makedirs(fnirt_folder_2, exist_ok=True)
         fnirt_folder_3 = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "3")
         os.makedirs(fnirt_folder_3, exist_ok=True)
-        group_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "group")
+        group_folder = os.path.join(os.getcwd(), "group", "susceptibility")
         os.makedirs(group_folder, exist_ok=True)
-        group_fnirt_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "group", "fnirt_test")
+        group_fnirt_folder = os.path.join(os.getcwd(), "group", "susceptibility", "fnirt_test")
         os.makedirs(group_fnirt_folder, exist_ok=True)
         group_fnirt_folder_1 = os.path.join(os.getcwd(), 'group', 'susceptibility', 'fnirt_test', '1')
         os.makedirs(group_fnirt_folder_1, exist_ok=True)
@@ -1201,181 +1188,181 @@ if answer5 == 'y':
 
     # Step 2: Calculate percentage of ROI voxels outside the brain during neurofeedback.
     print("\n###### STEP 2: CALCULATE PERCENTAGE OF ROI VOXELS OUTSIDE BRAIN DURING NEUROFEEDBACK ######")
-    path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
-    cisc_folder = None
-    for folder_name in os.listdir(path):
-        if "CISC" in folder_name:
-            cisc_folder = folder_name
-            break
-    if cisc_folder is None:
-        print("No 'CISC' folder found in the 'neurofeedback' directory.")
-        exit(1)
-    def get_sequence_numbers(file_name):
-        parts = file_name.split('_')
-        return int(parts[1]), int(parts[2].split('.')[0])
-    def copy_files(src_folder, dest_folder, sequence_number):
-        src_pattern = f'*_{sequence_number:06d}_*.dcm'
-        matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
-        for file in matching_files:
-            src_path = os.path.join(src_folder, file)
-            dest_path = os.path.join(dest_folder, file)
-            shutil.copy(src_path, dest_path)
-    def main():
-        src_folder = os.path.join(path, cisc_folder)
-        dicoms_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms')
-        run01_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms', 'run01_dicoms')
-        run02_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms', 'run02_dicoms')
-        run03_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms', 'run03_dicoms')
-        run04_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms', 'run04_dicoms')
-        os.makedirs(dicoms_folder, exist_ok=True)
-        os.makedirs(run01_folder, exist_ok=True)
-        os.makedirs(run02_folder, exist_ok=True)
-        os.makedirs(run03_folder, exist_ok=True)
-        os.makedirs(run04_folder, exist_ok=True)
-        files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
-        seq_vol_counts = {}
-        for file in files:
-            sequence_number, volume_number = get_sequence_numbers(file)
-            if sequence_number not in seq_vol_counts:
-                seq_vol_counts[sequence_number] = []
-            seq_vol_counts[sequence_number].append(volume_number)
-        seq_210 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 210]
-        seq_238 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 238]
-        min_210 = min(seq_210)
-        max_210 = max(seq_210)
-        min_238 = min(seq_238)
-        max_238 = max(seq_238)
-        if not os.listdir(run01_folder):
-            print("Copying Run01 dicoms...")
-            copy_files(src_folder, run01_folder, min_210)
-            print("Run01 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
-        if not os.listdir(run02_folder):
-            print("Copying Run02 dicoms...")
-            copy_files(src_folder, run02_folder, min_238)
-            print("Run02 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
-        if not os.listdir(run03_folder):
-            print("Copying Run03 dicoms...")
-            copy_files(src_folder, run03_folder, max_238)
-            print("Run03 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
-        if not os.listdir(run04_folder):
-            print("Copying Run04 dicoms...")
-            copy_files(src_folder, run04_folder, max_210)
-            print("Run04 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
-    if __name__ == "__main__":
-        main()
-    for run in runs:
-        destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "dicoms", f"{run}_dicoms")
-        output_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "niftis")
-        output_file = os.path.join(output_folder, f"{run}.nii")
-        if not os.path.exists(output_file):
-            print(f"Converting {run.upper()} DICOM files to Nifti format...")
-            subprocess.run(['dcm2niix', '-o', output_folder, '-f', run, '-b', 'n', destination_folder])
-            print(f"{run.upper()} DICOM files converted to Nifti format.")
-        else:
-            print(f"{run.upper()} Nifti file already exists. Skipping conversion.")
-        averaged_file = os.path.join(output_folder, f"{run}_averaged.nii.gz")
-        if not os.path.exists(averaged_file):
-            subprocess.run(['fslmaths', output_file, '-Tmean', averaged_file])
-            print(f"{run} Nifti volumes merged successfully.")
-        else:
-            print(f"{run} averaged Nifti already exists. Skipping merging operation.")
-    ##################################################################################### Need to do brain extraction?
-    def read_roi_file(roi_file):
-        voxel_coordinates = []
-        with open(roi_file, 'r') as file:
-            content = file.read()
-            matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
-            for match in matches:
-                coordinates = match.split()
-                voxel_coordinates.append(
-                    (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
-        return voxel_coordinates
-    run_num = ['1', '2', '3', '4']
-    for num in run_num:
-        roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', f'target_folder_run-{num}', f'depnf_run-{num}.roi')
-        voxel_coordinates = read_roi_file(roi_file)
-        functional_image = f'{p_id}/analysis/susceptibility/niftis/{run}_averaged.nii.gz'
-        functional_image_info = nib.load(functional_image)
-        functional_dims = functional_image_info.shape
-        binary_volume = np.zeros(functional_dims)
-        for voxel in voxel_coordinates:
-            x, y, z = voxel
-            binary_volume[x, y, z] = 1
-        binary_volume = np.flip(binary_volume, axis=1)
-        functional_affine = functional_image_info.affine
-        binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
-        nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/niftis/run0{num}_subject_space_ROI.nii.gz')
-    for run in runs:
-        betted_file = os.path.join(output_folder, f"{run}_averaged_betted.nii.gz")
-        if not os.path.exists(betted_file):
-            subprocess.run(['bet', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged.nii.gz', betted_file, '-R'])
-            print(f"{run} brain extraction completed.")
-        else:
-            print(f"{run} brain-extracted file already exists. Skipping BET operation.")
-        functional_image_betted = f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted.nii.gz'
-        binary_nifti_image = f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz'
-        screenshot_file = f'{p_id}/analysis/susceptibility/ROI_on_{run}_EPI.png'
-        binary_img = nib.load(binary_nifti_image)
-        binary_data = binary_img.get_fdata()
-        indices = np.nonzero(binary_data)
-        center_x = int(np.mean(indices[0]))
-        center_y = int(np.mean(indices[1]))
-        center_z = int(np.mean(indices[2]))
-        result = subprocess.run(['fsleyes', 'render', '--scene', 'lightbox', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-hc', '-hl', '-of', screenshot_file, functional_image, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0'], capture_output=True, text=True)
-        if result.returncode == 0:
-            print("Screenshot saved as", screenshot_file)
-        else:
-            print("Error encountered:", result.stderr)
-    for run in runs:
-        bin_file = os.path.join(output_folder, f"{run}_averaged_betted_bin.nii.gz")
-        threshold = '100'
-        if not os.path.exists(bin_file):
-            subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
-            print(f"{run} EPI binarisation completed.")
-        else:
-            print(f"{run} binarised EPI already present. Skipping binarisation operation.")
-        inverse_file = os.path.join(output_folder, f"{run}_averaged_betted_bin_inverse.nii.gz")
-        if not os.path.exists(inverse_file):
-            subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
-            print(f"{run} binarised EPI successfully inverted.")
-        else:
-            print(f"{run} inverted binary EPI already present. Skipping inversion procedure.")
-        result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz', '-k', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
-        if result2.returncode == 0:
-            result2_output = result2.stdout.strip()
-        else:
-            print(f"Error executing second fslstats command for {run}.")
-        result2_output_values = result2_output.split()
-        voxels_outside = float(result2_output_values[0])
-        result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
-        if result3.returncode == 0:
-            result3_output = result3.stdout.strip()
-        else:
-            print(f"Error executing first fslstats command for {run}.")
-        result3_output_values = result3_output.split()
-        total_voxels_in_roi = float(result3_output_values[0])
-        percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
-        percentage_outside = round(percentage_outside, 2)
-        percentage_file = os.path.join(susceptibility_folder, "percentage_outside.txt")
-        if not os.path.exists(percentage_file):
-            with open(percentage_file, "a") as f:
-                f.write("Percentage of ROI voxels in signal dropout regions of merged EPI images.\n\n")
-                f.write("run threshold percentage_outside\n")
-                f.write(f"{run} {threshold} {percentage_outside}\n")
-        else:
-            with open(percentage_file, "r") as f:
-                lines = f.readlines()
-                matching_lines = [line for line in lines if line.startswith(f"{run}")]
-                if matching_lines:
-                    with open(percentage_file, "w") as f:
-                        for index, line in enumerate(lines):
-                            if index not in matching_lines:
-                                f.write(line)
-                        f.write(f"{run} {threshold} {percentage_outside}\n")
-                else:
-                    with open(percentage_file, "a") as f:
-                        f.write(f"{run} {threshold} {percentage_outside}\n")
-        print("Percentage of ROI voxels in dropout regions saved in percentage_outside.txt file.")
+    for p_id in participants_to_iterate:
+        path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
+        cisc_folder = None
+        for folder_name in os.listdir(path):
+            if "CISC" in folder_name:
+                cisc_folder = folder_name
+                break
+        if cisc_folder is None:
+            print("No 'CISC' folder found in the 'neurofeedback' directory.")
+            exit(1)
+        def get_sequence_numbers(file_name):
+            parts = file_name.split('_')
+            return int(parts[1]), int(parts[2].split('.')[0])
+        def copy_files(src_folder, dest_folder, sequence_number):
+            src_pattern = f'*_{sequence_number:06d}_*.dcm'
+            matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
+            for file in matching_files:
+                src_path = os.path.join(src_folder, file)
+                dest_path = os.path.join(dest_folder, file)
+                shutil.copy(src_path, dest_path)
+        def main():
+            src_folder = os.path.join(path, cisc_folder)
+            dicoms_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms')
+            run01_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms', 'run01_dicoms')
+            run02_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms', 'run02_dicoms')
+            run03_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms', 'run03_dicoms')
+            run04_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'dicoms', 'run04_dicoms')
+            os.makedirs(dicoms_folder, exist_ok=True)
+            os.makedirs(run01_folder, exist_ok=True)
+            os.makedirs(run02_folder, exist_ok=True)
+            os.makedirs(run03_folder, exist_ok=True)
+            os.makedirs(run04_folder, exist_ok=True)
+            files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
+            seq_vol_counts = {}
+            for file in files:
+                sequence_number, volume_number = get_sequence_numbers(file)
+                if sequence_number not in seq_vol_counts:
+                    seq_vol_counts[sequence_number] = []
+                seq_vol_counts[sequence_number].append(volume_number)
+            seq_210 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 210]
+            seq_238 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 238]
+            min_210 = min(seq_210)
+            max_210 = max(seq_210)
+            min_238 = min(seq_238)
+            max_238 = max(seq_238)
+            if not os.listdir(run01_folder):
+                print("Copying Run01 dicoms...")
+                copy_files(src_folder, run01_folder, min_210)
+                print("Run01 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
+            if not os.listdir(run02_folder):
+                print("Copying Run02 dicoms...")
+                copy_files(src_folder, run02_folder, min_238)
+                print("Run02 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
+            if not os.listdir(run03_folder):
+                print("Copying Run03 dicoms...")
+                copy_files(src_folder, run03_folder, max_238)
+                print("Run03 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
+            if not os.listdir(run04_folder):
+                print("Copying Run04 dicoms...")
+                copy_files(src_folder, run04_folder, max_210)
+                print("Run04 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
+        if __name__ == "__main__":
+            main()
+        for run in runs:
+            destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "dicoms", f"{run}_dicoms")
+            output_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "niftis")
+            output_file = os.path.join(output_folder, f"{run}.nii")
+            if not os.path.exists(output_file):
+                print(f"Converting {run.upper()} DICOM files to Nifti format...")
+                subprocess.run(['dcm2niix', '-o', output_folder, '-f', run, '-b', 'n', destination_folder])
+                print(f"{run.upper()} DICOM files converted to Nifti format.")
+            else:
+                print(f"{run.upper()} Nifti file already exists. Skipping conversion.")
+            averaged_file = os.path.join(output_folder, f"{run}_averaged.nii.gz")
+            if not os.path.exists(averaged_file):
+                subprocess.run(['fslmaths', output_file, '-Tmean', averaged_file])
+                print(f"{run} Nifti volumes merged successfully.")
+            else:
+                print(f"{run} averaged Nifti already exists. Skipping merging operation.")
+        def read_roi_file(roi_file):
+            voxel_coordinates = []
+            with open(roi_file, 'r') as file:
+                content = file.read()
+                matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
+                for match in matches:
+                    coordinates = match.split()
+                    voxel_coordinates.append(
+                        (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
+            return voxel_coordinates
+        run_num = ['1', '2', '3', '4']
+        for num in run_num:
+            roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', f'target_folder_run-{num}', f'depnf_run-{num}.roi')
+            voxel_coordinates = read_roi_file(roi_file)
+            functional_image = f'{p_id}/analysis/susceptibility/niftis/{run}_averaged.nii.gz'
+            functional_image_info = nib.load(functional_image)
+            functional_dims = functional_image_info.shape
+            binary_volume = np.zeros(functional_dims)
+            for voxel in voxel_coordinates:
+                x, y, z = voxel
+                binary_volume[x, y, z] = 1
+            binary_volume = np.flip(binary_volume, axis=1)
+            functional_affine = functional_image_info.affine
+            binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
+            nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/niftis/run0{num}_subject_space_ROI.nii.gz')
+        for run in runs:
+            betted_file = os.path.join(output_folder, f"{run}_averaged_betted.nii.gz")
+            if not os.path.exists(betted_file):
+                subprocess.run(['bet', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged.nii.gz', betted_file, '-R'])
+                print(f"{run} brain extraction completed.")
+            else:
+                print(f"{run} brain-extracted file already exists. Skipping BET operation.")
+            functional_image_betted = f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted.nii.gz'
+            binary_nifti_image = f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz'
+            screenshot_file = f'{p_id}/analysis/susceptibility/ROI_on_{run}_EPI.png'
+            binary_img = nib.load(binary_nifti_image)
+            binary_data = binary_img.get_fdata()
+            indices = np.nonzero(binary_data)
+            center_x = int(np.mean(indices[0]))
+            center_y = int(np.mean(indices[1]))
+            center_z = int(np.mean(indices[2]))
+            result = subprocess.run(['fsleyes', 'render', '--scene', 'lightbox', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-hc', '-hl', '-of', screenshot_file, functional_image, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0'], capture_output=True, text=True)
+            if result.returncode == 0:
+                print("Screenshot saved as", screenshot_file)
+            else:
+                print("Error encountered:", result.stderr)
+        for run in runs:
+            bin_file = os.path.join(output_folder, f"{run}_averaged_betted_bin.nii.gz")
+            threshold = '100'
+            if not os.path.exists(bin_file):
+                subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
+                print(f"{run} EPI binarisation completed.")
+            else:
+                print(f"{run} binarised EPI already present. Skipping binarisation operation.")
+            inverse_file = os.path.join(output_folder, f"{run}_averaged_betted_bin_inverse.nii.gz")
+            if not os.path.exists(inverse_file):
+                subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
+                print(f"{run} binarised EPI successfully inverted.")
+            else:
+                print(f"{run} inverted binary EPI already present. Skipping inversion procedure.")
+            result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz', '-k', f'{p_id}/analysis/susceptibility/niftis/{run}_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
+            if result2.returncode == 0:
+                result2_output = result2.stdout.strip()
+            else:
+                print(f"Error executing second fslstats command for {run}.")
+            result2_output_values = result2_output.split()
+            voxels_outside = float(result2_output_values[0])
+            result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/niftis/{run}_subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
+            if result3.returncode == 0:
+                result3_output = result3.stdout.strip()
+            else:
+                print(f"Error executing first fslstats command for {run}.")
+            result3_output_values = result3_output.split()
+            total_voxels_in_roi = float(result3_output_values[0])
+            percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
+            percentage_outside = round(percentage_outside, 2)
+            percentage_file = os.path.join(susceptibility_folder, "percentage_outside.txt")
+            if not os.path.exists(percentage_file):
+                with open(percentage_file, "a") as f:
+                    f.write("Percentage of ROI voxels in signal dropout regions of merged EPI images.\n\n")
+                    f.write("run threshold percentage_outside\n")
+                    f.write(f"{run} {threshold} {percentage_outside}\n")
+            else:
+                with open(percentage_file, "r") as f:
+                    lines = f.readlines()
+                    matching_lines = [line for line in lines if line.startswith(f"{run}")]
+                    if matching_lines:
+                        with open(percentage_file, "w") as f:
+                            for index, line in enumerate(lines):
+                                if index not in matching_lines:
+                                    f.write(line)
+                            f.write(f"{run} {threshold} {percentage_outside}\n")
+                    else:
+                        with open(percentage_file, "a") as f:
+                            f.write(f"{run} {threshold} {percentage_outside}\n")
+            print("Percentage of ROI voxels in dropout regions saved in percentage_outside.txt file.")
 
     # Step 3: Test quality of alternate distortion correction method (Stage 1).
     print("\n###### STEP 3: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 1) ######")
@@ -1615,6 +1602,7 @@ if answer5 == 'y':
             if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_fieldmaps_bin, pa_trimmed_roi_mask])
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
+            
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
                 image1_nii = nib.load(image1_path)
@@ -1636,6 +1624,13 @@ if answer5 == 'y':
                 print(f'SSIM between PA and RL images for {p_id} successfully calculated.')
             else:
                 print(f"SSIM between PA and RL images for {p_id} already calculated. Skipping process.")
+                ssim_index = None
+                ssim_map_nifti = nib.load(ssim_output_path)
+                ssim_map = ssim_map_nifti.get_fdata()
+                if ssim_map.size > 0:
+                    ssim_index = ssim_map.mean()
+            if ssim_index is None:
+                raise ValueError(f"Failed to retrieve SSIM index for {p_id}")
             binarised_ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/1/binarised_ssim_mask.nii.gz"
             if not os.path.exists(binarised_ssim_output_path):
                 print(f'Binarising {p_id} SSIM mask...')
@@ -1645,6 +1640,7 @@ if answer5 == 'y':
                 print(f'{p_id} SSIM mask already binarised. Skipping process.')
             print(f'Counting voxels in binarised SSIM mask...')
             voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+            voxels_in_whole_mask = float(voxels_in_whole_mask)
             print(f'Voxels in whole binarised SSIM mask for {p_id}:', voxels_in_whole_mask)
             intersection_mask_path = f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_roi_intersect.nii.gz'
             if not os.path.exists(intersection_mask_path):
@@ -1658,7 +1654,7 @@ if answer5 == 'y':
             print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
             voxels_in_roi_in_mask = float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
-            ssim_df = pd.DataFrame({'p_id': p_id, 'ssim_index': ssim_index, 'voxels_in_bin_ssim_mask': voxels_in_whole_mask, 'perc_roi_voxels_in_bin_ssim_mask': perc_roi_voxels_in_mask})
+            ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask]})
             ssim_df.tocsv(f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', sep='\t', index=False)
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/1/group_ssim_df.txt', sep='\t', index=False)
@@ -1931,6 +1927,13 @@ if answer5 == 'y':
                 print(f'SSIM between corrected and uncorrected images for {p_id} successfully calculated.')
             else:
                 print(f"SSIM between uncorrected and corrected images for {p_id} already calculated. Skipping process.")
+                ssim_index = None
+                ssim_map_nifti = nib.load(ssim_output_path)
+                ssim_map = ssim_map_nifti.get_fdata()
+                if ssim_map.size > 0:
+                    ssim_index = ssim_map.mean()
+            if ssim_index is None:
+                raise ValueError(f"Failed to retrieve SSIM index for {p_id}")           
             binarised_ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/2/binarised_ssim_mask.nii.gz"
             if not os.path.exists(binarised_ssim_output_path):
                 print(f'Binarising {p_id} SSIM mask...')
@@ -1940,6 +1943,7 @@ if answer5 == 'y':
                 print(f'{p_id} SSIM mask already binarised. Skipping process.')
             print(f'Counting voxels in binarised SSIM mask...')
             voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+            voxels_in_whole_mask = float(voxels_in_whole_mask)
             print(f'Voxels in whole binarised SSIM mask for {p_id}:', voxels_in_whole_mask)
             intersection_mask_path = f'{p_id}/analysis/susceptibility/fnirt_test/2/ssim_roi_intersect.nii.gz'
             if not os.path.exists(intersection_mask_path):
@@ -1953,7 +1957,7 @@ if answer5 == 'y':
             print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
             voxels_in_roi_in_mask = float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
-            ssim_df = pd.DataFrame({'p_id': p_id, 'ssim_index': ssim_index, 'voxels_in_bin_ssim_mask': voxels_in_whole_mask, 'perc_roi_voxels_in_bin_ssim_mask': perc_roi_voxels_in_mask})
+            ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask]})
             ssim_df.tocsv(f'{p_id}/analysis/susceptibility/fnirt_test/2/ssim_df.txt', sep='\t', index=False)
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/2/group_ssim_df.txt', sep='\t', index=False)
@@ -2265,6 +2269,13 @@ if answer5 == 'y':
                 print(f'SSIM between PA and RL images for {p_id} successfully calculated.')
             else:
                 print(f"SSIM between PA and RL images for {p_id} already calculated. Skipping process.")
+                ssim_index = None
+                ssim_map_nifti = nib.load(ssim_output_path)
+                ssim_map = ssim_map_nifti.get_fdata()
+                if ssim_map.size > 0:
+                    ssim_index = ssim_map.mean()
+            if ssim_index is None:
+                raise ValueError(f"Failed to retrieve SSIM index for {p_id}")    
             binarised_ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/3/binarised_ssim_mask.nii.gz"
             if not os.path.exists(binarised_ssim_output_path):
                 print(f'Binarising {p_id} SSIM mask...')
@@ -2274,6 +2285,7 @@ if answer5 == 'y':
                 print(f'{p_id} SSIM mask already binarised. Skipping process.')
             print(f'Counting voxels in binarised SSIM mask...')
             voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+            voxels_in_whole_mask = float(voxels_in_whole_mask)
             print(f'Voxels in whole binarised SSIM mask for {p_id}:', voxels_in_whole_mask)
             intersection_mask_path = f'{p_id}/analysis/susceptibility/fnirt_test/3/ssim_roi_intersect.nii.gz'
             if not os.path.exists(intersection_mask_path):
@@ -2287,7 +2299,7 @@ if answer5 == 'y':
             print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
             voxels_in_roi_in_mask = float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
-            ssim_df = pd.DataFrame({'p_id': p_id, 'ssim_index': ssim_index, 'voxels_in_bin_ssim_mask': voxels_in_whole_mask, 'perc_roi_voxels_in_bin_ssim_mask': perc_roi_voxels_in_mask})
+            ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask]})
             ssim_df.tocsv(f'{p_id}/analysis/susceptibility/fnirt_test/3/ssim_df.txt', sep='\t', index=False)
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/3/group_ssim_df.txt', sep='\t', index=False)

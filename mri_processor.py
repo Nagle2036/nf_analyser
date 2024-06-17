@@ -1367,152 +1367,31 @@ if answer5 == 'y':
     # Step 3: Test quality of alternate distortion correction method (Stage 1).
     print("\n###### STEP 3: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 1) ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    group_participant_col = []
-    group_tissue_type_col = []
-    group_overlap_perc_col = []
+    column_headers = ['p_id', 'perc_outside_pa', 'perc_outside_rl']
+    group_perc_outside_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
         if p_id in good_participants:
+            print(f"Preparing files for {p_id}...")
             ap_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
             pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"
-            rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/rl_fieldmaps.nii"
             averaged_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/averaged_pa_fieldmaps.nii.gz"
             averaged_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/averaged_rl_fieldmaps.nii.gz"
             if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps):
-                print(f"{p_id} fieldmaps images being averaged...")
                 subprocess.run(['fslmaths', pa_fieldmaps, '-Tmean', averaged_pa_fieldmaps])
                 subprocess.run(['fslmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
-                print(f"{p_id} fieldmaps images successfully averaged.")
-            else:
-                print(f"{p_id} fieldmaps images already averaged. Skipping process.")
             betted_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/betted_pa_fieldmaps.nii.gz"
             betted_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/betted_rl_fieldmaps.nii.gz"
             if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps):
-                print(f"Fieldmaps sequences for {p_id} being brain extracted for distortion correction test 1.")
                 subprocess.run(["bet", averaged_pa_fieldmaps, betted_pa_fieldmaps, "-m", "-R"])
                 subprocess.run(["bet", averaged_rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
-                print(f"Fieldmaps sequences for {p_id} successfully brain extracted.")
-            else: 
-                print(f"Fieldmaps sequences for {p_id} already brain extracted. Skipping process.")
             flirted_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/flirted_pa_fieldmaps.nii.gz"
             flirted_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/flirted_rl_fieldmaps.nii.gz"
             t1_flirted_pa_fieldmaps_transformation = f"{p_id}/analysis/susceptibility/fnirt_test/1/t1_flirted_pa_fieldmaps_transformation.mat"
             t1_flirted_rl_fieldmaps_transformation = f"{p_id}/analysis/susceptibility/fnirt_test/1/t1_flirted_rl_fieldmaps_transformation.mat"
             structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
             if not os.path.exists(flirted_pa_fieldmaps):
-                print(f"Aligning PA and RL fieldmaps to structural image for {p_id} distortion correction test 1...")
                 subprocess.run(["flirt", "-in", betted_pa_fieldmaps, "-ref", structural_brain, "-out", flirted_pa_fieldmaps, "-omat", t1_flirted_pa_fieldmaps_transformation])
                 subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", structural_brain, "-out", flirted_rl_fieldmaps, "-omat", t1_flirted_rl_fieldmaps_transformation])
-                print(f"PA and RL fieldmaps aligned to structural image successfully for {p_id}.")
-            else:
-                print(f"PA and RL fieldmaps have already been aligned to structural image for {p_id}. Skipping process.")
-            pa_csf_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg_pve_0.nii.gz"
-            pa_wm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg_pve_1.nii.gz"
-            pa_gm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg_pve_2.nii.gz"
-            rl_csf_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_seg_pve_0.nii.gz"
-            rl_wm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_seg_pve_1.nii.gz"
-            rl_gm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_seg_pve_2.nii.gz"
-            if not os.path.exists(pa_csf_pve_seg):
-                print(f"Segmenting {p_id} PA and RL fieldmaps...")
-                pa_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg"
-                rl_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_seg"
-                subprocess.run(["fast", "-n", "3", "-o", pa_seg, structural_brain, flirted_pa_fieldmaps])
-                subprocess.run(["fast", "-n", "3", "-o", rl_seg, structural_brain, flirted_rl_fieldmaps])
-                print(f"{p_id} segmentation of PA and RL fieldmaps completed.")
-            else:
-                print(f"{p_id} segmentation of PA and RL fieldmaps already completed. Skipping process.")
-            pa_csf_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_csf_pve_seg_bin.nii.gz"
-            pa_wm_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_wm_pve_seg_bin.nii.gz"
-            pa_gm_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_gm_pve_seg_bin.nii.gz"
-            if not os.path.exists(pa_csf_pve_seg_bin):
-                print(f"Binarising {p_id} CSF, WM and GM segmented PVE masks for PA fieldmaps...")
-                subprocess.run(['fslmaths', pa_csf_pve_seg, '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
-                subprocess.run(['fslmaths', pa_wm_pve_seg, '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
-                subprocess.run(['fslmaths', pa_gm_pve_seg, '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
-                print(f"{p_id} CSF, WM, and GM segmented PVE masks for PA fieldmaps successfully binarised.")
-            else:
-                print(f"{p_id} binarisation of CSF, WM and GM segmented PVE masks for PA fieldmaps already completed. Skipping process.")
-            rl_csf_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_csf_pve_seg_bin.nii.gz"
-            rl_wm_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_wm_pve_seg_bin.nii.gz"
-            rl_gm_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_gm_pve_seg_bin.nii.gz"
-            if not os.path.exists(rl_csf_pve_seg_bin):
-                print(f"Binarising {p_id} CSF, WM and GM segmented PVE masks for RL fieldmaps...")
-                subprocess.run(['fslmaths', rl_csf_pve_seg, '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
-                subprocess.run(['fslmaths', rl_wm_pve_seg, '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
-                subprocess.run(['fslmaths', rl_gm_pve_seg, '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
-                print(f"{p_id} CSF, WM, and GM segmented PVE masks for RL fieldmaps successfully binarised.")
-            else:
-                print(f"{p_id} binarisation of CSF, WM and GM segmented PVE masks for RL fieldmaps already completed. Skipping process.")
-            csf_intersect_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/csf_intersect_mask.nii.gz"
-            wm_intersect_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/wm_intersect_mask.nii.gz"
-            gm_intersect_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/gm_intersect_mask.nii.gz"
-            if not os.path.exists(csf_intersect_mask):
-                print(f"Creating Intersect masks for {p_id}...")
-                subprocess.run(['fslmaths', pa_csf_pve_seg_bin, '-mul', rl_csf_pve_seg_bin, '-bin', csf_intersect_mask])
-                subprocess.run(['fslmaths', pa_wm_pve_seg_bin, '-mul', rl_wm_pve_seg_bin, '-bin', wm_intersect_mask])
-                subprocess.run(['fslmaths', pa_gm_pve_seg_bin, '-mul', rl_gm_pve_seg_bin, '-bin', gm_intersect_mask])
-                print(f"Intersect masks for {p_id} successfully created.")
-            else:
-                print(f"Intersect masks for {p_id} already created. Skipping process.")
-            csf_intersect_vol = float(subprocess.run(['fslstats', csf_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
-            wm_intersect_vol = float(subprocess.run(['fslstats', wm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
-            gm_intersect_vol = float(subprocess.run(['fslstats', gm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
-            pa_csf_mask_vol = float(subprocess.run(['fslstats', pa_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            rl_csf_mask_vol = float(subprocess.run(['fslstats', rl_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            if pa_csf_mask_vol < rl_csf_mask_vol:
-                csf_overlap_perc = (csf_intersect_vol / pa_csf_mask_vol) * 100
-            else: 
-                csf_overlap_perc = (csf_intersect_vol / rl_csf_mask_vol) * 100
-            pa_wm_mask_vol = float(subprocess.run(['fslstats', pa_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            rl_wm_mask_vol = float(subprocess.run(['fslstats', rl_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            if pa_wm_mask_vol < rl_wm_mask_vol:
-                wm_overlap_perc = (wm_intersect_vol / pa_wm_mask_vol) * 100
-            else: 
-                wm_overlap_perc = (wm_intersect_vol / rl_wm_mask_vol) * 100
-            pa_gm_mask_vol = float(subprocess.run(['fslstats', pa_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            rl_gm_mask_vol = float(subprocess.run(['fslstats', rl_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-            if pa_gm_mask_vol < rl_gm_mask_vol:
-                gm_overlap_perc = (gm_intersect_vol / pa_gm_mask_vol) * 100
-            else: 
-                gm_overlap_perc = (gm_intersect_vol / rl_gm_mask_vol) * 100
-            overlap_perc_file = f"{p_id}/analysis/susceptibility/fnirt_test/1/overlap_perc.txt"
-            participant_col = []
-            tissue_type_col = []
-            overlap_perc_col = []
-            participant_col.append(p_id)
-            participant_col.append(p_id)
-            participant_col.append(p_id)
-            tissue_type_col.append('csf')
-            tissue_type_col.append('wm')
-            tissue_type_col.append('gm')
-            overlap_perc_col.append(csf_overlap_perc)
-            overlap_perc_col.append(wm_overlap_perc)
-            overlap_perc_col.append(gm_overlap_perc)
-            overlap_perc_df = pd.DataFrame({'p_id': participant_col, 'tissue_type': tissue_type_col, 'overlap_perc': overlap_perc_col})
-            overlap_perc_df.to_csv(overlap_perc_file, sep='\t', index=False)
-            print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} saved to susceptibility/fnirt_test/1 folder.")
-            group_overlap_perc_file = "group/susceptibility/fnirt_test/1/overlap_perc.txt"     
-            if p_id not in group_participant_col:
-                group_participant_col.append(p_id)
-                group_participant_col.append(p_id)
-                group_participant_col.append(p_id)
-                group_tissue_type_col.append('csf')
-                group_tissue_type_col.append('wm')
-                group_tissue_type_col.append('gm')
-                group_overlap_perc_col.append(csf_overlap_perc) 
-                group_overlap_perc_col.append(wm_overlap_perc) 
-                group_overlap_perc_col.append(gm_overlap_perc)          
-                group_overlap_perc_df = pd.DataFrame({'p_id': group_participant_col, 'tissue_type': group_tissue_type_col, 'overlap_perc': group_overlap_perc_col})
-                group_overlap_perc_df.to_csv(group_overlap_perc_file, sep='\t', index=False)
-                print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} appended to group file in group/susceptibility/fnirt_test/1 folder.")
-            else:
-                print(f"Percentage of overlap between PA and RL fieldmap segmentation masks for {p_id} already appended to group file in group/susceptibility/fnirt_test/1 folder. Skipping process.")
-    
-    percentage_outside_pa_list = []
-    percentage_outside_rl_list = []
-    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
-    group_ssim_df = pd.DataFrame(columns = column_headers) 
-    for p_id in participants_to_iterate:
-        if p_id in good_participants:
             def read_roi_file(roi_file):
                 voxel_coordinates = []
                 with open(roi_file, 'r') as file:
@@ -1536,12 +1415,8 @@ if answer5 == 'y':
             voxel_coordinates = read_roi_file(roi_file)
             averaged_run = f"{p_id}/analysis/susceptibility/fnirt_test/1/averaged_run.nii.gz"
             if not os.path.exists(averaged_run):
-                print(f"{p_id} Run 1 images being averaged...")
                 run = f"{p_id}/analysis/preproc/niftis/run01_nh.nii.gz"
                 subprocess.run(['fslmaths', run, '-Tmean', averaged_run])
-                print(f"{p_id} Run 1 images successfully averaged.")
-            else:
-                print(f"{p_id} Run 1 images already averaged. Skipping process.")
             functional_image_info = nib.load(averaged_run)
             functional_dims = functional_image_info.shape
             binary_volume = np.zeros(functional_dims)
@@ -1591,18 +1466,25 @@ if answer5 == 'y':
                 print("Error executing fslstats command.")
             result2_output_values = result2_output.split()
             total_voxels_in_roi = float(result2_output_values[0])
-            percentage_outside_pa = (pa_voxels_outside / total_voxels_in_roi) * 100
-            percentage_outside_pa = round(percentage_outside_pa, 2)
-            percentage_outside_pa_list.append(percentage_outside_pa)
-            percentage_outside_rl = (rl_voxels_outside / total_voxels_in_roi) * 100
-            percentage_outside_rl = round(percentage_outside_rl, 2)
-            percentage_outside_rl_list.append(percentage_outside_rl)
+            perc_outside_pa = (pa_voxels_outside / total_voxels_in_roi) * 100
+            perc_outside_pa = round(percentage_outside_pa, 2)
+            perc_outside_rl = (rl_voxels_outside / total_voxels_in_roi) * 100
+            perc_outside_rl = round(percentage_outside_rl, 2)
             pa_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_trimmed_roi_mask.nii.gz"
             rl_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_trimmed_roi_mask.nii.gz"
             if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_fieldmaps_bin, pa_trimmed_roi_mask])
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
-            
+            perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_pa': [perc_outside_pa], 'perc_outside_rl': [perc_outside_rl]})
+            perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/perc_outside_df.txt', sep='\t', index=False)
+            group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
+    group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/1/group_perc_outside_df.txt', sep='\t', index=False)
+    
+    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
+    group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:
+            print(f"Running SSIM analysis for {p_id}...")
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
                 image1_nii = nib.load(image1_path)
@@ -1614,16 +1496,10 @@ if answer5 == 'y':
                 ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
                 ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
                 nib.save(ssim_map_nifti, ssim_output_path)
-                print(f"SSIM Index: {ssim_index}")
-                print(f"SSIM map saved to: {ssim_output_path}")
                 return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
-                print(f"Calculating SSIM between PA and RL images for {p_id}...")
                 ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, ssim_output_path)
-                print(f'SSIM between PA and RL images for {p_id} successfully calculated.')
-            else:
-                print(f"SSIM between PA and RL images for {p_id} already calculated. Skipping process.")
                 ssim_index = None
                 ssim_map_nifti = nib.load(ssim_output_path)
                 ssim_map = ssim_map_nifti.get_fdata()
@@ -1633,36 +1509,100 @@ if answer5 == 'y':
                 raise ValueError(f"Failed to retrieve SSIM index for {p_id}")
             binarised_ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/1/binarised_ssim_mask.nii.gz"
             if not os.path.exists(binarised_ssim_output_path):
-                print(f'Binarising {p_id} SSIM mask...')
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", binarised_ssim_output_path])
-                print(f'{p_id} SSIM mask successfully binarised.')
-            else:
-                print(f'{p_id} SSIM mask already binarised. Skipping process.')
-            print(f'Counting voxels in binarised SSIM mask...')
             voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             voxels_in_whole_mask = float(voxels_in_whole_mask)
-            print(f'Voxels in whole binarised SSIM mask for {p_id}:', voxels_in_whole_mask)
             intersection_mask_path = f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_roi_intersect.nii.gz'
             if not os.path.exists(intersection_mask_path):
-                print(f'Creating intersect mask of SSIM and ROI for {p_id}...')
                 subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", transformed_roi_mask, intersection_mask_path])
-                print(f'Intersect mask of SSIM and ROI for {p_id} successfully created.')
-            else:
-                print(f'Intersect mask of SSIM and ROI for {p_id} already exists. Skipping process.')
-            print(f'Counting voxels in transformed ROI mask for {p_id}...')
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
-            print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
             voxels_in_roi_in_mask = float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
-            ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask]})
+            ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask]})
             ssim_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', sep='\t', index=False)
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/1/group_ssim_df.txt', sep='\t', index=False)
-        
+    
+    column_headers = ['p_id', 'tissue_type', 'overlap_perc']
+    group_overlap_perc_df = pd.DataFrame(columns = column_headers) 
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:
+            print(f'Running segmentation analysis for {p_id}...')
+            pa_csf_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg_pve_0.nii.gz"
+            pa_wm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg_pve_1.nii.gz"
+            pa_gm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg_pve_2.nii.gz"
+            rl_csf_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_seg_pve_0.nii.gz"
+            rl_wm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_seg_pve_1.nii.gz"
+            rl_gm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_seg_pve_2.nii.gz"
+            if not os.path.exists(pa_csf_pve_seg):
+                pa_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg"
+                rl_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_seg"
+                subprocess.run(["fast", "-n", "3", "-o", pa_seg, structural_brain, flirted_pa_fieldmaps])
+                subprocess.run(["fast", "-n", "3", "-o", rl_seg, structural_brain, flirted_rl_fieldmaps])
+            pa_csf_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_csf_pve_seg_bin.nii.gz"
+            pa_wm_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_wm_pve_seg_bin.nii.gz"
+            pa_gm_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_gm_pve_seg_bin.nii.gz"
+            if not os.path.exists(pa_csf_pve_seg_bin):
+                subprocess.run(['fslmaths', pa_csf_pve_seg, '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
+                subprocess.run(['fslmaths', pa_wm_pve_seg, '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
+                subprocess.run(['fslmaths', pa_gm_pve_seg, '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
+            rl_csf_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_csf_pve_seg_bin.nii.gz"
+            rl_wm_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_wm_pve_seg_bin.nii.gz"
+            rl_gm_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_gm_pve_seg_bin.nii.gz"
+            if not os.path.exists(rl_csf_pve_seg_bin):
+                subprocess.run(['fslmaths', rl_csf_pve_seg, '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
+                subprocess.run(['fslmaths', rl_wm_pve_seg, '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
+                subprocess.run(['fslmaths', rl_gm_pve_seg, '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
+            csf_intersect_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/csf_intersect_mask.nii.gz"
+            wm_intersect_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/wm_intersect_mask.nii.gz"
+            gm_intersect_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/gm_intersect_mask.nii.gz"
+            if not os.path.exists(csf_intersect_mask):
+                subprocess.run(['fslmaths', pa_csf_pve_seg_bin, '-mul', rl_csf_pve_seg_bin, '-bin', csf_intersect_mask])
+                subprocess.run(['fslmaths', pa_wm_pve_seg_bin, '-mul', rl_wm_pve_seg_bin, '-bin', wm_intersect_mask])
+                subprocess.run(['fslmaths', pa_gm_pve_seg_bin, '-mul', rl_gm_pve_seg_bin, '-bin', gm_intersect_mask])
+            csf_intersect_vol = float(subprocess.run(['fslstats', csf_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+            wm_intersect_vol = float(subprocess.run(['fslstats', wm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+            gm_intersect_vol = float(subprocess.run(['fslstats', gm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+            pa_csf_mask_vol = float(subprocess.run(['fslstats', pa_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            rl_csf_mask_vol = float(subprocess.run(['fslstats', rl_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            if pa_csf_mask_vol < rl_csf_mask_vol:
+                csf_overlap_perc = (csf_intersect_vol / pa_csf_mask_vol) * 100
+            else: 
+                csf_overlap_perc = (csf_intersect_vol / rl_csf_mask_vol) * 100
+            pa_wm_mask_vol = float(subprocess.run(['fslstats', pa_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            rl_wm_mask_vol = float(subprocess.run(['fslstats', rl_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            if pa_wm_mask_vol < rl_wm_mask_vol:
+                wm_overlap_perc = (wm_intersect_vol / pa_wm_mask_vol) * 100
+            else: 
+                wm_overlap_perc = (wm_intersect_vol / rl_wm_mask_vol) * 100
+            pa_gm_mask_vol = float(subprocess.run(['fslstats', pa_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            rl_gm_mask_vol = float(subprocess.run(['fslstats', rl_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+            if pa_gm_mask_vol < rl_gm_mask_vol:
+                gm_overlap_perc = (gm_intersect_vol / pa_gm_mask_vol) * 100
+            else: 
+                gm_overlap_perc = (gm_intersect_vol / rl_gm_mask_vol) * 100
+            participant_col = []
+            tissue_type_col = []
+            overlap_perc_col = []
+            participant_col.append(p_id)
+            participant_col.append(p_id)
+            participant_col.append(p_id)
+            tissue_type_col.append('csf')
+            tissue_type_col.append('wm')
+            tissue_type_col.append('gm')
+            overlap_perc_col.append(csf_overlap_perc)
+            overlap_perc_col.append(wm_overlap_perc)
+            overlap_perc_col.append(gm_overlap_perc)
+            overlap_perc_df = pd.DataFrame({'p_id': participant_col, 'tissue_type': tissue_type_col, 'overlap_perc': overlap_perc_col})
+            overlap_perc_df.to_csv(f"{p_id}/analysis/susceptibility/fnirt_test/1/overlap_perc_df.txt", sep='\t', index=False)
+            group_overlap_perc_df = pd.concat([group_overlap_perc_df, overlap_perc_df], ignore_index=True)
+    group_overlap_perc_df.to_csv('group/susceptibility/fnirt_test/1/group_overlap_perc_df.txt', sep='\t', index=False)
+
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
     for p_id in participants_to_iterate:
-        if p_id in good_participants:     
+        if p_id in good_participants:
+            print(f'Running voxel signal intensity analysis for {p_id}...')
             def extract_voxel_intensities(epi_image_path, mask_image_path):
                 epi_img = nib.load(epi_image_path)
                 epi_data = epi_img.get_fdata()
@@ -1674,10 +1614,6 @@ if answer5 == 'y':
                 return voxel_intensity_list
             pa_voxel_intensities = extract_voxel_intensities(flirted_pa_fieldmaps, pa_trimmed_roi_mask)
             rl_voxel_intensities = extract_voxel_intensities(flirted_rl_fieldmaps, rl_trimmed_roi_mask)
-            pa_voxel_intensities_mean = np.mean(pa_voxel_intensities)
-            rl_voxel_intensities_mean = np.mean(rl_voxel_intensities)
-            print(f"Average voxel intensity within ROI for {p_id} PA fieldmap sequence: {pa_voxel_intensities_mean}")
-            print(f"Average voxel intensity within ROI for {p_id} RL fieldmap sequence: {rl_voxel_intensities_mean}")
             values = pa_voxel_intensities + rl_voxel_intensities
             sequence = ['pa'] * len(pa_voxel_intensities) + ['rl'] * len(rl_voxel_intensities)
             subject = [f'{p_id}'] * len(pa_voxel_intensities) + [f'{p_id}'] * len(rl_voxel_intensities)
@@ -1685,8 +1621,6 @@ if answer5 == 'y':
             voxel_intensity_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/voxel_intensity_df.txt', sep='\t', index=False)
             group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
     group_voxel_intensity_df.to_csv('group/susceptibility/fnirt_test/1/group_voxel_intensity_df.txt', sep='\t', index=False)
-    print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants in PA fieldmap sequence:', percentage_outside_pa_list)
-    print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants in RL fieldmap sequence:', percentage_outside_rl_list)
     pa_means = []
     rl_means= []
     p_values = []
@@ -1701,20 +1635,18 @@ if answer5 == 'y':
             mean_value_rl = filtered_rl['value'].mean()
             rl_means.append(mean_value_rl)
             anderson_pa = stats.anderson(filtered_pa['value'])
-            print(f"Anderson-Darling test for PA sequence values: Statistic={anderson_pa.statistic}, Critical Values={anderson_pa.critical_values}, Significance Levels={anderson_pa.significance_level}")
             anderson_rl = stats.anderson(filtered_rl['value'])
-            print(f"Anderson-Darling test for RL sequence values: Statistic={anderson_rl.statistic}, Critical Values={anderson_rl.critical_values}, Significance Levels={anderson_rl.significance_level}")
             significance_level = 0.05
             is_pa_normal = anderson_pa.statistic < anderson_pa.critical_values[
                 anderson_pa.significance_level.tolist().index(significance_level * 100)]
             is_rl_normal = anderson_rl.statistic < anderson_rl.critical_values[
                 anderson_rl.significance_level.tolist().index(significance_level * 100)]
             if is_pa_normal and is_rl_normal:
-                print(f'Running t-test for {p_id}...')
+                print(f'Anderson-Darling test passed for {p_id} voxel intensity values. Running parametric t-test...')
                 _, p_value = stats.ttest_ind(filtered_pa['value'], filtered_rl['value'], equal_var=False)
                 p_values.append(p_value)
             else:
-                print(f'Running Mann Whitney U test for {p_id}...')
+                print(f'Anderson-Darling test failed for {p_id} voxel intensity values. Running non-parametric Mann Whitney U test...')
                 _, p_value = stats.mannwhitneyu(filtered_pa['value'], filtered_rl['value'], alternative='two-sided')
                 p_values.append(p_value)
             pa_std_error = np.std(filtered_pa['value']) / np.sqrt(len(filtered_pa['value']))
@@ -1735,7 +1667,7 @@ if answer5 == 'y':
             plot_data.at[idx, 'Significance'] = '**'
         elif p_value < 0.05:
             plot_data.at[idx, 'Significance'] = '*'
-    mean_plot = (
+    voxel_intensity_plot = (
         ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
         geom_bar(stat='identity', position='dodge') +
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
@@ -1751,7 +1683,7 @@ if answer5 == 'y':
             ha='center',
             va='bottom',
             show_legend=False))
-    mean_plot.save('group/susceptibility/fnirt_test/1/mean_plot.png')
+    voxel_intensity_plot.save('group/susceptibility/fnirt_test/1/voxel_intensity_plot.png')
     pa_means_overall = np.mean(pa_means)
     rl_means_overall = np.mean(rl_means)
     pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
@@ -1759,13 +1691,13 @@ if answer5 == 'y':
     _, pa_means_overall_shap_p = stats.shapiro(pa_means)
     _, rl_means_overall_shap_p = stats.shapiro(rl_means)
     if pa_means_overall_shap_p > 0.05 and rl_means_overall_shap_p > 0.5:
-        print(f'Running t-test for {p_id}...')
+        print(f'Shapiro-Wilke test passed for {p_id} voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(pa_means, rl_means)
     else:
-        print(f'Running Mann-Whitney U test for {p_id}...')
+        print(f'Shapiro-Wilke test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.mannwhitneyu(pa_means, rl_means)
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
-    overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
@@ -1773,15 +1705,15 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0), limits=[0,350])
                         )
     if p_value < 0.001:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
+        group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
     elif p_value < 0.01:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
+        group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
     elif p_value < 0.05:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
+        group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-    overall_mean_plot.save('group/susceptibility/fnirt_test/1/overall_mean_plot.png')
+    group_voxel_intensity_plot.save('group/susceptibility/fnirt_test/1/group_voxel_intensity_plot.png')
 
     # Step 4: Test quality of alternate distortion correction method (Stage 2).
     print("\n###### STEP 4: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")

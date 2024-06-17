@@ -1371,7 +1371,7 @@ if answer5 == 'y':
     group_perc_outside_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
         if p_id in good_participants:
-            print(f"Preparing files for {p_id}...")
+            print(f"Preparing Stage 1 files for {p_id}...")
             ap_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
             pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"
             averaged_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/averaged_pa_fieldmaps.nii.gz"
@@ -1467,9 +1467,9 @@ if answer5 == 'y':
             result2_output_values = result2_output.split()
             total_voxels_in_roi = float(result2_output_values[0])
             perc_outside_pa = (pa_voxels_outside / total_voxels_in_roi) * 100
-            perc_outside_pa = round(percentage_outside_pa, 2)
+            perc_outside_pa = round(perc_outside_pa, 2)
             perc_outside_rl = (rl_voxels_outside / total_voxels_in_roi) * 100
-            perc_outside_rl = round(percentage_outside_rl, 2)
+            perc_outside_rl = round(perc_outside_rl, 2)
             pa_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_trimmed_roi_mask.nii.gz"
             rl_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_trimmed_roi_mask.nii.gz"
             if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
@@ -1484,7 +1484,7 @@ if answer5 == 'y':
     group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
         if p_id in good_participants:
-            print(f"Running SSIM analysis for {p_id}...")
+            print(f"Running Stage 1 SSIM analysis for {p_id}...")
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
                 image1_nii = nib.load(image1_path)
@@ -1527,7 +1527,7 @@ if answer5 == 'y':
     group_overlap_perc_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
         if p_id in good_participants:
-            print(f'Running segmentation analysis for {p_id}...')
+            print(f'Running Stage 1 segmentation analysis for {p_id}...')
             pa_csf_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg_pve_0.nii.gz"
             pa_wm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg_pve_1.nii.gz"
             pa_gm_pve_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg_pve_2.nii.gz"
@@ -1602,7 +1602,7 @@ if answer5 == 'y':
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
     for p_id in participants_to_iterate:
         if p_id in good_participants:
-            print(f'Running voxel signal intensity analysis for {p_id}...')
+            print(f'Running Stage 1 voxel signal intensity analysis for {p_id}...')
             def extract_voxel_intensities(epi_image_path, mask_image_path):
                 epi_img = nib.load(epi_image_path)
                 epi_data = epi_img.get_fdata()
@@ -1717,46 +1717,29 @@ if answer5 == 'y':
 
     # Step 4: Test quality of alternate distortion correction method (Stage 2).
     print("\n###### STEP 4: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
-    percentage_outside_corrected_list = []
-    percentage_outside_uncorrected_list = []
-    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
-    group_ssim_df = pd.DataFrame(columns = column_headers) 
+    column_headers = ['p_id', 'perc_outside_corrected', 'perc_outside_uncorrected']
+    group_perc_outside_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
-        if p_id in good_participants:            
+        if p_id in good_participants:  
+            print(f'Preparing Stage 2 files for {p_id}...')          
             averaged_run = f"{p_id}/analysis/susceptibility/fnirt_test/2/averaged_run.nii.gz"
             if not os.path.exists(averaged_run):
-                print(f"{p_id} Run 1 images being averaged...")
                 run = f"{p_id}/analysis/preproc/niftis/run01_nh.nii.gz"
                 subprocess.run(['fslmaths', run, '-Tmean', averaged_run])
-                print(f"{p_id} Run 1 images successfully averaged.")
-            else:
-                print(f"{p_id} Run 1 images already averaged. Skipping process.")
             uncorrected_run = f"{p_id}/analysis/susceptibility/fnirt_test/2/uncorrected_run.nii.gz"
             if not os.path.exists(uncorrected_run):
-                print(f"Performing brain extraction on Run 1 functional image.")
                 subprocess.run(["bet", averaged_run, uncorrected_run, "-m", "-R"])
-                print("Run 1 functional image brain extracted.")
-            else:
-                print("Run 1 functional image already brain extracted. Skipping process.")
             corrected_run = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "2", "corrected_run.nii.gz")
             if not os.path.exists(corrected_run):
-                print("Applying fieldmaps...")
                 subprocess.run(["applytopup", f"--imain={uncorrected_run}", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={corrected_run}"])
-                print("Fieldmap application completed.")
-            else:
-                print("Fieldmaps already calculated and applied. Skipping process.")
             flirted_corrected_run = f"{p_id}/analysis/susceptibility/fnirt_test/2/flirted_corrected_run.nii.gz"
             flirted_uncorrected_run = f"{p_id}/analysis/susceptibility/fnirt_test/2/flirted_uncorrected_run.nii.gz"
             flirted_corrected_run_transformation = f"{p_id}/analysis/susceptibility/fnirt_test/2/flirted_corrected_run_transformation.mat"
             flirted_uncorrected_run_transformation = f"{p_id}/analysis/susceptibility/fnirt_test/2/flirted_uncorrected_run_transformation.mat"
             if not os.path.exists(flirted_corrected_run):
-                print(f"Aligning corrected and uncorrected Run 1 sequences to structural image for {p_id} distortion correction test 2...")
                 structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
                 subprocess.run(["flirt", "-in", corrected_run, "-ref", structural_brain, "-out", flirted_corrected_run, "-omat", flirted_corrected_run_transformation])
                 subprocess.run(["flirt", "-in", uncorrected_run, "-ref", structural_brain, "-out", flirted_uncorrected_run, "-omat", flirted_uncorrected_run_transformation])
-                print(f"Corrected and uncorrected Run 1 sequence aligned to structural image successfully for {p_id}.")
-            else:
-                print(f"Corrected and uncorrected Run 1 sequences have already been aligned to structural image for {p_id}. Skipping process.")
             def read_roi_file(roi_file):
                 voxel_coordinates = []
                 with open(roi_file, 'r') as file:
@@ -1827,17 +1810,25 @@ if answer5 == 'y':
                 print("Error executing fslstats command.")
             result2_output_values = result2_output.split()
             total_voxels_in_roi = float(result2_output_values[0])
-            percentage_outside_corrected = (corrected_voxels_outside / total_voxels_in_roi) * 100
-            percentage_outside_corrected = round(percentage_outside_corrected, 2)
-            percentage_outside_corrected_list.append(percentage_outside_corrected)
-            percentage_outside_uncorrected = (uncorrected_voxels_outside / total_voxels_in_roi) * 100
-            percentage_outside_uncorrected = round(percentage_outside_uncorrected, 2)
-            percentage_outside_uncorrected_list.append(percentage_outside_uncorrected)
+            perc_outside_corrected = (corrected_voxels_outside / total_voxels_in_roi) * 100
+            perc_outside_corrected = round(perc_outside_corrected, 2)
+            perc_outside_uncorrected = (uncorrected_voxels_outside / total_voxels_in_roi) * 100
+            perc_outside_uncorrected = round(perc_outside_uncorrected, 2)
             corrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/corrected_trimmed_roi_mask.nii.gz"
             uncorrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/uncorrected_trimmed_roi_mask.nii.gz"
             if not os.path.exists(corrected_trimmed_roi_mask) or not os.path.exists(uncorrected_trimmed_roi_mask):
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_corrected_bin, corrected_trimmed_roi_mask])
                 subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_uncorrected_bin, uncorrected_trimmed_roi_mask])
+            perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_corrected': [perc_outside_corrected], 'perc_outside_rl': [perc_outside_uncorrected]})
+            perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/2/perc_outside_df.txt', sep='\t', index=False)
+            group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
+    group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/2/group_perc_outside_df.txt', sep='\t', index=False)
+
+    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
+    group_ssim_df = pd.DataFrame(columns = column_headers)   
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:   
+            print(f'Running Stage 2 SSIM analysis for {p_id}...')        
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
                 """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
                 image1_nii = nib.load(image1_path)
@@ -1849,16 +1840,10 @@ if answer5 == 'y':
                 ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
                 ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
                 nib.save(ssim_map_nifti, ssim_output_path)
-                print(f"SSIM Index: {ssim_index}")
-                print(f"SSIM map saved to: {ssim_output_path}")
                 return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/2/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
-                print(f"Calculating SSIM between corrected and uncorrected images for {p_id}...")
                 ssim_index = calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)
-                print(f'SSIM between corrected and uncorrected images for {p_id} successfully calculated.')
-            else:
-                print(f"SSIM between uncorrected and corrected images for {p_id} already calculated. Skipping process.")
                 ssim_index = None
                 ssim_map_nifti = nib.load(ssim_output_path)
                 ssim_map = ssim_map_nifti.get_fdata()
@@ -1868,25 +1853,13 @@ if answer5 == 'y':
                 raise ValueError(f"Failed to retrieve SSIM index for {p_id}")           
             binarised_ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/2/binarised_ssim_mask.nii.gz"
             if not os.path.exists(binarised_ssim_output_path):
-                print(f'Binarising {p_id} SSIM mask...')
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", binarised_ssim_output_path])
-                print(f'{p_id} SSIM mask successfully binarised.')
-            else:
-                print(f'{p_id} SSIM mask already binarised. Skipping process.')
-            print(f'Counting voxels in binarised SSIM mask...')
             voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             voxels_in_whole_mask = float(voxels_in_whole_mask)
-            print(f'Voxels in whole binarised SSIM mask for {p_id}:', voxels_in_whole_mask)
             intersection_mask_path = f'{p_id}/analysis/susceptibility/fnirt_test/2/ssim_roi_intersect.nii.gz'
             if not os.path.exists(intersection_mask_path):
-                print(f'Creating intersect mask of SSIM and ROI for {p_id}...')
                 subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", transformed_roi_mask, intersection_mask_path])
-                print(f'Intersect mask of SSIM and ROI for {p_id} successfully created.')
-            else:
-                print(f'Intersect mask of SSIM and ROI for {p_id} already exists. Skipping process.')
-            print(f'Counting voxels in transformed ROI mask for {p_id}...')
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
-            print(f'Number of transformed ROI mask voxels present in SSIM intersect mask for {p_id}:', voxels_in_roi_in_mask)
             voxels_in_roi_in_mask = float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
             ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask]})
@@ -1897,7 +1870,8 @@ if answer5 == 'y':
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
     for p_id in participants_to_iterate:
-        if p_id in good_participants:             
+        if p_id in good_participants:    
+            print(f'Running Stage 2 voxel signal intensity analysis for {p_id}...')         
             def extract_voxel_intensities(epi_image_path, mask_image_path):
                 epi_img = nib.load(epi_image_path)
                 epi_data = epi_img.get_fdata()
@@ -1909,10 +1883,6 @@ if answer5 == 'y':
                 return voxel_intensity_list
             corrected_voxel_intensities = extract_voxel_intensities(flirted_corrected_run, corrected_trimmed_roi_mask)
             uncorrected_voxel_intensities = extract_voxel_intensities(flirted_uncorrected_run, uncorrected_trimmed_roi_mask)
-            corrected_voxel_intensities_mean = np.mean(corrected_voxel_intensities)
-            uncorrected_voxel_intensities_mean = np.mean(uncorrected_voxel_intensities)
-            print(f"Average voxel intensity within ROI for {p_id} fieldmap-corrected sequence: {corrected_voxel_intensities_mean}")
-            print(f"Average voxel intensity within ROI for {p_id} uncorrected sequence: {uncorrected_voxel_intensities_mean}")
             values = corrected_voxel_intensities + uncorrected_voxel_intensities
             sequence = ['corrected'] * len(corrected_voxel_intensities) + ['uncorrected'] * len(uncorrected_voxel_intensities)
             subject = [f'{p_id}'] * len(corrected_voxel_intensities) + [f'{p_id}'] * len(uncorrected_voxel_intensities)
@@ -1920,8 +1890,6 @@ if answer5 == 'y':
             voxel_intensity_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/2/voxel_intensity_df.txt', sep='\t', index=False)
             group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
     group_voxel_intensity_df.to_csv('group/susceptibility/fnirt_test/2/group_voxel_intensity_df.txt', sep='\t', index=False)
-    print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants following fieldmap correction:', percentage_outside_corrected_list)
-    print('Percentage of ROI voxels in signal dropout regions for each of the 13 good participants in absence of fieldmap correction:', percentage_outside_uncorrected_list)
     corrected_means = []
     uncorrected_means= []
     p_values = []
@@ -1945,11 +1913,11 @@ if answer5 == 'y':
             is_uncorrected_normal = anderson_uncorrected.statistic < anderson_uncorrected.critical_values[
                 anderson_uncorrected.significance_level.tolist().index(significance_level * 100)]
             if is_corrected_normal and is_uncorrected_normal:
-                print(f'Running t-test for {p_id}...')
+                print(f'Anderson-Darling test passed for {p_id} voxel intensity values. Running parametric t-test...')
                 _, p_value = stats.ttest_ind(filtered_corrected['value'], filtered_uncorrected['value'], equal_var=False)
                 p_values.append(p_value)
             else:
-                print(f'Running Mann Whitney U test for {p_id}...')
+                print(f'Anderson-Darling test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
                 _, p_value = stats.mannwhitneyu(filtered_corrected['value'], filtered_uncorrected['value'], alternative='two-sided')
                 p_values.append(p_value)
             corrected_std_error = np.std(filtered_corrected['value']) / np.sqrt(len(filtered_corrected['value']))
@@ -1970,7 +1938,7 @@ if answer5 == 'y':
             plot_data.at[idx, 'Significance'] = '**'
         elif p_value < 0.05:
             plot_data.at[idx, 'Significance'] = '*'
-    mean_plot = (
+    voxel_intensity_plot = (
         ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
         geom_bar(stat='identity', position='dodge') +
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
@@ -1986,7 +1954,7 @@ if answer5 == 'y':
             ha='center',
             va='bottom',
             show_legend=False))
-    mean_plot.save('group/susceptibility/fnirt_test/2/mean_plot.png')
+    voxel_intensity_plot.save('group/susceptibility/fnirt_test/2/voxel_intensity_plot.png')
     corrected_means_overall = np.mean(corrected_means)
     uncorrected_means_overall = np.mean(uncorrected_means)
     corrected_std_error_overall = np.std(corrected_means) / np.sqrt(len(corrected_means))
@@ -1994,11 +1962,13 @@ if answer5 == 'y':
     _, corrected_means_overall_shap_p = stats.shapiro(corrected_means)
     _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
     if corrected_means_overall_shap_p > 0.05 and uncorrected_means_overall_shap_p > 0.5:
+        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(corrected_means, uncorrected_means)
     else:
+        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means)
     plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
-    overall_mean_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
@@ -2006,15 +1976,15 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0), limits=[0,350])
                         )
     if p_value < 0.001:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
+        group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
     elif p_value < 0.01:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
+        group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
     elif p_value < 0.05:
-        overall_mean_plot = overall_mean_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
+        group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-    overall_mean_plot.save('group/susceptibility/fnirt_test/2/overall_mean_plot.png')
+    group_voxel_intensity_plot.save('group/susceptibility/fnirt_test/2/group_voxel_intensity_plot.png')
 
     # Step 5: Test quality of alternate distortion correction method (Stage 3).
     print("\n###### STEP 5: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 3) ######")

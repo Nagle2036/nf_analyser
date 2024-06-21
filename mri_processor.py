@@ -1433,6 +1433,11 @@ if answer5 == 'y':
             roi_transformation = f'{p_id}/analysis/susceptibility/fnirt_test/1/roi_transformation.mat'
             subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', temp_file, '-omat', roi_transformation])
             subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', roi_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
+            pa_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_trimmed_roi_mask.nii.gz"
+            rl_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_trimmed_roi_mask.nii.gz"
+            if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_fieldmaps_bin, pa_trimmed_roi_mask])
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
             flirted_pa_fieldmaps_bin = f'{p_id}/analysis/susceptibility/fnirt_test/1/flirted_pa_fieldmaps_bin.nii.gz'
             if not os.path.exists(flirted_pa_fieldmaps_bin):
                 subprocess.run(['fslmaths', flirted_pa_fieldmaps, '-thr', '100', '-bin', flirted_pa_fieldmaps_bin])
@@ -1459,22 +1464,17 @@ if answer5 == 'y':
                 print("Error executing fslstats command.")
             rl_result_output_values = rl_result_output.split()
             rl_voxels_outside = float(rl_result_output_values[0])
-            result2 = subprocess.run(['fslstats', transformed_roi_mask, '-V'], capture_output=True, text=True)
-            if result2.returncode == 0:
-                result2_output = result2.stdout.strip()
+            result1 = subprocess.run(['fslstats', transformed_roi_mask, '-V'], capture_output=True, text=True)
+            if result1.returncode == 0:
+                result1_output = result1.stdout.strip()
             else:
                 print("Error executing fslstats command.")
-            result2_output_values = result2_output.split()
-            total_voxels_in_roi = float(result2_output_values[0])
+            result1_output_values = result1_output.split()
+            total_voxels_in_roi = float(result1_output_values[0])
             perc_outside_pa = (pa_voxels_outside / total_voxels_in_roi) * 100
             perc_outside_pa = round(perc_outside_pa, 2)
             perc_outside_rl = (rl_voxels_outside / total_voxels_in_roi) * 100
             perc_outside_rl = round(perc_outside_rl, 2)
-            pa_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_trimmed_roi_mask.nii.gz"
-            rl_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_trimmed_roi_mask.nii.gz"
-            if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_fieldmaps_bin, pa_trimmed_roi_mask])
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
             perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_pa': [perc_outside_pa], 'perc_outside_rl': [perc_outside_rl]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
@@ -1507,14 +1507,23 @@ if answer5 == 'y':
                     ssim_index = ssim_map.mean()
             if ssim_index is None:
                 raise ValueError(f"Failed to retrieve SSIM index for {p_id}")
-            binarised_ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/1/binarised_ssim_mask.nii.gz"
-            if not os.path.exists(binarised_ssim_output_path):
-                subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", binarised_ssim_output_path])
-            voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+            ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_bin.nii.gz"
+            if not os.path.exists(ssim_bin):
+                subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
+            combined_pa_rl_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/combined_pa_rl_mask.nii.gz"
+            if not os.path.exists(combined_pa_rl_mask):
+                subprocess.run(['fslmaths', flirted_pa_fieldmaps_bin, '-add', flirted_rl_fieldmaps_bin, combined_pa_rl_mask])
+            bin_pa_rl_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/bin_pa_rl_mask.nii.gz"
+            if not os.path.exists(bin_pa_rl_mask):
+                subprocess.run('fslmaths', combined_pa_rl_mask, '-bin', bin_pa_rl_mask)
+            ssim_bin_trimmed = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_bin_trimmed.nii.gz"
+            if not os.path.exists(ssim_bin_trimmed):
+                subprocess.run(['fslmaths', ssim_bin, '-mul', bin_pa_rl_mask, ssim_bin_trimmed])
+            voxels_in_whole_mask = subprocess.run(["fslstats", ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
             voxels_in_whole_mask = float(voxels_in_whole_mask)
             intersection_mask_path = f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_roi_intersect.nii.gz'
             if not os.path.exists(intersection_mask_path):
-                subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", transformed_roi_mask, intersection_mask_path])
+                subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", transformed_roi_mask, intersection_mask_path])
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             voxels_in_roi_in_mask = float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
@@ -1773,10 +1782,12 @@ if answer5 == 'y':
             nib.save(binary_mask, f'{p_id}/analysis/susceptibility/fnirt_test/2/run01_subject_space_ROI.nii.gz')
             roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/2/run01_subject_space_ROI.nii.gz'
             transformed_roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/2/transformed_roi_mask.nii.gz'
-            temp_file = f'{p_id}/analysis/susceptibility/fnirt_test/2/temp_file.nii.gz'
-            roi_transformation = f'{p_id}/analysis/susceptibility/fnirt_test/2/roi_transformation.mat'
-            subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', temp_file, '-omat', roi_transformation])
-            subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', roi_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
+            subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', flirted_uncorrected_run_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
+            corrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/corrected_trimmed_roi_mask.nii.gz"
+            uncorrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/uncorrected_trimmed_roi_mask.nii.gz"
+            if not os.path.exists(corrected_trimmed_roi_mask) or not os.path.exists(uncorrected_trimmed_roi_mask):
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_corrected_bin, corrected_trimmed_roi_mask])
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_uncorrected_bin, uncorrected_trimmed_roi_mask])
             flirted_corrected_bin = f'{p_id}/analysis/susceptibility/fnirt_test/2/flirted_corrected_bin.nii.gz'
             if not os.path.exists(flirted_corrected_bin):
                 subprocess.run(['fslmaths', flirted_corrected_run, '-thr', '100', '-bin', flirted_corrected_bin])
@@ -1803,23 +1814,18 @@ if answer5 == 'y':
                 print("Error executing fslstats command.")
             uncorrected_result_output_values = uncorrected_result_output.split()
             uncorrected_voxels_outside = float(uncorrected_result_output_values[0])
-            result2 = subprocess.run(['fslstats', transformed_roi_mask, '-V'], capture_output=True, text=True)
-            if result2.returncode == 0:
-                result2_output = result2.stdout.strip()
+            result1 = subprocess.run(['fslstats', transformed_roi_mask, '-V'], capture_output=True, text=True)
+            if result1.returncode == 0:
+                result1_output = result1.stdout.strip()
             else:
                 print("Error executing fslstats command.")
-            result2_output_values = result2_output.split()
-            total_voxels_in_roi = float(result2_output_values[0])
+            result1_output_values = result1_output.split()
+            total_voxels_in_roi = float(result1_output_values[0])
             perc_outside_corrected = (corrected_voxels_outside / total_voxels_in_roi) * 100
             perc_outside_corrected = round(perc_outside_corrected, 2)
             perc_outside_uncorrected = (uncorrected_voxels_outside / total_voxels_in_roi) * 100
             perc_outside_uncorrected = round(perc_outside_uncorrected, 2)
-            corrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/corrected_trimmed_roi_mask.nii.gz"
-            uncorrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/uncorrected_trimmed_roi_mask.nii.gz"
-            if not os.path.exists(corrected_trimmed_roi_mask) or not os.path.exists(uncorrected_trimmed_roi_mask):
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_corrected_bin, corrected_trimmed_roi_mask])
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_uncorrected_bin, uncorrected_trimmed_roi_mask])
-            perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_corrected': [perc_outside_corrected], 'perc_outside_rl': [perc_outside_uncorrected]})
+            perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_corrected': [perc_outside_corrected], 'perc_outside_uncorrected': [perc_outside_uncorrected]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/2/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/2/group_perc_outside_df.txt', sep='\t', index=False)
@@ -1851,14 +1857,23 @@ if answer5 == 'y':
                     ssim_index = ssim_map.mean()
             if ssim_index is None:
                 raise ValueError(f"Failed to retrieve SSIM index for {p_id}")           
-            binarised_ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/2/binarised_ssim_mask.nii.gz"
-            if not os.path.exists(binarised_ssim_output_path):
-                subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", binarised_ssim_output_path])
-            voxels_in_whole_mask = subprocess.run(["fslstats", binarised_ssim_output_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+            ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/2/ssim_bin.nii.gz"
+            if not os.path.exists(ssim_bin):
+                subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
+            combined_corr_uncorr_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/combined_corr_uncorr_mask.nii.gz"
+            if not os.path.exists(combined_corr_uncorr_mask):
+                subprocess.run(['fslmaths', flirted_corrected_bin, '-add', flirted_uncorrected_bin, combined_corr_uncorr_mask])
+            bin_corr_uncorr_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/bin_corr_uncorr_mask.nii.gz"
+            if not os.path.exists(bin_corr_uncorr_mask):
+                subprocess.run('fslmaths', combined_corr_uncorr_mask, '-bin', bin_corr_uncorr_mask)
+            ssim_bin_trimmed = f"{p_id}/analysis/susceptibility/fnirt_test/2/ssim_bin_trimmed.nii.gz"
+            if not os.path.exists(ssim_bin_trimmed):
+                subprocess.run(['fslmaths', ssim_bin, '-mul', bin_corr_uncorr_mask, ssim_bin_trimmed])
+            voxels_in_whole_mask = subprocess.run(["fslstats", ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
             voxels_in_whole_mask = float(voxels_in_whole_mask)
             intersection_mask_path = f'{p_id}/analysis/susceptibility/fnirt_test/2/ssim_roi_intersect.nii.gz'
             if not os.path.exists(intersection_mask_path):
-                subprocess.run(["fslmaths", binarised_ssim_output_path, "-mas", transformed_roi_mask, intersection_mask_path])
+                subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", transformed_roi_mask, intersection_mask_path])
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             voxels_in_roi_in_mask = float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100

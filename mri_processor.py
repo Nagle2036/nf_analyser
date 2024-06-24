@@ -41,6 +41,7 @@ import nibabel as nib
 from skimage.metrics import structural_similarity as ssim
 from plotnine import *
 from scipy import stats
+from pingouin import mixed_anova
 
 #endregion
 
@@ -1606,6 +1607,70 @@ if answer5 == 'y':
             overlap_perc_df.to_csv(f"{p_id}/analysis/susceptibility/fnirt_test/1/overlap_perc_df.txt", sep='\t', index=False)
             group_overlap_perc_df = pd.concat([group_overlap_perc_df, overlap_perc_df], ignore_index=True)
     group_overlap_perc_df.to_csv('group/susceptibility/fnirt_test/1/group_overlap_perc_df.txt', sep='\t', index=False)
+    csf_values = []
+    wm_values = []
+    gm_values = []
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:
+            filtered_csf = group_overlap_perc_df.loc[(group_overlap_perc_df['tissue_type'] == 'csf') & (group_overlap_perc_df['p_id'] == p_id), 'overlap_perc'].values[0]
+            filtered_csf = float(filtered_csf)
+            csf_values.append(filtered_csf)
+            filtered_wm = group_overlap_perc_df.loc[(group_overlap_perc_df['tissue_type'] == 'wm') & (group_overlap_perc_df['p_id'] == p_id), 'overlap_perc'].values[0]
+            filtered_wm = float(filtered_wm)
+            wm_values.append(filtered_wm)
+            filtered_gm = group_overlap_perc_df.loc[(group_overlap_perc_df['tissue_type'] == 'gm') & (group_overlap_perc_df['p_id'] == p_id), 'overlap_perc'].values[0]
+            filtered_gm = float(filtered_gm)
+            gm_values.append(filtered_gm)
+    plot_data = pd.DataFrame({
+        'Participant': good_participants * 3,
+        'Overlap_Perc': csf_values + wm_values + gm_values,
+        'Tissue_Type': ['CSF'] * len(good_participants) + ['WM'] * len(good_participants) + ['GM'] * len(good_participants)
+    })
+    overlap_perc_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Overlap_Perc', fill='Tissue_Type')) +
+        geom_bar(stat='identity', position='dodge') +
+        theme_classic() +
+        labs(title='Sequence Tissue Type Overlap', x='Participant', y='Overlap_Perc') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    overlap_perc_plot.save('group/susceptibility/fnirt_test/1/overlap_perc_plot.png')
+    filtered_csf = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'].tolist()
+    filtered_wm = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'wm']['overlap_perc'].tolist()
+    filtered_gm = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'gm']['overlap_perc'].tolist()
+    csf_std_error = np.std(filtered_csf) / np.sqrt(len(filtered_csf))
+    wm_std_error = np.std(filtered_wm) / np.sqrt(len(filtered_wm))
+    gm_std_error = np.std(filtered_gm) / np.sqrt(len(filtered_gm))
+    sphericity_test = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id', between='p_id')
+    epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
+    print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
+    normality_passed = True
+    shapiro_results = df.groupby('tissue_type')['overlap_perc'].apply(stats.shapiro)
+    shapiro_p_values = shapiro_results.apply(lambda x: x.pvalue)
+    if any(shapiro_p_values < 0.05):
+        normality_passed = False
+    print(f'Stage 1 segmentation analysis Shapiro-Wilk test of normality passed: {normality_passed}')
+    _, p_value_levene = stats.levene(
+        df[df['tissue_type'] == 'csf']['overlap_perc'],
+        df[df['tissue_type'] == 'wm']['overlap_perc'],
+        df[df['tissue_type'] == 'gm']['overlap_perc']
+    )
+    print(f'Stage 1 segmentation analysis Levene test p-value: {p_value_levene}')
+    if normality_passed and p_value_levene > 0.05 and epsilon_value > 0.75:
+        print('Stage 1 segmentation analysis parametric assumptions met. Proceeding with two-way ANOVA...')
+        anova_result = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id', between='p_id')
+        print(anova_result)
+    else:
+        print('Stage 1 segmentation analysis parametric assumptions not met. Two-way ANOVA not run. Reassess the data.')
+    plot_data = pd.DataFrame({'Tissue_Type': ['CSF', 'WM', 'GM'], 'Overlap_Perc': [filtered_csf, filtered_wm, filtered_gm], 'Std_Error': [csf_standard_error, wm_standard_error, gm_standard_error]})
+    group_overlap_perc_plot = (ggplot(plot_data, aes(x='Tissue_Type', y='Overlap_Perc')) + 
+                        geom_bar(stat='identity', position='dodge') +
+                        geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_perc + Std_Error'), width=0.2, color='black') +
+                        theme_classic() +
+                        labs(title='Sequence Tissue Type Overlap') +
+                        scale_y_continuous(expand=(0, 0))
+                        )
+    group_overlap_perc_plot.save('group/susceptibility/fnirt_test/1/group_overlap_perc_plot.png')
 
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   

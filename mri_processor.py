@@ -1581,6 +1581,7 @@ if answer5 == 'y':
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/1/group_ssim_df.txt', sep='\t', index=False)
     ssim_indexes = group_ssim_df['ssim_index'].tolist()
+    ssim_mean = np.mean(ssim_indexes)
     plot_data = pd.DataFrame({
         'Participant': good_participants,
         'SSIM': ssim_indexes,
@@ -1588,6 +1589,7 @@ if answer5 == 'y':
     ssim_plot = (
         ggplot(plot_data, aes(x='Participant', y='SSIM')) +
         geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
@@ -1665,6 +1667,9 @@ if answer5 == 'y':
             overlap_perc_col.append(csf_overlap_perc)
             overlap_perc_col.append(wm_overlap_perc)
             overlap_perc_col.append(gm_overlap_perc)
+            values = np.array([csf_overlap_perc, wm_overlap_perc, gm_overlap_perc])
+            overlap_perc_av = np.mean(values)
+            overlap_perc_av_values.append(overlap_perc_av)
             overlap_perc_df = pd.DataFrame({'p_id': participant_col, 'tissue_type': tissue_type_col, 'overlap_perc': overlap_perc_col})
             overlap_perc_df.to_csv(f"{p_id}/analysis/susceptibility/fnirt_test/1/overlap_perc_df.txt", sep='\t', index=False)
             group_overlap_perc_df = pd.concat([group_overlap_perc_df, overlap_perc_df], ignore_index=True)
@@ -1733,6 +1738,49 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0))
                         )
     group_overlap_perc_plot.save('group/susceptibility/fnirt_test/1/group_overlap_perc_plot.png')
+    plot_data_ssim = pd.DataFrame({
+    'Participant': good_participants,
+    'SSIM': ssim_indexes
+    })
+    plot_data_overlap_perc = pd.DataFrame({
+    'Participant': good_participants,
+    'Overlap_Perc': overlap_perc_av_values
+    })
+    ssim_plot = (
+    ggplot(plot_data_ssim, aes(x='Participant', y='SSIM')) +
+    geom_bar(stat='identity', position='dodge') +
+    theme_classic() +
+    labs(y='SSIM') +
+    theme(axis_text_x=element_text(rotation=45, hjust=1),
+          text=element_text(size=12, color='blue'),
+          axis_title=element_text(size=14, face='bold'))
+    )
+    overlap_perc_plot = (
+    ggplot(plot_data_overlap_perc, aes(x='Participant', y='Overlap_Perc')) +
+    geom_bar(stat='identity', position='dodge') +
+    theme_classic() +
+    labs(y='Overlap_Perc') +
+    theme(axis_text_x=element_text(rotation=45, hjust=1),
+          text=element_text(size=12, color='blue'),
+          axis_title=element_text(size=14, face='bold'))
+    )
+    ssim_fig = ssim_plot.draw()
+    overla_perc_fig = overlap_perc_plot.draw()
+    fig, ax1 = plt.subplots()
+    ax1.bar(good_participants, ssim_indexes, color='blue', label='SSIM')
+    ax1.set_xlabel('Participant')
+    ax1.set_ylabel('SSIM', color='blue')
+    ax1.tick_params(axis='y', labelcolor='blue')
+    ax2 = ax1.twinx()
+    ax2.bar(good_participants, overlap_perc_av_values, color='red', label='Overlap_Perc', alpha=0.5)
+    ax2.set_ylabel('Overlap_Perc', color='red')
+    ax2.tick_params(axis='y', labelcolor='red')
+    plt.title('SSIM and Tissue Overlap Percentage Plot')
+    ax1.set_xticklabels(good_participants, rotation=45, ha='right')
+    save_path = 'group/susceptibility/fnirt_test/1/ssim_overlap_perc_plot.png'
+    plt.savefig(save_path, bbox_inches='tight')
+    
+
 
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
@@ -2057,6 +2105,7 @@ if answer5 == 'y':
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/2/group_ssim_df.txt', sep='\t', index=False)
     ssim_indexes = group_ssim_df['ssim_index'].tolist()
+    ssim_mean = np.mean(ssim_indexes)
     plot_data = pd.DataFrame({
         'Participant': good_participants,
         'SSIM': ssim_indexes,
@@ -2064,6 +2113,7 @@ if answer5 == 'y':
     ssim_plot = (
         ggplot(plot_data, aes(x='Participant', y='SSIM')) +
         geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
@@ -2437,13 +2487,15 @@ if answer5 == 'y':
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/3/group_ssim_df.txt', sep='\t', index=False)
     ssim_indexes = group_ssim_df['ssim_index'].tolist()
+    ssim_mean = np.mean(ssim_indexes)
     plot_data = pd.DataFrame({
-        'Participant': good_participants,
+        'Participant': bad_participants,
         'SSIM': ssim_indexes,
     })
     ssim_plot = (
         ggplot(plot_data, aes(x='Participant', y='SSIM')) +
         geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
@@ -2827,13 +2879,15 @@ if answer5 == 'y':
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/4/group_ssim_df.txt', sep='\t', index=False)
     ssim_indexes = group_ssim_df['ssim_index'].tolist()
+    ssim_mean = np.mean(ssim_indexes)
     plot_data = pd.DataFrame({
-        'Participant': good_participants,
+        'Participant': bad_participants,
         'SSIM': ssim_indexes,
     })
     ssim_plot = (
         ggplot(plot_data, aes(x='Participant', y='SSIM')) +
         geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +

@@ -1580,7 +1580,21 @@ if answer5 == 'y':
             ssim_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', sep='\t', index=False)
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/1/group_ssim_df.txt', sep='\t', index=False)
-    
+    ssim_indexes = group_ssim_df['ssim_index'].tolist()
+    plot_data = pd.DataFrame({
+        'Participant': good_participants,
+        'SSIM': ssim_indexes,
+    })
+    ssim_plot = (
+        ggplot(plot_data, aes(x='Participant', y='SSIM')) +
+        geom_bar(stat='identity', position='dodge') +
+        theme_classic() +
+        labs(title='SSIM Indexes', x='Participant', y='SSIM') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_plot.save('group/susceptibility/fnirt_test/1/ssim_plot.png')
+
     column_headers = ['p_id', 'tissue_type', 'overlap_perc']
     group_overlap_perc_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
@@ -2042,6 +2056,20 @@ if answer5 == 'y':
             ssim_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/2/ssim_df.txt', sep='\t', index=False)
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/2/group_ssim_df.txt', sep='\t', index=False)
+    ssim_indexes = group_ssim_df['ssim_index'].tolist()
+    plot_data = pd.DataFrame({
+        'Participant': good_participants,
+        'SSIM': ssim_indexes,
+    })
+    ssim_plot = (
+        ggplot(plot_data, aes(x='Participant', y='SSIM')) +
+        geom_bar(stat='identity', position='dodge') +
+        theme_classic() +
+        labs(title='SSIM Indexes', x='Participant', y='SSIM') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_plot.save('group/susceptibility/fnirt_test/2/ssim_plot.png')
 
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
@@ -2408,7 +2436,21 @@ if answer5 == 'y':
             ssim_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/3/ssim_df.txt', sep='\t', index=False)
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/3/group_ssim_df.txt', sep='\t', index=False)
-    
+    ssim_indexes = group_ssim_df['ssim_index'].tolist()
+    plot_data = pd.DataFrame({
+        'Participant': good_participants,
+        'SSIM': ssim_indexes,
+    })
+    ssim_plot = (
+        ggplot(plot_data, aes(x='Participant', y='SSIM')) +
+        geom_bar(stat='identity', position='dodge') +
+        theme_classic() +
+        labs(title='SSIM Indexes', x='Participant', y='SSIM') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_plot.save('group/susceptibility/fnirt_test/3/ssim_plot.png')
+
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
     for p_id in participants_to_iterate:
@@ -2784,7 +2826,21 @@ if answer5 == 'y':
             ssim_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/4/ssim_df.txt', sep='\t', index=False)
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/4/group_ssim_df.txt', sep='\t', index=False)
-    
+    ssim_indexes = group_ssim_df['ssim_index'].tolist()
+    plot_data = pd.DataFrame({
+        'Participant': good_participants,
+        'SSIM': ssim_indexes,
+    })
+    ssim_plot = (
+        ggplot(plot_data, aes(x='Participant', y='SSIM')) +
+        geom_bar(stat='identity', position='dodge') +
+        theme_classic() +
+        labs(title='SSIM Indexes', x='Participant', y='SSIM') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_plot.save('group/susceptibility/fnirt_test/4/ssim_plot.png')
+
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
     for p_id in participants_to_iterate:

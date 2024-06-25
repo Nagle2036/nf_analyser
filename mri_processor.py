@@ -1368,6 +1368,8 @@ if answer5 == 'y':
     # Step 3: Test quality of alternate distortion correction method (Stage 1).
     print("\n###### STEP 3: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 1) ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    perc_outside_pa_values = []
+    perc_outside_rl_values = []
     column_headers = ['p_id', 'perc_outside_pa', 'perc_outside_rl']
     group_perc_outside_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
@@ -1474,12 +1476,58 @@ if answer5 == 'y':
             total_voxels_in_roi = float(result1_output_values[0])
             perc_outside_pa = (pa_voxels_outside / total_voxels_in_roi) * 100
             perc_outside_pa = round(perc_outside_pa, 2)
+            perc_outside_pa_values.append(perc_outside_pa)
             perc_outside_rl = (rl_voxels_outside / total_voxels_in_roi) * 100
             perc_outside_rl = round(perc_outside_rl, 2)
+            perc_outside_rl_values.append(perc_outside_rl)
             perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_pa': [perc_outside_pa], 'perc_outside_rl': [perc_outside_rl]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/1/group_perc_outside_df.txt', sep='\t', index=False)
+    plot_data = pd.DataFrame({
+        'Participant': good_participants * 2,
+        'Perc_Outside': perc_outside_pa_values + perc_outside_rl_values,
+        'Sequence': ['PA'] * len(good_participants) + ['RL'] * len(good_participants)
+    })
+    perc_outside_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
+        geom_bar(stat='identity', position='dodge') +
+        theme_classic() +
+        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    perc_outside_plot.save('group/susceptibility/fnirt_test/1/perc_outside_plot.png')
+    perc_outside_pa_overall = np.mean(perc_outside_pa_values)
+    perc_outside_rl_overall = np.mean(perc_outside_rl_values)
+    pa_std_error = np.std(perc_outside_pa_values) / np.sqrt(len(perc_outside_pa_values))
+    rl_std_error = np.std(perc_outside_rl_values) / np.sqrt(len(perc_outside_rl_values))
+    _, perc_outside_pa_overall_shap_p = stats.shapiro(perc_outside_pa_values)
+    _, perc_outside_rl_overall_shap_p = stats.shapiro(perc_outside_rl_values)
+    if perc_outside_pa_overall_shap_p > 0.05 and perc_outside_rl_overall_shap_p > 0.5:
+        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
+        _, p_value = stats.ttest_ind(perc_outside_pa_overall_shap_p, perc_outside_rl_overall_shap_p)
+    else:
+        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        _, p_value = stats.mannwhitneyu(perc_outside_pa_overall_shap_p, perc_outside_rl_overall_shap_p)
+    plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Perc_Outside': [perc_outside_pa_overall, perc_outside_rl_overall], 'Std_Error': [pa_std_error, rl_std_error]})
+    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
+                        geom_bar(stat='identity', position='dodge') +
+                        geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
+                        theme_classic() +
+                        labs(title='Percentage of Voxels in Signal Dropout Regions') +
+                        scale_y_continuous(expand=(0, 0))
+                        )
+    if p_value < 0.001:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+    elif p_value < 0.01:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+    elif p_value < 0.05:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")    
+    group_perc_outside_plot.save('group/susceptibility/fnirt_test/1/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
     group_ssim_df = pd.DataFrame(columns = column_headers) 
@@ -1791,6 +1839,8 @@ if answer5 == 'y':
 
     # Step 4: Test quality of alternate distortion correction method (Stage 2).
     print("\n###### STEP 4: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
+    perc_outside_corrected_values = []
+    perc_outside_uncorrected_values = []
     column_headers = ['p_id', 'perc_outside_corrected', 'perc_outside_uncorrected']
     group_perc_outside_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
@@ -1888,12 +1938,58 @@ if answer5 == 'y':
             total_voxels_in_roi = float(result1_output_values[0])
             perc_outside_corrected = (corrected_voxels_outside / total_voxels_in_roi) * 100
             perc_outside_corrected = round(perc_outside_corrected, 2)
+            perc_outside_corrected_values.append(perc_outside_corrected)
             perc_outside_uncorrected = (uncorrected_voxels_outside / total_voxels_in_roi) * 100
             perc_outside_uncorrected = round(perc_outside_uncorrected, 2)
+            perc_outside_uncorrected_values.append(perc_outside_uncorrected)
             perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_corrected': [perc_outside_corrected], 'perc_outside_uncorrected': [perc_outside_uncorrected]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/2/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/2/group_perc_outside_df.txt', sep='\t', index=False)
+    plot_data = pd.DataFrame({
+        'Participant': good_participants * 2,
+        'Perc_Outside': perc_outside_corrected_values + perc_outside_uncorrected_values,
+        'Sequence': ['corrected'] * len(good_participants) + ['uncorrected'] * len(good_participants)
+    })
+    perc_outside_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
+        geom_bar(stat='identity', position='dodge') +
+        theme_classic() +
+        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    perc_outside_plot.save('group/susceptibility/fnirt_test/2/perc_outside_plot.png')
+    perc_outside_corrected_overall = np.mean(perc_outside_corrected_values)
+    perc_outside_uncorrected_overall = np.mean(perc_outside_uncorrected_values)
+    corrected_std_error = np.std(perc_outside_corrected_values) / np.sqrt(len(perc_outside_corrected_values))
+    uncorrected_std_error = np.std(perc_outside_uncorrected_values) / np.sqrt(len(perc_outside_uncorrected_values))
+    _, perc_outside_corrected_overall_shap_p = stats.shapiro(perc_outside_corrected_values)
+    _, perc_outside_uncorrected_overall_shap_p = stats.shapiro(perc_outside_uncorrected_values)
+    if perc_outside_corrected_overall_shap_p > 0.05 and perc_outside_uncorrected_overall_shap_p > 0.5:
+        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
+        _, p_value = stats.ttest_ind(perc_outside_corrected_overall_shap_p, perc_outside_uncorrected_overall_shap_p)
+    else:
+        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        _, p_value = stats.mannwhitneyu(perc_outside_corrected_overall_shap_p, perc_outside_uncorrected_overall_shap_p)
+    plot_data = pd.DataFrame({'Sequence': ['corrected', 'uncorrected'], 'Perc_Outside': [perc_outside_corrected_overall, perc_outside_uncorrected_overall], 'Std_Error': [corrected_std_error, uncorrected_std_error]})
+    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
+                        geom_bar(stat='identity', position='dodge') +
+                        geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
+                        theme_classic() +
+                        labs(title='Percentage of Voxels in Signal Dropout Regions') +
+                        scale_y_continuous(expand=(0, 0))
+                        )
+    if p_value < 0.001:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+    elif p_value < 0.01:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+    elif p_value < 0.05:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")    
+    group_perc_outside_plot.save('group/susceptibility/fnirt_test/2/group_perc_outside_plot.png')
 
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
     group_ssim_df = pd.DataFrame(columns = column_headers)   
@@ -2069,6 +2165,8 @@ if answer5 == 'y':
     # Step 5: Test quality of alternate distortion correction method (Stage 3).
     print("\n###### STEP 5: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 3) ######")   
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
+    perc_outside_run01_values = []
+    perc_outside_run04_values = []
     column_headers = ['p_id', 'perc_outside_run01', 'perc_outside_run04']
     group_perc_outside_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
@@ -2200,12 +2298,58 @@ if answer5 == 'y':
             total_voxels_in_roi_run04 = float(result2_output_values[0])
             perc_outside_run01 = (run01_voxels_outside / total_voxels_in_roi_run01) * 100
             perc_outside_run01 = round(perc_outside_run01, 2)
+            perc_outside_run01_values.append(perc_outside_run01)
             perc_outside_run04 = (run04_voxels_outside / total_voxels_in_roi_run04) * 100
             perc_outside_run04 = round(perc_outside_run04, 2)
+            perc_outside_run04_values.append(perc_outside_run04)
             perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_run01': [perc_outside_run01], 'perc_outside_run04': [perc_outside_run04]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/3/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/3/group_perc_outside_df.txt', sep='\t', index=False)
+    plot_data = pd.DataFrame({
+        'Participant': bad_participants * 2,
+        'Perc_Outside': perc_outside_run01_values + perc_outside_run04_values,
+        'Sequence': ['run01'] * len(bad_participants) + ['run04'] * len(bad_participants)
+    })
+    perc_outside_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
+        geom_bar(stat='identity', position='dodge') +
+        theme_classic() +
+        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    perc_outside_plot.save('group/susceptibility/fnirt_test/3/perc_outside_plot.png')
+    perc_outside_run01_overall = np.mean(perc_outside_run01_values)
+    perc_outside_run04_overall = np.mean(perc_outside_run04_values)
+    run01_std_error = np.std(perc_outside_run01_values) / np.sqrt(len(perc_outside_run01_values))
+    run04_std_error = np.std(perc_outside_run04_values) / np.sqrt(len(perc_outside_run04_values))
+    _, perc_outside_run01_overall_shap_p = stats.shapiro(perc_outside_run01_values)
+    _, perc_outside_run04_overall_shap_p = stats.shapiro(perc_outside_run04_values)
+    if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.5:
+        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
+        _, p_value = stats.ttest_ind(perc_outside_run01_overall_shap_p, perc_outside_run04_overall_shap_p)
+    else:
+        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        _, p_value = stats.mannwhitneyu(perc_outside_run01_overall_shap_p, perc_outside_run04_overall_shap_p)
+    plot_data = pd.DataFrame({'Sequence': ['run01', 'run04'], 'Perc_Outside': [perc_outside_run01_overall, perc_outside_run04_overall], 'Std_Error': [run01_std_error, run04_std_error]})
+    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
+                        geom_bar(stat='identity', position='dodge') +
+                        geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
+                        theme_classic() +
+                        labs(title='Percentage of Voxels in Signal Dropout Regions') +
+                        scale_y_continuous(expand=(0, 0))
+                        )
+    if p_value < 0.001:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+    elif p_value < 0.01:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+    elif p_value < 0.05:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")    
+    group_perc_outside_plot.save('group/susceptibility/fnirt_test/3/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
     group_ssim_df = pd.DataFrame(columns = column_headers) 
@@ -2385,7 +2529,9 @@ if answer5 == 'y':
     # Step 6: Test quality of alternate distortion correction method (Stage 4).
     print("\n###### STEP 5: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 4) ######")   
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
-    column_headers = ['p_id', 'perc_outside_fnirted_run01', 'perc_outside_fnirted_run04']
+    perc_outside_run01_values = []
+    perc_outside_run04_values = []
+    column_headers = ['p_id', 'perc_outside_run01', 'perc_outside_run04']
     group_perc_outside_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
         if p_id in bad_participants:
@@ -2528,12 +2674,58 @@ if answer5 == 'y':
             total_voxels_in_roi_run04 = float(result2_output_values[0])
             perc_outside_run01 = (run01_voxels_outside / total_voxels_in_roi_run01) * 100
             perc_outside_run01 = round(perc_outside_run01, 2)
+            perc_outside_run01_values.append(perc_outside_run01)
             perc_outside_run04 = (run04_voxels_outside / total_voxels_in_roi_run04) * 100
             perc_outside_run04 = round(perc_outside_run04, 2)
+            perc_outside_run04_values.append(perc_outside_run04)
             perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_run01': [perc_outside_run01], 'perc_outside_run04': [perc_outside_run04]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/4/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/4/group_perc_outside_df.txt', sep='\t', index=False)
+    plot_data = pd.DataFrame({
+        'Participant': bad_participants * 2,
+        'Perc_Outside': perc_outside_run01_values + perc_outside_run04_values,
+        'Sequence': ['run01'] * len(bad_participants) + ['run04'] * len(bad_participants)
+    })
+    perc_outside_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
+        geom_bar(stat='identity', position='dodge') +
+        theme_classic() +
+        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    perc_outside_plot.save('group/susceptibility/fnirt_test/4/perc_outside_plot.png')
+    perc_outside_run01_overall = np.mean(perc_outside_run01_values)
+    perc_outside_run04_overall = np.mean(perc_outside_run04_values)
+    run01_std_error = np.std(perc_outside_run01_values) / np.sqrt(len(perc_outside_run01_values))
+    run04_std_error = np.std(perc_outside_run04_values) / np.sqrt(len(perc_outside_run04_values))
+    _, perc_outside_run01_overall_shap_p = stats.shapiro(perc_outside_run01_values)
+    _, perc_outside_run04_overall_shap_p = stats.shapiro(perc_outside_run04_values)
+    if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.5:
+        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
+        _, p_value = stats.ttest_ind(perc_outside_run01_overall_shap_p, perc_outside_run04_overall_shap_p)
+    else:
+        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        _, p_value = stats.mannwhitneyu(perc_outside_run01_overall_shap_p, perc_outside_run04_overall_shap_p)
+    plot_data = pd.DataFrame({'Sequence': ['run01', 'run04'], 'Perc_Outside': [perc_outside_run01_overall, perc_outside_run04_overall], 'Std_Error': [run01_std_error, run04_std_error]})
+    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
+                        geom_bar(stat='identity', position='dodge') +
+                        geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
+                        theme_classic() +
+                        labs(title='Percentage of Voxels in Signal Dropout Regions') +
+                        scale_y_continuous(expand=(0, 0))
+                        )
+    if p_value < 0.001:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+    elif p_value < 0.01:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+    elif p_value < 0.05:
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")    
+    group_perc_outside_plot.save('group/susceptibility/fnirt_test/4/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
     group_ssim_df = pd.DataFrame(columns = column_headers) 

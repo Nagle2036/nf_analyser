@@ -1375,8 +1375,8 @@ if answer5 == 'y':
     for p_id in participants_to_iterate:
         if p_id in good_participants:
             print(f"Preparing Stage 1 files for {p_id}...")
-            ap_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/ap_fieldmaps.nii"
             pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"
+            rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/rl_fieldmaps.nii"
             averaged_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/averaged_pa_fieldmaps.nii.gz"
             averaged_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/averaged_rl_fieldmaps.nii.gz"
             if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps):

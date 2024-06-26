@@ -1590,6 +1590,7 @@ if answer5 == 'y':
     )
     ssim_plot.save('group/susceptibility/fnirt_test/1/ssim_plot.png')
 
+    overlap_perc_av_values = []
     column_headers = ['p_id', 'tissue_type', 'overlap_perc']
     group_overlap_perc_df = pd.DataFrame(columns = column_headers) 
     for p_id in participants_to_iterate:
@@ -1773,8 +1774,6 @@ if answer5 == 'y':
     save_path = 'group/susceptibility/fnirt_test/1/ssim_overlap_perc_plot.png'
     plt.savefig(save_path, bbox_inches='tight')
     
-
-
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
     for p_id in participants_to_iterate:

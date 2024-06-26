@@ -1564,7 +1564,7 @@ if answer5 == 'y':
                 subprocess.run(['fslmaths', flirted_pa_fieldmaps_bin, '-add', flirted_rl_fieldmaps_bin, combined_pa_rl_mask])
             bin_pa_rl_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/bin_pa_rl_mask.nii.gz"
             if not os.path.exists(bin_pa_rl_mask):
-                subprocess.run('fslmaths', combined_pa_rl_mask, '-bin', bin_pa_rl_mask)
+                subprocess.run(['fslmaths', combined_pa_rl_mask, '-bin', bin_pa_rl_mask])
             ssim_bin_trimmed = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_bin_trimmed.nii.gz"
             if not os.path.exists(ssim_bin_trimmed):
                 subprocess.run(['fslmaths', ssim_bin, '-mul', bin_pa_rl_mask, ssim_bin_trimmed])
@@ -2088,7 +2088,7 @@ if answer5 == 'y':
                 subprocess.run(['fslmaths', flirted_corrected_bin, '-add', flirted_uncorrected_bin, combined_corr_uncorr_mask])
             bin_corr_uncorr_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/bin_corr_uncorr_mask.nii.gz"
             if not os.path.exists(bin_corr_uncorr_mask):
-                subprocess.run('fslmaths', combined_corr_uncorr_mask, '-bin', bin_corr_uncorr_mask)
+                subprocess.run(['fslmaths', combined_corr_uncorr_mask, '-bin', bin_corr_uncorr_mask])
             ssim_bin_trimmed = f"{p_id}/analysis/susceptibility/fnirt_test/2/ssim_bin_trimmed.nii.gz"
             if not os.path.exists(ssim_bin_trimmed):
                 subprocess.run(['fslmaths', ssim_bin, '-mul', bin_corr_uncorr_mask, ssim_bin_trimmed])
@@ -2464,7 +2464,7 @@ if answer5 == 'y':
                 subprocess.run(['fslmaths', flirted_run01_bin, '-add', flirted_run04_bin, combined_run01_run04_mask])
             bin_run01_run04_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/bin_run01_run04_mask.nii.gz"
             if not os.path.exists(bin_run01_run04_mask):
-                subprocess.run('fslmaths', combined_run01_run04_mask, '-bin', bin_run01_run04_mask)
+                subprocess.run(['fslmaths', combined_run01_run04_mask, '-bin', bin_run01_run04_mask])
             ssim_bin_trimmed = f"{p_id}/analysis/susceptibility/fnirt_test/3/ssim_bin_trimmed.nii.gz"
             if not os.path.exists(ssim_bin_trimmed):
                 subprocess.run(['fslmaths', ssim_bin, '-mul', bin_run01_run04_mask, ssim_bin_trimmed])
@@ -2856,7 +2856,7 @@ if answer5 == 'y':
                 subprocess.run(['fslmaths', fnirted_run01_bin, '-add', fnirted_run04_bin, combined_run01_run04_mask])
             bin_run01_run04_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/bin_run01_run04_mask.nii.gz"
             if not os.path.exists(bin_run01_run04_mask):
-                subprocess.run('fslmaths', combined_run01_run04_mask, '-bin', bin_run01_run04_mask)
+                subprocess.run(['fslmaths', combined_run01_run04_mask, '-bin', bin_run01_run04_mask])
             ssim_bin_trimmed = f"{p_id}/analysis/susceptibility/fnirt_test/4/ssim_bin_trimmed.nii.gz"
             if not os.path.exists(ssim_bin_trimmed):
                 subprocess.run(['fslmaths', ssim_bin, '-mul', bin_run01_run04_mask, ssim_bin_trimmed])

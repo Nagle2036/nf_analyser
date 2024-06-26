@@ -1436,11 +1436,6 @@ if answer5 == 'y':
             roi_transformation = f'{p_id}/analysis/susceptibility/fnirt_test/1/roi_transformation.mat'
             subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', temp_file, '-omat', roi_transformation])
             subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', roi_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
-            pa_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_trimmed_roi_mask.nii.gz"
-            rl_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_trimmed_roi_mask.nii.gz"
-            if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_fieldmaps_bin, pa_trimmed_roi_mask])
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
             flirted_pa_fieldmaps_bin = f'{p_id}/analysis/susceptibility/fnirt_test/1/flirted_pa_fieldmaps_bin.nii.gz'
             if not os.path.exists(flirted_pa_fieldmaps_bin):
                 subprocess.run(['fslmaths', flirted_pa_fieldmaps, '-thr', '100', '-bin', flirted_pa_fieldmaps_bin])
@@ -1483,6 +1478,11 @@ if answer5 == 'y':
             perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_pa': [perc_outside_pa], 'perc_outside_rl': [perc_outside_rl]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
+            pa_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_trimmed_roi_mask.nii.gz"
+            rl_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_trimmed_roi_mask.nii.gz"
+            if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_fieldmaps_bin, pa_trimmed_roi_mask])
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/1/group_perc_outside_df.txt', sep='\t', index=False)
     plot_data = pd.DataFrame({
         'Participant': good_participants * 2,
@@ -1960,11 +1960,6 @@ if answer5 == 'y':
             roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/2/run01_subject_space_ROI.nii.gz'
             transformed_roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/2/transformed_roi_mask.nii.gz'
             subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', flirted_uncorrected_run_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
-            corrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/corrected_trimmed_roi_mask.nii.gz"
-            uncorrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/uncorrected_trimmed_roi_mask.nii.gz"
-            if not os.path.exists(corrected_trimmed_roi_mask) or not os.path.exists(uncorrected_trimmed_roi_mask):
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_corrected_bin, corrected_trimmed_roi_mask])
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_uncorrected_bin, uncorrected_trimmed_roi_mask])
             flirted_corrected_bin = f'{p_id}/analysis/susceptibility/fnirt_test/2/flirted_corrected_bin.nii.gz'
             if not os.path.exists(flirted_corrected_bin):
                 subprocess.run(['fslmaths', flirted_corrected_run, '-thr', '100', '-bin', flirted_corrected_bin])
@@ -2007,6 +2002,11 @@ if answer5 == 'y':
             perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_corrected': [perc_outside_corrected], 'perc_outside_uncorrected': [perc_outside_uncorrected]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/2/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
+            corrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/corrected_trimmed_roi_mask.nii.gz"
+            uncorrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/uncorrected_trimmed_roi_mask.nii.gz"
+            if not os.path.exists(corrected_trimmed_roi_mask) or not os.path.exists(uncorrected_trimmed_roi_mask):
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_corrected_bin, corrected_trimmed_roi_mask])
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_uncorrected_bin, uncorrected_trimmed_roi_mask])
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/2/group_perc_outside_df.txt', sep='\t', index=False)
     plot_data = pd.DataFrame({
         'Participant': good_participants * 2,
@@ -2329,11 +2329,6 @@ if answer5 == 'y':
             flirted_roi_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/3/run04_subject_space_ROI.nii.gz'
             if not os.path.exists(flirted_roi_run04):
                 subprocess.run(['flirt', '-in', roi_mask_run04, '-ref', structural_brain, '-applyxfm', '-init', t1_flirted_run04_transformation, '-out', flirted_roi_run04, '-interp', 'nearestneighbour'])
-            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/run01_trimmed_roi_mask.nii.gz"
-            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/run04_trimmed_roi_mask.nii.gz"
-            if not os.path.exists(run01_trimmed_roi_mask) or not os.path.exists(run04_trimmed_roi_mask):
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_run01_bin, run01_trimmed_roi_mask])
-                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_run04_bin, run04_trimmed_roi_mask])
             flirted_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/3/flirted_run01_bin.nii.gz'
             if not os.path.exists(flirted_run01_bin):
                 subprocess.run(['fslmaths', flirted_run01, '-thr', '100', '-bin', flirted_run01_bin])
@@ -2383,6 +2378,11 @@ if answer5 == 'y':
             perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_run01': [perc_outside_run01], 'perc_outside_run04': [perc_outside_run04]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/3/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
+            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/run01_trimmed_roi_mask.nii.gz"
+            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/run04_trimmed_roi_mask.nii.gz"
+            if not os.path.exists(run01_trimmed_roi_mask) or not os.path.exists(run04_trimmed_roi_mask):
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_run01_bin, run01_trimmed_roi_mask])
+                subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_run04_bin, run04_trimmed_roi_mask])
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/3/group_perc_outside_df.txt', sep='\t', index=False)
     plot_data = pd.DataFrame({
         'Participant': bad_participants * 2,
@@ -2721,11 +2721,6 @@ if answer5 == 'y':
             fnirted_roi_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04.nii.gz'
             if not os.path.exists(fnirted_roi_run04):
                 subprocess.run(['applywarp', f'--in={roi_mask_run04}', f'--ref={structural_brain}', f'--warp={warp_run04}', f'--out={fnirted_roi_run04}'], check=True)
-            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_trimmed_roi_mask.nii.gz"
-            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_trimmed_roi_mask.nii.gz"
-            if not os.path.exists(run01_trimmed_roi_mask) or not os.path.exists(run04_trimmed_roi_mask):
-                subprocess.run(['fslmaths', fnirted_roi_run01, '-mul', fnirted_run01_bin, run01_trimmed_roi_mask])
-                subprocess.run(['fslmaths', fnirted_roi_run04, '-mul', fnirted_run04_bin, run04_trimmed_roi_mask])
             fnirted_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_bin.nii.gz'
             if not os.path.exists(fnirted_run01_bin):
                 subprocess.run(['fslmaths', fnirted_run01, '-thr', '100', '-bin', fnirted_run01_bin])
@@ -2775,6 +2770,11 @@ if answer5 == 'y':
             perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_run01': [perc_outside_run01], 'perc_outside_run04': [perc_outside_run04]})
             perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/4/perc_outside_df.txt', sep='\t', index=False)
             group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
+            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_trimmed_roi_mask.nii.gz"
+            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_trimmed_roi_mask.nii.gz"
+            if not os.path.exists(run01_trimmed_roi_mask) or not os.path.exists(run04_trimmed_roi_mask):
+                subprocess.run(['fslmaths', fnirted_roi_run01, '-mul', fnirted_run01_bin, run01_trimmed_roi_mask])
+                subprocess.run(['fslmaths', fnirted_roi_run04, '-mul', fnirted_run04_bin, run04_trimmed_roi_mask])
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/4/group_perc_outside_df.txt', sep='\t', index=False)
     plot_data = pd.DataFrame({
         'Participant': bad_participants * 2,

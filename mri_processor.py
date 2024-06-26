@@ -1549,13 +1549,6 @@ if answer5 == 'y':
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, ssim_output_path)
-                ssim_index = None
-                ssim_map_nifti = nib.load(ssim_output_path)
-                ssim_map = ssim_map_nifti.get_fdata()
-                if ssim_map.size > 0:
-                    ssim_index = ssim_map.mean()
-            if ssim_index is None:
-                raise ValueError(f"Failed to retrieve SSIM index for {p_id}")
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
@@ -2072,14 +2065,7 @@ if answer5 == 'y':
                 return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/2/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
-                ssim_index = calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)
-                ssim_index = None
-                ssim_map_nifti = nib.load(ssim_output_path)
-                ssim_map = ssim_map_nifti.get_fdata()
-                if ssim_map.size > 0:
-                    ssim_index = ssim_map.mean()
-            if ssim_index is None:
-                raise ValueError(f"Failed to retrieve SSIM index for {p_id}")           
+                ssim_index = calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)       
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/2/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
@@ -2449,13 +2435,6 @@ if answer5 == 'y':
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/3/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 ssim_index = calculate_ssim(flirted_run01, flirted_run04, ssim_output_path)
-                ssim_index = None
-                ssim_map_nifti = nib.load(ssim_output_path)
-                ssim_map = ssim_map_nifti.get_fdata()
-                if ssim_map.size > 0:
-                    ssim_index = ssim_map.mean()
-            if ssim_index is None:
-                raise ValueError(f"Failed to retrieve SSIM index for {p_id}")
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/3/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
@@ -2841,13 +2820,6 @@ if answer5 == 'y':
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/4/ssim_map.nii.gz"
             if not os.path.exists(ssim_output_path):
                 ssim_index = calculate_ssim(fnirted_run01, fnirted_run04, ssim_output_path)
-                ssim_index = None
-                ssim_map_nifti = nib.load(ssim_output_path)
-                ssim_map = ssim_map_nifti.get_fdata()
-                if ssim_map.size > 0:
-                    ssim_index = ssim_map.mean()
-            if ssim_index is None:
-                raise ValueError(f"Failed to retrieve SSIM index for {p_id}")
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/4/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])

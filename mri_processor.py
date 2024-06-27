@@ -1519,14 +1519,14 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0))
                         )
     if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
     elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
     elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")    
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")    
     group_perc_outside_plot.save('group/susceptibility/fnirt_test/1/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
@@ -1535,7 +1535,7 @@ if answer5 == 'y':
         if p_id in good_participants:
             print(f"Running Stage 1 SSIM analysis for {p_id}...")
             def calculate_ssim(image1_path, image2_path, ssim_output_path):
-                """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
+                """Function to calculate SSIM between two Nifti images and save the SSIM map."""
                 image1_nii = nib.load(image1_path)
                 image2_nii = nib.load(image2_path)
                 image1 = image1_nii.get_fdata()
@@ -1547,12 +1547,16 @@ if answer5 == 'y':
                 nib.save(ssim_map_nifti, ssim_output_path)
                 return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_map.nii.gz"
+            flirted_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/flirted_pa_fieldmaps.nii.gz"
+            flirted_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/flirted_rl_fieldmaps.nii.gz"
             if not os.path.exists(ssim_output_path):
                 ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, ssim_output_path)
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
             combined_pa_rl_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/combined_pa_rl_mask.nii.gz"
+            flirted_pa_fieldmaps_bin = f'{p_id}/analysis/susceptibility/fnirt_test/1/flirted_pa_fieldmaps_bin.nii.gz'
+            flirted_rl_fieldmaps_bin = f'{p_id}/analysis/susceptibility/fnirt_test/1/flirted_rl_fieldmaps_bin.nii.gz'
             if not os.path.exists(combined_pa_rl_mask):
                 subprocess.run(['fslmaths', flirted_pa_fieldmaps_bin, '-add', flirted_rl_fieldmaps_bin, combined_pa_rl_mask])
             bin_pa_rl_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/bin_pa_rl_mask.nii.gz"
@@ -1564,12 +1568,13 @@ if answer5 == 'y':
             voxels_in_whole_mask = subprocess.run(["fslstats", ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
             voxels_in_whole_mask = float(voxels_in_whole_mask)
             intersection_mask_path = f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_roi_intersect.nii.gz'
+            transformed_roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/1/transformed_roi_mask.nii.gz'
             if not os.path.exists(intersection_mask_path):
                 subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", transformed_roi_mask, intersection_mask_path])
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
             voxels_in_roi_in_mask = float(voxels_in_roi_in_mask)
             perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
-            ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask]})
+            ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask]})
             ssim_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', sep='\t', index=False)
             group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('group/susceptibility/fnirt_test/1/group_ssim_df.txt', sep='\t', index=False)
@@ -1579,7 +1584,7 @@ if answer5 == 'y':
         'Participant': good_participants,
         'SSIM': ssim_indexes,
     })
-    ssim_plot = (
+    ssim_index_plot = (
         ggplot(plot_data, aes(x='Participant', y='SSIM')) +
         geom_bar(stat='identity', position='dodge') +
         geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
@@ -1588,7 +1593,39 @@ if answer5 == 'y':
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
         scale_y_continuous(expand=(0, 0))
     )
-    ssim_plot.save('group/susceptibility/fnirt_test/1/ssim_plot.png')
+    ssim_index_plot.save('group/susceptibility/fnirt_test/1/ssim_index_plot.png')
+    voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
+    voxels_mean = np.mean(voxels)
+    plot_data = pd.DataFrame({
+        'Participant': good_participants,
+        'Voxels': voxels,
+    })
+    ssim_voxels_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Voxels')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
+        theme_classic() +
+        labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_voxels_plot.save('group/susceptibility/fnirt_test/1/ssim_voxels_plot.png')
+    perc_voxels = group_ssim_df['perc_roi_voxels_in_bin_ssim_mask'].tolist()
+    perc_voxels_mean = np.mean(perc_voxels)
+    plot_data = pd.DataFrame({
+        'Participant': good_participants,
+        'Perc_Voxels': perc_voxels,
+    })
+    ssim_perc_voxels_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
+        theme_classic() +
+        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_perc_voxels_plot.save('group/susceptibility/fnirt_test/1/ssim_perc_voxels_plot.png')
 
     overlap_perc_av_values = []
     column_headers = ['p_id', 'tissue_type', 'overlap_perc']
@@ -1605,6 +1642,9 @@ if answer5 == 'y':
             if not os.path.exists(pa_csf_pve_seg):
                 pa_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_seg"
                 rl_seg = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_seg"
+                flirted_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/flirted_pa_fieldmaps.nii.gz"
+                flirted_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/flirted_rl_fieldmaps.nii.gz"
+                structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
                 subprocess.run(["fast", "-n", "3", "-o", pa_seg, structural_brain, flirted_pa_fieldmaps])
                 subprocess.run(["fast", "-n", "3", "-o", rl_seg, structural_brain, flirted_rl_fieldmaps])
             pa_csf_pve_seg_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_csf_pve_seg_bin.nii.gz"
@@ -1697,12 +1737,15 @@ if answer5 == 'y':
     )
     overlap_perc_plot.save('group/susceptibility/fnirt_test/1/overlap_perc_plot.png')
     filtered_csf = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'].tolist()
+    mean_csf = np.mean(filtered_csf)
     filtered_wm = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'wm']['overlap_perc'].tolist()
+    mean_wm = np.mean(filtered_wm)
     filtered_gm = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'gm']['overlap_perc'].tolist()
+    mean_gm = np.mean(filtered_gm)
     csf_std_error = np.std(filtered_csf) / np.sqrt(len(filtered_csf))
     wm_std_error = np.std(filtered_wm) / np.sqrt(len(filtered_wm))
     gm_std_error = np.std(filtered_gm) / np.sqrt(len(filtered_gm))
-    sphericity_test = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id', between='p_id')
+    sphericity_test = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
     epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
     print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
     normality_passed = True
@@ -1719,11 +1762,11 @@ if answer5 == 'y':
     print(f'Stage 1 segmentation analysis Levene test p-value: {p_value_levene}')
     if normality_passed and p_value_levene > 0.05 and epsilon_value > 0.75:
         print('Stage 1 segmentation analysis parametric assumptions met. Proceeding with two-way ANOVA...')
-        anova_result = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id', between='p_id')
+        anova_result = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
         print(anova_result)
     else:
         print('Stage 1 segmentation analysis parametric assumptions not met. Two-way ANOVA not run. Reassess the data.')
-    plot_data = pd.DataFrame({'Tissue_Type': ['CSF', 'WM', 'GM'], 'Overlap_Perc': [filtered_csf, filtered_wm, filtered_gm], 'Std_Error': [csf_standard_error, wm_standard_error, gm_standard_error]})
+    plot_data = pd.DataFrame({'Tissue_Type': ['CSF', 'WM', 'GM'], 'Overlap_Perc': [mean_csf, mean_wm, mean_gm], 'Std_Error': [csf_std_error, wm_std_error, gm_std_error]})
     group_overlap_perc_plot = (ggplot(plot_data, aes(x='Tissue_Type', y='Overlap_Perc')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_perc + Std_Error'), width=0.2, color='black') +
@@ -1788,6 +1831,10 @@ if answer5 == 'y':
                 roi_voxel_intensities = epi_data[mask_data]
                 voxel_intensity_list = roi_voxel_intensities.tolist()
                 return voxel_intensity_list
+            flirted_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/flirted_pa_fieldmaps.nii.gz"
+            flirted_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/flirted_rl_fieldmaps.nii.gz"
+            pa_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/pa_trimmed_roi_mask.nii.gz"
+            rl_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/1/rl_trimmed_roi_mask.nii.gz"
             pa_voxel_intensities = extract_voxel_intensities(flirted_pa_fieldmaps, pa_trimmed_roi_mask)
             rl_voxel_intensities = extract_voxel_intensities(flirted_rl_fieldmaps, rl_trimmed_roi_mask)
             values = pa_voxel_intensities + rl_voxel_intensities
@@ -2035,14 +2082,14 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0))
                         )
     if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
     elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
     elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")    
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")    
     group_perc_outside_plot.save('group/susceptibility/fnirt_test/2/group_perc_outside_plot.png')
 
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
@@ -2063,12 +2110,16 @@ if answer5 == 'y':
                 nib.save(ssim_map_nifti, ssim_output_path)
                 return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/2/ssim_map.nii.gz"
+            flirted_corrected_run = f"{p_id}/analysis/susceptibility/fnirt_test/2/flirted_corrected_run.nii.gz"
+            flirted_uncorrected_run = f"{p_id}/analysis/susceptibility/fnirt_test/2/flirted_uncorrected_run.nii.gz"
             if not os.path.exists(ssim_output_path):
                 ssim_index = calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)       
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/2/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
             combined_corr_uncorr_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/combined_corr_uncorr_mask.nii.gz"
+            flirted_corrected_bin = f'{p_id}/analysis/susceptibility/fnirt_test/2/flirted_corrected_bin.nii.gz'
+            flirted_uncorrected_bin = f'{p_id}/analysis/susceptibility/fnirt_test/2/flirted_uncorrected_bin.nii.gz'
             if not os.path.exists(combined_corr_uncorr_mask):
                 subprocess.run(['fslmaths', flirted_corrected_bin, '-add', flirted_uncorrected_bin, combined_corr_uncorr_mask])
             bin_corr_uncorr_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/bin_corr_uncorr_mask.nii.gz"
@@ -2080,6 +2131,7 @@ if answer5 == 'y':
             voxels_in_whole_mask = subprocess.run(["fslstats", ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
             voxels_in_whole_mask = float(voxels_in_whole_mask)
             intersection_mask_path = f'{p_id}/analysis/susceptibility/fnirt_test/2/ssim_roi_intersect.nii.gz'
+            transformed_roi_mask = f'{p_id}/analysis/susceptibility/fnirt_test/2/transformed_roi_mask.nii.gz'
             if not os.path.exists(intersection_mask_path):
                 subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", transformed_roi_mask, intersection_mask_path])
             voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
@@ -2095,7 +2147,7 @@ if answer5 == 'y':
         'Participant': good_participants,
         'SSIM': ssim_indexes,
     })
-    ssim_plot = (
+    ssim_index_plot = (
         ggplot(plot_data, aes(x='Participant', y='SSIM')) +
         geom_bar(stat='identity', position='dodge') +
         geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
@@ -2104,7 +2156,39 @@ if answer5 == 'y':
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
         scale_y_continuous(expand=(0, 0))
     )
-    ssim_plot.save('group/susceptibility/fnirt_test/2/ssim_plot.png')
+    ssim_index_plot.save('group/susceptibility/fnirt_test/2/ssim_index_plot.png')
+    voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
+    voxels_mean = np.mean(voxels)
+    plot_data = pd.DataFrame({
+        'Participant': good_participants,
+        'Voxels': voxels,
+    })
+    ssim_voxels_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Voxels')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
+        theme_classic() +
+        labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_voxels_plot.save('group/susceptibility/fnirt_test/2/ssim_voxels_plot.png')
+    perc_voxels = group_ssim_df['perc_roi_voxels_in_bin_ssim_mask'].tolist()
+    perc_voxels_mean = np.mean(perc_voxels)
+    plot_data = pd.DataFrame({
+        'Participant': good_participants,
+        'Perc_Voxels': perc_voxels,
+    })
+    ssim_perc_voxels_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
+        theme_classic() +
+        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_perc_voxels_plot.save('group/susceptibility/fnirt_test/2/ssim_perc_voxels_plot.png')
 
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
@@ -2120,6 +2204,10 @@ if answer5 == 'y':
                 roi_voxel_intensities = epi_data[mask_data]
                 voxel_intensity_list = roi_voxel_intensities.tolist()
                 return voxel_intensity_list
+            flirted_corrected_run = f"{p_id}/analysis/susceptibility/fnirt_test/2/flirted_corrected_run.nii.gz"
+            flirted_uncorrected_run = f"{p_id}/analysis/susceptibility/fnirt_test/2/flirted_uncorrected_run.nii.gz"
+            corrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/corrected_trimmed_roi_mask.nii.gz"
+            uncorrected_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/2/uncorrected_trimmed_roi_mask.nii.gz"
             corrected_voxel_intensities = extract_voxel_intensities(flirted_corrected_run, corrected_trimmed_roi_mask)
             uncorrected_voxel_intensities = extract_voxel_intensities(flirted_uncorrected_run, uncorrected_trimmed_roi_mask)
             values = corrected_voxel_intensities + uncorrected_voxel_intensities
@@ -2404,14 +2492,14 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0))
                         )
     if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
     elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
     elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")    
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")    
     group_perc_outside_plot.save('group/susceptibility/fnirt_test/3/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
@@ -2432,12 +2520,16 @@ if answer5 == 'y':
                 nib.save(ssim_map_nifti, ssim_output_path)
                 return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/3/ssim_map.nii.gz"
+            flirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/3/flirted_run01.nii.gz"
+            flirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/3/flirted_run04.nii.gz"
             if not os.path.exists(ssim_output_path):
                 ssim_index = calculate_ssim(flirted_run01, flirted_run04, ssim_output_path)
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/3/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
             combined_run01_run04_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/combined_run01_run04_mask.nii.gz"
+            flirted_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/3/flirted_run01_bin.nii.gz'
+            flirted_run04_bin = f'{p_id}/analysis/susceptibility/fnirt_test/3/flirted_run04_bin.nii.gz'
             if not os.path.exists(combined_run01_run04_mask):
                 subprocess.run(['fslmaths', flirted_run01_bin, '-add', flirted_run04_bin, combined_run01_run04_mask])
             bin_run01_run04_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/bin_run01_run04_mask.nii.gz"
@@ -2450,6 +2542,8 @@ if answer5 == 'y':
             voxels_in_whole_mask = float(voxels_in_whole_mask)
             intersection_mask_path_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/3/ssim_roi_intersect_run01.nii.gz'
             intersection_mask_path_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/3/ssim_roi_intersect_run04.nii.gz'
+            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/run01_trimmed_roi_mask.nii.gz"
+            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/run04_trimmed_roi_mask.nii.gz"
             if not os.path.exists(intersection_mask_path_run01):
                 subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run01_trimmed_roi_mask, intersection_mask_path_run01])
                 subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run04_trimmed_roi_mask, intersection_mask_path_run04])
@@ -2470,7 +2564,7 @@ if answer5 == 'y':
         'Participant': bad_participants,
         'SSIM': ssim_indexes,
     })
-    ssim_plot = (
+    ssim_index_plot = (
         ggplot(plot_data, aes(x='Participant', y='SSIM')) +
         geom_bar(stat='identity', position='dodge') +
         geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
@@ -2479,7 +2573,39 @@ if answer5 == 'y':
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
         scale_y_continuous(expand=(0, 0))
     )
-    ssim_plot.save('group/susceptibility/fnirt_test/3/ssim_plot.png')
+    ssim_index_plot.save('group/susceptibility/fnirt_test/3/ssim_index_plot.png')
+    voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
+    voxels_mean = np.mean(voxels)
+    plot_data = pd.DataFrame({
+        'Participant': bad_participants,
+        'Voxels': voxels,
+    })
+    ssim_voxels_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Voxels')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
+        theme_classic() +
+        labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_voxels_plot.save('group/susceptibility/fnirt_test/3/ssim_voxels_plot.png')
+    perc_voxels = group_ssim_df['perc_roi_voxels_in_bin_ssim_mask'].tolist()
+    perc_voxels_mean = np.mean(perc_voxels)
+    plot_data = pd.DataFrame({
+        'Participant': bad_participants,
+        'Perc_Voxels': perc_voxels,
+    })
+    ssim_perc_voxels_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
+        theme_classic() +
+        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_perc_voxels_plot.save('group/susceptibility/fnirt_test/3/ssim_perc_voxels_plot.png')
 
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
@@ -2495,6 +2621,10 @@ if answer5 == 'y':
                 roi_voxel_intensities = epi_data[mask_data]
                 voxel_intensity_list = roi_voxel_intensities.tolist()
                 return voxel_intensity_list
+            flirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/3/flirted_run01.nii.gz"
+            flirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/3/flirted_run04.nii.gz"
+            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/run01_trimmed_roi_mask.nii.gz"
+            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/3/run04_trimmed_roi_mask.nii.gz"
             run01_voxel_intensities = extract_voxel_intensities(flirted_run01, run01_trimmed_roi_mask)
             run04_voxel_intensities = extract_voxel_intensities(flirted_run04, run04_trimmed_roi_mask)
             values = run01_voxel_intensities + run04_voxel_intensities
@@ -2789,14 +2919,14 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0))
                         )
     if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
     elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
     elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 40, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) +30, yend=max(plot_data['Perc_Outside']) + 30, color="black")    
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")    
     group_perc_outside_plot.save('group/susceptibility/fnirt_test/4/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
@@ -2817,12 +2947,16 @@ if answer5 == 'y':
                 nib.save(ssim_map_nifti, ssim_output_path)
                 return ssim_index
             ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/4/ssim_map.nii.gz"
+            fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
+            fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
             if not os.path.exists(ssim_output_path):
                 ssim_index = calculate_ssim(fnirted_run01, fnirted_run04, ssim_output_path)
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/4/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
             combined_run01_run04_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/combined_run01_run04_mask.nii.gz"
+            fnirted_run01_bin = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_bin.nii.gz"
+            fnirted_run04_bin = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04_bin.nii.gz"
             if not os.path.exists(combined_run01_run04_mask):
                 subprocess.run(['fslmaths', fnirted_run01_bin, '-add', fnirted_run04_bin, combined_run01_run04_mask])
             bin_run01_run04_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/bin_run01_run04_mask.nii.gz"
@@ -2835,6 +2969,8 @@ if answer5 == 'y':
             voxels_in_whole_mask = float(voxels_in_whole_mask)
             intersection_mask_path_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/4/ssim_roi_intersect_run01.nii.gz'
             intersection_mask_path_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/4/ssim_roi_intersect_run04.nii.gz'
+            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_trimmed_roi_mask.nii.gz"
+            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_trimmed_roi_mask.nii.gz"
             if not os.path.exists(intersection_mask_path_run01):
                 subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run01_trimmed_roi_mask, intersection_mask_path_run01])
                 subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run04_trimmed_roi_mask, intersection_mask_path_run04])
@@ -2855,7 +2991,7 @@ if answer5 == 'y':
         'Participant': bad_participants,
         'SSIM': ssim_indexes,
     })
-    ssim_plot = (
+    ssim_index_plot = (
         ggplot(plot_data, aes(x='Participant', y='SSIM')) +
         geom_bar(stat='identity', position='dodge') +
         geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
@@ -2864,7 +3000,39 @@ if answer5 == 'y':
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
         scale_y_continuous(expand=(0, 0))
     )
-    ssim_plot.save('group/susceptibility/fnirt_test/4/ssim_plot.png')
+    ssim_index_plot.save('group/susceptibility/fnirt_test/4/ssim_plot.png')
+    voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
+    voxels_mean = np.mean(voxels)
+    plot_data = pd.DataFrame({
+        'Participant': bad_participants,
+        'Voxels': voxels,
+    })
+    ssim_voxels_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Voxels')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
+        theme_classic() +
+        labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_voxels_plot.save('group/susceptibility/fnirt_test/4/ssim_voxels_plot.png')
+    perc_voxels = group_ssim_df['perc_roi_voxels_in_bin_ssim_mask'].tolist()
+    perc_voxels_mean = np.mean(perc_voxels)
+    plot_data = pd.DataFrame({
+        'Participant': bad_participants,
+        'Perc_Voxels': perc_voxels,
+    })
+    ssim_perc_voxels_plot = (
+        ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
+        geom_bar(stat='identity', position='dodge') +
+        geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
+        theme_classic() +
+        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        scale_y_continuous(expand=(0, 0))
+    )
+    ssim_perc_voxels_plot.save('group/susceptibility/fnirt_test/4/ssim_perc_voxels_plot.png')
 
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
@@ -2880,6 +3048,10 @@ if answer5 == 'y':
                 roi_voxel_intensities = epi_data[mask_data]
                 voxel_intensity_list = roi_voxel_intensities.tolist()
                 return voxel_intensity_list
+            fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
+            fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
+            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_trimmed_roi_mask.nii.gz"
+            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_trimmed_roi_mask.nii.gz"
             run01_voxel_intensities = extract_voxel_intensities(fnirted_run01, run01_trimmed_roi_mask)
             run04_voxel_intensities = extract_voxel_intensities(fnirted_run04, run04_trimmed_roi_mask)
             values = run01_voxel_intensities + run04_voxel_intensities

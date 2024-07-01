@@ -1752,32 +1752,20 @@ if answer5 == 'y':
     group_overlap_perc_df['p_id'] = group_overlap_perc_df['p_id'].astype(str)
     group_overlap_perc_df['tissue_type'] = group_overlap_perc_df['tissue_type'].astype(str)
     group_overlap_perc_df['overlap_perc'] = pd.to_numeric(group_overlap_perc_df['overlap_perc'], errors='coerce')
-    
-    try:
-        sphericity_test = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
-        epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
-        print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
-    except ValueError as e:
-        print(f"Error in rm_anova: {e}")
-        print("Check if the 'within' and 'subject' columns are correctly specified.")
-        print("Column types:")
-        print(group_overlap_perc_df.dtypes)
-        print("Unique values in 'tissue_type':", group_overlap_perc_df['tissue_type'].unique())
-        print("Unique values in 'p_id':", group_overlap_perc_df['p_id'].unique())
-        raise
-    
+    sphericity_test = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
+    epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
     epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
     print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
     normality_passed = True
-    shapiro_results = df.groupby('tissue_type')['overlap_perc'].apply(stats.shapiro)
+    shapiro_results = group_overlap_perc_df.groupby('tissue_type')['overlap_perc'].apply(stats.shapiro)
     shapiro_p_values = shapiro_results.apply(lambda x: x.pvalue)
     if any(shapiro_p_values < 0.05):
         normality_passed = False
     print(f'Stage 1 segmentation analysis Shapiro-Wilk test of normality passed: {normality_passed}')
     _, p_value_levene = stats.levene(
-        df[df['tissue_type'] == 'csf']['overlap_perc'],
-        df[df['tissue_type'] == 'wm']['overlap_perc'],
-        df[df['tissue_type'] == 'gm']['overlap_perc']
+        group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'],
+        group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'wm']['overlap_perc'],
+        group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'gm']['overlap_perc']
     )
     print(f'Stage 1 segmentation analysis Levene test p-value: {p_value_levene}')
     if normality_passed and p_value_levene > 0.05 and epsilon_value > 0.75:

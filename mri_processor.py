@@ -1747,7 +1747,21 @@ if answer5 == 'y':
     gm_std_error = np.std(filtered_gm) / np.sqrt(len(filtered_gm))
     group_overlap_perc_df['p_id'] = group_overlap_perc_df['p_id'].astype(str)
     group_overlap_perc_df['tissue_type'] = group_overlap_perc_df['tissue_type'].astype(str)
-    sphericity_test = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
+    group_overlap_perc_df['overlap_perc'] = pd.to_numeric(group_overlap_perc_df['overlap_perc'], errors='coerce')
+    
+    try:
+        sphericity_test = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
+        epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
+        print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
+    except ValueError as e:
+        print(f"Error in mixed_anova: {e}")
+        print("Check if the 'within' and 'subject' columns are correctly specified.")
+        print("Column types:")
+        print(group_overlap_perc_df.dtypes)
+        print("Unique values in 'tissue_type':", group_overlap_perc_df['tissue_type'].unique())
+        print("Unique values in 'p_id':", group_overlap_perc_df['p_id'].unique())
+        raise
+    
     epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
     print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
     normality_passed = True

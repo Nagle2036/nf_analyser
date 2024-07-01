@@ -41,7 +41,7 @@ import nibabel as nib
 from skimage.metrics import structural_similarity as ssim
 from plotnine import *
 from scipy import stats
-from pingouin import mixed_anova
+from pingouin import rm_anova
 
 #endregion
 
@@ -1751,18 +1751,20 @@ if answer5 == 'y':
     group_overlap_perc_df['p_id'] = group_overlap_perc_df['p_id'].astype(str)
     group_overlap_perc_df['tissue_type'] = group_overlap_perc_df['tissue_type'].astype(str)
     group_overlap_perc_df['overlap_perc'] = pd.to_numeric(group_overlap_perc_df['overlap_perc'], errors='coerce')
+    
     try:
-        sphericity_test = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
+        sphericity_test = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
         epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
         print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
     except ValueError as e:
-        print(f"Error in mixed_anova: {e}")
+        print(f"Error in rm_anova: {e}")
         print("Check if the 'within' and 'subject' columns are correctly specified.")
         print("Column types:")
         print(group_overlap_perc_df.dtypes)
         print("Unique values in 'tissue_type':", group_overlap_perc_df['tissue_type'].unique())
         print("Unique values in 'p_id':", group_overlap_perc_df['p_id'].unique())
         raise
+    
     epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
     print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
     normality_passed = True
@@ -1779,7 +1781,7 @@ if answer5 == 'y':
     print(f'Stage 1 segmentation analysis Levene test p-value: {p_value_levene}')
     if normality_passed and p_value_levene > 0.05 and epsilon_value > 0.75:
         print('Stage 1 segmentation analysis parametric assumptions met. Proceeding with two-way ANOVA...')
-        anova_result = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
+        anova_result = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
         print(anova_result)
     else:
         print('Stage 1 segmentation analysis parametric assumptions not met. Two-way ANOVA not run. Reassess the data.')

@@ -2390,7 +2390,7 @@ if answer5 == 'y':
             flirted_roi_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/3/run01_subject_space_ROI.nii.gz'
             if not os.path.exists(flirted_roi_run01):
                 subprocess.run(['flirt', '-in', roi_mask_run01, '-ref', structural_brain, '-applyxfm', '-init', t1_flirted_run01_transformation, '-out', flirted_roi_run01, '-interp', 'nearestneighbour'])
-            roi_file_run04 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-1/depnf_run-4.roi"
+            roi_file_run04 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-4/depnf_run-4.roi"
             voxel_coordinates_run04 = read_roi_file(roi_file_run04)
             run04_template = f"{p_id}/analysis/susceptibility/fnirt_test/3/run04_template.nii.gz"
             if not os.path.exists(run04_template):
@@ -2817,7 +2817,7 @@ if answer5 == 'y':
             fnirted_roi_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01.nii.gz'
             if not os.path.exists(fnirted_roi_run01):
                 subprocess.run(['applywarp', f'--in={roi_mask_run01}', f'--ref={structural_brain}', f'--warp={warp_run01}', f'--out={fnirted_roi_run01}'], check=True)
-            roi_file_run04 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-1/depnf_run-4.roi"
+            roi_file_run04 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-4/depnf_run-4.roi"
             voxel_coordinates_run04 = read_roi_file(roi_file_run04)
             run04_template = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_template.nii.gz"
             if not os.path.exists(run04_template):

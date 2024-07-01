@@ -1745,7 +1745,8 @@ if answer5 == 'y':
     csf_std_error = np.std(filtered_csf) / np.sqrt(len(filtered_csf))
     wm_std_error = np.std(filtered_wm) / np.sqrt(len(filtered_wm))
     gm_std_error = np.std(filtered_gm) / np.sqrt(len(filtered_gm))
-    group_overlap_perc_df['overlap_perc'] = group_overlap_perc_df['overlap_perc'].astype(str)
+    group_overlap_perc_df['p_id'] = group_overlap_perc_df['p_id'].astype(str)
+    group_overlap_perc_df['tissue_type'] = group_overlap_perc_df['tissue_type'].astype(str)
     sphericity_test = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
     epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
     print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')

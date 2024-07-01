@@ -1553,7 +1553,8 @@ if answer5 == 'y':
                 ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, ssim_output_path)
             else:
                 df = pd.read_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', delimiter='\t')
-                ssim_index = df.loc[f'{p_id}', 'ssim_index']
+                ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+                ssim_index = ssim_index_series.iloc[0]
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])

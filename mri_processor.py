@@ -1551,6 +1551,9 @@ if answer5 == 'y':
             flirted_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/flirted_rl_fieldmaps.nii.gz"
             if not os.path.exists(ssim_output_path):
                 ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, ssim_output_path)
+            else:
+                df = pd.read_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', delimeter='\t')
+                ssim_index = df.loc[f'{p_id}', 'ssim_index']
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):
                 subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
@@ -1748,7 +1751,6 @@ if answer5 == 'y':
     group_overlap_perc_df['p_id'] = group_overlap_perc_df['p_id'].astype(str)
     group_overlap_perc_df['tissue_type'] = group_overlap_perc_df['tissue_type'].astype(str)
     group_overlap_perc_df['overlap_perc'] = pd.to_numeric(group_overlap_perc_df['overlap_perc'], errors='coerce')
-    
     try:
         sphericity_test = mixed_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
         epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
@@ -1761,7 +1763,6 @@ if answer5 == 'y':
         print("Unique values in 'tissue_type':", group_overlap_perc_df['tissue_type'].unique())
         print("Unique values in 'p_id':", group_overlap_perc_df['p_id'].unique())
         raise
-    
     epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
     print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
     normality_passed = True

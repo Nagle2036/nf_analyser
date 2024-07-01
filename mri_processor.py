@@ -1773,11 +1773,11 @@ if answer5 == 'y':
         anova_result = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
         print(anova_result)
     else:
-        print('Stage 1 segmentation analysis parametric assumptions not met. Two-way ANOVA not run. Reassess the data.')
+        print('Stage 1 segmentation analysis parametric assumptions not met. Two-way ANOVA not run.')
     plot_data = pd.DataFrame({'Tissue_Type': ['CSF', 'WM', 'GM'], 'Overlap_Perc': [mean_csf, mean_wm, mean_gm], 'Std_Error': [csf_std_error, wm_std_error, gm_std_error]})
     group_overlap_perc_plot = (ggplot(plot_data, aes(x='Tissue_Type', y='Overlap_Perc')) + 
                         geom_bar(stat='identity', position='dodge') +
-                        geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_perc + Std_Error'), width=0.2, color='black') +
+                        geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_Perc + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Sequence Tissue Type Overlap') +
                         scale_y_continuous(expand=(0, 0))

@@ -1552,7 +1552,7 @@ if answer5 == 'y':
             if not os.path.exists(ssim_output_path):
                 ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, ssim_output_path)
             else:
-                df = pd.read_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', delimeter='\t')
+                df = pd.read_csv(f'{p_id}/analysis/susceptibility/fnirt_test/1/ssim_df.txt', delimiter='\t')
                 ssim_index = df.loc[f'{p_id}', 'ssim_index']
             ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/1/ssim_bin.nii.gz"
             if not os.path.exists(ssim_bin):

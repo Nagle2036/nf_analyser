@@ -2746,8 +2746,8 @@ if answer5 == 'y':
     for p_id in participants_to_iterate:
         if p_id in bad_participants:
             print(f"Preparing Stage 4 files for {p_id}...")
-            run01 = f"{p_id}/analysis/preproc/niftis/run01_nh.nii"
-            run04 = f"{p_id}/analysis/preproc/niftis/run04_nh.nii"
+            run01 = f"{p_id}/analysis/preproc/niftis/run01_nh.nii.gz"
+            run04 = f"{p_id}/analysis/preproc/niftis/run04_nh.nii.gz"
             averaged_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/averaged_run01.nii.gz"
             averaged_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/averaged_run04.nii.gz"
             if not os.path.exists(averaged_run01) or not os.path.exists(averaged_run04):

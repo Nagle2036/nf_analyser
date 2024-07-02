@@ -1175,6 +1175,8 @@ if answer5 == 'y':
         os.makedirs(fnirt_folder_2, exist_ok=True)
         fnirt_folder_3 = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "3")
         os.makedirs(fnirt_folder_3, exist_ok=True)
+        fnirt_folder_4 = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "4")
+        os.makedirs(fnirt_folder_4, exist_ok=True)
         group_folder = os.path.join(os.getcwd(), "group", "susceptibility")
         os.makedirs(group_folder, exist_ok=True)
         group_fnirt_folder = os.path.join(os.getcwd(), "group", "susceptibility", "fnirt_test")
@@ -1185,6 +1187,8 @@ if answer5 == 'y':
         os.makedirs(group_fnirt_folder_2, exist_ok=True)
         group_fnirt_folder_3 = os.path.join(os.getcwd(), 'group', 'susceptibility', 'fnirt_test', '3')
         os.makedirs(group_fnirt_folder_3, exist_ok=True)
+        group_fnirt_folder_4 = os.path.join(os.getcwd(), 'group', 'susceptibility', 'fnirt_test', '4')
+        os.makedirs(group_fnirt_folder_4, exist_ok=True)
     print('Directories created.')
 
     # Step 2: Calculate percentage of ROI voxels outside the brain during neurofeedback.

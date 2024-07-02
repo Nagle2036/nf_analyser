@@ -2387,7 +2387,7 @@ if answer5 == 'y':
             binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
             nib.save(binary_mask, f'{p_id}/analysis/susceptibility/fnirt_test/3/run01_subject_space_ROI.nii.gz')
             roi_mask_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/3/run01_subject_space_ROI.nii.gz'
-            flirted_roi_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/3/run01_subject_space_ROI.nii.gz'
+            flirted_roi_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/3/flirted_roi_run01.nii.gz'
             if not os.path.exists(flirted_roi_run01):
                 subprocess.run(['flirt', '-in', roi_mask_run01, '-ref', structural_brain, '-applyxfm', '-init', t1_flirted_run01_transformation, '-out', flirted_roi_run01, '-interp', 'nearestneighbour'])
             roi_file_run04 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-4/depnf_run-4.roi"
@@ -2407,7 +2407,7 @@ if answer5 == 'y':
             binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
             nib.save(binary_mask, f'{p_id}/analysis/susceptibility/fnirt_test/3/run04_subject_space_ROI.nii.gz')
             roi_mask_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/3/run04_subject_space_ROI.nii.gz'
-            flirted_roi_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/3/run04_subject_space_ROI.nii.gz'
+            flirted_roi_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/3/flirted_roi_run04.nii.gz'
             if not os.path.exists(flirted_roi_run04):
                 subprocess.run(['flirt', '-in', roi_mask_run04, '-ref', structural_brain, '-applyxfm', '-init', t1_flirted_run04_transformation, '-out', flirted_roi_run04, '-interp', 'nearestneighbour'])
             flirted_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/3/flirted_run01_bin.nii.gz'

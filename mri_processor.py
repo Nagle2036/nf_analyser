@@ -1230,7 +1230,7 @@ if answer5 == 'y':
         analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility')
         dicoms_folder = os.path.join(analysis_folder, 'susc_scc', 'dicoms')
         os.makedirs(dicoms_folder, exist_ok=True)
-        run_folders = {f"{run}_dicoms": os.path.join(dicoms_folder, f"{run}_dicoms") for num in range(1, 5)}
+        run_folders = {f"run0{num}_dicoms": os.path.join(dicoms_folder, f"run0{num}_dicoms") for num in range(1, 5)}
         for folder in run_folders.values():
             os.makedirs(folder, exist_ok=True)
         files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]

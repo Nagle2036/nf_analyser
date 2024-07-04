@@ -1230,7 +1230,7 @@ if answer5 == 'y':
         analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility')
         dicoms_folder = os.path.join(analysis_folder, 'susc_scc', 'dicoms')
         os.makedirs(dicoms_folder, exist_ok=True)
-        run_folders = {f"run{num:02d}_dicoms": os.path.join(dicoms_folder, f"run{num:02d}_dicoms") for num in range(1, 5)}
+        run_folders = {f"{run}_dicoms": os.path.join(dicoms_folder, f"{run}_dicoms") for num in range(1, 5)}
         for folder in run_folders.values():
             os.makedirs(folder, exist_ok=True)
         files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
@@ -1271,7 +1271,7 @@ if answer5 == 'y':
         for num in run_num:
             roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', f'target_folder_run-{num}', f'depnf_run-{num}.roi')
             voxel_coordinates = read_roi_file(roi_file)
-            functional_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{num:02d}_averaged.nii.gz'
+            functional_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged.nii.gz'
             functional_image_info = nib.load(functional_image)
             functional_dims = functional_image_info.shape
             binary_volume = np.zeros(functional_dims)
@@ -1281,7 +1281,7 @@ if answer5 == 'y':
             binary_volume = np.flip(binary_volume, axis=1)
             functional_affine = functional_image_info.affine
             binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
-            nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{num:02d}_subject_space_ROI.nii.gz')
+            nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz')
         for run in runs:
             betted_file = os.path.join(output_folder, f"{run}_averaged_betted.nii.gz")
             if not os.path.exists(betted_file):

@@ -1168,7 +1168,7 @@ if answer5 == 'y':
         fnirt_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test")
         os.makedirs(fnirt_folder, exist_ok=True)
         susc_scc_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "susc_scc")
-        os.makedirs(susc_scc, exist_ok=True)
+        os.makedirs(susc_scc_folder, exist_ok=True)
         nifti_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'susc_scc', 'niftis')
         os.makedirs(nifti_folder, exist_ok=True)
         fnirt_folder_1 = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "1")

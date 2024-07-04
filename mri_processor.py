@@ -1259,12 +1259,12 @@ if answer5 == 'y':
         output_folder = os.path.join(analysis_folder, 'susc_scc', 'niftis')
         os.makedirs(output_folder, exist_ok=True)
         for run in runs:
-            destination_folder = run_folders[f"run{run:02d}_dicoms"]
-            output_file = os.path.join(output_folder, f"run{run:02d}.nii")
+            destination_folder = run_folders[f"{run}_dicoms"]
+            output_file = os.path.join(output_folder, f"{run}.nii")
             if not os.path.exists(output_file):
                 print(f"Converting {run.upper()} DICOM files to Nifti format for participant {p_id}...")
-                subprocess.run(['dcm2niix', '-o', output_folder, '-f', f"run{run:02d}", '-b', 'n', destination_folder])
-            averaged_file = os.path.join(output_folder, f"run{run:02d}_averaged.nii.gz")
+                subprocess.run(['dcm2niix', '-o', output_folder, '-f', f"{run}", '-b', 'n', destination_folder])
+            averaged_file = os.path.join(output_folder, f"{run}_averaged.nii.gz")
             if not os.path.exists(averaged_file):
                 subprocess.run(['fslmaths', output_file, '-Tmean', averaged_file])
         run_num = ['1', '2', '3', '4']
@@ -1283,12 +1283,12 @@ if answer5 == 'y':
             binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
             nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{num:02d}_subject_space_ROI.nii.gz')
         for run in runs:
-            betted_file = os.path.join(output_folder, f"run{run:02d}_averaged_betted.nii.gz")
+            betted_file = os.path.join(output_folder, f"{run}_averaged_betted.nii.gz")
             if not os.path.exists(betted_file):
-                subprocess.run(['bet', f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{run:02d}_averaged.nii.gz', betted_file, '-R'])
-            functional_image_betted = f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{run:02d}_averaged_betted.nii.gz'
-            binary_nifti_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{run:02d}_subject_space_ROI.nii.gz'
-            screenshot_file = f'{p_id}/analysis/susceptibility/susc_scc/ROI_on_run{run:02d}_EPI.png'
+                subprocess.run(['bet', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged.nii.gz', betted_file, '-R'])
+            functional_image_betted = f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted.nii.gz'
+            binary_nifti_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz'
+            screenshot_file = f'{p_id}/analysis/susceptibility/susc_scc/ROI_on_{run}_EPI.png'
             binary_img = nib.load(binary_nifti_image)
             binary_data = binary_img.get_fdata()
             indices = np.nonzero(binary_data)
@@ -1301,14 +1301,14 @@ if answer5 == 'y':
             else:
                 print(f"Error encountered: {result.stderr}")
         for run in runs:
-            bin_file = os.path.join(output_folder, f"run{run:02d}_averaged_betted_bin.nii.gz")
+            bin_file = os.path.join(output_folder, f"{run}_averaged_betted_bin.nii.gz")
             threshold = '100'
             if not os.path.exists(bin_file):
-                subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{run:02d}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
-            inverse_file = os.path.join(output_folder, f"run{run:02d}_averaged_betted_bin_inverse.nii.gz")
+                subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
+            inverse_file = os.path.join(output_folder, f"{run}_averaged_betted_bin_inverse.nii.gz")
             if not os.path.exists(inverse_file):
-                subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{run:02d}_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
-            result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{run:02d}_subject_space_ROI.nii.gz', '-k', f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{run:02d}_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
+                subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
+            result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz', '-k', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
             if result2.returncode == 0:
                 result2_output = result2.stdout.strip()
             else:
@@ -1316,7 +1316,7 @@ if answer5 == 'y':
                 continue
             result2_output_values = result2_output.split()
             voxels_outside = float(result2_output_values[0])
-            result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/run{run:02d}_subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
+            result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
             if result3.returncode == 0:
                 result3_output = result3.stdout.strip()
             else:

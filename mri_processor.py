@@ -1768,48 +1768,28 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0))
                         )
     group_overlap_perc_plot.save('group/susceptibility/fnirt_test/1/group_overlap_perc_plot.png')
-    plot_data_ssim = pd.DataFrame({
-    'Participant': good_participants,
-    'SSIM': ssim_indexes
+    plot_data = pd.DataFrame({
+        'Participant': good_participants,
+        'SSIM': ssim_indexes,
+        'Overlap_Perc': overlap_perc_av_values
     })
-    plot_data_overlap_perc = pd.DataFrame({
-    'Participant': good_participants,
-    'Overlap_Perc': overlap_perc_av_values
-    })
-    ssim_plot = (
-    ggplot(plot_data_ssim, aes(x='Participant', y='SSIM')) +
-    geom_bar(stat='identity', position='dodge') +
-    theme_classic() +
-    labs(y='SSIM') +
-    theme(axis_text_x=element_text(rotation=45, hjust=1),
-          text=element_text(size=12, color='blue'),
-          axis_title=element_text(size=14, face='bold'))
-    )
-    overlap_perc_plot = (
-    ggplot(plot_data_overlap_perc, aes(x='Participant', y='Overlap_Perc')) +
-    geom_bar(stat='identity', position='dodge') +
-    theme_classic() +
-    labs(y='Overlap_Perc') +
-    theme(axis_text_x=element_text(rotation=45, hjust=1),
-          text=element_text(size=12, color='blue'),
-          axis_title=element_text(size=14, face='bold'))
-    )
-    ssim_fig = ssim_plot.draw()
-    overla_perc_fig = overlap_perc_plot.draw()
     fig, ax1 = plt.subplots()
-    ax1.bar(good_participants, ssim_indexes, color='blue', label='SSIM')
+    bar_width = 0.35
+    index = np.arange(len(good_participants))
+    bar1 = ax1.bar(index, plot_data['SSIM'], bar_width, label='SSIM', color='blue')
+    ax2 = ax1.twinx()
+    bar2 = ax2.bar(index + bar_width, plot_data['Overlap_Perc'], bar_width, label='Overlap_Perc', color='red', alpha=0.5)
     ax1.set_xlabel('Participant')
     ax1.set_ylabel('SSIM', color='blue')
-    ax1.tick_params(axis='y', labelcolor='blue')
-    ax2 = ax1.twinx()
-    ax2.bar(good_participants, overlap_perc_av_values, color='red', label='Overlap_Perc', alpha=0.5)
     ax2.set_ylabel('Overlap_Perc', color='red')
-    ax2.tick_params(axis='y', labelcolor='red')
+    ax1.set_xticks(index + bar_width / 2)
+    ax1.set_xticklabels(plot_data['Participant'], rotation=45, ha='right')
     plt.title('SSIM and Tissue Overlap Percentage Plot')
-    ax1.set_xticklabels(good_participants, rotation=45, ha='right')
+    fig.legend(loc='upper right', bbox_to_anchor=(1,1), bbox_transform=ax1.transAxes)
     save_path = 'group/susceptibility/fnirt_test/1/ssim_overlap_perc_plot.png'
+    plt.tight_layout()
     plt.savefig(save_path, bbox_inches='tight')
-    
+
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
     for p_id in participants_to_iterate:

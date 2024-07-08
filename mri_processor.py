@@ -1346,9 +1346,11 @@ if answer5 == 'y':
                         with open(percentage_file, "a") as f:
                             f.write(f"{run} {threshold} {percentage_outside}\n")
             print(f"Percentage of ROI voxels in dropout regions saved in percentage_outside.txt file for {run}.")
-    if __name__ == "__main__":
-        for p_id in participants_to_iterate:
-            process_participant(p_id, runs)
+    screenshot_file = f'{p_id}/analysis/susceptibility/susc_scc/ROI_on_run01_EPI.png'
+    if not os.path.exists(screenshot_file):
+        if __name__ == "__main__":
+            for p_id in participants_to_iterate:
+                process_participant(p_id, runs)
 
     # Step 3: Test quality of alternate distortion correction method (Stage 1).
     print("\n###### STEP 3: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 1) ######")
@@ -1580,7 +1582,7 @@ if answer5 == 'y':
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-        scale_y_continuous(expand=(0, 0))
+        scale_y_continuous(expand=(0, 0), limits=[0.8,1])
     )
     ssim_index_plot.save('group/susceptibility/fnirt_test/1/ssim_index_plot.png')
     voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
@@ -1722,7 +1724,7 @@ if answer5 == 'y':
         theme_classic() +
         labs(title='Sequence Tissue Type Overlap', x='Participant', y='Overlap_Perc') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-        scale_y_continuous(expand=(0, 0))
+        scale_y_continuous(expand=(0, 0), limits=[0,100])
     )
     overlap_perc_plot.save('group/susceptibility/fnirt_test/1/overlap_perc_plot.png')
     filtered_csf = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'].tolist()
@@ -1765,7 +1767,7 @@ if answer5 == 'y':
                         geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_Perc + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Sequence Tissue Type Overlap') +
-                        scale_y_continuous(expand=(0, 0))
+                        scale_y_continuous(expand=(0, 0), limits=[0,100])
                         )
     group_overlap_perc_plot.save('group/susceptibility/fnirt_test/1/group_overlap_perc_plot.png')
     plot_data = pd.DataFrame({
@@ -1773,20 +1775,24 @@ if answer5 == 'y':
         'SSIM': ssim_indexes,
         'Overlap_Perc': overlap_perc_av_values
     })
+    plot_data_sorted = plot_data.sort_values(by='Overlap_Perc', ascending=False)
+    index_sorted = np.arange(len(plot_data_sorted))
     fig, ax1 = plt.subplots()
-    bar_width = 0.35
-    index = np.arange(len(good_participants))
-    bar1 = ax1.bar(index, plot_data['SSIM'], bar_width, label='SSIM', color='blue')
-    ax2 = ax1.twinx()
-    bar2 = ax2.bar(index + bar_width, plot_data['Overlap_Perc'], bar_width, label='Overlap_Perc', color='red', alpha=0.5)
-    ax1.set_xlabel('Participant')
+    bar1 = ax1.bar(index_sorted, plot_data_sorted['SSIM'], bar_width, label='SSIM', color='blue')
     ax1.set_ylabel('SSIM', color='blue')
+    ax1.tick_params(axis='y', labelcolor='blue')
+    ax1.set_ylim(0.8, 1.0)  
+    ax2 = ax1.twinx()
+    bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='red', alpha=0.5)
     ax2.set_ylabel('Overlap_Perc', color='red')
-    ax1.set_xticks(index + bar_width / 2)
-    ax1.set_xticklabels(plot_data['Participant'], rotation=45, ha='right')
+    ax2.tick_params(axis='y', labelcolor='red')
+    ax2.set_ylim(70, 100)
+    ax1.set_xlabel('Participant')
+    ax1.set_xticks(index_sorted + bar_width / 2)
+    ax1.set_xticklabels(plot_data_sorted['Participant'], rotation=45, ha='right')
     plt.title('SSIM and Tissue Overlap Percentage Plot')
-    fig.legend(loc='upper right', bbox_to_anchor=(1,1), bbox_transform=ax1.transAxes)
-    save_path = 'group/susceptibility/fnirt_test/1/ssim_overlap_perc_plot.png'
+    fig.legend(loc='upper right', bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes)
+    save_path = 'ssim_overlap_perc_plot_sorted.png'
     plt.tight_layout()
     plt.savefig(save_path, bbox_inches='tight')
 
@@ -1852,7 +1858,7 @@ if answer5 == 'y':
     plot_data = pd.DataFrame({
         'Participant': good_participants * 2,
         'Mean_Value': pa_means + rl_means,
-        'Sequence': ['Corrected'] * len(good_participants) + ['Uncorrected'] * len(good_participants),
+        'Sequence': ['PA'] * len(good_participants) + ['RL'] * len(good_participants),
         'Significance': ['' for _ in range(len(good_participants) * 2)],
         'Std_Error': pa_std_errors + rl_std_errors
     })
@@ -2127,7 +2133,7 @@ if answer5 == 'y':
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-        scale_y_continuous(expand=(0, 0))
+        scale_y_continuous(expand=(0, 0), limits=[0.8,1])
     )
     ssim_index_plot.save('group/susceptibility/fnirt_test/2/ssim_index_plot.png')
     voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
@@ -2544,7 +2550,7 @@ if answer5 == 'y':
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-        scale_y_continuous(expand=(0, 0))
+        scale_y_continuous(expand=(0, 0), limits=[0.8,1])
     )
     ssim_index_plot.save('group/susceptibility/fnirt_test/3/ssim_index_plot.png')
     voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
@@ -2642,7 +2648,7 @@ if answer5 == 'y':
     plot_data = pd.DataFrame({
         'Participant': bad_participants * 2,
         'Mean_Value': run01_means + run04_means,
-        'Sequence': ['Corrected'] * len(bad_participants) + ['Uncorrected'] * len(bad_participants),
+        'Sequence': ['RUN01'] * len(bad_participants) + ['RUN04'] * len(bad_participants),
         'Significance': ['' for _ in range(len(bad_participants) * 2)],
         'Std_Error': run01_std_errors + run04_std_errors
     })
@@ -2743,6 +2749,29 @@ if answer5 == 'y':
             if not os.path.exists(fnirted_run01):
                 subprocess.run(['applywarp', f'--in={betted_run01}', f'--ref={structural_brain}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
                 subprocess.run(['applywarp', f'--in={betted_run04}', f'--ref={structural_brain}', f'--warp={warp_run04}', f'--out={fnirted_run04}'])
+            def get_voxel_size(filename):
+                result = subprocess.run(['fslhd', filename], capture_output=True, text=True)
+                lines = result.stdout.split('\n')
+                pixdims = []
+                for line in lines:
+                    if 'pixdim' in line:
+                        pixdims = line.split()[1:4]
+                        break
+                return pixdims
+            def resample_to_original_voxel_size(input_image, original_voxel_size, output_image):
+                subprocess.run(['flirt', '-in', input_image, '-ref', input_image, '-applyisoxfm', f'{original_voxel_size[0]}', f'{original_voxel_size[1]}', f'{original_voxel_size[2]}', '-out', output_image])
+            original_voxel_size_run01 = get_voxel_size(averaged_run01)
+            final_voxel_size_run01 = get_voxel_size(fnirted_run01)
+            fnirted_run01_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_resampled.nii.gz"
+            if not os.path.exists(fnirted_run01_resampled):
+                if original_voxel_size_run01 != final_voxel_size_run01:
+                    resample_to_original_voxel_size(fnirted_run01, original_voxel_size_run01, fnirted_run01_resampled)
+            original_voxel_size_run04 = get_voxel_size(averaged_run04)
+            final_voxel_size_run04 = get_voxel_size(fnirted_run04)
+            fnirted_run04_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04_resampled.nii.gz"
+            if not os.path.exists(fnirted_run04_resampled):
+                if original_voxel_size_run04 != final_voxel_size_run04:
+                    resample_to_original_voxel_size(fnirted_run04, original_voxel_size_run04, fnirted_run04_resampled)
             def read_roi_file(roi_file):
                 voxel_coordinates = []
                 with open(roi_file, 'r') as file:
@@ -2782,6 +2811,15 @@ if answer5 == 'y':
             fnirted_roi_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01.nii.gz'
             if not os.path.exists(fnirted_roi_run01):
                 subprocess.run(['applywarp', f'--in={roi_mask_run01}', f'--ref={structural_brain}', f'--warp={warp_run01}', f'--out={fnirted_roi_run01}'], check=True)
+            fnirted_roi_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01_bin.nii.gz'
+            if not os.path.exists(fnirted_roi_run01_bin):
+                subprocess.run(['fslmaths', fnirted_roi_run01, '-thr', '0.5', '-bin', fnirted_roi_run01_bin])
+            original_voxel_size_roi_run01 = get_voxel_size(roi_mask_run01)
+            final_voxel_size_roi_run01 = get_voxel_size(fnirted_roi_run01_bin)
+            fnirted_roi_run01_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01_resampled.nii.gz"
+            if not os.path.exists(fnirted_roi_run01_resampled):
+                if original_voxel_size_roi_run01 != final_voxel_size_roi_run01:
+                    resample_to_original_voxel_size(fnirted_roi_run01_bin, original_voxel_size_roi_run01, fnirted_roi_run01_resampled)
             roi_file_run04 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-4/depnf_run-4.roi"
             voxel_coordinates_run04 = read_roi_file(roi_file_run04)
             run04_template = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_template.nii.gz"
@@ -2802,6 +2840,15 @@ if answer5 == 'y':
             fnirted_roi_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04.nii.gz'
             if not os.path.exists(fnirted_roi_run04):
                 subprocess.run(['applywarp', f'--in={roi_mask_run04}', f'--ref={structural_brain}', f'--warp={warp_run04}', f'--out={fnirted_roi_run04}'], check=True)
+            fnirted_roi_run04_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04_bin.nii.gz'
+            if not os.path.exists(fnirted_roi_run04_bin):
+                subprocess.run(['fslmaths', fnirted_roi_run04, '-thr', '0.5', '-bin', fnirted_roi_run04_bin])
+            original_voxel_size_roi_run04 = get_voxel_size(roi_mask_run04)
+            final_voxel_size_roi_run04 = get_voxel_size(fnirted_roi_run04_bin)
+            fnirted_roi_run04_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04_resampled.nii.gz"
+            if not os.path.exists(fnirted_roi_run04_resampled):
+                if original_voxel_size_roi_run04 != final_voxel_size_roi_run04:
+                    resample_to_original_voxel_size(fnirted_roi_run04_bin, original_voxel_size_roi_run04, fnirted_roi_run04_resampled)
             fnirted_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_bin.nii.gz'
             if not os.path.exists(fnirted_run01_bin):
                 subprocess.run(['fslmaths', fnirted_run01, '-thr', '100', '-bin', fnirted_run01_bin])
@@ -2814,28 +2861,28 @@ if answer5 == 'y':
             run04_bin_inv = f'{p_id}/analysis/susceptibility/fnirt_test/4/run04_bin_inv.nii.gz'
             if not os.path.exists(run04_bin_inv):
                 subprocess.run(['fslmaths', fnirted_run04_bin, '-sub', '1', '-abs', run04_bin_inv])
-            run01_result = subprocess.run(['fslstats', fnirted_roi_run01, '-k', run01_bin_inv, '-V'], capture_output=True, text=True)
+            run01_result = subprocess.run(['fslstats', fnirted_roi_run01_resampled, '-k', run01_bin_inv, '-V'], capture_output=True, text=True)
             if run01_result.returncode == 0:
                 run01_result_output = run01_result.stdout.strip()
             else:
                 print("Error executing fslstats command.")
             run01_result_output_values = run01_result_output.split()
             run01_voxels_outside = float(run01_result_output_values[0])
-            run04_result = subprocess.run(['fslstats', fnirted_roi_run04, '-k', run04_bin_inv, '-V'], capture_output=True, text=True)
+            run04_result = subprocess.run(['fslstats', fnirted_roi_run04_resampled, '-k', run04_bin_inv, '-V'], capture_output=True, text=True)
             if run04_result.returncode == 0:
                 run04_result_output = run04_result.stdout.strip()
             else:
                 print("Error executing fslstats command.")
             run04_result_output_values = run04_result_output.split()
             run04_voxels_outside = float(run04_result_output_values[0])
-            result1 = subprocess.run(['fslstats', fnirted_roi_run01, '-V'], capture_output=True, text=True)
+            result1 = subprocess.run(['fslstats', fnirted_roi_run01_resampled, '-V'], capture_output=True, text=True)
             if result1.returncode == 0:
                 result1_output = result1.stdout.strip()
             else:
                 print("Error executing fslstats command.")
             result1_output_values = result1_output.split()
             total_voxels_in_roi_run01 = float(result1_output_values[0])
-            result2 = subprocess.run(['fslstats', fnirted_roi_run04, '-V'], capture_output=True, text=True)
+            result2 = subprocess.run(['fslstats', fnirted_roi_run04_resampled, '-V'], capture_output=True, text=True)
             if result2.returncode == 0:
                 result2_output = result2.stdout.strip()
             else:
@@ -2854,8 +2901,8 @@ if answer5 == 'y':
             run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_trimmed_roi_mask.nii.gz"
             run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_trimmed_roi_mask.nii.gz"
             if not os.path.exists(run01_trimmed_roi_mask) or not os.path.exists(run04_trimmed_roi_mask):
-                subprocess.run(['fslmaths', fnirted_roi_run01, '-mul', fnirted_run01_bin, run01_trimmed_roi_mask])
-                subprocess.run(['fslmaths', fnirted_roi_run04, '-mul', fnirted_run04_bin, run04_trimmed_roi_mask])
+                subprocess.run(['fslmaths', fnirted_roi_run01_resampled, '-mul', fnirted_run01_bin, run01_trimmed_roi_mask])
+                subprocess.run(['fslmaths', fnirted_roi_run04_resampled, '-mul', fnirted_run04_bin, run04_trimmed_roi_mask])
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/4/group_perc_outside_df.txt', sep='\t', index=False)
     plot_data = pd.DataFrame({
         'Participant': bad_participants * 2,
@@ -2971,9 +3018,9 @@ if answer5 == 'y':
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-        scale_y_continuous(expand=(0, 0))
+        scale_y_continuous(expand=(0, 0), limits=[0.8,1])
     )
-    ssim_index_plot.save('group/susceptibility/fnirt_test/4/ssim_plot.png')
+    ssim_index_plot.save('group/susceptibility/fnirt_test/4/ssim_index_plot.png')
     voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
     voxels_mean = np.mean(voxels)
     plot_data = pd.DataFrame({
@@ -3069,7 +3116,7 @@ if answer5 == 'y':
     plot_data = pd.DataFrame({
         'Participant': bad_participants * 2,
         'Mean_Value': run01_means + run04_means,
-        'Sequence': ['Corrected'] * len(bad_participants) + ['Uncorrected'] * len(bad_participants),
+        'Sequence': ['RUN01'] * len(bad_participants) + ['RUN04'] * len(bad_participants),
         'Significance': ['' for _ in range(len(bad_participants) * 2)],
         'Std_Error': run01_std_errors + run04_std_errors
     })

@@ -1778,10 +1778,11 @@ if answer5 == 'y':
     plot_data_sorted = plot_data.sort_values(by='Overlap_Perc', ascending=False)
     index_sorted = np.arange(len(plot_data_sorted))
     fig, ax1 = plt.subplots()
+    bar_width = 0.35
     bar1 = ax1.bar(index_sorted, plot_data_sorted['SSIM'], bar_width, label='SSIM', color='blue')
     ax1.set_ylabel('SSIM', color='blue')
     ax1.tick_params(axis='y', labelcolor='blue')
-    ax1.set_ylim(0.8, 1.0)  
+    ax1.set_ylim(0.8, 1.0)
     ax2 = ax1.twinx()
     bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='red', alpha=0.5)
     ax2.set_ylabel('Overlap_Perc', color='red')
@@ -1792,7 +1793,7 @@ if answer5 == 'y':
     ax1.set_xticklabels(plot_data_sorted['Participant'], rotation=45, ha='right')
     plt.title('SSIM and Tissue Overlap Percentage Plot')
     fig.legend(loc='upper right', bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes)
-    save_path = 'ssim_overlap_perc_plot_sorted.png'
+    save_path = 'ssim_overlap_perc_plot.png'
     plt.tight_layout()
     plt.savefig(save_path, bbox_inches='tight')
 

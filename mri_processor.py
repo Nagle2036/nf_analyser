@@ -2778,9 +2778,9 @@ if answer5 == 'y':
                     for row in resample_matrix:
                         f.write(" ".join(map(str, row)) + "\n")
                 subprocess.run(['flirt', '-in', input_image, '-ref', input_image, '-applyxfm', '-init', matrix_file, '-out', output_image])
-                subprocess.run(['fslchpixdim', output_image, '1', target_voxel_size[0]])
-                subprocess.run(['fslchpixdim', output_image, '2', target_voxel_size[1]])
-                subprocess.run(['fslchpixdim', output_image, '3', target_voxel_size[2]])
+                subprocess.run(['fslchpixdim', output_image, '1', str(target_voxel_size[0])])
+                subprocess.run(['fslchpixdim', output_image, '2', str(target_voxel_size[1])])
+                subprocess.run(['fslchpixdim', output_image, '3', str(target_voxel_size[2])])
                 resampled_voxel_size = get_voxel_size(output_image)
                 print(f"Resampled voxel size: {resampled_voxel_size}")
             original_voxel_size_run01 = get_voxel_size(averaged_run01)

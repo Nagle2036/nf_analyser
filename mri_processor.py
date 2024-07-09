@@ -1793,7 +1793,7 @@ if answer5 == 'y':
     ax1.set_xticklabels(plot_data_sorted['Participant'], rotation=45, ha='right')
     plt.title('SSIM and Tissue Overlap Percentage Plot')
     fig.legend(loc='upper right', bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes)
-    save_path = 'ssim_overlap_perc_plot.png'
+    save_path = 'group/susceptibility/fnirt_test/1/ssim_overlap_perc_plot.png'
     plt.tight_layout()
     plt.savefig(save_path, bbox_inches='tight')
 
@@ -2753,26 +2753,47 @@ if answer5 == 'y':
             def get_voxel_size(filename):
                 result = subprocess.run(['fslhd', filename], capture_output=True, text=True)
                 lines = result.stdout.split('\n')
-                pixdims = []
+                pixdim1, pixdim2, pixdim3 = None, None, None
                 for line in lines:
-                    if 'pixdim' in line:
-                        pixdims = line.split()[1:4]
-                        break
-                return pixdims
-            def resample_to_original_voxel_size(input_image, original_voxel_size, output_image):
-                subprocess.run(['flirt', '-in', input_image, '-ref', input_image, '-applyisoxfm', f'{original_voxel_size[0]}', f'{original_voxel_size[1]}', f'{original_voxel_size[2]}', '-out', output_image])
+                    if 'pixdim1' in line:
+                        pixdim1 = float(line.split()[1])
+                    elif 'pixdim2' in line:
+                        pixdim2 = float(line.split()[1])
+                    elif 'pixdim3' in line:
+                        pixdim3 = float(line.split()[1])
+                return [pixdim1, pixdim2, pixdim3]
+            def create_resample_matrix(original_voxel_size, new_voxel_size, filename):
+                scaling_matrix = [
+                    [new_voxel_size[0] / original_voxel_size[0], 0, 0, 0],
+                    [0, new_voxel_size[1] / original_voxel_size[1], 0, 0],
+                    [0, 0, new_voxel_size[2] / original_voxel_size[2], 0],
+                    [0, 0, 0, 1]
+                ]
+                with open(filename, 'w') as f:
+                    for row in scaling_matrix:
+                        f.write(' '.join(map(str, row)) + '\n')
+            def resample_to_original_voxel_size(input_image, original_voxel_size, new_voxel_size, output_image):
+                transform_matrix = "scaling_matrix.mat"
+                create_resample_matrix(original_voxel_size, new_voxel_size, transform_matrix)
+                subprocess.run([
+                    'flirt', '-in', input_image, '-ref', input_image, 
+                    '-applyxfm', '-init', transform_matrix, 
+                    '-out', output_image, '-interp', 'trilinear'
+                ])
+                resampled_voxel_size = get_voxel_size(output_image)
+                print(f"Resampled voxel size: {resampled_voxel_size}")
             original_voxel_size_run01 = get_voxel_size(averaged_run01)
             final_voxel_size_run01 = get_voxel_size(fnirted_run01)
             fnirted_run01_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_resampled.nii.gz"
             if not os.path.exists(fnirted_run01_resampled):
                 if original_voxel_size_run01 != final_voxel_size_run01:
-                    resample_to_original_voxel_size(fnirted_run01, original_voxel_size_run01, fnirted_run01_resampled)
+                    resample_to_original_voxel_size(fnirted_run01, original_voxel_size_run01, final_voxel_size_run01, fnirted_run01_resampled)
             original_voxel_size_run04 = get_voxel_size(averaged_run04)
             final_voxel_size_run04 = get_voxel_size(fnirted_run04)
             fnirted_run04_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04_resampled.nii.gz"
             if not os.path.exists(fnirted_run04_resampled):
                 if original_voxel_size_run04 != final_voxel_size_run04:
-                    resample_to_original_voxel_size(fnirted_run04, original_voxel_size_run04, fnirted_run04_resampled)
+                    resample_to_original_voxel_size(fnirted_run04, original_voxel_size_run04, final_voxel_size_run04, fnirted_run04_resampled)
             def read_roi_file(roi_file):
                 voxel_coordinates = []
                 with open(roi_file, 'r') as file:
@@ -2820,7 +2841,7 @@ if answer5 == 'y':
             fnirted_roi_run01_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01_resampled.nii.gz"
             if not os.path.exists(fnirted_roi_run01_resampled):
                 if original_voxel_size_roi_run01 != final_voxel_size_roi_run01:
-                    resample_to_original_voxel_size(fnirted_roi_run01_bin, original_voxel_size_roi_run01, fnirted_roi_run01_resampled)
+                    resample_to_original_voxel_size(fnirted_roi_run01_bin, original_voxel_size_roi_run01, final_voxel_size_roi_run01, fnirted_roi_run01_resampled)
             roi_file_run04 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-4/depnf_run-4.roi"
             voxel_coordinates_run04 = read_roi_file(roi_file_run04)
             run04_template = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_template.nii.gz"
@@ -2849,7 +2870,7 @@ if answer5 == 'y':
             fnirted_roi_run04_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04_resampled.nii.gz"
             if not os.path.exists(fnirted_roi_run04_resampled):
                 if original_voxel_size_roi_run04 != final_voxel_size_roi_run04:
-                    resample_to_original_voxel_size(fnirted_roi_run04_bin, original_voxel_size_roi_run04, fnirted_roi_run04_resampled)
+                    resample_to_original_voxel_size(fnirted_roi_run04_bin, original_voxel_size_roi_run04, final_voxel_size_roi_run04, fnirted_roi_run04_resampled)
             fnirted_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_bin.nii.gz'
             if not os.path.exists(fnirted_run01_bin):
                 subprocess.run(['fslmaths', fnirted_run01, '-thr', '100', '-bin', fnirted_run01_bin])

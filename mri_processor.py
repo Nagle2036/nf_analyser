@@ -2762,6 +2762,7 @@ if answer5 == 'y':
                     elif 'pixdim3' in line:
                         pixdim3 = float(line.split()[1])
                 return [pixdim1, pixdim2, pixdim3]
+                print(filename, pixdim1, pixdim2, pixdim3)
             def create_resample_matrix(current_voxel_size, target_voxel_size):
                 scaling_matrix = [
                     [current_voxel_size[0] / target_voxel_size[0], 0, 0, 0],

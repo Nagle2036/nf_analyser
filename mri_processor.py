@@ -2770,11 +2770,10 @@ if answer5 == 'y':
                     [0, 0, 0, 1]
                 ]
                 return scaling_matrix
-
             def resample_image(input_image, target_voxel_size, output_image):
                 current_voxel_size = get_voxel_size(input_image)
                 resample_matrix = create_resample_matrix(current_voxel_size, target_voxel_size)
-                matrix_file = "resample_matrix.txt"
+                matrix_file = "f{p_id}/analysis/susceptibility/fnirt_test/4/resample_matrix.txt"
                 with open(matrix_file, "w") as f:
                     for row in resample_matrix:
                         f.write(" ".join(map(str, row)) + "\n")

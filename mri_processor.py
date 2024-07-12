@@ -1503,17 +1503,17 @@ if answer5 == 'y':
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Percentage of Voxels in Signal Dropout Regions') +
-                        scale_y_continuous(expand=(0, 0))
+                        scale_y_continuous(expand=(0, 0), limits=[0,10])
                         )
     if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 9.0, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 8.5, yend=max(plot_data['Perc_Outside']) + 8.5, color="black")
     elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 9.0, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 8.5, yend=max(plot_data['Perc_Outside']) + 8.5, color="black")
     elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")    
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 9.0, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 8.5, yend=max(plot_data['Perc_Outside']) + 8.5, color="black")    
     group_perc_outside_plot.save('group/susceptibility/fnirt_test/1/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']

@@ -1492,12 +1492,12 @@ if answer5 == 'y':
     _, perc_outside_pa_overall_shap_p = stats.shapiro(perc_outside_pa_values)
     _, perc_outside_rl_overall_shap_p = stats.shapiro(perc_outside_rl_values)
     if perc_outside_pa_overall_shap_p > 0.05 and perc_outside_rl_overall_shap_p > 0.5:
-        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(perc_outside_pa_overall_shap_p, perc_outside_rl_overall_shap_p)
+        print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
+        _, p_value = stats.ttest_ind(perc_outside_pa_values, perc_outside_rl_values)
         print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(perc_outside_pa_overall_shap_p, perc_outside_rl_overall_shap_p)
+        print(f'Shapiro-Wilk test failed for perc_outside values. Running non-parametric Mann-Whitney U test...')
+        _, p_value = stats.mannwhitneyu(perc_outside_pa_values, perc_outside_rl_values)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Perc_Outside': [perc_outside_pa_overall, perc_outside_rl_overall], 'Std_Error': [pa_std_error, rl_std_error]})
     group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
@@ -1898,11 +1898,13 @@ if answer5 == 'y':
     _, pa_means_overall_shap_p = stats.shapiro(pa_means)
     _, rl_means_overall_shap_p = stats.shapiro(rl_means)
     if pa_means_overall_shap_p > 0.05 and rl_means_overall_shap_p > 0.5:
-        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
+        print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(pa_means, rl_means)
+        print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.mannwhitneyu(pa_means, rl_means)
+        print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -2052,12 +2054,12 @@ if answer5 == 'y':
     _, perc_outside_corrected_overall_shap_p = stats.shapiro(perc_outside_corrected_values)
     _, perc_outside_uncorrected_overall_shap_p = stats.shapiro(perc_outside_uncorrected_values)
     if perc_outside_corrected_overall_shap_p > 0.05 and perc_outside_uncorrected_overall_shap_p > 0.5:
-        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(perc_outside_corrected_overall_shap_p, perc_outside_uncorrected_overall_shap_p)
+        print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
+        _, p_value = stats.ttest_ind(perc_outside_corrected_values, perc_outside_uncorrected_values)
         print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(perc_outside_corrected_overall_shap_p, perc_outside_uncorrected_overall_shap_p)
+        print(f'Shapiro-Wilk test failed for perc_outside values. Running non-parametric Mann-Whitney U test...')
+        _, p_value = stats.mannwhitneyu(perc_outside_corrected_values, perc_outside_uncorrected_values)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['corrected', 'uncorrected'], 'Perc_Outside': [perc_outside_corrected_overall, perc_outside_uncorrected_overall], 'Std_Error': [corrected_std_error, uncorrected_std_error]})
     group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
@@ -2275,11 +2277,13 @@ if answer5 == 'y':
     _, corrected_means_overall_shap_p = stats.shapiro(corrected_means)
     _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
     if corrected_means_overall_shap_p > 0.05 and uncorrected_means_overall_shap_p > 0.5:
-        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
+        print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(corrected_means, uncorrected_means)
+        print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means)
+        print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -2464,12 +2468,12 @@ if answer5 == 'y':
     _, perc_outside_run01_overall_shap_p = stats.shapiro(perc_outside_run01_values)
     _, perc_outside_run04_overall_shap_p = stats.shapiro(perc_outside_run04_values)
     if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.5:
-        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(perc_outside_run01_overall_shap_p, perc_outside_run04_overall_shap_p)
+        print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
+        _, p_value = stats.ttest_ind(perc_outside_run01_values, perc_outside_run04_values)
         print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(perc_outside_run01_overall_shap_p, perc_outside_run04_overall_shap_p)
+        print(f'Shapiro-Wilk test failed for perc_outside values. Running non-parametric Mann-Whitney U test...')
+        _, p_value = stats.mannwhitneyu(perc_outside_run01_values, perc_outside_run04_values)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['run01', 'run04'], 'Perc_Outside': [perc_outside_run01_overall, perc_outside_run04_overall], 'Std_Error': [run01_std_error, run04_std_error]})
     group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
@@ -2692,11 +2696,11 @@ if answer5 == 'y':
     _, run01_means_overall_shap_p = stats.shapiro(run01_means)
     _, run04_means_overall_shap_p = stats.shapiro(run04_means)
     if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.5:
-        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
+        print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(run01_means, run04_means)
         print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.mannwhitneyu(run01_means, run04_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
@@ -2959,12 +2963,12 @@ if answer5 == 'y':
     _, perc_outside_run01_overall_shap_p = stats.shapiro(perc_outside_run01_values)
     _, perc_outside_run04_overall_shap_p = stats.shapiro(perc_outside_run04_values)
     if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.5:
-        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(perc_outside_run01_overall_shap_p, perc_outside_run04_overall_shap_p)
+        print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
+        _, p_value = stats.ttest_ind(perc_outside_run01_values, perc_outside_run04_values)
         print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(perc_outside_run01_overall_shap_p, perc_outside_run04_overall_shap_p)
+        print(f'Shapiro-Wilk test failed for perc_outside values. Running non-parametric Mann-Whitney U test...')
+        _, p_value = stats.mannwhitneyu(perc_outside_run01_values, perc_outside_run04_values)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['run01', 'run04'], 'Perc_Outside': [perc_outside_run01_overall, perc_outside_run04_overall], 'Std_Error': [run01_std_error, run04_std_error]})
     group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
@@ -3187,11 +3191,13 @@ if answer5 == 'y':
     _, run01_means_overall_shap_p = stats.shapiro(run01_means)
     _, run04_means_overall_shap_p = stats.shapiro(run04_means)
     if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.5:
-        print(f'Shapiro-Wilk test passed for {p_id} voxel intensity values. Running parametric t-test...')
+        print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(run01_means, run04_means)
+        print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for {p_id} voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.mannwhitneyu(run01_means, run04_means)
+        print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
                         geom_bar(stat='identity', position='dodge') +

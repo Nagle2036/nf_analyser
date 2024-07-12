@@ -1692,7 +1692,7 @@ if answer5 == 'y':
             overlap_perc_col.append(csf_overlap_perc)
             overlap_perc_col.append(wm_overlap_perc)
             overlap_perc_col.append(gm_overlap_perc)
-            if p_id == 'P122' or 'P136':
+            if p_id == 'P122' or p_id == 'P136':
                 values = np.array([wm_overlap_perc, gm_overlap_perc])
                 overlap_perc_av = np.mean(values)
                 overlap_perc_av_values.append(overlap_perc_av)

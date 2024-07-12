@@ -1771,7 +1771,7 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0), limits=[0,100])
                         )
     group_overlap_perc_plot.save('group/susceptibility/fnirt_test/1/group_overlap_perc_plot.png')
-    ssim_values = df.loc[df['p_id'].isin(['P122', 'P136']), 'ssim_index'].tolist()
+    ssim_values = group_ssim_df.loc[group_ssim_df['p_id'].isin(['P122', 'P136']), 'ssim_index'].tolist()
     plot_data = pd.DataFrame({
         'Participant': ['P122', 'P136'],
         'SSIM': ssim_values,

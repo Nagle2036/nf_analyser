@@ -1692,9 +1692,10 @@ if answer5 == 'y':
             overlap_perc_col.append(csf_overlap_perc)
             overlap_perc_col.append(wm_overlap_perc)
             overlap_perc_col.append(gm_overlap_perc)
-            values = np.array([wm_overlap_perc, gm_overlap_perc])
-            overlap_perc_av = np.mean(values)
-            overlap_perc_av_values.append(overlap_perc_av)
+            if p_id == 'P122' or 'P136':
+                values = np.array([wm_overlap_perc, gm_overlap_perc])
+                overlap_perc_av = np.mean(values)
+                overlap_perc_av_values.append(overlap_perc_av)
             overlap_perc_df = pd.DataFrame({'p_id': participant_col, 'tissue_type': tissue_type_col, 'overlap_perc': overlap_perc_col})
             overlap_perc_df.to_csv(f"{p_id}/analysis/susceptibility/fnirt_test/1/overlap_perc_df.txt", sep='\t', index=False)
             group_overlap_perc_df = pd.concat([group_overlap_perc_df, overlap_perc_df], ignore_index=True)
@@ -1770,9 +1771,10 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0), limits=[0,100])
                         )
     group_overlap_perc_plot.save('group/susceptibility/fnirt_test/1/group_overlap_perc_plot.png')
+    ssim_values = df.loc[df['p_id'].isin(['P122', 'P136']), 'ssim_index'].tolist()
     plot_data = pd.DataFrame({
-        'Participant': good_participants,
-        'SSIM': ssim_indexes,
+        'Participant': ['P122', 'P136'],
+        'SSIM': ssim_values,
         'Overlap_Perc': overlap_perc_av_values
     })
     plot_data_sorted = plot_data.sort_values(by='Overlap_Perc', ascending=False)

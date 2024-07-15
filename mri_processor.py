@@ -5,7 +5,7 @@
 # Add percentage completion metric.
 # Output mri_processor.py Bash terminal outputs / prints into .txt log file
 # Add option to run analysis for all subjects. E.g. for fMRI preprocessing, the input question could be: "Enter the participant's ID (e.g. P001), or write 'ALL' to execute for all participants."
-# Potentially recreate preprocessing pipeline with fmriprep just to show that I ca n use it. And maybe compare analysis results after my preprocessing and fmriprep preprocessing
+# Potentially recreate preprocessing pipeline with fmriprep just to show that I can use it. And maybe compare analysis results after my preprocessing and fmriprep preprocessing
 
 #region IMPORT PACKAGES.
 
@@ -1508,14 +1508,14 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0), limits=[0,10])
                         )
     if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 4.5, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 4, yend=max(plot_data['Perc_Outside']) + 4, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
     elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 4.5, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 4, yend=max(plot_data['Perc_Outside']) + 4, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
     elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 4.5, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 4, yend=max(plot_data['Perc_Outside']) + 4, color="black")    
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")    
     group_perc_outside_plot.save('group/susceptibility/fnirt_test/1/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
@@ -2071,14 +2071,14 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0))
                         )
     if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
     elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
     elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")    
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")    
     group_perc_outside_plot.save('group/susceptibility/fnirt_test/2/group_perc_outside_plot.png')
 
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
@@ -2486,14 +2486,14 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0))
                         )
     if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
     elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
     elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")    
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")    
     group_perc_outside_plot.save('group/susceptibility/fnirt_test/3/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
@@ -2982,14 +2982,14 @@ if answer5 == 'y':
                         scale_y_continuous(expand=(0, 0))
                         )
     if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
     elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="**", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
     elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 7.5, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 5, yend=max(plot_data['Perc_Outside']) + 5, color="black")    
+        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="*", size=16, color="black") + \
+            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")    
     group_perc_outside_plot.save('group/susceptibility/fnirt_test/4/group_perc_outside_plot.png')
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']

@@ -2751,29 +2751,34 @@ if answer5 == 'y':
 
             betted_run01_info = subprocess.run(['fslinfo', betted_run01], capture_output=True, text=True)
             betted_run01_info_output = betted_run01_info.stdout
+            dim1 = dim2 = dim3 = dim4 = datatype = None
+            pixdim1 = pixdim2 = pixdim3 = pixdim4 = None
             for line in betted_run01_info_output.splitlines():
-                if "dim1" in line:
-                    dim1 = int(line.split()[1])
-                elif "dim2" in line:
-                    dim2 = int(line.split()[1])
-                elif "dim3" in line:
-                    dim3 = int(line.split()[1])
-                elif "dim4" in line:
-                    dim4 = int(line.split()[1])
-                elif "datatype" in line:
-                    datatype = int(line.split()[1])
-                elif "pixdim1" in line:
-                    pixdim1 = float(line.split()[1])
-                elif "pixdim2" in line:
-                    pixdim2 = float(line.split()[1])
-                elif "pixdim3" in line:
-                    pixdim3 = float(line.split()[1])
-                elif "pixdim4" in line:
-                    pixdim4 = float(line.split()[1])
+                parts = line.split()
+                if line.startswith("dim1"):
+                    dim1 = int(parts[1])
+                elif line.startswith("dim2"):
+                    dim2 = int(parts[1])
+                elif line.startswith("dim3"):
+                    dim3 = int(parts[1])
+                elif line.startswith("dim4"):
+                    dim4 = int(parts[1])
+                elif line.startswith("datatype"):
+                    datatype = int(parts[1])
+                elif line.startswith("pixdim1"):
+                    pixdim1 = float(parts[1])
+                elif line.startswith("pixdim2"):
+                    pixdim2 = float(parts[1])
+                elif line.startswith("pixdim3"):
+                    pixdim3 = float(parts[1])
+                elif line.startswith("pixdim4"):
+                    pixdim4 = float(parts[1])
+            if None in [dim1, dim2, dim3, dim4, datatype, pixdim1, pixdim2, pixdim3, pixdim4]:
+                raise ValueError("Missing one or more required fslinfo values")
             print(f"dim1: {dim1}, dim2: {dim2}, dim3: {dim3}, dim4: {dim4}, datatype: {datatype}, pixdim1: {pixdim1}, pixdim2: {pixdim2}, pixdim3: {pixdim3}, pixdim4: {pixdim4}")
             structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
             blank_image_34_slices = f"{p_id}/analysis/susceptibility/fnirt_test/4/blank_image_34_slices.nii.gz"
-            subprocess.run(['fslcreatehd', dim1, dim2, '34', dim4, pixdim1, pixdim2, pixdim3, pixdim4, '0', '0', '0', datatype, blank_image_34_slices])
+            subprocess.run(['fslcreatehd', str(dim1), str(dim2), '34', str(dim4), str(pixdim1), str(pixdim2), str(pixdim3), str(pixdim4), '0', '0', '0', str(datatype), blank_image_34_slices])
             subprocess.run(['fslmaths', blank_image_34_slices, '-mul', '0', blank_image_34_slices])
             betted_run01_extended = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run01_extended.nii.gz"
             subprocess.run(['fslmerge', '-z', betted_run01_extended, blank_image_34_slices, betted_run01])

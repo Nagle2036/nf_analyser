@@ -2747,72 +2747,59 @@ if answer5 == 'y':
             if not os.path.exists(betted_run01) or not os.path.exists(betted_run04):
                 subprocess.run(["bet", averaged_run01, betted_run01, "-m", "-R"])
                 subprocess.run(["bet", averaged_run04, betted_run04, "-m", "-R"])
+            
+
+            betted_run01_info = subprocess.run(['fslinfo', betted_run01], capture_output=True, text=True)
+            betted_run01_info_output = betted_run01_info.stdout
+            for line in betted_run01_info_output.splitlines():
+                if "dim1" in line:
+                    dim1 = int(line.split()[1])
+                elif "dim2" in line:
+                    dim2 = int(line.split()[1])
+                elif "dim3" in line:
+                    dim3 = int(line.split()[1])
+                elif "dim4" in line:
+                    dim4 = int(line.split()[1])
+                elif "datatype" in line:
+                    datatype = int(line.split()[1])
+                elif "pixdim1" in line:
+                    pixdim1 = float(line.split()[1])
+                elif "pixdim2" in line:
+                    pixdim2 = float(line.split()[1])
+                elif "pixdim3" in line:
+                    pixdim3 = float(line.split()[1])
+                elif "pixdim4" in line:
+                    pixdim4 = float(line.split()[1])
+            print(f"dim1: {dim1}, dim2: {dim2}, dim3: {dim3}, dim4: {dim4}, datatype: {datatype}, pixdim1: {pixdim1}, pixdim2: {pixdim2}, pixdim3: {pixdim3}, pixdim4: {pixdim4}")
+            structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
+            blank_image_34_slices = f"{p_id}/analysis/susceptibility/fnirt_test/4/blank_image_34_slices.nii.gz"
+            subprocess.run(['fslcreatehd', dim1, dim2, '34', dim4, pixdim1, pixdim2, pixdim3, pixdim4, '0', '0', '0', datatype, blank_image_34_slices])
+            subprocess.run(['fslmaths', blank_image_34_slices, '-mul', '0', blank_image_34_slices])
+            betted_run01_extended = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run01_extended.nii.gz"
+            subprocess.run(['fslmerge', '-z', betted_run01_extended, blank_image_34_slices, betted_run01])
+            structural_brain_downsampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/structural_brain_downsampled.nii.gz"
+            subprocess.run(['flirt', '-in', structural_brain, '-ref', betted_run01_extended, '-out', structural_brain_downsampled, '-applyxfm'])
+            
+            
             flirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01.nii.gz"
             flirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run04.nii.gz"
             flirted_run01_matrix = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01_matrix.mat"
             flirted_run04_matrix = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run04_matrix.mat"
-            structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
             if not os.path.exists(flirted_run01):
-                subprocess.run(['flirt', '-in', betted_run01, '-ref', structural_brain, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
-                subprocess.run(['flirt', '-in', betted_run04, '-ref', structural_brain, '-out', flirted_run04, '-omat', flirted_run04_matrix, '-dof', '6'])
+                subprocess.run(['flirt', '-in', betted_run01, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
+                subprocess.run(['flirt', '-in', betted_run04, '-ref', structural_brain_downsampled, '-out', flirted_run04, '-omat', flirted_run04_matrix, '-dof', '6'])
             nonlin_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/nonlin_run01.nii.gz"
             nonlin_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/nonlin_run04.nii.gz"
             warp_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run01"
             warp_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run04"
             if not os.path.exists(nonlin_run01):
-                subprocess.run(['fnirt', f'--in={betted_run01}', f'--ref={structural_brain}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', f'--iout={nonlin_run01}'])
-                subprocess.run(['fnirt', f'--in={betted_run04}', f'--ref={structural_brain}', f'--aff={flirted_run04_matrix}', f'--cout={warp_run04}', f'--iout={nonlin_run04}'])
+                subprocess.run(['fnirt', f'--in={betted_run01}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', f'--iout={nonlin_run01}'])
+                subprocess.run(['fnirt', f'--in={betted_run04}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run04_matrix}', f'--cout={warp_run04}', f'--iout={nonlin_run04}'])
             fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
             fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
             if not os.path.exists(fnirted_run01):
-                subprocess.run(['applywarp', f'--in={betted_run01}', f'--ref={structural_brain}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
-                subprocess.run(['applywarp', f'--in={betted_run04}', f'--ref={structural_brain}', f'--warp={warp_run04}', f'--out={fnirted_run04}'])
-            def get_voxel_size(filename):
-                result = subprocess.run(['fslhd', filename], capture_output=True, text=True)
-                lines = result.stdout.split('\n')
-                pixdim1, pixdim2, pixdim3 = None, None, None
-                for line in lines:
-                    if 'pixdim1' in line:
-                        pixdim1 = float(line.split()[1])
-                    elif 'pixdim2' in line:
-                        pixdim2 = float(line.split()[1])
-                    elif 'pixdim3' in line:
-                        pixdim3 = float(line.split()[1])
-                print(f"Voxel sizes for {filename}: {pixdim1}, {pixdim2}, {pixdim3}")
-                return [pixdim1, pixdim2, pixdim3]
-            def create_resample_matrix(current_voxel_size, target_voxel_size):
-                scaling_matrix = [
-                    [target_voxel_size[0] / current_voxel_size[0], 0, 0, 0],
-                    [0, target_voxel_size[1] / current_voxel_size[1], 0, 0],
-                    [0, 0, target_voxel_size[2] / current_voxel_size[2], 0],
-                    [0, 0, 0, 1]
-                ]
-                return scaling_matrix
-            def resample_image(input_image, target_voxel_size, output_image):
-                current_voxel_size = get_voxel_size(input_image)
-                resample_matrix = create_resample_matrix(current_voxel_size, target_voxel_size)
-                matrix_file = f"{p_id}/analysis/susceptibility/fnirt_test/4/resample_matrix.txt"
-                with open(matrix_file, "w") as f:
-                    for row in resample_matrix:
-                        f.write(" ".join(map(str, row)) + "\n")
-                subprocess.run(['flirt', '-in', input_image, '-ref', input_image, '-applyxfm', '-init', matrix_file, '-out', output_image])
-                # subprocess.run(['fslchpixdim', output_image, '1', str(target_voxel_size[0])])
-                # subprocess.run(['fslchpixdim', output_image, '2', str(target_voxel_size[1])])
-                # subprocess.run(['fslchpixdim', output_image, '3', str(target_voxel_size[2])])
-                resampled_voxel_size = get_voxel_size(output_image)
-                print(f"Resampled voxel size: {resampled_voxel_size}")
-            current_voxel_size_run01 = get_voxel_size(fnirted_run01)
-            target_voxel_size_run01 = get_voxel_size(averaged_run01)
-            fnirted_run01_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_resampled.nii.gz"
-            if not os.path.exists(fnirted_run01_resampled):
-                if target_voxel_size_run01 != current_voxel_size_run01:
-                    resample_image(fnirted_run01, target_voxel_size_run01, fnirted_run01_resampled)
-            current_voxel_size_run04 = get_voxel_size(fnirted_run04)
-            target_voxel_size_run04 = get_voxel_size(averaged_run04)
-            fnirted_run04_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04_resampled.nii.gz"
-            if not os.path.exists(fnirted_run04_resampled):
-                if target_voxel_size_run04 != current_voxel_size_run04:
-                    resample_image(fnirted_run04, target_voxel_size_run04, fnirted_run04_resampled)
+                subprocess.run(['applywarp', f'--in={betted_run01}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+                subprocess.run(['applywarp', f'--in={betted_run04}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run04}', f'--out={fnirted_run04}'])
             def read_roi_file(roi_file):
                 voxel_coordinates = []
                 with open(roi_file, 'r') as file:
@@ -2855,12 +2842,6 @@ if answer5 == 'y':
             fnirted_roi_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01_bin.nii.gz'
             if not os.path.exists(fnirted_roi_run01_bin):
                 subprocess.run(['fslmaths', fnirted_roi_run01, '-thr', '0.5', '-bin', fnirted_roi_run01_bin])
-            current_voxel_size_roi_run01 = get_voxel_size(fnirted_roi_run01_bin)
-            target_voxel_size_roi_run01 = get_voxel_size(roi_mask_run01)
-            fnirted_roi_run01_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01_resampled.nii.gz"
-            if not os.path.exists(fnirted_roi_run01_resampled):
-                if target_voxel_size_roi_run01 != current_voxel_size_roi_run01:
-                    resample_image(fnirted_roi_run01_bin, target_voxel_size_roi_run01, fnirted_roi_run01_resampled)
             roi_file_run04 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-4/depnf_run-4.roi"
             voxel_coordinates_run04 = read_roi_file(roi_file_run04)
             run04_template = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_template.nii.gz"
@@ -2884,12 +2865,6 @@ if answer5 == 'y':
             fnirted_roi_run04_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04_bin.nii.gz'
             if not os.path.exists(fnirted_roi_run04_bin):
                 subprocess.run(['fslmaths', fnirted_roi_run04, '-thr', '0.5', '-bin', fnirted_roi_run04_bin])
-            current_voxel_size_roi_run04 = get_voxel_size(fnirted_roi_run04_bin)
-            target_voxel_size_roi_run04 = get_voxel_size(roi_mask_run04)
-            fnirted_roi_run04_resampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04_resampled.nii.gz"
-            if not os.path.exists(fnirted_roi_run04_resampled):
-                if target_voxel_size_roi_run04 != current_voxel_size_roi_run04:
-                    resample_image(fnirted_roi_run04_bin, target_voxel_size_roi_run04, fnirted_roi_run04_resampled)
             fnirted_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_bin.nii.gz'
             if not os.path.exists(fnirted_run01_bin):
                 subprocess.run(['fslmaths', fnirted_run01, '-thr', '100', '-bin', fnirted_run01_bin])

@@ -2776,15 +2776,17 @@ if answer5 == 'y':
             if None in [dim1, dim2, dim3, dim4, datatype, pixdim1, pixdim2, pixdim3, pixdim4]:
                 raise ValueError("Missing one or more required fslinfo values")
             print(f"dim1: {dim1}, dim2: {dim2}, dim3: {dim3}, dim4: {dim4}, datatype: {datatype}, pixdim1: {pixdim1}, pixdim2: {pixdim2}, pixdim3: {pixdim3}, pixdim4: {pixdim4}")
-            structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
-            blank_image_34_slices = f"{p_id}/analysis/susceptibility/fnirt_test/4/blank_image_34_slices.nii.gz"
-            subprocess.run(['fslcreatehd', str(dim1), str(dim2), '34', str(dim4), str(pixdim1), str(pixdim2), str(pixdim3), str(pixdim4), '0', '0', '0', str(datatype), blank_image_34_slices])
-            subprocess.run(['fslmaths', blank_image_34_slices, '-mul', '0', blank_image_34_slices])
-            betted_run01_extended = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run01_extended.nii.gz"
-            subprocess.run(['fslmerge', '-z', betted_run01_extended, blank_image_34_slices, betted_run01])
+            # structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
+            # blank_image_34_slices = f"{p_id}/analysis/susceptibility/fnirt_test/4/blank_image_34_slices.nii.gz"
+            # subprocess.run(['fslcreatehd', str(dim1), str(dim2), '34', str(dim4), str(pixdim1), str(pixdim2), str(pixdim3), '{:.6f}'.format(pixdim4), '0', '0', '0', str(datatype), blank_image_34_slices])
+            # subprocess.run(['fslmaths', blank_image_34_slices, '-mul', '0', blank_image_34_slices])
+            # betted_run01_extended = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run01_extended.nii.gz"
+            # subprocess.run(['fslmerge', '-z', betted_run01_extended, blank_image_34_slices, betted_run01])
+            # structural_brain_downsampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/structural_brain_downsampled.nii.gz"
+            # subprocess.run(['flirt', '-in', structural_brain, '-ref', betted_run01_extended, '-out', structural_brain_downsampled, '-applyxfm'])
             structural_brain_downsampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/structural_brain_downsampled.nii.gz"
-            subprocess.run(['flirt', '-in', structural_brain, '-ref', betted_run01_extended, '-out', structural_brain_downsampled, '-applyxfm'])
-            
+            subprocess.run(['flirt', '-in', structural_brain, '-ref', betted_run01, '-out', structural_brain_downsampled, '-applyxfm', '-usesqform'])
+
             
             flirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01.nii.gz"
             flirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run04.nii.gz"

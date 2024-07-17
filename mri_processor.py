@@ -2843,7 +2843,7 @@ if answer5 == 'y':
             roi_mask_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/4/run01_subject_space_ROI.nii.gz'
             fnirted_roi_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01.nii.gz'
             if not os.path.exists(fnirted_roi_run01):
-                subprocess.run(['applywarp', f'--in={roi_mask_run01}', f'--ref={structural_brain}', f'--warp={warp_run01}', f'--out={fnirted_roi_run01}'], check=True)
+                subprocess.run(['applywarp', f'--in={roi_mask_run01}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_roi_run01}'], check=True)
             fnirted_roi_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01_bin.nii.gz'
             if not os.path.exists(fnirted_roi_run01_bin):
                 subprocess.run(['fslmaths', fnirted_roi_run01, '-thr', '0.5', '-bin', fnirted_roi_run01_bin])
@@ -2866,7 +2866,7 @@ if answer5 == 'y':
             roi_mask_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/4/run04_subject_space_ROI.nii.gz'
             fnirted_roi_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04.nii.gz'
             if not os.path.exists(fnirted_roi_run04):
-                subprocess.run(['applywarp', f'--in={roi_mask_run04}', f'--ref={structural_brain}', f'--warp={warp_run04}', f'--out={fnirted_roi_run04}'], check=True)
+                subprocess.run(['applywarp', f'--in={roi_mask_run04}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run04}', f'--out={fnirted_roi_run04}'], check=True)
             fnirted_roi_run04_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04_bin.nii.gz'
             if not os.path.exists(fnirted_roi_run04_bin):
                 subprocess.run(['fslmaths', fnirted_roi_run04, '-thr', '0.5', '-bin', fnirted_roi_run04_bin])
@@ -2882,28 +2882,28 @@ if answer5 == 'y':
             run04_bin_inv = f'{p_id}/analysis/susceptibility/fnirt_test/4/run04_bin_inv.nii.gz'
             if not os.path.exists(run04_bin_inv):
                 subprocess.run(['fslmaths', fnirted_run04_bin, '-sub', '1', '-abs', run04_bin_inv])
-            run01_result = subprocess.run(['fslstats', fnirted_roi_run01, '-k', run01_bin_inv, '-V'], capture_output=True, text=True)
+            run01_result = subprocess.run(['fslstats', fnirted_roi_run01_bin, '-k', run01_bin_inv, '-V'], capture_output=True, text=True)
             if run01_result.returncode == 0:
                 run01_result_output = run01_result.stdout.strip()
             else:
                 print("Error executing fslstats command.")
             run01_result_output_values = run01_result_output.split()
             run01_voxels_outside = float(run01_result_output_values[0])
-            run04_result = subprocess.run(['fslstats', fnirted_roi_run04, '-k', run04_bin_inv, '-V'], capture_output=True, text=True)
+            run04_result = subprocess.run(['fslstats', fnirted_roi_run04_bin, '-k', run04_bin_inv, '-V'], capture_output=True, text=True)
             if run04_result.returncode == 0:
                 run04_result_output = run04_result.stdout.strip()
             else:
                 print("Error executing fslstats command.")
             run04_result_output_values = run04_result_output.split()
             run04_voxels_outside = float(run04_result_output_values[0])
-            result1 = subprocess.run(['fslstats', fnirted_roi_run01, '-V'], capture_output=True, text=True)
+            result1 = subprocess.run(['fslstats', fnirted_roi_run01_bin, '-V'], capture_output=True, text=True)
             if result1.returncode == 0:
                 result1_output = result1.stdout.strip()
             else:
                 print("Error executing fslstats command.")
             result1_output_values = result1_output.split()
             total_voxels_in_roi_run01 = float(result1_output_values[0])
-            result2 = subprocess.run(['fslstats', fnirted_roi_run04, '-V'], capture_output=True, text=True)
+            result2 = subprocess.run(['fslstats', fnirted_roi_run04_bin, '-V'], capture_output=True, text=True)
             if result2.returncode == 0:
                 result2_output = result2.stdout.strip()
             else:
@@ -2922,8 +2922,8 @@ if answer5 == 'y':
             run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_trimmed_roi_mask.nii.gz"
             run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_trimmed_roi_mask.nii.gz"
             if not os.path.exists(run01_trimmed_roi_mask) or not os.path.exists(run04_trimmed_roi_mask):
-                subprocess.run(['fslmaths', fnirted_roi_run01, '-mul', fnirted_run01_bin, run01_trimmed_roi_mask])
-                subprocess.run(['fslmaths', fnirted_roi_run04, '-mul', fnirted_run04_bin, run04_trimmed_roi_mask])
+                subprocess.run(['fslmaths', fnirted_roi_run01_bin, '-mul', fnirted_run01_bin, run01_trimmed_roi_mask])
+                subprocess.run(['fslmaths', fnirted_roi_run04_bin, '-mul', fnirted_run04_bin, run04_trimmed_roi_mask])
     group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/4/group_perc_outside_df.txt', sep='\t', index=False)
     plot_data = pd.DataFrame({
         'Participant': bad_participants * 2,

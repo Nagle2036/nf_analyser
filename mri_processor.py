@@ -2800,8 +2800,8 @@ if answer5 == 'y':
             warp_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run01"
             warp_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run04"
             if not os.path.exists(nonlin_run01):
-                subprocess.run(['fnirt', f'--in={betted_run01}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', f'--iout={nonlin_run01}'])
-                subprocess.run(['fnirt', f'--in={betted_run04}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run04_matrix}', f'--cout={warp_run04}', f'--iout={nonlin_run04}'])
+                subprocess.run(['fnirt', f'--in={betted_run01}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run01_matrix}', '--lambda=400,200,150,75,60,45', f'--cout={warp_run01}', f'--iout={nonlin_run01}'])
+                subprocess.run(['fnirt', f'--in={betted_run04}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run04_matrix}', '--lambda=400,200,150,75,60,45', f'--cout={warp_run04}', f'--iout={nonlin_run04}'])
             fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
             fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
             if not os.path.exists(fnirted_run01):

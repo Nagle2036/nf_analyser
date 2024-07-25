@@ -1884,7 +1884,7 @@ if answer5 == 'y':
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
@@ -2266,7 +2266,7 @@ if answer5 == 'y':
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
@@ -2688,7 +2688,7 @@ if answer5 == 'y':
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
@@ -3168,7 +3168,7 @@ if answer5 == 'y':
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),

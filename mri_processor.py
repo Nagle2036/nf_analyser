@@ -1481,7 +1481,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
         labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12, color='black')) +
         scale_y_continuous(expand=(0, 0))
     )
     perc_outside_plot.save('group/susceptibility/fnirt_test/1/perc_outside_plot.png')
@@ -1500,12 +1500,13 @@ if answer5 == 'y':
         _, p_value = stats.mannwhitneyu(perc_outside_pa_values, perc_outside_rl_values)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Perc_Outside': [perc_outside_pa_overall, perc_outside_rl_overall], 'Std_Error': [pa_std_error, rl_std_error]})
-    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
+    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Percentage of Voxels in Signal Dropout Regions') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,10])
+                        scale_y_continuous(expand=(0, 0), limits=[0,10]) +
+                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
     if p_value < 0.001:
         group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
@@ -1584,7 +1585,7 @@ if answer5 == 'y':
         geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0), limits=[0.8,1])
     )
     ssim_index_plot.save('group/susceptibility/fnirt_test/1/ssim_index_plot.png')
@@ -1600,7 +1601,7 @@ if answer5 == 'y':
         geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0))
     )
     ssim_voxels_plot.save('group/susceptibility/fnirt_test/1/ssim_voxels_plot.png')
@@ -1616,7 +1617,7 @@ if answer5 == 'y':
         geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
     ssim_perc_voxels_plot.save('group/susceptibility/fnirt_test/1/ssim_perc_voxels_plot.png')
@@ -1727,8 +1728,9 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
         labs(title='Sequence Tissue Type Overlap', x='Participant', y='Overlap_Perc') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
-        scale_y_continuous(expand=(0, 0), limits=[0,100])
+        theme(axis_text_x=element_text(rotation=45, hjust=1, color='black'), text=element_text(size=12, color='black'), axis_title=element_text(size=12, color='black')) +
+        scale_y_continuous(expand=(0, 0), limits=[0,100]) +
+        scale_fill_manual(values={'CSF': '#E3D985', 'WM': '#db5f57', 'GM': '#57d3db'})
     )
     overlap_perc_plot.save('group/susceptibility/fnirt_test/1/overlap_perc_plot.png')
     filtered_csf = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'].tolist()
@@ -1766,12 +1768,13 @@ if answer5 == 'y':
     else:
         print('Stage 1 segmentation analysis parametric assumptions not met. Two-way ANOVA not run.')
     plot_data = pd.DataFrame({'Tissue_Type': ['CSF', 'WM', 'GM'], 'Overlap_Perc': [mean_csf, mean_wm, mean_gm], 'Std_Error': [csf_std_error, wm_std_error, gm_std_error]})
-    group_overlap_perc_plot = (ggplot(plot_data, aes(x='Tissue_Type', y='Overlap_Perc')) + 
+    group_overlap_perc_plot = (ggplot(plot_data, aes(x='Tissue_Type', y='Overlap_Perc', fill='Tissue_Type')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_Perc + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Sequence Tissue Type Overlap') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,100])
+                        scale_y_continuous(expand=(0, 0), limits=[0,100]) +
+                        scale_fill_manual(values={'CSF': '#E3D985', 'WM': '#db5f57', 'GM': '#57d3db'})
                         )
     group_overlap_perc_plot.save('group/susceptibility/fnirt_test/1/group_overlap_perc_plot.png')
     ssim_values = group_ssim_df.loc[group_ssim_df['p_id'].isin(['P122', 'P136']), 'ssim_index'].tolist()
@@ -1784,14 +1787,14 @@ if answer5 == 'y':
     index_sorted = np.arange(len(plot_data_sorted))
     fig, ax1 = plt.subplots()
     bar_width = 0.35
-    bar1 = ax1.bar(index_sorted, plot_data_sorted['SSIM'], bar_width, label='SSIM', color='blue')
-    ax1.set_ylabel('SSIM', color='blue')
-    ax1.tick_params(axis='y', labelcolor='blue')
+    bar1 = ax1.bar(index_sorted, plot_data_sorted['SSIM'], bar_width, label='SSIM', color='#db5f57')
+    ax1.set_ylabel('SSIM', color='#db5f57')
+    ax1.tick_params(axis='y', labelcolor='#db5f57')
     ax1.set_ylim(0.94, 0.98)
     ax2 = ax1.twinx()
-    bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='red', alpha=0.5)
-    ax2.set_ylabel('Overlap_Perc', color='red')
-    ax2.tick_params(axis='y', labelcolor='red')
+    bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='#57d3db', alpha=0.5)
+    ax2.set_ylabel('Overlap_Perc', color='#57d3db')
+    ax2.tick_params(axis='y', labelcolor='#57d3db')
     ax2.set_ylim(75, 95)
     ax1.set_xlabel('Participant')
     ax1.set_xticks(index_sorted + bar_width / 2)
@@ -1881,7 +1884,7 @@ if answer5 == 'y':
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
@@ -1907,12 +1910,13 @@ if answer5 == 'y':
         _, p_value = stats.mannwhitneyu(pa_means, rl_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
-    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Mean of Voxel Intensities Across Participants.') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,350])
+                        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
     if p_value < 0.001:
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
@@ -2044,7 +2048,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
         labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
     perc_outside_plot.save('group/susceptibility/fnirt_test/2/perc_outside_plot.png')
@@ -2063,12 +2067,13 @@ if answer5 == 'y':
         _, p_value = stats.mannwhitneyu(perc_outside_corrected_values, perc_outside_uncorrected_values)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['corrected', 'uncorrected'], 'Perc_Outside': [perc_outside_corrected_overall, perc_outside_uncorrected_overall], 'Std_Error': [corrected_std_error, uncorrected_std_error]})
-    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
+    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Percentage of Voxels in Signal Dropout Regions') +
-                        scale_y_continuous(expand=(0, 0))
+                        scale_y_continuous(expand=(0, 0)) +
+                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
     if p_value < 0.001:
         group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
@@ -2143,7 +2148,7 @@ if answer5 == 'y':
         geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0), limits=[0.8,1])
     )
     ssim_index_plot.save('group/susceptibility/fnirt_test/2/ssim_index_plot.png')
@@ -2159,7 +2164,7 @@ if answer5 == 'y':
         geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0))
     )
     ssim_voxels_plot.save('group/susceptibility/fnirt_test/2/ssim_voxels_plot.png')
@@ -2175,7 +2180,7 @@ if answer5 == 'y':
         geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
     ssim_perc_voxels_plot.save('group/susceptibility/fnirt_test/2/ssim_perc_voxels_plot.png')
@@ -2261,7 +2266,7 @@ if answer5 == 'y':
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
@@ -2287,12 +2292,13 @@ if answer5 == 'y':
         _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
-    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Mean of Voxel Intensities Across Participants.') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,350])
+                        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
     if p_value < 0.001:
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
@@ -2459,7 +2465,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
         labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
     perc_outside_plot.save('group/susceptibility/fnirt_test/3/perc_outside_plot.png')
@@ -2478,12 +2484,13 @@ if answer5 == 'y':
         _, p_value = stats.mannwhitneyu(perc_outside_run01_values, perc_outside_run04_values)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['run01', 'run04'], 'Perc_Outside': [perc_outside_run01_overall, perc_outside_run04_overall], 'Std_Error': [run01_std_error, run04_std_error]})
-    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
+    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Percentage of Voxels in Signal Dropout Regions') +
-                        scale_y_continuous(expand=(0, 0))
+                        scale_y_continuous(expand=(0, 0)) +
+                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
     if p_value < 0.001:
         group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
@@ -2565,7 +2572,7 @@ if answer5 == 'y':
         geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0), limits=[0.8,1])
     )
     ssim_index_plot.save('group/susceptibility/fnirt_test/3/ssim_index_plot.png')
@@ -2581,7 +2588,7 @@ if answer5 == 'y':
         geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0))
     )
     ssim_voxels_plot.save('group/susceptibility/fnirt_test/3/ssim_voxels_plot.png')
@@ -2597,7 +2604,7 @@ if answer5 == 'y':
         geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
     ssim_perc_voxels_plot.save('group/susceptibility/fnirt_test/3/ssim_perc_voxels_plot.png')
@@ -2681,7 +2688,7 @@ if answer5 == 'y':
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
@@ -2707,12 +2714,13 @@ if answer5 == 'y':
         _, p_value = stats.mannwhitneyu(run01_means, run04_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
-    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Mean of Voxel Intensities Across Participants.') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,350])
+                        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
     if p_value < 0.001:
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
@@ -2800,8 +2808,8 @@ if answer5 == 'y':
             warp_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run01"
             warp_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run04"
             if not os.path.exists(nonlin_run01):
-                subprocess.run(['fnirt', f'--in={betted_run01}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run01_matrix}', '--lambda=400,200,150,75,60,45', f'--cout={warp_run01}', f'--iout={nonlin_run01}'])
-                subprocess.run(['fnirt', f'--in={betted_run04}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run04_matrix}', '--lambda=400,200,150,75,60,45', f'--cout={warp_run04}', f'--iout={nonlin_run04}'])
+                subprocess.run(['fnirt', f'--in={betted_run01}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', f'--iout={nonlin_run01}'])
+                subprocess.run(['fnirt', f'--in={betted_run04}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run04_matrix}', f'--cout={warp_run04}', f'--iout={nonlin_run04}'])
             fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
             fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
             if not os.path.exists(fnirted_run01):
@@ -2937,7 +2945,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
         labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
     perc_outside_plot.save('group/susceptibility/fnirt_test/4/perc_outside_plot.png')
@@ -2956,12 +2964,13 @@ if answer5 == 'y':
         _, p_value = stats.mannwhitneyu(perc_outside_run01_values, perc_outside_run04_values)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['run01', 'run04'], 'Perc_Outside': [perc_outside_run01_overall, perc_outside_run04_overall], 'Std_Error': [run01_std_error, run04_std_error]})
-    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside')) + 
+    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Percentage of Voxels in Signal Dropout Regions') +
-                        scale_y_continuous(expand=(0, 0))
+                        scale_y_continuous(expand=(0, 0)) +
+                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
     if p_value < 0.001:
         group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
@@ -3043,7 +3052,7 @@ if answer5 == 'y':
         geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='SSIM Indexes', x='Participant', y='SSIM') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0), limits=[0.8,1])
     )
     ssim_index_plot.save('group/susceptibility/fnirt_test/4/ssim_index_plot.png')
@@ -3059,7 +3068,7 @@ if answer5 == 'y':
         geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0))
     )
     ssim_voxels_plot.save('group/susceptibility/fnirt_test/4/ssim_voxels_plot.png')
@@ -3075,7 +3084,7 @@ if answer5 == 'y':
         geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
         labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
     ssim_perc_voxels_plot.save('group/susceptibility/fnirt_test/4/ssim_perc_voxels_plot.png')
@@ -3159,7 +3168,7 @@ if answer5 == 'y':
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=14, face='bold')) +
+        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
@@ -3185,12 +3194,13 @@ if answer5 == 'y':
         _, p_value = stats.mannwhitneyu(run01_means, run04_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
-    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean')) + 
+    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Mean of Voxel Intensities Across Participants.') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,350])
+                        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
+                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
     if p_value < 0.001:
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \

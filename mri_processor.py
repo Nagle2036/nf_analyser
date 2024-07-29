@@ -1908,20 +1908,26 @@ if answer5 == 'y':
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.wilcoxon(pa_means, rl_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
+    
+    
     plot_data = pd.DataFrame({'p_id': good_participants, 'pa_values': pa_means, 'rl_values': rl_means})
     data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['pa_values', 'rl_values'], var_name='sequence', value_name='value')
+    data_long['sequence'] = data_long['sequence'].map({'pa_values': 'PA', 'rl_values': 'RL'})
     group_voxel_intensity_ladder_plot = (
-        ggplot(data_long, aes(x='value', y='p_id', group='p_id')) +
-        geom_segment(aes(x='pa_values', xend='rl_values', y='p_id', yend='p_id'), 
-                    data=plot_data, color='gray') +
+        ggplot(data_long, aes(x='sequence', y='value', group='p_id')) +
+        geom_segment(aes(x='sequence', xend='sequence', y='value', yend='value'), 
+                    color='gray', size=1) +
         geom_point(aes(color='sequence'), size=4) +
         theme_minimal() +
         labs(title='Ladder Plot of PA and RL Sequences',
-            x='Value',
-            y='p_id') +
-        scale_y_reverse()
+            x='p_id',
+            y='Voxel Intensity') +
+        scale_x_discrete(limits=['PA', 'RL']) +
+        scale_y_continuous()
     )
     group_voxel_intensity_ladder_plot.save('group/susceptibility/fnirt_test/1/group_voxel_intensity_ladder_plot.png')                          
+    
+    
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +

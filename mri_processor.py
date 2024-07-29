@@ -1909,7 +1909,7 @@ if answer5 == 'y':
         _, p_value = stats.wilcoxon(pa_means, rl_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'p_id': good_participants, 'pa_values': pa_means, 'rl_values': rl_means})
-    data_long = pd.melt(data, id_vars=['p_id'], value_vars=['pa_values', 'rl_values'], var_name='sequence', value_name='value')
+    data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['pa_values', 'rl_values'], var_name='sequence', value_name='value')
     group_voxel_intensity_ladder_plot = (
         ggplot(data_long, aes(x='value', y='p_id', group='p_id')) +
         geom_segment(aes(x='pa_values', xend='rl_values', y='p_id', yend='p_id'), 

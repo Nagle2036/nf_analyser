@@ -1918,6 +1918,11 @@ if answer5 == 'y':
         geom_line(aes(group='p_id'), color='gray', size=1) +
         geom_point(aes(color='sequence'), size=4) +
         theme_light() +
+        theme(
+            panel_grid_major=element_blank(), 
+            panel_grid_minor=element_blank(), 
+            panel_border=element_blank(),   
+        ) +
         labs(title='Ladder Plot of PA and RL Sequences',
             x='p_id',
             y='Voxel Intensity') +

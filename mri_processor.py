@@ -1913,7 +1913,7 @@ if answer5 == 'y':
     group_voxel_intensity_ladder_plot = (
         ggplot(data_long, aes(x='value', y='p_id', group='p_id')) +
         geom_segment(aes(x='pa_values', xend='rl_values', y='p_id', yend='p_id'), 
-                    data=data, color='gray') +
+                    data=plot_data, color='gray') +
         geom_point(aes(color='sequence'), size=4) +
         theme_minimal() +
         labs(title='Ladder Plot of PA and RL Sequences',

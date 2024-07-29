@@ -1480,7 +1480,7 @@ if answer5 == 'y':
         ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
-        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
+        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Percentage of SCC Voxels in Signal Dropout') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12, color='black')) +
         scale_y_continuous(expand=(0, 0))
     )
@@ -1504,7 +1504,7 @@ if answer5 == 'y':
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Percentage of Voxels in Signal Dropout Regions') +
+                        labs(title='Percentage of Voxels in Signal Dropout Regions', y='Percentage of SCC Voxels in Signal Dropout') +
                         scale_y_continuous(expand=(0, 0), limits=[0,10]) +
                         scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
@@ -1616,7 +1616,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
-        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
+        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Percentage of SCC Voxels in SSIM Mask') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
@@ -1727,10 +1727,10 @@ if answer5 == 'y':
         ggplot(plot_data, aes(x='Participant', y='Overlap_Perc', fill='Tissue_Type')) +
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
-        labs(title='Sequence Tissue Type Overlap', x='Participant', y='Overlap_Perc') +
+        labs(title='Sequence Tissue Type Overlap', x='Participant', y='Tissue Overlap Percentage', fill='Tissue Type') +
         theme(axis_text_x=element_text(rotation=45, hjust=1, color='black'), text=element_text(size=12, color='black'), axis_title=element_text(size=12, color='black')) +
         scale_y_continuous(expand=(0, 0), limits=[0,100]) +
-        scale_fill_manual(values={'CSF': '#E3D985', 'WM': '#db5f57', 'GM': '#57d3db'})
+        scale_fill_manual(values={'CSF': '#F9DC5C', 'WM': '#db5f57', 'GM': '#57d3db'})
     )
     overlap_perc_plot.save('group/susceptibility/fnirt_test/1/overlap_perc_plot.png')
     filtered_csf = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'].tolist()
@@ -1771,9 +1771,9 @@ if answer5 == 'y':
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_Perc + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Sequence Tissue Type Overlap') +
+                        labs(title='Sequence Tissue Type Overlap', x='Tissue Type', y='Tissue Overlap Percentage') +
                         scale_y_continuous(expand=(0, 0), limits=[0,100]) +
-                        scale_fill_manual(values={'CSF': '#E3D985', 'WM': '#db5f57', 'GM': '#57d3db'})
+                        scale_fill_manual(values={'CSF': '#F9DC5C', 'WM': '#db5f57', 'GM': '#57d3db'})
                         )
     group_overlap_perc_plot.save('group/susceptibility/fnirt_test/1/group_overlap_perc_plot.png')
     ssim_values = group_ssim_df.loc[group_ssim_df['p_id'].isin(['P122', 'P136']), 'ssim_index'].tolist()
@@ -1787,12 +1787,12 @@ if answer5 == 'y':
     fig, ax1 = plt.subplots()
     bar_width = 0.35
     bar1 = ax1.bar(index_sorted, plot_data_sorted['SSIM'], bar_width, label='SSIM', color='#db5f57')
-    ax1.set_ylabel('SSIM', color='#db5f57')
+    ax1.set_ylabel('SSIM Index', color='#db5f57')
     ax1.tick_params(axis='y', labelcolor='#db5f57')
     ax1.set_ylim(0.94, 0.98)
     ax2 = ax1.twinx()
-    bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='#57d3db', alpha=0.5)
-    ax2.set_ylabel('Overlap_Perc', color='#57d3db')
+    bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='#57d3db', alpha=1)
+    ax2.set_ylabel(' Tissue Overlap Percentage', color='#57d3db')
     ax2.tick_params(axis='y', labelcolor='#57d3db')
     ax2.set_ylim(75, 95)
     ax1.set_xlabel('Participant')
@@ -1882,7 +1882,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
-        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean SCC Signal Intensity') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
@@ -1909,7 +1909,6 @@ if answer5 == 'y':
         _, p_value = stats.wilcoxon(pa_means, rl_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     
-    
     plot_data = pd.DataFrame({'p_id': good_participants, 'pa_values': pa_means, 'rl_values': rl_means})
     data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['pa_values', 'rl_values'], var_name='sequence', value_name='value')
     data_long['sequence'] = data_long['sequence'].map({'pa_values': 'PA', 'rl_values': 'RL'})
@@ -1921,23 +1920,24 @@ if answer5 == 'y':
         theme(
             panel_grid_major=element_blank(), 
             panel_grid_minor=element_blank(), 
-            panel_border=element_blank(),   
+            panel_border=element_blank(),
+            axis_line_x=element_line(color='black'),  
+            axis_line_y=element_line(color='black'),  
         ) +
         labs(title='Ladder Plot of PA and RL Sequences',
-            x='p_id',
-            y='Voxel Intensity') +
+            x='Sequence',
+            y='Mean SCC Signal Intensity') +
         scale_x_discrete(limits=['PA', 'RL']) +
         scale_y_continuous()
     )
     group_voxel_intensity_ladder_plot.save('group/susceptibility/fnirt_test/1/group_voxel_intensity_ladder_plot.png')                          
-    
     
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Mean of Voxel Intensities Across Participants.') +
+                        labs(title='Mean of Voxel Intensities Across Participants', y='Mean SCC Signal Intensity') +
                         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
                         scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
@@ -2070,7 +2070,7 @@ if answer5 == 'y':
         ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
-        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
+        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Percentage of SCC Voxels in Signal Dropout') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
@@ -2094,7 +2094,7 @@ if answer5 == 'y':
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Percentage of Voxels in Signal Dropout Regions') +
+                        labs(title='Percentage of Voxels in Signal Dropout Regions', y='Percentage of SCC Voxels in Signal Dropout') +
                         scale_y_continuous(expand=(0, 0)) +
                         scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
@@ -2202,7 +2202,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
-        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
+        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Percentage of SCC Voxels in SSIM Mask') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
@@ -2288,7 +2288,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
-        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean SCC Signal Intensity') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
@@ -2319,7 +2319,7 @@ if answer5 == 'y':
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Mean of Voxel Intensities Across Participants.') +
+                        labs(title='Mean of Voxel Intensities Across Participants', y='Mean SCC Signal Intensity') +
                         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
                         scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
@@ -2487,7 +2487,7 @@ if answer5 == 'y':
         ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
-        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
+        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Percentage of SCC Voxels in Signal Dropout') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
@@ -2511,7 +2511,7 @@ if answer5 == 'y':
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Percentage of Voxels in Signal Dropout Regions') +
+                        labs(title='Percentage of Voxels in Signal Dropout Regions', y='Percentage of SCC Voxels in Signal Dropout') +
                         scale_y_continuous(expand=(0, 0)) +
                         scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
@@ -2626,7 +2626,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
-        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
+        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Percentage of SCC Voxels in SSIM Mask') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
@@ -2710,7 +2710,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
-        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean SCC Signal Intensity') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
@@ -2741,7 +2741,7 @@ if answer5 == 'y':
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Mean of Voxel Intensities Across Participants.') +
+                        labs(title='Mean of Voxel Intensities Across Participants', y='Mean SCC Signal Intensity') +
                         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
                         scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
@@ -2967,7 +2967,7 @@ if answer5 == 'y':
         ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
-        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Perc_Outside') +
+        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Percentage of SCC Voxels in Signal Dropout') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
@@ -2991,7 +2991,7 @@ if answer5 == 'y':
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Percentage of Voxels in Signal Dropout Regions') +
+                        labs(title='Percentage of Voxels in Signal Dropout Regions', y='Percentage of SCC Voxels in Signal Dropout') +
                         scale_y_continuous(expand=(0, 0)) +
                         scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )
@@ -3106,7 +3106,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
         theme_classic() +
-        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Perc_Voxels') +
+        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Percentage of SCC Voxels in SSIM Mask') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0))
     )
@@ -3190,7 +3190,7 @@ if answer5 == 'y':
         geom_bar(stat='identity', position='dodge') +
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
         theme_classic() +
-        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean Value') +
+        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean SCC Signal Intensity') +
         theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
@@ -3221,7 +3221,7 @@ if answer5 == 'y':
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Mean of Voxel Intensities Across Participants.') +
+                        labs(title='Mean of Voxel Intensities Across Participants', y='Mean SCC Signal Intensity') +
                         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
                         scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
                         )

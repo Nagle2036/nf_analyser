@@ -1915,8 +1915,7 @@ if answer5 == 'y':
     data_long['sequence'] = data_long['sequence'].map({'pa_values': 'PA', 'rl_values': 'RL'})
     group_voxel_intensity_ladder_plot = (
         ggplot(data_long, aes(x='sequence', y='value', group='p_id')) +
-        geom_segment(data=data_long[data_long['sequence'] == 'PA'], aes(x='sequence', xend='sequence', y='value', yend=data_long[data_long['sequence'] == 'RL']['value'].values), 
-                    color='gray', size=1) +
+        geom_line(aes(group='p_id'), color='gray', size=1) +
         geom_point(aes(color='sequence'), size=4) +
         theme_light() +
         labs(title='Ladder Plot of PA and RL Sequences',

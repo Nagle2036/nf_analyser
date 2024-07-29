@@ -1747,7 +1747,6 @@ if answer5 == 'y':
     group_overlap_perc_df['overlap_perc'] = pd.to_numeric(group_overlap_perc_df['overlap_perc'], errors='coerce')
     sphericity_test = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
     epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
-    epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
     print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
     normality_passed = True
     shapiro_results = group_overlap_perc_df.groupby('tissue_type')['overlap_perc'].apply(stats.shapiro)
@@ -1903,12 +1902,26 @@ if answer5 == 'y':
     _, rl_means_overall_shap_p = stats.shapiro(rl_means)
     if pa_means_overall_shap_p > 0.05 and rl_means_overall_shap_p > 0.5:
         print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(pa_means, rl_means)
+        _, p_value = stats.ttest_rel(pa_means, rl_means)
         print(f"T-test p-value: {p_value}")
     else:
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(pa_means, rl_means)
+        _, p_value = stats.wilcoxon(pa_means, rl_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
+    plot_data = pd.DataFrame({'p_id': good_participants, 'pa_values': pa_means, 'rl_values': rl_means})
+    data_long = pd.melt(data, id_vars=['p_id'], value_vars=['pa_values', 'rl_values'], var_name='sequence', value_name='value')
+    group_voxel_intensity_ladder_plot = (
+        ggplot(data_long, aes(x='value', y='p_id', group='p_id')) +
+        geom_segment(aes(x='pa_values', xend='rl_values', y='p_id', yend='p_id'), 
+                    data=data, color='gray') +
+        geom_point(aes(color='sequence'), size=4) +
+        theme_minimal() +
+        labs(title='Ladder Plot of PA and RL Sequences',
+            x='Value',
+            y='p_id') +
+        scale_y_reverse()
+    )
+    group_voxel_intensity_ladder_plot.save('group/susceptibility/fnirt_test/1/group_voxel_intensity_ladder_plot.png')                          
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -2285,11 +2298,11 @@ if answer5 == 'y':
     _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
     if corrected_means_overall_shap_p > 0.05 and uncorrected_means_overall_shap_p > 0.5:
         print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(corrected_means, uncorrected_means)
+        _, p_value = stats.ttest_rel(corrected_means, uncorrected_means)
         print(f"T-test p-value: {p_value}")
     else:
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(corrected_means, uncorrected_means)
+        _, p_value = stats.wilcoxon(corrected_means, uncorrected_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
@@ -2707,11 +2720,11 @@ if answer5 == 'y':
     _, run04_means_overall_shap_p = stats.shapiro(run04_means)
     if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.5:
         print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(run01_means, run04_means)
+        _, p_value = stats.ttest_rel(run01_means, run04_means)
         print(f"T-test p-value: {p_value}")
     else:
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(run01_means, run04_means)
+        _, p_value = stats.wilcoxon(run01_means, run04_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
@@ -3187,11 +3200,11 @@ if answer5 == 'y':
     _, run04_means_overall_shap_p = stats.shapiro(run04_means)
     if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.5:
         print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(run01_means, run04_means)
+        _, p_value = stats.ttest_rel(run01_means, run04_means)
         print(f"T-test p-value: {p_value}")
     else:
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(run01_means, run04_means)
+        _, p_value = stats.wilcoxon(run01_means, run04_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
     plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 

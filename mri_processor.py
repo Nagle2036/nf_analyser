@@ -276,12 +276,18 @@ if answer3 == 'y':
     directories = [entry for entry in entries if os.path.isdir(os.path.join(bids_folder, entry))]
     if directories == ['code']:
         for code in heudiconv_subject_codes:
-            subprocess.run(['heudiconv', '-d', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{subject}/data/neurofeedback/20230404.CISC35036.CISC35036/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', ''])
+            path = os.path.join(os.getcwd(), f'P{code}', 'data', 'neurofeedback')
+            cisc_folder = None
+            for folder_name in os.listdir(path):
+                if "CISC" in folder_name:
+                    cisc_folder = folder_name
+                    break
+            if cisc_folder is None:
+                print("No 'CISC' folder found in the 'neurofeedback' directory.")
+                exit(1)
+            if not os.path.exists(f"bids/sub-{code}"):
+                subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/heuristic.py', '-s', f'{code}', '-c', 'dcm2niix', '-b', '--overwrite'])
 
-
-
-
-# heudiconv -d /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{subject}/data/neurofeedback/20230404.CISC35036.CISC35036/*.dcm -o /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/ -f convertall -s 004 -c none --overwrite
 
 
 #endregion

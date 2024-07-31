@@ -283,7 +283,7 @@ if answer3 == 'y':
             print("No 'CISC' folder found in the 'neurofeedback' directory.")
             exit(1)
         if not os.path.exists(f"bids/sub-{code}"):
-            subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/heuristic.py', '-s', f'{code}', '-c', 'dcm2niix', '-b', '--overwrite'])
+            subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/code/heuristic.py', '-s', f'{code}', '-c', 'dcm2niix', '-b', '--overwrite'])
 #endregion
 
 #region FMRI PREPROCESSING.
@@ -2864,44 +2864,55 @@ if answer6 == 'y':
                 subprocess.run(["bet", averaged_run01, betted_run01, "-m", "-R"])
                 subprocess.run(["bet", averaged_run04, betted_run04, "-m", "-R"])
             
+            spm_bet_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "4", "spm_bet")
+            os.makedirs(spm_bet_folder, exist_ok=True)
+            structural_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/structural.nii"
+            if not os.path.exists(structural_spm):
+                shutil.copy(structural_path, structural_spm)
+            structural_brain_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/structural_brain.nii.gz"
+            if not os.path.exists(structural_brain_spm):
+                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', structural_spm])
+            averaged_run01_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run01.nii.gz"
+            averaged_run04_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run04.nii.gz"
+            if not os.path.exists(averaged_run01_spm) or not os.path.exists(averaged_run04_spm)
+                shutil.copy(averaged_run01, averaged_run01_spm)
+                shutil.copy(averaged_run04, averaged_run04_spm)
+            betted_run01_spm = "{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run01_brain.nii.gz"
+            betted_run04_spm = "{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run04_brain.nii.gz"
+            if not os.path.exists(betted_run01_spm) or not os.path.exists(betted_run04_spm):
+                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run01])
+                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run04])
+            
 
-            betted_run01_info = subprocess.run(['fslinfo', betted_run01], capture_output=True, text=True)
-            betted_run01_info_output = betted_run01_info.stdout
-            dim1 = dim2 = dim3 = dim4 = datatype = None
-            pixdim1 = pixdim2 = pixdim3 = pixdim4 = None
-            for line in betted_run01_info_output.splitlines():
-                parts = line.split()
-                if line.startswith("dim1"):
-                    dim1 = int(parts[1])
-                elif line.startswith("dim2"):
-                    dim2 = int(parts[1])
-                elif line.startswith("dim3"):
-                    dim3 = int(parts[1])
-                elif line.startswith("dim4"):
-                    dim4 = int(parts[1])
-                elif line.startswith("datatype"):
-                    datatype = int(parts[1])
-                elif line.startswith("pixdim1"):
-                    pixdim1 = float(parts[1])
-                elif line.startswith("pixdim2"):
-                    pixdim2 = float(parts[1])
-                elif line.startswith("pixdim3"):
-                    pixdim3 = float(parts[1])
-                elif line.startswith("pixdim4"):
-                    pixdim4 = float(parts[1])
-            if None in [dim1, dim2, dim3, dim4, datatype, pixdim1, pixdim2, pixdim3, pixdim4]:
-                raise ValueError("Missing one or more required fslinfo values")
-            print(f"dim1: {dim1}, dim2: {dim2}, dim3: {dim3}, dim4: {dim4}, datatype: {datatype}, pixdim1: {pixdim1}, pixdim2: {pixdim2}, pixdim3: {pixdim3}, pixdim4: {pixdim4}")
-            # structural_brain = f"{p_id}/analysis/preproc/structural/structural_brain.nii.gz"
-            # blank_image_34_slices = f"{p_id}/analysis/susceptibility/fnirt_test/4/blank_image_34_slices.nii.gz"
-            # subprocess.run(['fslcreatehd', str(dim1), str(dim2), '34', str(dim4), str(pixdim1), str(pixdim2), str(pixdim3), '{:.6f}'.format(pixdim4), '0', '0', '0', str(datatype), blank_image_34_slices])
-            # subprocess.run(['fslmaths', blank_image_34_slices, '-mul', '0', blank_image_34_slices])
-            # betted_run01_extended = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run01_extended.nii.gz"
-            # subprocess.run(['fslmerge', '-z', betted_run01_extended, blank_image_34_slices, betted_run01])
+            # betted_run01_info = subprocess.run(['fslinfo', betted_run01], capture_output=True, text=True)
+            # betted_run01_info_output = betted_run01_info.stdout
+            # dim1 = dim2 = dim3 = dim4 = datatype = None
+            # pixdim1 = pixdim2 = pixdim3 = pixdim4 = None
+            # for line in betted_run01_info_output.splitlines():
+            #     parts = line.split()
+            #     if line.startswith("dim1"):
+            #         dim1 = int(parts[1])
+            #     elif line.startswith("dim2"):
+            #         dim2 = int(parts[1])
+            #     elif line.startswith("dim3"):
+            #         dim3 = int(parts[1])
+            #     elif line.startswith("dim4"):
+            #         dim4 = int(parts[1])
+            #     elif line.startswith("datatype"):
+            #         datatype = int(parts[1])
+            #     elif line.startswith("pixdim1"):
+            #         pixdim1 = float(parts[1])
+            #     elif line.startswith("pixdim2"):
+            #         pixdim2 = float(parts[1])
+            #     elif line.startswith("pixdim3"):
+            #         pixdim3 = float(parts[1])
+            #     elif line.startswith("pixdim4"):
+            #         pixdim4 = float(parts[1])
+            # if None in [dim1, dim2, dim3, dim4, datatype, pixdim1, pixdim2, pixdim3, pixdim4]:
+            #     raise ValueError("Missing one or more required fslinfo values")
+            # print(f"dim1: {dim1}, dim2: {dim2}, dim3: {dim3}, dim4: {dim4}, datatype: {datatype}, pixdim1: {pixdim1}, pixdim2: {pixdim2}, pixdim3: {pixdim3}, pixdim4: {pixdim4}")
             # structural_brain_downsampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/structural_brain_downsampled.nii.gz"
-            # subprocess.run(['flirt', '-in', structural_brain, '-ref', betted_run01_extended, '-out', structural_brain_downsampled, '-applyxfm'])
-            structural_brain_downsampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/structural_brain_downsampled.nii.gz"
-            subprocess.run(['flirt', '-in', structural_brain, '-ref', betted_run01, '-out', structural_brain_downsampled, '-applyxfm', '-usesqform'])
+            # subprocess.run(['flirt', '-in', structural_brain, '-ref', betted_run01, '-out', structural_brain_downsampled, '-applyxfm', '-usesqform'])
 
             
             flirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01.nii.gz"

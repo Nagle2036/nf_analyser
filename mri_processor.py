@@ -196,31 +196,86 @@ if answer2 == 'y':
         RETRY_DELAY_SECONDS = 5
         while True:
             download_files_from_folder(parent_folder, save_directory, downloaded_files)
-            # Download the specific file eCRF.xlsx
-            ecrf_file_name = 'eCRF.xlsx'
-            ecrf_file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{ecrf_file_name}'
-            if ecrf_file_name not in downloaded_files:
-                ecrf_item = next((item for item in client.folder(parent_folder.parent.id).get_items() if item.name == ecrf_file_name), None)
-                if ecrf_item:             
-                    retry_attempts = 0
-                    while retry_attempts < MAX_RETRY_ATTEMPTS:
-                        try:
-                            with open(ecrf_file_path, 'wb') as writeable_stream:
-                                ecrf_item.download_to(writeable_stream)
-                                downloaded_files.add(ecrf_file_name)
-                                print(f"Downloaded: {ecrf_file_name}")
-                            break
-                        except Exception as e:
-                            print(f"An error occurred while downloading '{ecrf_file_name}': {str(e)}")
+
+            specific_files = ['eCRF.xlsx', 'heuristic.py']
+            for file in specific_files:
+                file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{file}'
+                if file not in downloaded_files:
+                    file_item = next((item for item in client.folder(parent_folder.parent.id).get_items() if item.name == file), None)
+                    if item:
+                        retry_attempts = 0
+                        while retry_attempts < MAX_RETRY_ATTEMPTS:
+                            try:
+                                with open(file_path, 'wb') as writeable_stream:
+                                    item.download_to(writeable_stream)
+                                    downloaded_files.add(file)
+                                    print(f"Downloaded: {file}.")
+                                break
+                            except Exception as e
+                            print(f"An error occurred while downloading {file}: {str(e)}")
                             print("Retrying...")
                             time.sleep(RETRY_DELAY_SECONDS)
                             retry_attempts += 1
-                    if retry_attempts == MAX_RETRY_ATTEMPTS:
-                        print(f"Failed to download '{ecrf_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
+                        if retry_attempts == MAX_RETRY_ATTEMPTS:
+                            print(f"Failed to download {file} after {MAX_RETRY_ATTEMPTS} attempts.")
+                    else:
+                        print(f"{file} not found in parent folder.")
                 else:
-                    print(f'eCRF.xlsx not found in parent folder.')
-            else:
-                print(f'eCRF.xlsx already downloaded.')
+                    print(f"{file} already downloaded.")
+
+            # # Download the specific file eCRF.xlsx
+            # ecrf_file_name = 'eCRF.xlsx'
+            # ecrf_file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{ecrf_file_name}'
+            # if ecrf_file_name not in downloaded_files:
+            #     ecrf_item = next((item for item in client.folder(parent_folder.parent.id).get_items() if item.name == ecrf_file_name), None)
+            #     if ecrf_item:             
+            #         retry_attempts = 0
+            #         while retry_attempts < MAX_RETRY_ATTEMPTS:
+            #             try:
+            #                 with open(ecrf_file_path, 'wb') as writeable_stream:
+            #                     ecrf_item.download_to(writeable_stream)
+            #                     downloaded_files.add(ecrf_file_name)
+            #                     print(f"Downloaded: {ecrf_file_name}")
+            #                 break
+            #             except Exception as e:
+            #                 print(f"An error occurred while downloading '{ecrf_file_name}': {str(e)}")
+            #                 print("Retrying...")
+            #                 time.sleep(RETRY_DELAY_SECONDS)
+            #                 retry_attempts += 1
+            #         if retry_attempts == MAX_RETRY_ATTEMPTS:
+            #             print(f"Failed to download '{ecrf_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
+            #     else:
+            #         print(f'eCRF.xlsx not found in parent folder.')
+            # else:
+            #     print(f'eCRF.xlsx already downloaded.')
+
+            # # Download the specific file heuristic.py file
+            # heuristic_file_name = 'heuristic.py'
+            # heuristic_file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{heuristic_file_name}'
+            # if heuristic_file_name not in downloaded_files:
+            #     heuristic_item = next((item for item in client.folder(parent_folder.parent.id).get_items() if item.name == heuristic_file_name), None)
+            #     if heuristic_item:             
+            #         retry_attempts = 0
+            #         while retry_attempts < MAX_RETRY_ATTEMPTS:
+            #             try:
+            #                 with open(heuristic_file_path, 'wb') as writeable_stream:
+            #                     heuristic_item.download_to(writeable_stream)
+            #                     downloaded_files.add(heuristic_file_name)
+            #                     print(f"Downloaded: {heuristic_file_name}")
+            #                 break
+            #             except Exception as e:
+            #                 print(f"An error occurred while downloading '{heuristic_file_name}': {str(e)}")
+            #                 print("Retrying...")
+            #                 time.sleep(RETRY_DELAY_SECONDS)
+            #                 retry_attempts += 1
+            #         if retry_attempts == MAX_RETRY_ATTEMPTS:
+            #             print(f"Failed to download '{heuristic_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
+            #     else:
+            #         print(f'heuristic.py not found in parent folder.')
+            # else:
+            #     print(f'heuristic.py already downloaded.')
+
+
             # Get the updated folder information to check if all files have been downloaded
             parent_folder_info = client.folder(parent_folder.id).get()
             item_collection = parent_folder_info["item_collection"]
@@ -243,10 +298,53 @@ if answer2 == 'y':
     server_thread.join()
 #endregion
 
+#region CONVERT DICOMS TO BIDS FORMAT.
+
+answer3 = input("Would you like to convert raw DICOMs to BIDS format? (y/n)\n")
+if answer3 = 'y':
+    p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
+    if p_id.startswith('P'):
+        p_id.replace('P', '')
+    heudiconv_subject_codes = ['004', '006', '020', '030', '059', '078', '093', '094', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
+    if p_id == 'ALL':
+        participants_to_iterate = heudiconv_subject_codes
+    else:
+        participants_to_iterate = [p_id]
+    code_folder = 'code'
+    bids_folder = os.path.join(os.getcwd(), 'bids')
+    restart = input("Would you like to start the BIDS conversion from scratch for all participants? This will remove all files from the bids/ folder, apart from bids/code/. (y/n)\n")
+    if restart == 'y':
+        double_check = input("Are you sure? (y/n)")
+        if double_check = 'y':
+            for item in os.listdir(bids_folder)
+                item_path = os.path.join(bids_folder, item)
+                if item != code_folder:
+                    if os.path.exists(item_path):
+                        print(f"Deleting bids/{item} folder...")
+                        shutil.rmtree(item_path)
+                        print(f"bids/{item} folder successfully deleted.")
+                    else: 
+                        print(f"bids/{item} folder does not exist.")
+        else:
+            sys.exit()
+    entries = os.listdir(bids_folder)
+    directories = [entry for entry in entries if os.path.isdir(os.path.join(bids_folder, entry))]
+    if directories == ['code']:
+        for code in heudiconv_subject_codes:
+            subprocess.run(['heudiconv', '-d', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{subject}/data/neurofeedback/20230404.CISC35036.CISC35036/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', ''])
+
+
+
+
+heudiconv -d /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{subject}/data/neurofeedback/20230404.CISC35036.CISC35036/*.dcm -o /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/ -f convertall -s 004 -c none --overwrite
+
+
+#endregion
+
 #region FMRI PREPROCESSING.
 
-answer3 = input("Would you like to execute fMRI preprocessing? (y/n)\n")
-if answer3 == 'y':
+answer4 = input("Would you like to execute fMRI preprocessing? (y/n)\n")
+if answer4 == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
@@ -923,10 +1021,10 @@ if answer3 == 'y':
 
 #endregion
 
-#region THERM ANALYSIS.
+#region THERMOMETER ANALYSIS.
 
-answer4 = input("Would you like to execute thermometer analysis? (y/n)\n")
-if answer4 == 'y':
+answer5 = input("Would you like to execute thermometer analysis? (y/n)\n")
+if answer5 == 'y':
     
     # Step 1: Access Run 2 and 3 tbv_script thermometer files and extract relevant data into dataframe.
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
@@ -1125,8 +1223,8 @@ if answer4 == 'y':
 
 #region SUSCEPTIBILITY ANALYSIS.
 
-answer5 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
-if answer5 == 'y':
+answer6 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
+if answer6 == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
@@ -1908,7 +2006,6 @@ if answer5 == 'y':
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.wilcoxon(pa_means, rl_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
-    
     plot_data = pd.DataFrame({'p_id': good_participants, 'pa_values': pa_means, 'rl_values': rl_means})
     data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['pa_values', 'rl_values'], var_name='sequence', value_name='value')
     data_long['sequence'] = data_long['sequence'].map({'pa_values': 'PA', 'rl_values': 'RL'})
@@ -1931,7 +2028,6 @@ if answer5 == 'y':
         scale_y_continuous()
     )
     group_voxel_intensity_ladder_plot.save('group/susceptibility/fnirt_test/1/group_voxel_intensity_ladder_plot.png')                          
-    
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -2314,6 +2410,28 @@ if answer5 == 'y':
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.wilcoxon(corrected_means, uncorrected_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
+    plot_data = pd.DataFrame({'p_id': good_participants, 'corrected_values': corrected_means, 'uncorrected_values': uncorrected_means})
+    data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['corrected_values', 'uncorrected_values'], var_name='sequence', value_name='value')
+    data_long['sequence'] = data_long['sequence'].map({'corrected_values': 'CORR', 'uncorrected_values': 'UNCORR'})
+    group_voxel_intensity_ladder_plot = (
+        ggplot(data_long, aes(x='sequence', y='value', group='p_id')) +
+        geom_line(aes(group='p_id'), color='gray', size=1) +
+        geom_point(aes(color='sequence'), size=4) +
+        theme_light() +
+        theme(
+            panel_grid_major=element_blank(), 
+            panel_grid_minor=element_blank(), 
+            panel_border=element_blank(),
+            axis_line_x=element_line(color='black'),  
+            axis_line_y=element_line(color='black'),  
+        ) +
+        labs(title='Ladder Plot of Corrected and Uncorrected PA Sequence',
+            x='Sequence',
+            y='Mean SCC Signal Intensity') +
+        scale_x_discrete(limits=['CORR', 'UNCORR']) +
+        scale_y_continuous()
+    )
+    group_voxel_intensity_ladder_plot.save('group/susceptibility/fnirt_test/2/group_voxel_intensity_ladder_plot.png')
     plot_data = pd.DataFrame({'Sequence': ['Corrected', 'Uncorrected'], 'Mean': [corrected_means_overall, uncorrected_means_overall], 'Std_Error': [corrected_std_error_overall, uncorrected_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -2736,6 +2854,28 @@ if answer5 == 'y':
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.wilcoxon(run01_means, run04_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
+    plot_data = pd.DataFrame({'p_id': bad_participants, 'run01_values': run01_means, 'run04_values': run04_means})
+    data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['run01_values', 'run04_values'], var_name='sequence', value_name='value')
+    data_long['sequence'] = data_long['sequence'].map({'run01_values': 'RUN01', 'run04_values': 'RUN04'})
+    group_voxel_intensity_ladder_plot = (
+        ggplot(data_long, aes(x='sequence', y='value', group='p_id')) +
+        geom_line(aes(group='p_id'), color='gray', size=1) +
+        geom_point(aes(color='sequence'), size=4) +
+        theme_light() +
+        theme(
+            panel_grid_major=element_blank(), 
+            panel_grid_minor=element_blank(), 
+            panel_border=element_blank(),
+            axis_line_x=element_line(color='black'),  
+            axis_line_y=element_line(color='black'),  
+        ) +
+        labs(title='Ladder Plot of RUN01 and RUN04 Sequences',
+            x='Sequence',
+            y='Mean SCC Signal Intensity') +
+        scale_x_discrete(limits=['RUN01', 'RUN04']) +
+        scale_y_continuous()
+    )
+    group_voxel_intensity_ladder_plot.save('group/susceptibility/fnirt_test/3/group_voxel_intensity_ladder_plot.png')
     plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -3216,6 +3356,28 @@ if answer5 == 'y':
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
         _, p_value = stats.wilcoxon(run01_means, run04_means)
         print(f"Mann-Whitney U test p-value: {p_value}")
+    plot_data = pd.DataFrame({'p_id': bad_participants, 'run01_values': run01_means, 'run04_values': run04_means})
+    data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['run01_values', 'run04_values'], var_name='sequence', value_name='value')
+    data_long['sequence'] = data_long['sequence'].map({'run01_values': 'RUN01', 'run04_values': 'RUN04'})
+    group_voxel_intensity_ladder_plot = (
+        ggplot(data_long, aes(x='sequence', y='value', group='p_id')) +
+        geom_line(aes(group='p_id'), color='gray', size=1) +
+        geom_point(aes(color='sequence'), size=4) +
+        theme_light() +
+        theme(
+            panel_grid_major=element_blank(), 
+            panel_grid_minor=element_blank(), 
+            panel_border=element_blank(),
+            axis_line_x=element_line(color='black'),  
+            axis_line_y=element_line(color='black'),  
+        ) +
+        labs(title='Ladder Plot of FNIRTed RUN01 and RUN04 Sequences',
+            x='Sequence',
+            y='Mean SCC Signal Intensity') +
+        scale_x_discrete(limits=['RUN01', 'RUN04']) +
+        scale_y_continuous()
+    )
+    group_voxel_intensity_ladder_plot.save('group/susceptibility/fnirt_test/4/group_voxel_intensity_ladder_plot.png')
     plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -3235,5 +3397,9 @@ if answer5 == 'y':
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
     group_voxel_intensity_plot.save('group/susceptibility/fnirt_test/4/group_voxel_intensity_plot.png')
+
+#endregion
+
+#region BEHAVIOURAL ANALYSIS.
 
 #endregion

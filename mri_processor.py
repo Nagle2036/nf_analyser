@@ -212,10 +212,10 @@ if answer2 == 'y':
                                     print(f"Downloaded: {file}.")
                                 break
                             except Exception as e:
-                            print(f"An error occurred while downloading {file}: {str(e)}")
-                            print("Retrying...")
-                            time.sleep(RETRY_DELAY_SECONDS)
-                            retry_attempts += 1
+                                print(f"An error occurred while downloading {file}: {str(e)}")
+                                print("Retrying...")
+                                time.sleep(RETRY_DELAY_SECONDS)
+                                retry_attempts += 1
                         if retry_attempts == MAX_RETRY_ATTEMPTS:
                             print(f"Failed to download {file} after {MAX_RETRY_ATTEMPTS} attempts.")
                     else:

@@ -65,237 +65,301 @@ if answer2 == 'y':
     if not os.path.exists(p_id_folder):
         os.makedirs(p_id_folder)
     
-    # Define the signal handler function
-    def signal_handler(sig, frame):
-        # Kill the process using port 8080
-        for proc in psutil.process_iter():
-            try:
-                connections = proc.connections()
-                for conn in connections:
-                    if conn.laddr.port == 8080:
-                        proc.kill()
-            except psutil.AccessDenied:
-                pass
-        # Exit the script
-        exit(0)
-    # Register the signal handler function for SIGINT and SIGTSTP signals
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTSTP, signal_handler)
-    # Set up OAuth2 credentials
+    
+    import os
+    import sys
+    import webbrowser
+    import threading
+    import signal
+    import http.server
+    import socketserver
+    import urllib.parse
+    import time
+    from boxsdk import OAuth2, Client
+
+    # Configuration
     CLIENT_ID = 'hv3z8wjk584zopc89fgsc29ikb6m0emp'
     CLIENT_SECRET = 'IpbJPrsXb0LnhtJW36Z0bfXQFhIObgpH'
     REDIRECT_URI = 'http://localhost:8080'
-    # Create the OAuth2 object
-    oauth = OAuth2(
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        store_tokens=None,
-    )
-    # Create a simple HTTP server to handle the OAuth2 callback
-    class CallbackHandler(BaseHTTPRequestHandler):
-        def log_message(self, format, *args):
-            # Suppress log messages from the web server. Note that when troubleshooting, try to comment out this function as it may be suppressing error messages that can shine a light on the issue. 
-            pass
+    PARENT_FOLDER_NAME = 'f'{p_id}''
+    SAVE_DIRECTORY = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{p_id}'
+
+    # Create an OAuth2 object
+    oauth = OAuth2(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI)
+
+    # HTTP server to handle OAuth2 callback
+    class CallbackHandler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
             if self.path.startswith('/'):
-                # Extract the authorization code from the URL
                 query = urllib.parse.urlparse(self.path).query
                 params = urllib.parse.parse_qs(query)
                 if 'code' in params:
                     authorization_code = params['code'][0]
-                    # Exchange the authorization code for an access token
-                    access_token, refresh_token = oauth.authenticate(
-                        authorization_code)
-                    # Shut down the HTTP server after the code is retrieved
+                    global access_token, refresh_token
+                    access_token, refresh_token = oauth.authenticate(authorization_code)
                     self.send_response(200)
                     self.send_header('Content-type', 'text/html')
                     self.end_headers()
                     self.wfile.write(
-                        b'<html><head><title>Authorization Successful</title></head><body><h1>Authorization Successful</h1><p>You can close this window now.</p></body></html>')
+                        b'<html><head><title>Authorization Successful</title></head><body><h1>Authorization Successful</h1><p>You can close this window now.</p></body></html>'
+                    )
                     threading.Thread(target=self.server.shutdown).start()
                 else:
                     self.send_response(400)
                     self.send_header('Content-type', 'text/html')
                     self.end_headers()
                     self.wfile.write(
-                        b'<html><head><title>Bad Request</title></head><body><h1>Bad Request</h1></body></html>')
+                        b'<html><head><title>Bad Request</title></head><body><h1>Bad Request</h1></body></html>'
+                    )
             else:
                 self.send_response(400)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 self.wfile.write(
-                    b'<html><head><title>Bad Request</title></head><body><h1>Bad Request</h1></body></html>')
-    # Start the local web server to handle the OAuth2 callback
-    server = HTTPServer(('localhost', 8080), CallbackHandler)
-    server_thread = threading.Thread(target=server.serve_forever)
-    server_thread.start()
-    # Perform the authentication flow
-    auth_url, _ = oauth.get_authorization_url(REDIRECT_URI)
-    # Open the authorization URL in a web browser
-    webbrowser.open(auth_url)
-    # Wait for the user to complete the authorization flow
-    print("Waiting for authorisation...")
-    input("Press Enter to continue once authorised...")
-    # Shut down the local web server
-    server.shutdown()
-    # Create the Box client using the access token
-    client = Client(oauth)
-    # Get the folder ID by name
-    folder_name = f'{p_id}'
-    search_results = client.search().query(query=folder_name, type='folder')
-    folder = next(
-        (item for item in search_results if item.name == folder_name), None)
-    # Define get_downloaded_files function
-    def get_downloaded_files(save_directory):
-        downloaded_files = set()
-        for root, dirs, files in os.walk(save_directory):
-            for file in files:
-                downloaded_files.add(file)
-        return downloaded_files
-    # Define download_files_from_folder function
-    def download_files_from_folder(folder, save_directory, downloaded_files):
-        MAX_RETRY_ATTEMPTS = 3
-        RETRY_DELAY_SECONDS = 5
-        items = list(client.folder(folder.id).get_items(limit=1000, offset=0))
+                    b'<html><head><title>Bad Request</title></head><body><h1>Bad Request</h1></body></html>'
+                )
+
+    # Start local web server to handle OAuth2 callback
+    def start_server():
+        with socketserver.TCPServer(('localhost', 8080), CallbackHandler) as httpd:
+            httpd.handle_request()
+
+    # Perform the OAuth2 authentication
+    def authenticate():
+        auth_url, _ = oauth.get_authorization_url(REDIRECT_URI)
+        webbrowser.open(auth_url)
+        print("Waiting for authorization...")
+        input("Press Enter to continue once authorized...")
+        start_server()
+
+    # Download files from a Box folder recursively
+    def download_files_from_folder(folder_id, save_directory, client):
+        items = client.folder(folder_id).get_items(limit=1000, offset=0)
+        os.makedirs(save_directory, exist_ok=True)
         for item in items:
-            if isinstance(item, File):
-                if item.name in downloaded_files:
-                    continue
-                file_path = f'{save_directory}/{item.name}'
-                retry_attempts = 0
-                while retry_attempts < MAX_RETRY_ATTEMPTS:
-                    try:
-                        with open(file_path, 'wb') as writeable_stream:
-                            item.download_to(writeable_stream)
-                            downloaded_files.add(item.name)
-                            print(f"Downloaded: {item.name}")
-                        break
-                    except Exception as e:
-                        print(f"An error occurred while downloading '{item.name}': {str(e)}")
-                        print("Retrying...")
-                        time.sleep(RETRY_DELAY_SECONDS)
-                        retry_attempts += 1
-                if retry_attempts == MAX_RETRY_ATTEMPTS:
-                    print(f"Failed to download '{item.name}' after {MAX_RETRY_ATTEMPTS} attempts.")
-            elif isinstance(item, Folder):
-                subdirectory = f'{save_directory}/{item.name}'
-                os.makedirs(subdirectory, exist_ok=True)
-                download_files_from_folder(item, subdirectory, downloaded_files)
-    # Specify the parent folder name
-    parent_folder_name = f'{p_id}'
-    # Retrieve the parent folder
-    search_results = client.search().query(query=parent_folder_name, type='folder')
-    parent_folder = next((item for item in search_results if item.name == parent_folder_name), None)
-    if parent_folder:
-        # Specify the save directory
-        save_directory = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{p_id}'
-        # Get the set of downloaded files
-        downloaded_files = get_downloaded_files(save_directory)
-        # Download files recursively from the parent folder and its subfolders
-        MAX_RETRY_ATTEMPTS = 3
-        RETRY_DELAY_SECONDS = 5
-        while True:
-            download_files_from_folder(parent_folder, save_directory, downloaded_files)
+            if item.type == 'folder':
+                subdirectory = os.path.join(save_directory, item.name)
+                download_files_from_folder(item.id, subdirectory, client)
+            elif item.type == 'file':
+                file_path = os.path.join(save_directory, item.name)
+                with open(file_path, 'wb') as f:
+                    item.download_to(f)
+                print(f"Downloaded: {item.name}")
 
-            specific_files = ['eCRF.xlsx', 'heuristic.py']
-            for file in specific_files:
-                file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{file}'
-                if file not in downloaded_files:
-                    file_item = next((item for item in client.folder(parent_folder.parent.id).get_items() if item.name == file), None)
-                    if item:
-                        retry_attempts = 0
-                        while retry_attempts < MAX_RETRY_ATTEMPTS:
-                            try:
-                                with open(file_path, 'wb') as writeable_stream:
-                                    item.download_to(writeable_stream)
-                                    downloaded_files.add(file)
-                                    print(f"Downloaded: {file}.")
-                                break
-                            except Exception as e:
-                                print(f"An error occurred while downloading {file}: {str(e)}")
-                                print("Retrying...")
-                                time.sleep(RETRY_DELAY_SECONDS)
-                                retry_attempts += 1
-                        if retry_attempts == MAX_RETRY_ATTEMPTS:
-                            print(f"Failed to download {file} after {MAX_RETRY_ATTEMPTS} attempts.")
-                    else:
-                        print(f"{file} not found in parent folder.")
-                else:
-                    print(f"{file} already downloaded.")
+    # Main function
+    def main():
+        # Authenticate and get the client
+        authenticate()
+        client = Client(oauth)
 
-            # # Download the specific file eCRF.xlsx
-            # ecrf_file_name = 'eCRF.xlsx'
-            # ecrf_file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{ecrf_file_name}'
-            # if ecrf_file_name not in downloaded_files:
-            #     ecrf_item = next((item for item in client.folder(parent_folder.parent.id).get_items() if item.name == ecrf_file_name), None)
-            #     if ecrf_item:             
-            #         retry_attempts = 0
-            #         while retry_attempts < MAX_RETRY_ATTEMPTS:
-            #             try:
-            #                 with open(ecrf_file_path, 'wb') as writeable_stream:
-            #                     ecrf_item.download_to(writeable_stream)
-            #                     downloaded_files.add(ecrf_file_name)
-            #                     print(f"Downloaded: {ecrf_file_name}")
-            #                 break
-            #             except Exception as e:
-            #                 print(f"An error occurred while downloading '{ecrf_file_name}': {str(e)}")
-            #                 print("Retrying...")
-            #                 time.sleep(RETRY_DELAY_SECONDS)
-            #                 retry_attempts += 1
-            #         if retry_attempts == MAX_RETRY_ATTEMPTS:
-            #             print(f"Failed to download '{ecrf_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
-            #     else:
-            #         print(f'eCRF.xlsx not found in parent folder.')
-            # else:
-            #     print(f'eCRF.xlsx already downloaded.')
+        # Find the parent folder
+        search_results = client.search().query(query=PARENT_FOLDER_NAME, type='folder')
+        parent_folder = next((item for item in search_results if item.name == PARENT_FOLDER_NAME), None)
 
-            # # Download the specific file heuristic.py file
-            # heuristic_file_name = 'heuristic.py'
-            # heuristic_file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{heuristic_file_name}'
-            # if heuristic_file_name not in downloaded_files:
-            #     heuristic_item = next((item for item in client.folder(parent_folder.parent.id).get_items() if item.name == heuristic_file_name), None)
-            #     if heuristic_item:             
-            #         retry_attempts = 0
-            #         while retry_attempts < MAX_RETRY_ATTEMPTS:
-            #             try:
-            #                 with open(heuristic_file_path, 'wb') as writeable_stream:
-            #                     heuristic_item.download_to(writeable_stream)
-            #                     downloaded_files.add(heuristic_file_name)
-            #                     print(f"Downloaded: {heuristic_file_name}")
-            #                 break
-            #             except Exception as e:
-            #                 print(f"An error occurred while downloading '{heuristic_file_name}': {str(e)}")
-            #                 print("Retrying...")
-            #                 time.sleep(RETRY_DELAY_SECONDS)
-            #                 retry_attempts += 1
-            #         if retry_attempts == MAX_RETRY_ATTEMPTS:
-            #             print(f"Failed to download '{heuristic_file_name}' after {MAX_RETRY_ATTEMPTS} attempts.")
-            #     else:
-            #         print(f'heuristic.py not found in parent folder.')
-            # else:
-            #     print(f'heuristic.py already downloaded.')
+        if parent_folder:
+            # Download all files and folders from the parent folder
+            download_files_from_folder(parent_folder.id, SAVE_DIRECTORY, client)
+            print("All files and folders have been downloaded successfully.")
+        else:
+            print(f"Parent folder '{PARENT_FOLDER_NAME}' not found.")
 
-
-            # Get the updated folder information to check if all files have been downloaded
-            parent_folder_info = client.folder(parent_folder.id).get()
-            item_collection = parent_folder_info["item_collection"]
-            total_items = item_collection["total_count"]
-            # Check if all files have been downloaded
-            if len(downloaded_files) == total_items + 1:
-                break  # Break the loop if all files have been downloaded
-            # Check if the access token needs refreshing
-            try:
-                if oauth.access_token_expires_at - time.time() < 60:  # Refresh if token expires within 60 seconds
-                    oauth.refresh(oauth.access_token, oauth.refresh_token)
-                    # Update the Box client with the refreshed token
-                    client = Client(oauth)
-            except AttributeError:
-                pass  # Ignore the AttributeError if the access_token_expires_at attribute is not present
-                break
-    else:
-        print(f"Parent folder '{parent_folder_name}' not found.")
-    # Wait for the web server thread to complete
-    server_thread.join()
+    if __name__ == "__main__":
+        main()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # # Define the signal handler function
+    # def signal_handler(sig, frame):
+    #     # Kill the process using port 8080
+    #     for proc in psutil.process_iter():
+    #         try:
+    #             connections = proc.connections()
+    #             for conn in connections:
+    #                 if conn.laddr.port == 8080:
+    #                     proc.kill()
+    #         except psutil.AccessDenied:
+    #             pass
+    #     # Exit the script
+    #     exit(0)
+    # # Register the signal handler function for SIGINT and SIGTSTP signals
+    # signal.signal(signal.SIGINT, signal_handler)
+    # signal.signal(signal.SIGTSTP, signal_handler)
+    # # Set up OAuth2 credentials
+    # CLIENT_ID = 'hv3z8wjk584zopc89fgsc29ikb6m0emp'
+    # CLIENT_SECRET = 'IpbJPrsXb0LnhtJW36Z0bfXQFhIObgpH'
+    # REDIRECT_URI = 'http://localhost:8080'
+    # # Create the OAuth2 object
+    # oauth = OAuth2(
+    #     client_id=CLIENT_ID,
+    #     client_secret=CLIENT_SECRET,
+    #     store_tokens=None,
+    # )
+    # # Create a simple HTTP server to handle the OAuth2 callback
+    # class CallbackHandler(BaseHTTPRequestHandler):
+    #     def log_message(self, format, *args):
+    #         # Suppress log messages from the web server. Note that when troubleshooting, try to comment out this function as it may be suppressing error messages that can shine a light on the issue. 
+    #         pass
+    #     def do_GET(self):
+    #         if self.path.startswith('/'):
+    #             # Extract the authorization code from the URL
+    #             query = urllib.parse.urlparse(self.path).query
+    #             params = urllib.parse.parse_qs(query)
+    #             if 'code' in params:
+    #                 authorization_code = params['code'][0]
+    #                 # Exchange the authorization code for an access token
+    #                 access_token, refresh_token = oauth.authenticate(
+    #                     authorization_code)
+    #                 # Shut down the HTTP server after the code is retrieved
+    #                 self.send_response(200)
+    #                 self.send_header('Content-type', 'text/html')
+    #                 self.end_headers()
+    #                 self.wfile.write(
+    #                     b'<html><head><title>Authorization Successful</title></head><body><h1>Authorization Successful</h1><p>You can close this window now.</p></body></html>')
+    #                 threading.Thread(target=self.server.shutdown).start()
+    #             else:
+    #                 self.send_response(400)
+    #                 self.send_header('Content-type', 'text/html')
+    #                 self.end_headers()
+    #                 self.wfile.write(
+    #                     b'<html><head><title>Bad Request</title></head><body><h1>Bad Request</h1></body></html>')
+    #         else:
+    #             self.send_response(400)
+    #             self.send_header('Content-type', 'text/html')
+    #             self.end_headers()
+    #             self.wfile.write(
+    #                 b'<html><head><title>Bad Request</title></head><body><h1>Bad Request</h1></body></html>')
+    # # Start the local web server to handle the OAuth2 callback
+    # server = HTTPServer(('localhost', 8080), CallbackHandler)
+    # server_thread = threading.Thread(target=server.serve_forever)
+    # server_thread.start()
+    # # Perform the authentication flow
+    # auth_url, _ = oauth.get_authorization_url(REDIRECT_URI)
+    # # Open the authorization URL in a web browser
+    # webbrowser.open(auth_url)
+    # # Wait for the user to complete the authorization flow
+    # print("Waiting for authorisation...")
+    # input("Press Enter to continue once authorised...")
+    # # Shut down the local web server
+    # server.shutdown()
+    # # Create the Box client using the access token
+    # client = Client(oauth)
+    # # Get the folder ID by name
+    # folder_name = f'{p_id}'
+    # search_results = client.search().query(query=folder_name, type='folder')
+    # folder = next(
+    #     (item for item in search_results if item.name == folder_name), None)
+    # # Define get_downloaded_files function
+    # def get_downloaded_files(save_directory):
+    #     downloaded_files = set()
+    #     for root, dirs, files in os.walk(save_directory):
+    #         for file in files:
+    #             downloaded_files.add(file)
+    #     return downloaded_files
+    # # Define download_files_from_folder function
+    # def download_files_from_folder(folder, save_directory, downloaded_files):
+    #     MAX_RETRY_ATTEMPTS = 3
+    #     RETRY_DELAY_SECONDS = 5
+    #     items = list(client.folder(folder.id).get_items(limit=1000, offset=0))
+    #     for item in items:
+    #         if isinstance(item, File):
+    #             if item.name in downloaded_files:
+    #                 continue
+    #             file_path = f'{save_directory}/{item.name}'
+    #             retry_attempts = 0
+    #             while retry_attempts < MAX_RETRY_ATTEMPTS:
+    #                 try:
+    #                     with open(file_path, 'wb') as writeable_stream:
+    #                         item.download_to(writeable_stream)
+    #                         downloaded_files.add(item.name)
+    #                         print(f"Downloaded: {item.name}")
+    #                     break
+    #                 except Exception as e:
+    #                     print(f"An error occurred while downloading '{item.name}': {str(e)}")
+    #                     print("Retrying...")
+    #                     time.sleep(RETRY_DELAY_SECONDS)
+    #                     retry_attempts += 1
+    #             if retry_attempts == MAX_RETRY_ATTEMPTS:
+    #                 print(f"Failed to download '{item.name}' after {MAX_RETRY_ATTEMPTS} attempts.")
+    #         elif isinstance(item, Folder):
+    #             subdirectory = f'{save_directory}/{item.name}'
+    #             os.makedirs(subdirectory, exist_ok=True)
+    #             download_files_from_folder(item, subdirectory, downloaded_files)
+    # # Specify the parent folder name
+    # parent_folder_name = f'{p_id}'
+    # # Retrieve the parent folder
+    # search_results = client.search().query(query=parent_folder_name, type='folder')
+    # parent_folder = next((item for item in search_results if item.name == parent_folder_name), None)
+    # if parent_folder:
+    #     # Specify the save directory
+    #     save_directory = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{p_id}'
+    #     # Get the set of downloaded files
+    #     downloaded_files = get_downloaded_files(save_directory)
+    #     # Download files recursively from the parent folder and its subfolders
+    #     MAX_RETRY_ATTEMPTS = 3
+    #     RETRY_DELAY_SECONDS = 5
+    #     while True:
+    #         download_files_from_folder(parent_folder, save_directory, downloaded_files)
+    #         specific_files = ['eCRF.xlsx', 'heuristic.py']
+    #         for file in specific_files:
+    #             file_path = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{file}'
+    #             if file not in downloaded_files:
+    #                 file_item = next((item for item in client.folder(parent_folder.parent.id).get_items() if item.name == file), None)
+    #                 if file_item:
+    #                     retry_attempts = 0
+    #                     while retry_attempts < MAX_RETRY_ATTEMPTS:
+    #                         try:
+    #                             with open(file_path, 'wb') as writeable_stream:
+    #                                 file_item.download_to(writeable_stream)
+    #                                 downloaded_files.add(file)
+    #                                 print(f"Downloaded: {file}.")
+    #                             break
+    #                         except Exception as e:
+    #                             print(f"An error occurred while downloading {file}: {str(e)}")
+    #                             print("Retrying...")
+    #                             time.sleep(RETRY_DELAY_SECONDS)
+    #                             retry_attempts += 1
+    #                     if retry_attempts == MAX_RETRY_ATTEMPTS:
+    #                         print(f"Failed to download {file} after {MAX_RETRY_ATTEMPTS} attempts.")
+    #                 else:
+    #                     print(f"{file} not found in parent folder.")
+    #             else:
+    #                 print(f"{file} already downloaded.")
+    #         # Get the updated folder information to check if all files have been downloaded
+    #         parent_folder_info = client.folder(parent_folder.id).get()
+    #         item_collection = parent_folder_info["item_collection"]
+    #         total_items = item_collection["total_count"]
+    #         # Check if all files have been downloaded
+    #         if len(downloaded_files) == total_items + 1:
+    #             break  # Break the loop if all files have been downloaded
+    #         # Check if the access token needs refreshing
+    #         try:
+    #             if oauth.access_token_expires_at - time.time() < 60:  # Refresh if token expires within 60 seconds
+    #                 oauth.refresh(oauth.access_token, oauth.refresh_token)
+    #                 # Update the Box client with the refreshed token
+    #                 client = Client(oauth)
+    #         except AttributeError:
+    #             pass  # Ignore the AttributeError if the access_token_expires_at attribute is not present
+    #             break
+    # else:
+    #     print(f"Parent folder '{parent_folder_name}' not found.")
+    # # Wait for the web server thread to complete
+    # server_thread.join()
 #endregion
 
 #region CONVERT DICOMS TO BIDS FORMAT.

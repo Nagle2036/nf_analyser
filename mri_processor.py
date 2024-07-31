@@ -211,7 +211,7 @@ if answer2 == 'y':
                                     downloaded_files.add(file)
                                     print(f"Downloaded: {file}.")
                                 break
-                            except Exception as e
+                            except Exception as e:
                             print(f"An error occurred while downloading {file}: {str(e)}")
                             print("Retrying...")
                             time.sleep(RETRY_DELAY_SECONDS)
@@ -301,7 +301,7 @@ if answer2 == 'y':
 #region CONVERT DICOMS TO BIDS FORMAT.
 
 answer3 = input("Would you like to convert raw DICOMs to BIDS format? (y/n)\n")
-if answer3 = 'y':
+if answer3 == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     if p_id.startswith('P'):
         p_id.replace('P', '')
@@ -315,8 +315,8 @@ if answer3 = 'y':
     restart = input("Would you like to start the BIDS conversion from scratch for all participants? This will remove all files from the bids/ folder, apart from bids/code/. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)")
-        if double_check = 'y':
-            for item in os.listdir(bids_folder)
+        if double_check == 'y':
+            for item in os.listdir(bids_folder):
                 item_path = os.path.join(bids_folder, item)
                 if item != code_folder:
                     if os.path.exists(item_path):
@@ -336,7 +336,7 @@ if answer3 = 'y':
 
 
 
-heudiconv -d /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{subject}/data/neurofeedback/20230404.CISC35036.CISC35036/*.dcm -o /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/ -f convertall -s 004 -c none --overwrite
+# heudiconv -d /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{subject}/data/neurofeedback/20230404.CISC35036.CISC35036/*.dcm -o /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/ -f convertall -s 004 -c none --overwrite
 
 
 #endregion

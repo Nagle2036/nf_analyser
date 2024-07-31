@@ -89,7 +89,7 @@ if answer2 == 'y':
     refresh_token = None
 
     # Create an OAuth2 object
-    oauth = OAuth2(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+    oauth = OAuth2(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, access_token=None, refresh_token=None)
 
     # HTTP server to handle OAuth2 callback
     class CallbackHandler(http.server.SimpleHTTPRequestHandler):
@@ -100,7 +100,10 @@ if answer2 == 'y':
                 if 'code' in params:
                     global access_token, refresh_token
                     authorization_code = params['code'][0]
-                    access_token, refresh_token = oauth.get_access_token(authorization_code, redirect_uri=REDIRECT_URI)
+                    # Exchange the authorization code for an access token
+                    oauth.authenticate(authorization_code, redirect_uri=REDIRECT_URI)
+                    access_token = oauth.access_token
+                    refresh_token = oauth.refresh_token
                     self.send_response(200)
                     self.send_header('Content-type', 'text/html')
                     self.end_headers()
@@ -169,7 +172,7 @@ if answer2 == 'y':
 
     if __name__ == "__main__":
         main()
-    
+        
     
     
     

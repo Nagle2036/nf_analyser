@@ -249,7 +249,7 @@ answer3 = input("Would you like to convert raw DICOMs to BIDS format? (y/n)\n")
 if answer3 == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     if p_id.startswith('P'):
-        p_id.replace('P', '')
+        p_id = p_id.replace('P', '')
     heudiconv_subject_codes = ['004', '006', '020', '030', '059', '078', '093', '094', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
     if p_id == 'ALL':
         participants_to_iterate = heudiconv_subject_codes
@@ -272,24 +272,18 @@ if answer3 == 'y':
                         print(f"bids/{item} folder does not exist.")
         else:
             sys.exit()
-    entries = os.listdir(bids_folder)
-    directories = [entry for entry in entries if os.path.isdir(os.path.join(bids_folder, entry))]
-    if directories == ['code']:
-        for code in heudiconv_subject_codes:
-            path = os.path.join(os.getcwd(), f'P{code}', 'data', 'neurofeedback')
-            cisc_folder = None
-            for folder_name in os.listdir(path):
-                if "CISC" in folder_name:
-                    cisc_folder = folder_name
-                    break
-            if cisc_folder is None:
-                print("No 'CISC' folder found in the 'neurofeedback' directory.")
-                exit(1)
-            if not os.path.exists(f"bids/sub-{code}"):
-                subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/heuristic.py', '-s', f'{code}', '-c', 'dcm2niix', '-b', '--overwrite'])
-
-
-
+    for code in heudiconv_subject_codes:
+        path = os.path.join(os.getcwd(), f'P{code}', 'data', 'neurofeedback')
+        cisc_folder = None
+        for folder_name in os.listdir(path):
+            if "CISC" in folder_name:
+                cisc_folder = folder_name
+                break
+        if cisc_folder is None:
+            print("No 'CISC' folder found in the 'neurofeedback' directory.")
+            exit(1)
+        if not os.path.exists(f"bids/sub-{code}"):
+            subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/heuristic.py', '-s', f'{code}', '-c', 'dcm2niix', '-b', '--overwrite'])
 #endregion
 
 #region FMRI PREPROCESSING.

@@ -84,8 +84,12 @@ if answer2 == 'y':
     PARENT_FOLDER_NAME = f'{p_id}'
     SAVE_DIRECTORY = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{p_id}'
 
+    # Global variables to store tokens
+    access_token = None
+    refresh_token = None
+
     # Create an OAuth2 object
-    oauth = OAuth2(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, redirect_uri=REDIRECT_URI)
+    oauth = OAuth2(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 
     # HTTP server to handle OAuth2 callback
     class CallbackHandler(http.server.SimpleHTTPRequestHandler):
@@ -94,9 +98,9 @@ if answer2 == 'y':
                 query = urllib.parse.urlparse(self.path).query
                 params = urllib.parse.parse_qs(query)
                 if 'code' in params:
-                    authorization_code = params['code'][0]
                     global access_token, refresh_token
-                    access_token, refresh_token = oauth.authenticate(authorization_code)
+                    authorization_code = params['code'][0]
+                    access_token, refresh_token = oauth.get_access_token(authorization_code, redirect_uri=REDIRECT_URI)
                     self.send_response(200)
                     self.send_header('Content-type', 'text/html')
                     self.end_headers()
@@ -126,7 +130,7 @@ if answer2 == 'y':
 
     # Perform the OAuth2 authentication
     def authenticate():
-        auth_url, _ = oauth.get_authorization_url(REDIRECT_URI)
+        auth_url = oauth.get_authorization_url(redirect_uri=REDIRECT_URI)
         webbrowser.open(auth_url)
         print("Waiting for authorization...")
         input("Press Enter to continue once authorized...")

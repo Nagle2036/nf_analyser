@@ -131,7 +131,7 @@ if answer2 == 'y':
 
     # Perform the OAuth2 authentication
     def authenticate():
-        auth_url = oauth.get_authorization_url()
+        auth_url = oauth.get_authorization_url(redirect_uri=REDIRECT_URI)
         webbrowser.open(auth_url)
         print("Waiting for authorization...")
         input("Press Enter to continue once authorized...")

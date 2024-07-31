@@ -81,7 +81,7 @@ if answer2 == 'y':
     CLIENT_ID = 'hv3z8wjk584zopc89fgsc29ikb6m0emp'
     CLIENT_SECRET = 'IpbJPrsXb0LnhtJW36Z0bfXQFhIObgpH'
     REDIRECT_URI = 'http://localhost:8080'
-    PARENT_FOLDER_NAME = 'f'{p_id}''
+    PARENT_FOLDER_NAME = f'{p_id}'
     SAVE_DIRECTORY = f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/{p_id}'
 
     # Create an OAuth2 object

@@ -2874,7 +2874,7 @@ if answer6 == 'y':
                 subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', structural_spm])
             averaged_run01_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run01.nii.gz"
             averaged_run04_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run04.nii.gz"
-            if not os.path.exists(averaged_run01_spm) or not os.path.exists(averaged_run04_spm)
+            if not os.path.exists(averaged_run01_spm) or not os.path.exists(averaged_run04_spm):
                 shutil.copy(averaged_run01, averaged_run01_spm)
                 shutil.copy(averaged_run04, averaged_run04_spm)
             betted_run01_spm = "{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run01_brain.nii.gz"

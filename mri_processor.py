@@ -89,7 +89,7 @@ if answer2 == 'y':
     refresh_token = None
 
     # Create an OAuth2 object
-    oauth = OAuth2(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, access_token=None, refresh_token=None)
+    oauth = OAuth2(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 
     # HTTP server to handle OAuth2 callback
     class CallbackHandler(http.server.SimpleHTTPRequestHandler):
@@ -101,9 +101,7 @@ if answer2 == 'y':
                     global access_token, refresh_token
                     authorization_code = params['code'][0]
                     # Exchange the authorization code for an access token
-                    oauth.authenticate(authorization_code, redirect_uri=REDIRECT_URI)
-                    access_token = oauth.access_token
-                    refresh_token = oauth.refresh_token
+                    access_token, refresh_token = oauth.get_access_token(authorization_code, redirect_uri=REDIRECT_URI)
                     self.send_response(200)
                     self.send_header('Content-type', 'text/html')
                     self.end_headers()
@@ -133,7 +131,7 @@ if answer2 == 'y':
 
     # Perform the OAuth2 authentication
     def authenticate():
-        auth_url = oauth.get_authorization_url(redirect_uri=REDIRECT_URI)
+        auth_url = oauth.get_authorization_url()
         webbrowser.open(auth_url)
         print("Waiting for authorization...")
         input("Press Enter to continue once authorized...")

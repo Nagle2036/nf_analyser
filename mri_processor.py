@@ -2866,6 +2866,7 @@ if answer6 == 'y':
             
             spm_bet_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "4", "spm_bet")
             os.makedirs(spm_bet_folder, exist_ok=True)
+            structual_path = f"{p_id}/analysis/preproc/structural/structural.nii"
             structural_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/structural.nii"
             if not os.path.exists(structural_spm):
                 shutil.copy(structural_path, structural_spm)

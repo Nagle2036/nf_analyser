@@ -2863,7 +2863,6 @@ if answer6 == 'y':
             if not os.path.exists(betted_run01) or not os.path.exists(betted_run04):
                 subprocess.run(["bet", averaged_run01, betted_run01, "-m", "-R"])
                 subprocess.run(["bet", averaged_run04, betted_run04, "-m", "-R"])
-            
             spm_bet_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "4", "spm_bet")
             os.makedirs(spm_bet_folder, exist_ok=True)
             structural_path = f"{p_id}/analysis/preproc/structural/structural.nii"
@@ -2878,44 +2877,12 @@ if answer6 == 'y':
             if not os.path.exists(averaged_run01_spm) or not os.path.exists(averaged_run04_spm):
                 shutil.copy(averaged_run01, averaged_run01_spm)
                 shutil.copy(averaged_run04, averaged_run04_spm)
-            betted_run01_spm = "{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run01_brain.nii.gz"
-            betted_run04_spm = "{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run04_brain.nii.gz"
+            betted_run01_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run01_brain.nii.gz"
+            betted_run04_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run04_brain.nii.gz"
             if not os.path.exists(betted_run01_spm) or not os.path.exists(betted_run04_spm):
-                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run01])
-                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run04])
-            
-
-            # betted_run01_info = subprocess.run(['fslinfo', betted_run01], capture_output=True, text=True)
-            # betted_run01_info_output = betted_run01_info.stdout
-            # dim1 = dim2 = dim3 = dim4 = datatype = None
-            # pixdim1 = pixdim2 = pixdim3 = pixdim4 = None
-            # for line in betted_run01_info_output.splitlines():
-            #     parts = line.split()
-            #     if line.startswith("dim1"):
-            #         dim1 = int(parts[1])
-            #     elif line.startswith("dim2"):
-            #         dim2 = int(parts[1])
-            #     elif line.startswith("dim3"):
-            #         dim3 = int(parts[1])
-            #     elif line.startswith("dim4"):
-            #         dim4 = int(parts[1])
-            #     elif line.startswith("datatype"):
-            #         datatype = int(parts[1])
-            #     elif line.startswith("pixdim1"):
-            #         pixdim1 = float(parts[1])
-            #     elif line.startswith("pixdim2"):
-            #         pixdim2 = float(parts[1])
-            #     elif line.startswith("pixdim3"):
-            #         pixdim3 = float(parts[1])
-            #     elif line.startswith("pixdim4"):
-            #         pixdim4 = float(parts[1])
-            # if None in [dim1, dim2, dim3, dim4, datatype, pixdim1, pixdim2, pixdim3, pixdim4]:
-            #     raise ValueError("Missing one or more required fslinfo values")
-            # print(f"dim1: {dim1}, dim2: {dim2}, dim3: {dim3}, dim4: {dim4}, datatype: {datatype}, pixdim1: {pixdim1}, pixdim2: {pixdim2}, pixdim3: {pixdim3}, pixdim4: {pixdim4}")
-            # structural_brain_downsampled = f"{p_id}/analysis/susceptibility/fnirt_test/4/structural_brain_downsampled.nii.gz"
-            # subprocess.run(['flirt', '-in', structural_brain, '-ref', betted_run01, '-out', structural_brain_downsampled, '-applyxfm', '-usesqform'])
-
-            
+                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run01_spm])
+                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run04_spm])
+            structural_brain_downsampled = f"{p_id}/data/neurofeedback/fnirt_4_structural_downsampled/structural_brain_downsampled.nii.gz"
             flirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01.nii.gz"
             flirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run04.nii.gz"
             flirted_run01_matrix = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01_matrix.mat"

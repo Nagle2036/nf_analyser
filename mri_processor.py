@@ -42,6 +42,7 @@ from skimage.metrics import structural_similarity as ssim
 from plotnine import *
 from scipy import stats
 from pingouin import rm_anova
+import json
 
 #endregion
 
@@ -255,6 +256,8 @@ if answer3 == 'y':
         participants_to_iterate = heudiconv_subject_codes
     else:
         participants_to_iterate = [p_id]
+    
+    # Step 1: BIDS Conversion.
     code_folder = 'code'
     bids_folder = os.path.join(os.getcwd(), 'bids')
     restart = input("Would you like to start the BIDS conversion from scratch for all participants? This will remove all files from the bids/ folder, apart from bids/code/. (y/n)\n")
@@ -283,7 +286,39 @@ if answer3 == 'y':
             print("No 'CISC' folder found in the 'neurofeedback' directory.")
             exit(1)
         if not os.path.exists(f"bids/sub-{code}"):
+            print(f"Converting DICOMs to BIDS Nifti format for {p_id}...")
             subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/code/heuristic.py', '-s', f'{code}', '-c', 'dcm2niix', '-b', '--overwrite'])
+        else: 
+            print(f"DICOMs already converted to BIDS Nifti format for {p_id}. Skipping process.")
+
+    # Step 2: Fieldmap Labelling.
+    good_participants = ['059', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
+    for p_id in participants_to_iterate:
+        if p_id in good_participants:
+            print(f"Labelling fieldmap JSON files for {p_id}...")
+            func_directory = f"bids/sub-{p_id}/func"
+            func_files = []
+            for file_name in os.listdir(func_directory):
+                if file_name.endswith(".nii.gz"):
+                    file_path = os.path.join("func", file_name)
+                    func_files.append(file_path)
+            ap_fieldmap_json = f"bids/sub-{p_id}/fmap/sub-{p_id}_dir-AP_epi.json"
+            pa_fieldmap_json = f"bids/sub-{p_id}/fmap/sub-{p_id}_dir-PA_epi.json"
+            fieldmap_json_files = [ap_fieldmap_json, pa_fieldmap_json]
+            for fieldmap_json in fieldmap_json_files:
+                with open(fieldmap_json, 'r') as file:
+                    json_data = json.load(file)
+                if "IntendedFor" not in json_data:
+                    items = list(json_data.items())
+                    intended_for_item = ("IntendedFor", func_files)
+                    insert_index = next((i for i, (key, _) in enumerate(items) if key > "IntendedFor"), len(items))
+                    items.insert(insert_index, intended_for_item)
+                    json_data = dict(items)
+                    subprocess.run(['chmod +w '+ fieldmap_json], check=True)
+                    with open(fieldmap_json, 'w') as file:
+                        json.dump(json_data, file, indent=2)
+                else:
+                    print(f"{fieldmap_json} already labelled for {p_id}. Skipping process.")
 #endregion
 
 #region FMRI PREPROCESSING.
@@ -2859,11 +2894,11 @@ if answer6 == 'y':
                 subprocess.run(['fslmaths', run01, '-Tmean', averaged_run01])
                 subprocess.run(['fslmaths', run04, '-Tmean', averaged_run04])
             
-            betted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run01.nii.gz"
-            betted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run04.nii.gz"
-            if not os.path.exists(betted_run01) or not os.path.exists(betted_run04):
-                subprocess.run(["bet", averaged_run01, betted_run01, "-m", "-R"])
-                subprocess.run(["bet", averaged_run04, betted_run04, "-m", "-R"])
+            # betted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run01.nii.gz"
+            # betted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run04.nii.gz"
+            # if not os.path.exists(betted_run01) or not os.path.exists(betted_run04):
+            #     subprocess.run(["bet", averaged_run01, betted_run01, "-m", "-R"])
+            #     subprocess.run(["bet", averaged_run04, betted_run04, "-m", "-R"])
             
             spm_bet_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "4", "spm_bet")
             os.makedirs(spm_bet_folder, exist_ok=True)

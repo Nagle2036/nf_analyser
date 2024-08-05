@@ -2858,11 +2858,13 @@ if answer6 == 'y':
             if not os.path.exists(averaged_run01) or not os.path.exists(averaged_run04):
                 subprocess.run(['fslmaths', run01, '-Tmean', averaged_run01])
                 subprocess.run(['fslmaths', run04, '-Tmean', averaged_run04])
+            
             betted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run01.nii.gz"
             betted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run04.nii.gz"
             if not os.path.exists(betted_run01) or not os.path.exists(betted_run04):
                 subprocess.run(["bet", averaged_run01, betted_run01, "-m", "-R"])
                 subprocess.run(["bet", averaged_run04, betted_run04, "-m", "-R"])
+            
             spm_bet_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "4", "spm_bet")
             os.makedirs(spm_bet_folder, exist_ok=True)
             structural_path = f"{p_id}/analysis/preproc/structural/structural.nii"
@@ -2888,20 +2890,20 @@ if answer6 == 'y':
             flirted_run01_matrix = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01_matrix.mat"
             flirted_run04_matrix = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run04_matrix.mat"
             if not os.path.exists(flirted_run01):
-                subprocess.run(['flirt', '-in', betted_run01, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
-                subprocess.run(['flirt', '-in', betted_run04, '-ref', structural_brain_downsampled, '-out', flirted_run04, '-omat', flirted_run04_matrix, '-dof', '6'])
+                subprocess.run(['flirt', '-in', betted_run01_spm, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
+                subprocess.run(['flirt', '-in', betted_run04_spm, '-ref', structural_brain_downsampled, '-out', flirted_run04, '-omat', flirted_run04_matrix, '-dof', '6'])
             nonlin_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/nonlin_run01.nii.gz"
             nonlin_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/nonlin_run04.nii.gz"
             warp_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run01"
             warp_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run04"
             if not os.path.exists(nonlin_run01):
-                subprocess.run(['fnirt', f'--in={betted_run01}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', f'--iout={nonlin_run01}'])
-                subprocess.run(['fnirt', f'--in={betted_run04}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run04_matrix}', f'--cout={warp_run04}', f'--iout={nonlin_run04}'])
+                subprocess.run(['fnirt', f'--in={betted_run01_spm}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', f'--iout={nonlin_run01}'])
+                subprocess.run(['fnirt', f'--in={betted_run04_spm}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run04_matrix}', f'--cout={warp_run04}', f'--iout={nonlin_run04}'])
             fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
             fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
             if not os.path.exists(fnirted_run01):
-                subprocess.run(['applywarp', f'--in={betted_run01}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
-                subprocess.run(['applywarp', f'--in={betted_run04}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run04}', f'--out={fnirted_run04}'])
+                subprocess.run(['applywarp', f'--in={betted_run01_spm}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+                subprocess.run(['applywarp', f'--in={betted_run04_spm}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run04}', f'--out={fnirted_run04}'])
             def read_roi_file(roi_file):
                 voxel_coordinates = []
                 with open(roi_file, 'r') as file:

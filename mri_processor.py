@@ -314,7 +314,7 @@ if answer3 == 'y':
                     insert_index = next((i for i, (key, _) in enumerate(items) if key > "IntendedFor"), len(items))
                     items.insert(insert_index, intended_for_item)
                     json_data = dict(items)
-                    subprocess.run(['chmod +w '+ fieldmap_json], check=True)
+                    subprocess.run(['chmod', '+w', fieldmap_json], check=True)
                     with open(fieldmap_json, 'w') as file:
                         json.dump(json_data, file, indent=2)
                 else:

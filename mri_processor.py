@@ -2920,6 +2920,7 @@ if answer6 == 'y':
                 subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run01_spm])
                 subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run04_spm])
             structural_brain_downsampled = f"{p_id}/data/neurofeedback/fnirt_4_structural_downsampled/structural_brain_downsampled.nii.gz"
+            structural_downsampled = f"{p_id}/data/neurofeedback/fnirt_4_structural_downsampled/structural_downsampled.nii"
             flirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01.nii.gz"
             flirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run04.nii.gz"
             flirted_run01_matrix = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01_matrix.mat"
@@ -2932,13 +2933,13 @@ if answer6 == 'y':
             warp_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run01"
             warp_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run04"
             if not os.path.exists(nonlin_run01):
-                subprocess.run(['fnirt', f'--in={betted_run01_spm}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', f'--iout={nonlin_run01}'])
-                subprocess.run(['fnirt', f'--in={betted_run04_spm}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run04_matrix}', f'--cout={warp_run04}', f'--iout={nonlin_run04}'])
+                subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}'])
+                subprocess.run(['fnirt', f'--in={averaged_run04}', f'--ref={structural_downsampled}', f'--aff={flirted_run04_matrix}', f'--cout={warp_run04}'])
             fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
             fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
             if not os.path.exists(fnirted_run01):
-                subprocess.run(['applywarp', f'--in={betted_run01_spm}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
-                subprocess.run(['applywarp', f'--in={betted_run04_spm}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run04}', f'--out={fnirted_run04}'])
+                subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+                subprocess.run(['applywarp', f'--in={averaged_run04}', f'--ref={structural_downsampled}', f'--warp={warp_run04}', f'--out={fnirted_run04}'])
             def read_roi_file(roi_file):
                 voxel_coordinates = []
                 with open(roi_file, 'r') as file:

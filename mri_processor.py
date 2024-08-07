@@ -354,604 +354,616 @@ if answer4 == 'y':
         else:
             sys.exit()
 
-    # Step 1: Create directories.
-    print("\n###### STEP 1: CREATING DIRECTORIES ######")
-    for p_id in participants_to_iterate:
-        p_id_folder = os.path.join(os.getcwd(), p_id)
-        os.makedirs(p_id_folder, exist_ok=True)
-        analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
-        os.makedirs(analysis_folder, exist_ok=True)
-        preproc_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc')
-        os.makedirs(preproc_folder, exist_ok=True)
-        png_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'pngs')
-        os.makedirs(png_folder, exist_ok=True)
-        nifti_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis')
-        os.makedirs(nifti_folder, exist_ok=True)
-        structural_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural")
-        os.makedirs(structural_folder, exist_ok=True)
-        onset_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "onset_files")
-        os.makedirs(onset_folder, exist_ok=True)
-        mc_ms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms")
-        os.makedirs(mc_ms_folder, exist_ok=True)
-        bet_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "bet")
-        os.makedirs(bet_folder, exist_ok=True)
-        fieldmaps_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
-        os.makedirs(fieldmaps_folder, exist_ok=True)
-        group_folder = os.path.join(os.getcwd(), 'group')
-        os.makedirs(group_folder, exist_ok=True)
-        group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
-        os.makedirs(group_preproc_folder, exist_ok=True)
-        ms_test_folder = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test')
-        os.makedirs(ms_test_folder, exist_ok=True)
-    print("Directories created.")
+    # Step 1: Copy BIDS Niftis and singularity image to cluster server. 
+    shutil.copytree('bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')
+    shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_22.0.0.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg')
+    
+    # Step 2: Run fmriprep on cluster server.
+    subprocess.run(['ssh', '-Y','bsms9pc4@apollo2.hpc.susx.ac.uk'])
+    subprocess.run(['module', 'add', 'sge'])
+    subprocess.run(['qsub', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'])
 
-    # Step 2: Prepare Nifti files.
-    print("\n###### STEP 2: PREPARING NIFTI FILES ######")
-    for p_id in participants_to_iterate:
-        print(f"Preparing Nifti files for {p_id}...")
-        path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
-        cisc_folder = None
-        for folder_name in os.listdir(path):
-            if "CISC" in folder_name:
-                cisc_folder = folder_name
-                break
-        if cisc_folder is None:
-            print("No 'CISC' folder found in the 'neurofeedback' directory.")
-            exit(1)
-        def get_sequence_numbers(file_name):
-            parts = file_name.split('_')
-            return int(parts[1]), int(parts[2].split('.')[0])
-        def copy_files(src_folder, dest_folder, sequence_number):
-            src_pattern = f'*_{sequence_number:06d}_*.dcm'
-            matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
-            for file in matching_files:
-                src_path = os.path.join(src_folder, file)
-                dest_path = os.path.join(dest_folder, file)
-                shutil.copy(src_path, dest_path)
-        def main():
-            src_folder = os.path.join(path, cisc_folder)
-            dicoms_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms')
-            run01_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run01_dicoms')
-            run02_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run02_dicoms')
-            run03_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run03_dicoms')
-            run04_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run04_dicoms')
-            os.makedirs(dicoms_folder, exist_ok=True)
-            os.makedirs(run01_folder, exist_ok=True)
-            os.makedirs(run02_folder, exist_ok=True)
-            os.makedirs(run03_folder, exist_ok=True)
-            os.makedirs(run04_folder, exist_ok=True)
-            files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
-            seq_vol_counts = {}
-            for file in files:
-                sequence_number, volume_number = get_sequence_numbers(file)
-                if sequence_number not in seq_vol_counts:
-                    seq_vol_counts[sequence_number] = []
-                seq_vol_counts[sequence_number].append(volume_number)
-            seq_210 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 210]
-            seq_238 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 238]
-            min_210 = min(seq_210)
-            max_210 = max(seq_210)
-            min_238 = min(seq_238)
-            max_238 = max(seq_238)
-            if not os.listdir(run01_folder):
-                print(f"Copying Run01 dicoms for {p_id}...")
-                copy_files(src_folder, run01_folder, min_210)
-                print(f"{p_id} Run01 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
-            if not os.listdir(run02_folder):
-                print(f"Copying Run02 dicoms for {p_id}...")
-                copy_files(src_folder, run02_folder, min_238)
-                print(f"{p_id} Run02 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
-            if not os.listdir(run03_folder):
-                print(f"Copying Run03 dicoms for {p_id}...")
-                copy_files(src_folder, run03_folder, max_238)
-                print(f"{p_id} Run03 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
-            if not os.listdir(run04_folder):
-                print(f"Copying Run04 dicoms for {p_id}...")
-                copy_files(src_folder, run04_folder, max_210)
-                print(f"{p_id} Run04 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
-        if __name__ == "__main__":
-            main()
-        for run in runs:
-            destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", f"{run}_dicoms")
-            output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
-            output_file = os.path.join(output_folder, f"{run}.nii")
-            if not os.path.exists(output_file):
-                print(f"Converting {run.upper()} DICOM files to Nifti format for {p_id}...")
-                subprocess.run(['dcm2niix', '-o', output_folder, '-f', run, '-b', 'n', destination_folder])
-                print(f"{p_id} {run.upper()} DICOM files converted to Nifti format.")
-            else:
-                print(f"{p_id} {run.upper()} Nifti file already exists. Skipping conversion.")
-            png_path = f'{p_id}/analysis/preproc/pngs/{run}.png'
-            nifti_path = f'{p_id}/analysis/preproc/niftis/{run}.nii'
-            if not os.path.exists(png_path):
-                print(f"Saving {p_id} {run} Nifti as PNG...")
-                save_png = subprocess.run(['fsleyes', 'render', '--scene', 'ortho', '-of', png_path, nifti_path], capture_output=True, text=True)
-                if save_png.returncode == 0:
-                    print("Screenshot saved as", png_path)
-                else:
-                    print("Error encountered:", save_png.stderr)
-            else:
-                print('PNG files already created. Skipping conversion.')
-        print(f"Check PNG files in {p_id}/analysis/preproc/pngs to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Incorrect orientations can be corrected for using 'fslreorient2std' or 'fslswapdim' commands.")
+    # fmriprep clean up
+    # move remaining output files back onto cisc2
 
-    # Step 3: Brain extract structural Nifti.
-    print("\n###### STEP 3: BRAIN EXTRACTING STRUCTURAL NIFTI ######")
-    for p_id in participants_to_iterate:
-        src_folder = os.path.join(path, cisc_folder)
-        destination_folder = f'{p_id}/analysis/preproc/structural'
-        new_filename = 'structural.nii'
-        if not os.path.exists(f'{p_id}/analysis/preproc/structural/structural.nii'):
-            nifti_folder = os.path.join(src_folder, 'depression_neurofeedback', 'nifti')
-            nii_files = [f for f in os.listdir(nifti_folder) if f.endswith('.nii')]
-            if len(nii_files) == 1:
-                source_file = os.path.join(nifti_folder, nii_files[0])
-                shutil.copy(source_file, destination_folder)
-                copied_file_path = os.path.join(destination_folder, os.path.basename(source_file))
-                new_file_path = os.path.join(destination_folder, new_filename)
-                os.rename(copied_file_path, new_file_path)
-                print('T1 Nifti copied and renamed to structural.nii.')
-            else:
-                print("No .nii file found or multiple .nii files found in the 'nifti' folder.")
-        else:
-            print('Structural Nifti file already exists. Skipping process.')
-        bet_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural", "structural_brain.nii")
-        structural_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural", "structural.nii")
-        if not os.path.exists(f'{p_id}/analysis/preproc/structural/structural_brain.nii.gz'):
-            print("Performing brain extraction on structural image...")
-            subprocess.run(['bet', structural_path, bet_path, '-m', '-R'])
-            print("Structural image brain extracted.")
-        else:
-            print("Structural image already brain extracted. Skipping process.")
+    # # Step 1: Create directories.
+    # print("\n###### STEP 1: CREATING DIRECTORIES ######")
+    # for p_id in participants_to_iterate:
+    #     p_id_folder = os.path.join(os.getcwd(), p_id)
+    #     os.makedirs(p_id_folder, exist_ok=True)
+    #     analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
+    #     os.makedirs(analysis_folder, exist_ok=True)
+    #     preproc_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc')
+    #     os.makedirs(preproc_folder, exist_ok=True)
+    #     png_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'pngs')
+    #     os.makedirs(png_folder, exist_ok=True)
+    #     nifti_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis')
+    #     os.makedirs(nifti_folder, exist_ok=True)
+    #     structural_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural")
+    #     os.makedirs(structural_folder, exist_ok=True)
+    #     onset_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "onset_files")
+    #     os.makedirs(onset_folder, exist_ok=True)
+    #     mc_ms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "mc_ms")
+    #     os.makedirs(mc_ms_folder, exist_ok=True)
+    #     bet_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "bet")
+    #     os.makedirs(bet_folder, exist_ok=True)
+    #     fieldmaps_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
+    #     os.makedirs(fieldmaps_folder, exist_ok=True)
+    #     group_folder = os.path.join(os.getcwd(), 'group')
+    #     os.makedirs(group_folder, exist_ok=True)
+    #     group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
+    #     os.makedirs(group_preproc_folder, exist_ok=True)
+    #     ms_test_folder = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test')
+    #     os.makedirs(ms_test_folder, exist_ok=True)
+    # print("Directories created.")
 
-    # Step 4: Check and correct for binary number overflow in functional data.
-    print("\n###### STEP 4: CORRECTING EPI BINARY NUMBER OVERFLOW ######")
-    for p_id in participants_to_iterate:
-        def get_nifti_data_type(file_path):
-            try:
-                result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-                if result.returncode == 0:
-                    lines = result.stdout.splitlines()
-                    for line in lines:
-                        if 'data_type' in line:
-                            data_type = line.split()[-1].strip()
-                            return data_type
-                        else:
-                            print("Error: Unable to extract data_type from fslinfo output.")
-                else:
-                    print(f"Error: fslinfo command failed with the following error:\n{result.stderr}")
-            except Exception as e:
-                print(f"Error: An exception occurred - {str(e)}")
-        for run in runs:
-            nifti_file_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
-            data_type_value = get_nifti_data_type(nifti_file_path)
-            output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
-            if not os.path.exists(output_path):
-                if data_type_value == 'INT16':
-                    print(f'Filling holes in {run} raw Nifti image.')
-                    subprocess.run(['fslmaths', nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path])
-                    print(f'Holes filled in {run} raw Nifti image.')
-                else:
-                    print(f'Data type for {run} Nifti image is not INT16. Cannot complete hole filling process.')
-                    sys.exit()
-            else:
-                print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
+    # # Step 2: Prepare Nifti files.
+    # print("\n###### STEP 2: PREPARING NIFTI FILES ######")
+    # for p_id in participants_to_iterate:
+    #     print(f"Preparing Nifti files for {p_id}...")
+    #     path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
+    #     cisc_folder = None
+    #     for folder_name in os.listdir(path):
+    #         if "CISC" in folder_name:
+    #             cisc_folder = folder_name
+    #             break
+    #     if cisc_folder is None:
+    #         print("No 'CISC' folder found in the 'neurofeedback' directory.")
+    #         exit(1)
+    #     def get_sequence_numbers(file_name):
+    #         parts = file_name.split('_')
+    #         return int(parts[1]), int(parts[2].split('.')[0])
+    #     def copy_files(src_folder, dest_folder, sequence_number):
+    #         src_pattern = f'*_{sequence_number:06d}_*.dcm'
+    #         matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
+    #         for file in matching_files:
+    #             src_path = os.path.join(src_folder, file)
+    #             dest_path = os.path.join(dest_folder, file)
+    #             shutil.copy(src_path, dest_path)
+    #     def main():
+    #         src_folder = os.path.join(path, cisc_folder)
+    #         dicoms_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms')
+    #         run01_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run01_dicoms')
+    #         run02_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run02_dicoms')
+    #         run03_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run03_dicoms')
+    #         run04_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'dicoms', 'run04_dicoms')
+    #         os.makedirs(dicoms_folder, exist_ok=True)
+    #         os.makedirs(run01_folder, exist_ok=True)
+    #         os.makedirs(run02_folder, exist_ok=True)
+    #         os.makedirs(run03_folder, exist_ok=True)
+    #         os.makedirs(run04_folder, exist_ok=True)
+    #         files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
+    #         seq_vol_counts = {}
+    #         for file in files:
+    #             sequence_number, volume_number = get_sequence_numbers(file)
+    #             if sequence_number not in seq_vol_counts:
+    #                 seq_vol_counts[sequence_number] = []
+    #             seq_vol_counts[sequence_number].append(volume_number)
+    #         seq_210 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 210]
+    #         seq_238 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 238]
+    #         min_210 = min(seq_210)
+    #         max_210 = max(seq_210)
+    #         min_238 = min(seq_238)
+    #         max_238 = max(seq_238)
+    #         if not os.listdir(run01_folder):
+    #             print(f"Copying Run01 dicoms for {p_id}...")
+    #             copy_files(src_folder, run01_folder, min_210)
+    #             print(f"{p_id} Run01 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
+    #         if not os.listdir(run02_folder):
+    #             print(f"Copying Run02 dicoms for {p_id}...")
+    #             copy_files(src_folder, run02_folder, min_238)
+    #             print(f"{p_id} Run02 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
+    #         if not os.listdir(run03_folder):
+    #             print(f"Copying Run03 dicoms for {p_id}...")
+    #             copy_files(src_folder, run03_folder, max_238)
+    #             print(f"{p_id} Run03 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
+    #         if not os.listdir(run04_folder):
+    #             print(f"Copying Run04 dicoms for {p_id}...")
+    #             copy_files(src_folder, run04_folder, max_210)
+    #             print(f"{p_id} Run04 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
+    #     if __name__ == "__main__":
+    #         main()
+    #     for run in runs:
+    #         destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", f"{run}_dicoms")
+    #         output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "niftis")
+    #         output_file = os.path.join(output_folder, f"{run}.nii")
+    #         if not os.path.exists(output_file):
+    #             print(f"Converting {run.upper()} DICOM files to Nifti format for {p_id}...")
+    #             subprocess.run(['dcm2niix', '-o', output_folder, '-f', run, '-b', 'n', destination_folder])
+    #             print(f"{p_id} {run.upper()} DICOM files converted to Nifti format.")
+    #         else:
+    #             print(f"{p_id} {run.upper()} Nifti file already exists. Skipping conversion.")
+    #         png_path = f'{p_id}/analysis/preproc/pngs/{run}.png'
+    #         nifti_path = f'{p_id}/analysis/preproc/niftis/{run}.nii'
+    #         if not os.path.exists(png_path):
+    #             print(f"Saving {p_id} {run} Nifti as PNG...")
+    #             save_png = subprocess.run(['fsleyes', 'render', '--scene', 'ortho', '-of', png_path, nifti_path], capture_output=True, text=True)
+    #             if save_png.returncode == 0:
+    #                 print("Screenshot saved as", png_path)
+    #             else:
+    #                 print("Error encountered:", save_png.stderr)
+    #         else:
+    #             print('PNG files already created. Skipping conversion.')
+    #     print(f"Check PNG files in {p_id}/analysis/preproc/pngs to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Incorrect orientations can be corrected for using 'fslreorient2std' or 'fslswapdim' commands.")
 
-    # Step 5: Perform motion correction.
-    print("\n###### STEP 5: PERFORMING MOTION CORRECTION ######")
-    for p_id in participants_to_iterate:
-        use_middle_vol_vals = []
-        use_sinc_interp_vals = []
-        for run in runs:
-            input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
-            output_path = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
-            text_output_path = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
-            if not os.path.exists(text_output_path):
-                print(f"Finding optimal motion correction parameters for {run} data...")
-                subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
-                df = pd.read_csv(text_output_path, delim_whitespace=True, names=["vol_fd"])
-                use_middle_vol = 0
-                use_sinc_interp = 0
-                if len(df) % 2 == 0:
-                    middle_vol = len(df) // 2 - 1
-                    middle_vol_fd = df["vol_fd"].iloc[middle_vol]
-                    if middle_vol_fd <= 0.9:
-                        use_middle_vol = 1
-                else:
-                    middle_vol = len(df) // 2
-                    middle_vol_fd = df["vol_fd"].iloc[middle_vol]
-                    if middle_vol_fd <= 0.9:
-                        use_middle_vol = 1
-                high_motion_vols = 0
-                for value in df ["vol_fd"]:
-                    if value > 0.9:
-                        high_motion_vols += 1
-                percentage_outliers = (high_motion_vols / len(df)) * 100
-                if percentage_outliers > 20:
-                    use_sinc_interp = 1
-                use_middle_vol_vals.append(use_middle_vol)
-                use_sinc_interp_vals.append(use_sinc_interp)           
-                result_file = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test', 'ms_test_master.txt')
-                if not os.path.exists(result_file):
-                    with open(result_file, "a") as f:
-                        f.write("p_id run use_middle_vol use_sinc_interp\n")
-                        f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
-                else:
-                    with open(result_file, "r") as f:
-                        lines = f.readlines()
-                    matching_lines = [line for line in lines if line.startswith(f"{p_id} {run}")]  
-                    if matching_lines:
-                        with open(result_file, "w") as f:
-                            for index, line in enumerate(lines):
-                                if index not in matching_lines:
-                                    f.write(line)
-                            f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
-                    else:
-                        with open(result_file, "a") as f:
-                            f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
-            else:
-                print(f"Motion correction optimisation for {run} already performed. Skipping process.")
-        for run in runs:
-            input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
-            output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc.nii.gz') 
-            if not os.path.exists(output_path):
-                print(f"Performing motion correction on {run} data...")
-                if run == 'run01':
-                    if use_middle_vol_vals[0] == 1 and use_sinc_interp_vals[0] == 0:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
-                        print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
-                    elif use_middle_vol_vals[0] == 1 and use_sinc_interp_vals[0] == 1:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
-                        print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
-                    elif use_middle_vol_vals[0] == 0 and use_sinc_interp_vals[0] == 0:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
-                        print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
-                    elif use_middle_vol_vals[0] == 0 and use_sinc_interp_vals[0] == 1:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
-                        print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
-                if run == 'run02':
-                    if use_middle_vol_vals[1] == 1 and use_sinc_interp_vals[1] == 0:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
-                        print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
-                    elif use_middle_vol_vals[1] == 1 and use_sinc_interp_vals[1] == 1:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
-                        print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
-                    elif use_middle_vol_vals[1] == 0 and use_sinc_interp_vals[1] == 0:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
-                        print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
-                    elif use_middle_vol_vals[1] == 0 and use_sinc_interp_vals[1] == 1:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
-                        print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
-                if run == 'run03':
-                    if use_middle_vol_vals[2] == 1 and use_sinc_interp_vals[2] == 0:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
-                        print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
-                    elif use_middle_vol_vals[2] == 1 and use_sinc_interp_vals[2] == 1:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
-                        print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
-                    elif use_middle_vol_vals[2] == 0 and use_sinc_interp_vals[2] == 0:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
-                        print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
-                    elif use_middle_vol_vals[2] == 0 and use_sinc_interp_vals[2] == 1:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
-                        print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
-                if run == 'run04':
-                    if use_middle_vol_vals[3] == 1 and use_sinc_interp_vals[3] == 0:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
-                        print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
-                    elif use_middle_vol_vals[3] == 1 and use_sinc_interp_vals[3] == 1:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
-                        print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
-                    elif use_middle_vol_vals[3] == 0 and use_sinc_interp_vals[3] == 0:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
-                        print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
-                    elif use_middle_vol_vals[3] == 0 and use_sinc_interp_vals[3] == 1:
-                        subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
-                        print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
-            else:
-                print(f"{run} already motion corrected. Skipping process.")
+    # # Step 3: Brain extract structural Nifti.
+    # print("\n###### STEP 3: BRAIN EXTRACTING STRUCTURAL NIFTI ######")
+    # for p_id in participants_to_iterate:
+    #     src_folder = os.path.join(path, cisc_folder)
+    #     destination_folder = f'{p_id}/analysis/preproc/structural'
+    #     new_filename = 'structural.nii'
+    #     if not os.path.exists(f'{p_id}/analysis/preproc/structural/structural.nii'):
+    #         nifti_folder = os.path.join(src_folder, 'depression_neurofeedback', 'nifti')
+    #         nii_files = [f for f in os.listdir(nifti_folder) if f.endswith('.nii')]
+    #         if len(nii_files) == 1:
+    #             source_file = os.path.join(nifti_folder, nii_files[0])
+    #             shutil.copy(source_file, destination_folder)
+    #             copied_file_path = os.path.join(destination_folder, os.path.basename(source_file))
+    #             new_file_path = os.path.join(destination_folder, new_filename)
+    #             os.rename(copied_file_path, new_file_path)
+    #             print('T1 Nifti copied and renamed to structural.nii.')
+    #         else:
+    #             print("No .nii file found or multiple .nii files found in the 'nifti' folder.")
+    #     else:
+    #         print('Structural Nifti file already exists. Skipping process.')
+    #     bet_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural", "structural_brain.nii")
+    #     structural_path = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "structural", "structural.nii")
+    #     if not os.path.exists(f'{p_id}/analysis/preproc/structural/structural_brain.nii.gz'):
+    #         print("Performing brain extraction on structural image...")
+    #         subprocess.run(['bet', structural_path, bet_path, '-m', '-R'])
+    #         print("Structural image brain extracted.")
+    #     else:
+    #         print("Structural image already brain extracted. Skipping process.")
 
-    # Step 6: Perform motion scrubbing.
-    print("\n###### STEP 6: PERFORMING MOTION SCRUBBING ######")
-    for p_id in participants_to_iterate:
-        scrubbed_vols = []
-        for run in runs:
-            input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc')
-            output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc_ms')
-            text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_scrubbed_volumes.txt')
-            if not os.path.exists(output_path):
-                print(f"Performing motion scrubbing on {run} data...")
-                subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--nomoco'])
-                print(f'{run} motion scrubbed.')
-            else:
-                print (f'{run} already motion scrubbed. Skipping process.')
-            with open(output_path, 'r') as file:
-                first_row = file.readline().strip()
-                num_columns = len(first_row.split('   '))
-                scrubbed_vols.append(num_columns)
-                if run == 'run01' or 'run04':
-                    vol_num = 210
-                elif run == 'run02' or 'run03':
-                    vol_num = 238
-                run_scrubbed_vols_perc = (num_columns / vol_num) * 100
-                if run_scrubbed_vols_perc > 15:
-                    print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove this run from analysis.')
-                    sys.exit()
-                else:
-                    print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This is within the tolerable threshold of 15%. Analysis of this run can continue.')
-        sum_scrubbed_vols = sum(scrubbed_vols)
-        scrubbed_vols_perc = (sum_scrubbed_vols / 896) * 100
-        if scrubbed_vols_perc > 15:
-            print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove participant from analysis.')
-            sys.exit()
-        else:
-            print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
+    # # Step 4: Check and correct for binary number overflow in functional data.
+    # print("\n###### STEP 4: CORRECTING EPI BINARY NUMBER OVERFLOW ######")
+    # for p_id in participants_to_iterate:
+    #     def get_nifti_data_type(file_path):
+    #         try:
+    #             result = subprocess.run(['fslinfo', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    #             if result.returncode == 0:
+    #                 lines = result.stdout.splitlines()
+    #                 for line in lines:
+    #                     if 'data_type' in line:
+    #                         data_type = line.split()[-1].strip()
+    #                         return data_type
+    #                     else:
+    #                         print("Error: Unable to extract data_type from fslinfo output.")
+    #             else:
+    #                 print(f"Error: fslinfo command failed with the following error:\n{result.stderr}")
+    #         except Exception as e:
+    #             print(f"Error: An exception occurred - {str(e)}")
+    #     for run in runs:
+    #         nifti_file_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}.nii')
+    #         data_type_value = get_nifti_data_type(nifti_file_path)
+    #         output_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
+    #         if not os.path.exists(output_path):
+    #             if data_type_value == 'INT16':
+    #                 print(f'Filling holes in {run} raw Nifti image.')
+    #                 subprocess.run(['fslmaths', nifti_file_path, '-mul', '-1', '-thr', '0', '-bin', '-mul', '65536', '-add', nifti_file_path, output_path])
+    #                 print(f'Holes filled in {run} raw Nifti image.')
+    #             else:
+    #                 print(f'Data type for {run} Nifti image is not INT16. Cannot complete hole filling process.')
+    #                 sys.exit()
+    #         else:
+    #             print(f'Holes already filled in {run} raw Nifti image. Skipping process.')
 
-    # Step 8: Confirm sequence phase encoding directions for stratification of distortion correction method.
-    print("\n###### STEP 8: DETERMINING PHASE ENCODING DIRECTIONS ######")
-    bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
-    def copy_2_dicoms(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
-                sequences2 = defaultdict(list)
-                last_two_sets = []
-                for filename in os.listdir(source_folder):
-                    if filename.endswith('.dcm'):
-                        file_parts = filename.split('_')
-                        if len(file_parts) == 3:
-                            sequence_number = int(file_parts[1])
-                            volume_number = int(file_parts[2].split('.')[0])
-                            sequences2[sequence_number].append((filename, volume_number))
-                for sequence_number, files_info in sequences2.items():
-                    if len(files_info) == target_volume_count:
-                        last_two_sets.append(files_info)
-                        if len(last_two_sets) > 2:
-                            last_two_sets.pop(0)
-                for idx, files_info in enumerate(last_two_sets):
-                    for filename, _ in files_info:
-                        if idx == 0:
-                            destination_folder = destination_folder1
-                        else:
-                            destination_folder = destination_folder2
-                        source_path = os.path.join(source_folder, filename)
-                        destination_path = os.path.join(destination_folder, filename)
-                        shutil.copy2(source_path, destination_path)
-                        print(f"Copied {filename} to {destination_folder}")
-    for p_id in participants_to_iterate:
-        if p_id in bad_participants:
-            print(f"Copying {p_id} fieldmap DICOMS to separate folder...")
-            ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
-            pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "badpa")
-            os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
-            os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
-            path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
-            cisc_folder = None
-            for folder_name in os.listdir(path):
-                if "CISC" in folder_name:
-                    cisc_folder = folder_name
-                    break
-            if cisc_folder is None:
-                print("No 'CISC' folder found in the 'neurofeedback' directory.")
-                exit(1)
-            source_folder = os.path.join(path, cisc_folder)
-            if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
-                copy_2_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
-                print(f"{p_id} fieldmap DICOMS successfully copied.")
-            else:
-                print(f"{p_id} fieldmap DICOMS already copied. Skipping process.")
-            pe_list = ['ap', 'badpa']
-            for pe in pe_list:
-                destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
-                output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
-                output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
-                if not os.path.exists(output_file):
-                    print(f"Converting {p_id} {pe.upper()} fieldmaps DICOM files to Nifti format...")
-                    subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
-                    print(f"{p_id} {pe.upper()} fieldmaps DICOM files converted to Nifti format.")
-                else:
-                    print(f"{p_id} {pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
-    def copy_3_dicoms(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
-            sequences3 = defaultdict(list)
-            last_three_sets = [] 
-            for filename in os.listdir(source_folder):
-                if filename.endswith('.dcm'):
-                    file_parts = filename.split('_')
-                    if len(file_parts) == 3:
-                        sequence_number = int(file_parts[1])
-                        volume_number = int(file_parts[2].split('.')[0])
-                        sequences3[sequence_number].append((filename, volume_number))
-            for sequence_number, files_info in sequences3.items():
-                if len(files_info) == target_volume_count:
-                    last_three_sets.append(files_info)
-                    if len(last_three_sets) > 3:
-                        last_three_sets.pop(0)
-            for idx, files_info in enumerate(last_three_sets):
-                if idx == 0:
-                    destination_folder = destination_folder1
-                elif idx == 1:
-                    destination_folder = destination_folder2
-                else:
-                    destination_folder = destination_folder3
-                for filename, _ in files_info:
-                    source_path = os.path.join(source_folder, filename)
-                    destination_path = os.path.join(destination_folder, filename)
-                    shutil.copy2(source_path, destination_path)
-                    print(f"Copied {filename} to {destination_folder}")
-    for p_id in participants_to_iterate:
-        if p_id not in bad_participants:
-            ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
-            pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")
-            rl_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "rl")
-            os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
-            os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
-            os.makedirs(rl_fieldmaps_dicoms_folder, exist_ok=True)
-            path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
-            cisc_folder = None
-            for folder_name in os.listdir(path):
-                if "CISC" in folder_name:
-                    cisc_folder = folder_name
-                    break
-            if cisc_folder is None:
-                print("No 'CISC' folder found in the 'neurofeedback' directory.")
-                exit(1)
-            source_folder = os.path.join(path, cisc_folder)
-            if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder) or not os.listdir(rl_fieldmaps_dicoms_folder):
-                copy_3_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, rl_fieldmaps_dicoms_folder, target_volume_count=5)
-            pe_list = ['ap', 'pa', 'rl']
-            for pe in pe_list:
-                destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
-                output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
-                output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
-                if not os.path.exists(output_file):
-                    print(f"Converting {pe.upper()} fieldmaps DICOM files to Nifti format...")
-                    subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
-                    print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
-                else:
-                    print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
-    for p_id in participants_to_iterate:
-        if p_id in bad_participants:
-            ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
-            pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/badpa"
-            run01 = f"{p_id}/analysis/preproc/dicoms/run01_dicoms"
-            run02 = f"{p_id}/analysis/preproc/dicoms/run02_dicoms"
-            run03 = f"{p_id}/analysis/preproc/dicoms/run03_dicoms"
-            run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
-            folder_list = [ap_fieldmaps, pa_fieldmaps, run01, run02, run03, run04]
-            pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
-            pe_axes = []
-            for folder in folder_list:
-                dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
-                if len(dicom_files) == 0:
-                    print("No DICOM files found in the directory.")
-                else:
-                    random_file = random.choice(dicom_files)
-                    ds = pydicom.dcmread(random_file)
-                    pe_axis = ds.InPlanePhaseEncodingDirection
-                    pe_axes.append(pe_axis)
-                    start_index = folder.rfind('/') + 1  
-                    end_index = folder.rfind('_')  
-                    if end_index == -1 or end_index < start_index:
-                        folder = folder[start_index:] + "_fieldmaps"
-                    else:
-                        folder = folder[start_index:end_index]
-                    print(f"Phase Encoding Axis for {folder}: ", pe_axis)
-                if not os.path.exists(pe_file):
-                    with open(pe_file, "a") as f:
-                        f.write("sequence pe_axis\n")
-                        f.write(f"{folder} {pe_axis}\n")
-                else: 
-                    with open(pe_file, "r") as f:
-                        lines = f.readlines()
-                    matching_lines = [line for line in lines if line.startswith(f"{folder}")]
-                    if matching_lines:
-                        with open(pe_file, "w") as f:
-                            for index, line in enumerate(lines):
-                                if index not in matching_lines:
-                                    f.write(line)
-                            f.write(f"{folder} {pe_axis}\n")
-                    else:
-                        with open(pe_file, "a") as f:
-                            f.write(f"{folder} {pe_axis}\n")
-            print("Sequence PE axes saved to pe_axes.txt file.")
-            if pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'COL']:
-                print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, AP) for this participant. Stratification of distortion correction method can now take place.')
-            elif pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'ROW']:
-                print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, RL) for this participant. Stratification of distortion correction method can now take place.')
-            else:
-                print('Sequence PE directions are not as expected. Please investigate.')
-                sys.exit()
-        if p_id not in bad_participants:
-            ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
-            pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/pa"
-            rl_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/rl"
-            run01 = f"{p_id}/analysis/preproc/dicoms/run01_dicoms"
-            run02 = f"{p_id}/analysis/preproc/dicoms/run02_dicoms"
-            run03 = f"{p_id}/analysis/preproc/dicoms/run03_dicoms"
-            run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
-            folder_list = [ap_fieldmaps, pa_fieldmaps, rl_fieldmaps, run01, run02, run03, run04]
-            pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
-            pe_axes = []
-            for folder in folder_list:
-                dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
-                if len(dicom_files) == 0:
-                    print("No DICOM files found in the directory.")
-                else:
-                    random_file = random.choice(dicom_files)
-                    ds = pydicom.dcmread(random_file)
-                    pe_axis = ds.InPlanePhaseEncodingDirection
-                    pe_axes.append(pe_axis)
-                    start_index = folder.rfind('/') + 1  
-                    end_index = folder.rfind('_')  
-                    if end_index == -1 or end_index < start_index:
-                        folder = folder[start_index:] + "_fieldmaps"
-                    else:
-                        folder = folder[start_index:end_index]
-                    print(f"Phase Encoding Axis for {folder}: ", pe_axis)
-                if not os.path.exists(pe_file):
-                    with open(pe_file, "a") as f:
-                        f.write("sequence pe_axis\n")
-                        f.write(f"{folder} {pe_axis}\n")
-                else: 
-                    with open(pe_file, "r") as f:
-                        lines = f.readlines()
-                    matching_lines = [line for line in lines if line.startswith(f"{folder}")]
-                    if matching_lines:
-                        with open(pe_file, "w") as f:
-                            for index, line in enumerate(lines):
-                                if index not in matching_lines:
-                                    f.write(line)
-                            f.write(f"{folder} {pe_axis}\n")
-                    else:
-                        with open(pe_file, "a") as f:
-                            f.write(f"{folder} {pe_axis}\n")
-            print("Sequence PE axes saved to pe_axes.txt file.")
-            if pe_axes == ['COL', 'COL', 'ROW', 'COL', 'COL', 'COL', 'COL']:
-                print('Sequence PE directions are correct as expected (AP, PA, RL, PA, PA, PA, PA) for this participant. Stratification of distortion correction method can now take place.')
-            else:
-                print('Sequence PE directions are not as expected. Please investigate.')
-                sys.exit()
+    # # Step 5: Perform motion correction.
+    # print("\n###### STEP 5: PERFORMING MOTION CORRECTION ######")
+    # for p_id in participants_to_iterate:
+    #     use_middle_vol_vals = []
+    #     use_sinc_interp_vals = []
+    #     for run in runs:
+    #         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
+    #         output_path = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test', f'{p_id}_{run}_ms_test_output.txt')
+    #         text_output_path = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test', f'{p_id}_{run}_ms_test_log.txt') 
+    #         if not os.path.exists(text_output_path):
+    #             print(f"Finding optimal motion correction parameters for {run} data...")
+    #             subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--fd', '--thresh=0.9'])
+    #             df = pd.read_csv(text_output_path, delim_whitespace=True, names=["vol_fd"])
+    #             use_middle_vol = 0
+    #             use_sinc_interp = 0
+    #             if len(df) % 2 == 0:
+    #                 middle_vol = len(df) // 2 - 1
+    #                 middle_vol_fd = df["vol_fd"].iloc[middle_vol]
+    #                 if middle_vol_fd <= 0.9:
+    #                     use_middle_vol = 1
+    #             else:
+    #                 middle_vol = len(df) // 2
+    #                 middle_vol_fd = df["vol_fd"].iloc[middle_vol]
+    #                 if middle_vol_fd <= 0.9:
+    #                     use_middle_vol = 1
+    #             high_motion_vols = 0
+    #             for value in df ["vol_fd"]:
+    #                 if value > 0.9:
+    #                     high_motion_vols += 1
+    #             percentage_outliers = (high_motion_vols / len(df)) * 100
+    #             if percentage_outliers > 20:
+    #                 use_sinc_interp = 1
+    #             use_middle_vol_vals.append(use_middle_vol)
+    #             use_sinc_interp_vals.append(use_sinc_interp)           
+    #             result_file = os.path.join(os.getcwd(), 'group', 'preproc', 'ms_test', 'ms_test_master.txt')
+    #             if not os.path.exists(result_file):
+    #                 with open(result_file, "a") as f:
+    #                     f.write("p_id run use_middle_vol use_sinc_interp\n")
+    #                     f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
+    #             else:
+    #                 with open(result_file, "r") as f:
+    #                     lines = f.readlines()
+    #                 matching_lines = [line for line in lines if line.startswith(f"{p_id} {run}")]  
+    #                 if matching_lines:
+    #                     with open(result_file, "w") as f:
+    #                         for index, line in enumerate(lines):
+    #                             if index not in matching_lines:
+    #                                 f.write(line)
+    #                         f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
+    #                 else:
+    #                     with open(result_file, "a") as f:
+    #                         f.write(f"{p_id} {run} {use_middle_vol} {use_sinc_interp}\n")
+    #         else:
+    #             print(f"Motion correction optimisation for {run} already performed. Skipping process.")
+    #     for run in runs:
+    #         input_path = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'niftis', f'{run}_nh.nii.gz')
+    #         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc.nii.gz') 
+    #         if not os.path.exists(output_path):
+    #             print(f"Performing motion correction on {run} data...")
+    #             if run == 'run01':
+    #                 if use_middle_vol_vals[0] == 1 and use_sinc_interp_vals[0] == 0:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+    #                     print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
+    #                 elif use_middle_vol_vals[0] == 1 and use_sinc_interp_vals[0] == 1:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
+    #                     print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
+    #                 elif use_middle_vol_vals[0] == 0 and use_sinc_interp_vals[0] == 0:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
+    #                     print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
+    #                 elif use_middle_vol_vals[0] == 0 and use_sinc_interp_vals[0] == 1:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
+    #                     print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
+    #             if run == 'run02':
+    #                 if use_middle_vol_vals[1] == 1 and use_sinc_interp_vals[1] == 0:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+    #                     print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
+    #                 elif use_middle_vol_vals[1] == 1 and use_sinc_interp_vals[1] == 1:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
+    #                     print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
+    #                 elif use_middle_vol_vals[1] == 0 and use_sinc_interp_vals[1] == 0:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
+    #                     print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
+    #                 elif use_middle_vol_vals[1] == 0 and use_sinc_interp_vals[1] == 1:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
+    #                     print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
+    #             if run == 'run03':
+    #                 if use_middle_vol_vals[2] == 1 and use_sinc_interp_vals[2] == 0:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+    #                     print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
+    #                 elif use_middle_vol_vals[2] == 1 and use_sinc_interp_vals[2] == 1:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
+    #                     print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
+    #                 elif use_middle_vol_vals[2] == 0 and use_sinc_interp_vals[2] == 0:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
+    #                     print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
+    #                 elif use_middle_vol_vals[2] == 0 and use_sinc_interp_vals[2] == 1:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
+    #                     print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
+    #             if run == 'run04':
+    #                 if use_middle_vol_vals[3] == 1 and use_sinc_interp_vals[3] == 0:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-mats'])
+    #                     print(f"{run} motion corrected with middle volume reference and no sinc interpolation.")
+    #                 elif use_middle_vol_vals[3] == 1 and use_sinc_interp_vals[3] == 1:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-stages', '4', '-mats'])
+    #                     print(f"{run} motion corrected with middle volume reference and sinc interpolation.")
+    #                 elif use_middle_vol_vals[3] == 0 and use_sinc_interp_vals[3] == 0:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-mats'])
+    #                     print(f"{run} motion corrected with mean volume reference and no sinc interpolation.")
+    #                 elif use_middle_vol_vals[3] == 0 and use_sinc_interp_vals[3] == 1:
+    #                     subprocess.run(['mcflirt', '-in', input_path, '-out', output_path, '-meanvol', '-stages', '4', '-mats'])
+    #                     print(f"{run} motion corrected with mean volume reference and sinc interpolation.")
+    #         else:
+    #             print(f"{run} already motion corrected. Skipping process.")
 
-    # Step 9: Calculate and apply fieldmaps for relevant participants.
-    print("\n###### STEP 9: APPLYING FIELDMAPS ######")
-    for p_id in participants_to_iterate:
-        if p_id not in bad_participants:
-            ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
-            pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.nii')
-            output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'merged_fieldmaps.nii.gz')
-            if not os.path.exists(output_file):
-                print("Merging fieldmap sequences...")
-                subprocess.run(['fslmerge', '-t', output_file, ap_fieldmaps, pa_fieldmaps])
-                print("Fieldmap sequences merging completed.")
-            else:
-                print("Fieldmap sequences already merged. Skipping process.")
-            fov_phase = 1
-            base_res = 64
-            phase_res = 1
-            echo_spacing = 0.54
-            pe_steps = (fov_phase * base_res * phase_res) - 1
-            readout_time_s = (pe_steps * echo_spacing) / 1000
-            acqparams_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'acqparams.txt')
-            if not os.path.exists(acqparams_file):
-                with open(acqparams_file, "a") as f:
-                    f.write(f"0 -1 0 {readout_time_s}\n")
-                    f.write(f"0 -1 0 {readout_time_s}\n")
-                    f.write(f"0 -1 0 {readout_time_s}\n")
-                    f.write(f"0 -1 0 {readout_time_s}\n")
-                    f.write(f"0 -1 0 {readout_time_s}\n")
-                    f.write(f"0 1 0 {readout_time_s}\n")
-                    f.write(f"0 1 0 {readout_time_s}\n")
-                    f.write(f"0 1 0 {readout_time_s}\n")
-                    f.write(f"0 1 0 {readout_time_s}\n")
-                    f.write(f"0 1 0 {readout_time_s}")
-            fieldcoef_output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'topup_{p_id}_fieldcoef.nii.gz')
-            movpar_output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'topup_{p_id}_movpar.txt')
-            if not os.path.exists(fieldcoef_output_file) or not os.path.exists(movpar_output_file):
-                print("Calculating fieldmaps...")
-                subprocess.run(["topup", f"--imain={p_id}/analysis/preproc/fieldmaps/merged_fieldmaps.nii", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--config=b02b0.cnf", f"--out={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", f"--iout={p_id}/analysis/preproc/fieldmaps/topup_{p_id}_unwarped"])
-                print("Fieldmap calculation completed.")
-                for run in runs:
-                    print("Applying fieldmaps...")
-                    subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/bet/{run}_nh_mc_bet.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_nh_mc_bet_dc"])
-                    print("Fieldmap application completed.")
-            else:
-                print("Fieldmaps already calculated and applied. Skipping process.")
+    # # Step 6: Perform motion scrubbing.
+    # print("\n###### STEP 6: PERFORMING MOTION SCRUBBING ######")
+    # for p_id in participants_to_iterate:
+    #     scrubbed_vols = []
+    #     for run in runs:
+    #         input_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc')
+    #         output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_nh_mc_ms')
+    #         text_output_path = os.path.join (os.getcwd(), p_id, 'analysis', 'preproc', 'mc_ms', f'{run}_scrubbed_volumes.txt')
+    #         if not os.path.exists(output_path):
+    #             print(f"Performing motion scrubbing on {run} data...")
+    #             subprocess.run(['fsl_motion_outliers', '-i', input_path, '-o', output_path, '-s', text_output_path, '--nomoco'])
+    #             print(f'{run} motion scrubbed.')
+    #         else:
+    #             print (f'{run} already motion scrubbed. Skipping process.')
+    #         with open(output_path, 'r') as file:
+    #             first_row = file.readline().strip()
+    #             num_columns = len(first_row.split('   '))
+    #             scrubbed_vols.append(num_columns)
+    #             if run == 'run01' or 'run04':
+    #                 vol_num = 210
+    #             elif run == 'run02' or 'run03':
+    #                 vol_num = 238
+    #             run_scrubbed_vols_perc = (num_columns / vol_num) * 100
+    #             if run_scrubbed_vols_perc > 15:
+    #                 print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove this run from analysis.')
+    #                 sys.exit()
+    #             else:
+    #                 print(f'Percentage of volumes scrubbed for {run} is {run_scrubbed_vols_perc}%. This is within the tolerable threshold of 15%. Analysis of this run can continue.')
+    #     sum_scrubbed_vols = sum(scrubbed_vols)
+    #     scrubbed_vols_perc = (sum_scrubbed_vols / 896) * 100
+    #     if scrubbed_vols_perc > 15:
+    #         print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This exceeds tolerable threshold of 15%. Remove participant from analysis.')
+    #         sys.exit()
+    #     else:
+    #         print(f'Total percentage of volumes scrubbed is {scrubbed_vols_perc}%. This is within tolerable threshold of 15%. Analysis can continue.')
+
+    # # Step 8: Confirm sequence phase encoding directions for stratification of distortion correction method.
+    # print("\n###### STEP 8: DETERMINING PHASE ENCODING DIRECTIONS ######")
+    # bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
+    # def copy_2_dicoms(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
+    #             sequences2 = defaultdict(list)
+    #             last_two_sets = []
+    #             for filename in os.listdir(source_folder):
+    #                 if filename.endswith('.dcm'):
+    #                     file_parts = filename.split('_')
+    #                     if len(file_parts) == 3:
+    #                         sequence_number = int(file_parts[1])
+    #                         volume_number = int(file_parts[2].split('.')[0])
+    #                         sequences2[sequence_number].append((filename, volume_number))
+    #             for sequence_number, files_info in sequences2.items():
+    #                 if len(files_info) == target_volume_count:
+    #                     last_two_sets.append(files_info)
+    #                     if len(last_two_sets) > 2:
+    #                         last_two_sets.pop(0)
+    #             for idx, files_info in enumerate(last_two_sets):
+    #                 for filename, _ in files_info:
+    #                     if idx == 0:
+    #                         destination_folder = destination_folder1
+    #                     else:
+    #                         destination_folder = destination_folder2
+    #                     source_path = os.path.join(source_folder, filename)
+    #                     destination_path = os.path.join(destination_folder, filename)
+    #                     shutil.copy2(source_path, destination_path)
+    #                     print(f"Copied {filename} to {destination_folder}")
+    # for p_id in participants_to_iterate:
+    #     if p_id in bad_participants:
+    #         print(f"Copying {p_id} fieldmap DICOMS to separate folder...")
+    #         ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
+    #         pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "badpa")
+    #         os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+    #         os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
+    #         path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
+    #         cisc_folder = None
+    #         for folder_name in os.listdir(path):
+    #             if "CISC" in folder_name:
+    #                 cisc_folder = folder_name
+    #                 break
+    #         if cisc_folder is None:
+    #             print("No 'CISC' folder found in the 'neurofeedback' directory.")
+    #             exit(1)
+    #         source_folder = os.path.join(path, cisc_folder)
+    #         if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
+    #             copy_2_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
+    #             print(f"{p_id} fieldmap DICOMS successfully copied.")
+    #         else:
+    #             print(f"{p_id} fieldmap DICOMS already copied. Skipping process.")
+    #         pe_list = ['ap', 'badpa']
+    #         for pe in pe_list:
+    #             destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
+    #             output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
+    #             output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
+    #             if not os.path.exists(output_file):
+    #                 print(f"Converting {p_id} {pe.upper()} fieldmaps DICOM files to Nifti format...")
+    #                 subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
+    #                 print(f"{p_id} {pe.upper()} fieldmaps DICOM files converted to Nifti format.")
+    #             else:
+    #                 print(f"{p_id} {pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
+    # def copy_3_dicoms(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
+    #         sequences3 = defaultdict(list)
+    #         last_three_sets = [] 
+    #         for filename in os.listdir(source_folder):
+    #             if filename.endswith('.dcm'):
+    #                 file_parts = filename.split('_')
+    #                 if len(file_parts) == 3:
+    #                     sequence_number = int(file_parts[1])
+    #                     volume_number = int(file_parts[2].split('.')[0])
+    #                     sequences3[sequence_number].append((filename, volume_number))
+    #         for sequence_number, files_info in sequences3.items():
+    #             if len(files_info) == target_volume_count:
+    #                 last_three_sets.append(files_info)
+    #                 if len(last_three_sets) > 3:
+    #                     last_three_sets.pop(0)
+    #         for idx, files_info in enumerate(last_three_sets):
+    #             if idx == 0:
+    #                 destination_folder = destination_folder1
+    #             elif idx == 1:
+    #                 destination_folder = destination_folder2
+    #             else:
+    #                 destination_folder = destination_folder3
+    #             for filename, _ in files_info:
+    #                 source_path = os.path.join(source_folder, filename)
+    #                 destination_path = os.path.join(destination_folder, filename)
+    #                 shutil.copy2(source_path, destination_path)
+    #                 print(f"Copied {filename} to {destination_folder}")
+    # for p_id in participants_to_iterate:
+    #     if p_id not in bad_participants:
+    #         ap_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "ap")
+    #         pa_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "pa")
+    #         rl_fieldmaps_dicoms_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", "rl")
+    #         os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+    #         os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
+    #         os.makedirs(rl_fieldmaps_dicoms_folder, exist_ok=True)
+    #         path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
+    #         cisc_folder = None
+    #         for folder_name in os.listdir(path):
+    #             if "CISC" in folder_name:
+    #                 cisc_folder = folder_name
+    #                 break
+    #         if cisc_folder is None:
+    #             print("No 'CISC' folder found in the 'neurofeedback' directory.")
+    #             exit(1)
+    #         source_folder = os.path.join(path, cisc_folder)
+    #         if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder) or not os.listdir(rl_fieldmaps_dicoms_folder):
+    #             copy_3_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, rl_fieldmaps_dicoms_folder, target_volume_count=5)
+    #         pe_list = ['ap', 'pa', 'rl']
+    #         for pe in pe_list:
+    #             destination_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "dicoms", "fieldmaps", pe)
+    #             output_folder = os.path.join(os.getcwd(), p_id, "analysis", "preproc", "fieldmaps")
+    #             output_file = os.path.join(output_folder, f"{pe}_fieldmaps.nii")
+    #             if not os.path.exists(output_file):
+    #                 print(f"Converting {pe.upper()} fieldmaps DICOM files to Nifti format...")
+    #                 subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
+    #                 print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
+    #             else:
+    #                 print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
+    # for p_id in participants_to_iterate:
+    #     if p_id in bad_participants:
+    #         ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
+    #         pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/badpa"
+    #         run01 = f"{p_id}/analysis/preproc/dicoms/run01_dicoms"
+    #         run02 = f"{p_id}/analysis/preproc/dicoms/run02_dicoms"
+    #         run03 = f"{p_id}/analysis/preproc/dicoms/run03_dicoms"
+    #         run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
+    #         folder_list = [ap_fieldmaps, pa_fieldmaps, run01, run02, run03, run04]
+    #         pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
+    #         pe_axes = []
+    #         for folder in folder_list:
+    #             dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
+    #             if len(dicom_files) == 0:
+    #                 print("No DICOM files found in the directory.")
+    #             else:
+    #                 random_file = random.choice(dicom_files)
+    #                 ds = pydicom.dcmread(random_file)
+    #                 pe_axis = ds.InPlanePhaseEncodingDirection
+    #                 pe_axes.append(pe_axis)
+    #                 start_index = folder.rfind('/') + 1  
+    #                 end_index = folder.rfind('_')  
+    #                 if end_index == -1 or end_index < start_index:
+    #                     folder = folder[start_index:] + "_fieldmaps"
+    #                 else:
+    #                     folder = folder[start_index:end_index]
+    #                 print(f"Phase Encoding Axis for {folder}: ", pe_axis)
+    #             if not os.path.exists(pe_file):
+    #                 with open(pe_file, "a") as f:
+    #                     f.write("sequence pe_axis\n")
+    #                     f.write(f"{folder} {pe_axis}\n")
+    #             else: 
+    #                 with open(pe_file, "r") as f:
+    #                     lines = f.readlines()
+    #                 matching_lines = [line for line in lines if line.startswith(f"{folder}")]
+    #                 if matching_lines:
+    #                     with open(pe_file, "w") as f:
+    #                         for index, line in enumerate(lines):
+    #                             if index not in matching_lines:
+    #                                 f.write(line)
+    #                         f.write(f"{folder} {pe_axis}\n")
+    #                 else:
+    #                     with open(pe_file, "a") as f:
+    #                         f.write(f"{folder} {pe_axis}\n")
+    #         print("Sequence PE axes saved to pe_axes.txt file.")
+    #         if pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'COL']:
+    #             print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, AP) for this participant. Stratification of distortion correction method can now take place.')
+    #         elif pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'ROW']:
+    #             print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, RL) for this participant. Stratification of distortion correction method can now take place.')
+    #         else:
+    #             print('Sequence PE directions are not as expected. Please investigate.')
+    #             sys.exit()
+    #     if p_id not in bad_participants:
+    #         ap_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/ap"
+    #         pa_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/pa"
+    #         rl_fieldmaps = f"{p_id}/analysis/preproc/dicoms/fieldmaps/rl"
+    #         run01 = f"{p_id}/analysis/preproc/dicoms/run01_dicoms"
+    #         run02 = f"{p_id}/analysis/preproc/dicoms/run02_dicoms"
+    #         run03 = f"{p_id}/analysis/preproc/dicoms/run03_dicoms"
+    #         run04 = f"{p_id}/analysis/preproc/dicoms/run04_dicoms"
+    #         folder_list = [ap_fieldmaps, pa_fieldmaps, rl_fieldmaps, run01, run02, run03, run04]
+    #         pe_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pe_axes.txt')
+    #         pe_axes = []
+    #         for folder in folder_list:
+    #             dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
+    #             if len(dicom_files) == 0:
+    #                 print("No DICOM files found in the directory.")
+    #             else:
+    #                 random_file = random.choice(dicom_files)
+    #                 ds = pydicom.dcmread(random_file)
+    #                 pe_axis = ds.InPlanePhaseEncodingDirection
+    #                 pe_axes.append(pe_axis)
+    #                 start_index = folder.rfind('/') + 1  
+    #                 end_index = folder.rfind('_')  
+    #                 if end_index == -1 or end_index < start_index:
+    #                     folder = folder[start_index:] + "_fieldmaps"
+    #                 else:
+    #                     folder = folder[start_index:end_index]
+    #                 print(f"Phase Encoding Axis for {folder}: ", pe_axis)
+    #             if not os.path.exists(pe_file):
+    #                 with open(pe_file, "a") as f:
+    #                     f.write("sequence pe_axis\n")
+    #                     f.write(f"{folder} {pe_axis}\n")
+    #             else: 
+    #                 with open(pe_file, "r") as f:
+    #                     lines = f.readlines()
+    #                 matching_lines = [line for line in lines if line.startswith(f"{folder}")]
+    #                 if matching_lines:
+    #                     with open(pe_file, "w") as f:
+    #                         for index, line in enumerate(lines):
+    #                             if index not in matching_lines:
+    #                                 f.write(line)
+    #                         f.write(f"{folder} {pe_axis}\n")
+    #                 else:
+    #                     with open(pe_file, "a") as f:
+    #                         f.write(f"{folder} {pe_axis}\n")
+    #         print("Sequence PE axes saved to pe_axes.txt file.")
+    #         if pe_axes == ['COL', 'COL', 'ROW', 'COL', 'COL', 'COL', 'COL']:
+    #             print('Sequence PE directions are correct as expected (AP, PA, RL, PA, PA, PA, PA) for this participant. Stratification of distortion correction method can now take place.')
+    #         else:
+    #             print('Sequence PE directions are not as expected. Please investigate.')
+    #             sys.exit()
+
+    # # Step 9: Calculate and apply fieldmaps for relevant participants.
+    # print("\n###### STEP 9: APPLYING FIELDMAPS ######")
+    # for p_id in participants_to_iterate:
+    #     if p_id not in bad_participants:
+    #         ap_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'ap_fieldmaps.nii')
+    #         pa_fieldmaps = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'pa_fieldmaps.nii')
+    #         output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'merged_fieldmaps.nii.gz')
+    #         if not os.path.exists(output_file):
+    #             print("Merging fieldmap sequences...")
+    #             subprocess.run(['fslmerge', '-t', output_file, ap_fieldmaps, pa_fieldmaps])
+    #             print("Fieldmap sequences merging completed.")
+    #         else:
+    #             print("Fieldmap sequences already merged. Skipping process.")
+    #         fov_phase = 1
+    #         base_res = 64
+    #         phase_res = 1
+    #         echo_spacing = 0.54
+    #         pe_steps = (fov_phase * base_res * phase_res) - 1
+    #         readout_time_s = (pe_steps * echo_spacing) / 1000
+    #         acqparams_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', 'acqparams.txt')
+    #         if not os.path.exists(acqparams_file):
+    #             with open(acqparams_file, "a") as f:
+    #                 f.write(f"0 -1 0 {readout_time_s}\n")
+    #                 f.write(f"0 -1 0 {readout_time_s}\n")
+    #                 f.write(f"0 -1 0 {readout_time_s}\n")
+    #                 f.write(f"0 -1 0 {readout_time_s}\n")
+    #                 f.write(f"0 -1 0 {readout_time_s}\n")
+    #                 f.write(f"0 1 0 {readout_time_s}\n")
+    #                 f.write(f"0 1 0 {readout_time_s}\n")
+    #                 f.write(f"0 1 0 {readout_time_s}\n")
+    #                 f.write(f"0 1 0 {readout_time_s}\n")
+    #                 f.write(f"0 1 0 {readout_time_s}")
+    #         fieldcoef_output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'topup_{p_id}_fieldcoef.nii.gz')
+    #         movpar_output_file = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc', 'fieldmaps', f'topup_{p_id}_movpar.txt')
+    #         if not os.path.exists(fieldcoef_output_file) or not os.path.exists(movpar_output_file):
+    #             print("Calculating fieldmaps...")
+    #             subprocess.run(["topup", f"--imain={p_id}/analysis/preproc/fieldmaps/merged_fieldmaps.nii", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--config=b02b0.cnf", f"--out={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", f"--iout={p_id}/analysis/preproc/fieldmaps/topup_{p_id}_unwarped"])
+    #             print("Fieldmap calculation completed.")
+    #             for run in runs:
+    #                 print("Applying fieldmaps...")
+    #                 subprocess.run(["applytopup", f"--imain={p_id}/analysis/preproc/bet/{run}_nh_mc_bet.nii.gz", f"--datain={p_id}/analysis/preproc/fieldmaps/acqparams.txt", "--inindex=6", f"--topup={p_id}/analysis/preproc/fieldmaps/topup_{p_id}", "--method=jac", f"--out={p_id}/analysis/preproc/fieldmaps/{run}_nh_mc_bet_dc"])
+    #                 print("Fieldmap application completed.")
+    #         else:
+    #             print("Fieldmaps already calculated and applied. Skipping process.")
     
     # Step 10: Create onset files.
     print("\n###### STEP 10: CREATING ONSET FILES ######")

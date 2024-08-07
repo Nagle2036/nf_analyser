@@ -355,13 +355,21 @@ if answer4 == 'y':
             sys.exit()
 
     # Step 1: Copy BIDS Niftis and singularity image to cluster server. 
-    shutil.copytree('bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')
-    shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_22.0.0.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg')
+    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids'):
+        print("Copying BIDS files for all participants to cluster...")
+        shutil.copytree('bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')
+    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg'):
+        print("Copying fmriprep singularity image to cluster...")
+        shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_22.0.0.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg')
     
     # Step 2: Run fmriprep on cluster server.
-    subprocess.run(['ssh', '-Y','bsms9pc4@apollo2.hpc.susx.ac.uk'])
-    subprocess.run(['module', 'add', 'sge'])
-    subprocess.run(['qsub', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'])
+    cluster_commands = """
+    module add sge
+    qsub /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh
+    exit
+    """
+    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'bash -s'], input=cluster_commands, text=True)
+    
 
     # fmriprep clean up
     # move remaining output files back onto cisc2

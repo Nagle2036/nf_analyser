@@ -363,12 +363,68 @@ if answer4 == 'y':
         shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_22.0.0.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg')
     
     # Step 2: Run fmriprep on cluster server.
-    cluster_commands = """
+
+    fmriprep_cluster_script = """
+    #!/bin/bash
+    #$ -N bic_fmriprep # job name #one subject test
+    #$ -pe openmp 5 # parralel environment #how many parallel enviroments
+    #$ -o '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs' # need to be a path? #where to store the -o outputs and -e outputs. put it in the cisc volumes or in my cluster home directory
+    #$ -e '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs'
+    #$ -l m_mem_free=8G 
+    #$ -l 'h=!node001&!node069&!node072&!node076&!node077' # nodes NOT to use 
+    #$ -t 1 #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n
+    #$ -tc 10 #maximum tasks running simultaeneously .
+
     module add sge
-    qsub /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh
+
+    DATA_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids #nifti directory
+    SCRATCH_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch #working directory fmriprep_wd
+    OUT_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives #check where to put derivatives
+    LICENSE=/research/cisc2/shared/fs_license/license.txt  
+
+    cd ${DATA_DIR}
+
+    # Return paths to subject directories that are located in BIDS directory 
+    SUBJLIST=$(find sub-* -maxdepth 0  -type d) # this should yield a list like object (a shell array) of subject names 
+    #get length as a sanity check
+    len=${#SUBJLIST[@]}
+    echo Number of subjects  = $len
+
+    cd ${HOME}
+
+    echo This is the task id $SGE_TASK_ID
+
+    i=$(expr $SGE_TASK_ID - 1) # subtract 1 from SGE_TASK_ID (which will equal the number of the task you are running - set at the top of the script)
+    echo this is i $i
+    
+    arr=($SUBJLIST)
+    SUBJECT=${arr[i]}
+    echo $SUBJECT
+
+    singularity run --cleanenv \
+        -B ${DATA_DIR}:/data \
+        -B ${OUT_DIR}/:/out \
+        -B ${SCRATCH_DIR}:/wd \
+        -B ${LICENSE}:/license \
+        /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep_22.0.0.simg \
+        --skip_bids_validation \
+        --participant-label ${SUBJECT} \
+        --omp-nthreads 5 --nthreads 5 --mem_mb 30000 \
+        --low-mem --use-aroma\
+        --output-spaces MNI152NLin2009cAsym:res-2 \
+        --fs-license-file /license \
+        --work-dir /wd \
+        --cifti-output 91k \
+        /data /out/ participant
+
+    echo Done
     exit
     """
-    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'bash -l -c', cluster_commands], text=True)
+
+    with open('fmriprep_cluster.sh', 'w') as f:
+        f.write(fmriprep_cluster_script)
+
+    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'qsub /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'])
     
 
     # fmriprep clean up

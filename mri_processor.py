@@ -368,7 +368,7 @@ if answer4 == 'y':
     qsub /its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh
     exit
     """
-    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'bash -s'], input=cluster_commands, text=True)
+    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'bash -l -c', cluster_commands], text=True)
     
 
     # fmriprep clean up

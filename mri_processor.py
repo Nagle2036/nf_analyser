@@ -364,12 +364,12 @@ if answer4 == 'y':
     
     # Step 2: Run fmriprep on cluster server.
 
-    fmriprep_cluster_script = """
+    fmriprep_cluster_script = r"""
     #!/bin/bash
     #$ -N bic_fmriprep # job name #one subject test
     #$ -pe openmp 5 # parralel environment #how many parallel enviroments
     #$ -o '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs' # need to be a path? #where to store the -o outputs and -e outputs. put it in the cisc volumes or in my cluster home directory
-    #$ -e '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs'
+    #$ -e logs
     #$ -l m_mem_free=8G 
     #$ -l 'h=!node001&!node069&!node072&!node076&!node077' # nodes NOT to use 
     #$ -t 1 #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n

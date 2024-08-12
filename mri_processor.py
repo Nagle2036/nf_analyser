@@ -406,7 +406,7 @@ if answer4 == 'y':
         -B ${OUT_DIR}/:/out \
         -B ${SCRATCH_DIR}:/wd \
         -B ${LICENSE}:/license \
-        /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep_22.0.0.simg \
+        /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg \
         --skip_bids_validation \
         --participant-label ${SUBJECT} \
         --omp-nthreads 5 --nthreads 5 --mem_mb 30000 \
@@ -424,9 +424,7 @@ if answer4 == 'y':
     with open('fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
 
-    fmriprep_cluster_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'
-
-    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', f'source /etc/profile; source ~/.bash_profile; qsub {fmriprep_cluster_path}'])
+    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'])
     
 
     # fmriprep clean up

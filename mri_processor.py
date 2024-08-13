@@ -3669,25 +3669,25 @@ if answer7 == 'y':
     rosenberg_column = rosenberg_vis_1 + rosenberg_vis_2 + rosenberg_vis_3 + rosenberg_vis_4 + rosenberg_vis_5
 
     qids_vis_1 = ecrf_df.loc['qids_vis_1'].tolist()
-    qids_vis_2 = ['n/a' * 20]
+    qids_vis_2 = ['n/a'] * 20
     qids_vis_3 = ecrf_df.loc['qids_vis_3'].tolist()
     qids_vis_4 = ecrf_df.loc['qids_vis_4'].tolist()
     qids_vis_5 = ecrf_df.loc['qids_vis_5'].tolist()
     qids_column = qids_vis_1 + qids_vis_2 + qids_vis_3 + qids_vis_4 + qids_vis_5 
 
     madrs_vis_1 = ecrf_df.loc['madrs_vis_1'].tolist()
-    madrs_vis_2 = ['n/a' * 20]
+    madrs_vis_2 = ['n/a'] * 20
     madrs_vis_3 = ecrf_df.loc['madrs_vis_1'].tolist()
-    madrs_vis_4 = ['n/a' * 20]
-    madrs_vis_5 = ['n/a' * 20]
+    madrs_vis_4 = ['n/a'] * 20
+    madrs_vis_5 = ['n/a'] * 20
     madrs_column = madrs_vis_1 + madrs_vis_2 + madrs_vis_3 + madrs_vis_4 + madrs_vis_5
 
-    rqm_df['p_id'].append(p_id_column)
-    rqm_df['visit'].append(visit_column)
-    rqm_df['intervention'].append(intervention_column)
-    rqm_df['rosenberg'].append(rosenberg_column)
-    rqm_df['qids'].append(qids_column)
-    rqm_df['madrs'].append(madrs_column)
+    rqm_df['p_id'] = p_id_column
+    rqm_df['visit'] = visit_column
+    rqm_df['intervention'] = intervention_column
+    rqm_df['rosenberg'] = rosenberg_column
+    rqm_df['qids'] = qids_column
+    rqm_df['madrs'] = madrs_column
 
 
 

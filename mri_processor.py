@@ -3669,7 +3669,7 @@ if answer7 == 'y':
     rosenberg_column = rosenberg_vis_1 + rosenberg_vis_2 + rosenberg_vis_3 + rosenberg_vis_4 + rosenberg_vis_5
 
     qids_vis_1 = ecrf_df.loc['qids_vis_1'].tolist()
-    qids_vis_2 = ecrf_df.loc['qids_vis_2'].tolist()
+    qids_vis_2 = 'n/a' * 20
     qids_vis_3 = ecrf_df.loc['qids_vis_3'].tolist()
     qids_vis_4 = ecrf_df.loc['qids_vis_4'].tolist()
     qids_vis_5 = ecrf_df.loc['qids_vis_5'].tolist()

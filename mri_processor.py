@@ -3657,7 +3657,7 @@ if answer7 == 'y':
     columns = ['p_id', 'visit', 'intervention', 'rosenberg', 'qids', 'madrs']
     rqm_df = pd.DataFrame(columns=columns)
     p_id_column = participants * 5
-    visit_column = ['1' * 20] + ['2' * 20] + ['3' * 20] + ['4' * 20] + ['5' * 20]
+    visit_column = ['1'] * 20 + ['2'] * 20 + ['3'] * 20 + ['4'] * 20 + ['5'] * 20
     intervention_values = ecrf_df.loc['intervention'].tolist()
     intervention_column = list(intervention_values) * 5
     

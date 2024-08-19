@@ -360,9 +360,9 @@ if answer4 == 'y':
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids'):
         print("Copying BIDS files for all participants to cluster...")
         shutil.copytree('bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')
-    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg'):
+    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg'):
         print("Copying fmriprep singularity image to cluster...")
-        shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_22.0.0.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg')
+        shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_23.2.2.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg')
     
     # Step 2: Run fmriprep on cluster server.
 

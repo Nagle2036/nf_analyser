@@ -43,6 +43,8 @@ from plotnine import *
 from scipy import stats
 from pingouin import rm_anova
 import json
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 #endregion
 
@@ -368,11 +370,11 @@ if answer4 == 'y':
     #!/bin/bash
     #$ -N bic_fmriprep # job name #one subject test
     #$ -pe openmp 5 # parralel environment #how many parallel enviroments
-    #$ -o '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs' # need to be a path? #where to store the -o outputs and -e outputs. put it in the cisc volumes or in my cluster home directory
-    #$ -e logs
+    #$ -o /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs
+    #$ -e /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs
     #$ -l m_mem_free=8G 
     #$ -l 'h=!node001&!node069&!node072&!node076&!node077' # nodes NOT to use 
-    #$ -t 1 #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n
+    #$ -t 1-1 #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n
     #$ -tc 10 #maximum tasks running simultaeneously .
 
     module add sge
@@ -406,7 +408,7 @@ if answer4 == 'y':
         -B ${OUT_DIR}/:/out \
         -B ${SCRATCH_DIR}:/wd \
         -B ${LICENSE}:/license \
-        /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg \
+        /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg \
         --skip_bids_validation \
         --participant-label ${SUBJECT} \
         --omp-nthreads 5 --nthreads 5 --mem_mb 30000 \
@@ -1656,7 +1658,7 @@ if answer6 == 'y':
     rl_std_error = np.std(perc_outside_rl_values) / np.sqrt(len(perc_outside_rl_values))
     _, perc_outside_pa_overall_shap_p = stats.shapiro(perc_outside_pa_values)
     _, perc_outside_rl_overall_shap_p = stats.shapiro(perc_outside_rl_values)
-    if perc_outside_pa_overall_shap_p > 0.05 and perc_outside_rl_overall_shap_p > 0.5:
+    if perc_outside_pa_overall_shap_p > 0.05 and perc_outside_rl_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(perc_outside_pa_values, perc_outside_rl_values)
         print(f"T-test p-value: {p_value}")
@@ -2065,14 +2067,14 @@ if answer6 == 'y':
     rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
     _, pa_means_overall_shap_p = stats.shapiro(pa_means)
     _, rl_means_overall_shap_p = stats.shapiro(rl_means)
-    if pa_means_overall_shap_p > 0.05 and rl_means_overall_shap_p > 0.5:
+    if pa_means_overall_shap_p > 0.05 and rl_means_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_rel(pa_means, rl_means)
         print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Wilcoxon test...')
         _, p_value = stats.wilcoxon(pa_means, rl_means)
-        print(f"Mann-Whitney U test p-value: {p_value}")
+        print(f"Wilcoxon test p-value: {p_value}")
     plot_data = pd.DataFrame({'p_id': good_participants, 'pa_values': pa_means, 'rl_values': rl_means})
     data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['pa_values', 'rl_values'], var_name='sequence', value_name='value')
     data_long['sequence'] = data_long['sequence'].map({'pa_values': 'PA', 'rl_values': 'RL'})
@@ -2244,7 +2246,7 @@ if answer6 == 'y':
     uncorrected_std_error = np.std(perc_outside_uncorrected_values) / np.sqrt(len(perc_outside_uncorrected_values))
     _, perc_outside_corrected_overall_shap_p = stats.shapiro(perc_outside_corrected_values)
     _, perc_outside_uncorrected_overall_shap_p = stats.shapiro(perc_outside_uncorrected_values)
-    if perc_outside_corrected_overall_shap_p > 0.05 and perc_outside_uncorrected_overall_shap_p > 0.5:
+    if perc_outside_corrected_overall_shap_p > 0.05 and perc_outside_uncorrected_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(perc_outside_corrected_values, perc_outside_uncorrected_values)
         print(f"T-test p-value: {p_value}")
@@ -2469,14 +2471,14 @@ if answer6 == 'y':
     uncorrected_std_error_overall = np.std(uncorrected_means) / np.sqrt(len(uncorrected_means))
     _, corrected_means_overall_shap_p = stats.shapiro(corrected_means)
     _, uncorrected_means_overall_shap_p = stats.shapiro(uncorrected_means)
-    if corrected_means_overall_shap_p > 0.05 and uncorrected_means_overall_shap_p > 0.5:
+    if corrected_means_overall_shap_p > 0.05 and uncorrected_means_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_rel(corrected_means, uncorrected_means)
         print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Wilcoxon test...')
         _, p_value = stats.wilcoxon(corrected_means, uncorrected_means)
-        print(f"Mann-Whitney U test p-value: {p_value}")
+        print(f"Wilcoxon test p-value: {p_value}")
     plot_data = pd.DataFrame({'p_id': good_participants, 'corrected_values': corrected_means, 'uncorrected_values': uncorrected_means})
     data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['corrected_values', 'uncorrected_values'], var_name='sequence', value_name='value')
     data_long['sequence'] = data_long['sequence'].map({'corrected_values': 'CORR', 'uncorrected_values': 'UNCORR'})
@@ -2683,7 +2685,7 @@ if answer6 == 'y':
     run04_std_error = np.std(perc_outside_run04_values) / np.sqrt(len(perc_outside_run04_values))
     _, perc_outside_run01_overall_shap_p = stats.shapiro(perc_outside_run01_values)
     _, perc_outside_run04_overall_shap_p = stats.shapiro(perc_outside_run04_values)
-    if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.5:
+    if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(perc_outside_run01_values, perc_outside_run04_values)
         print(f"T-test p-value: {p_value}")
@@ -2913,14 +2915,14 @@ if answer6 == 'y':
     run04_std_error_overall = np.std(run04_means) / np.sqrt(len(run04_means))
     _, run01_means_overall_shap_p = stats.shapiro(run01_means)
     _, run04_means_overall_shap_p = stats.shapiro(run04_means)
-    if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.5:
+    if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_rel(run01_means, run04_means)
         print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Wilcoxon test...')
         _, p_value = stats.wilcoxon(run01_means, run04_means)
-        print(f"Mann-Whitney U test p-value: {p_value}")
+        print(f"Wilcoxon test p-value: {p_value}")
     plot_data = pd.DataFrame({'p_id': bad_participants, 'run01_values': run01_means, 'run04_values': run04_means})
     data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['run01_values', 'run04_values'], var_name='sequence', value_name='value')
     data_long['sequence'] = data_long['sequence'].map({'run01_values': 'RUN01', 'run04_values': 'RUN04'})
@@ -3167,7 +3169,7 @@ if answer6 == 'y':
     run04_std_error = np.std(perc_outside_run04_values) / np.sqrt(len(perc_outside_run04_values))
     _, perc_outside_run01_overall_shap_p = stats.shapiro(perc_outside_run01_values)
     _, perc_outside_run04_overall_shap_p = stats.shapiro(perc_outside_run04_values)
-    if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.5:
+    if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
         _, p_value = stats.ttest_ind(perc_outside_run01_values, perc_outside_run04_values)
         print(f"T-test p-value: {p_value}")
@@ -3397,14 +3399,14 @@ if answer6 == 'y':
     run04_std_error_overall = np.std(run04_means) / np.sqrt(len(run04_means))
     _, run01_means_overall_shap_p = stats.shapiro(run01_means)
     _, run04_means_overall_shap_p = stats.shapiro(run04_means)
-    if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.5:
+    if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
         _, p_value = stats.ttest_rel(run01_means, run04_means)
         print(f"T-test p-value: {p_value}")
     else:
-        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Mann-Whitney U test...')
+        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Wilcoxon test...')
         _, p_value = stats.wilcoxon(run01_means, run04_means)
-        print(f"Mann-Whitney U test p-value: {p_value}")
+        print(f"Wilcoxon test p-value: {p_value}")
     plot_data = pd.DataFrame({'p_id': bad_participants, 'run01_values': run01_means, 'run04_values': run04_means})
     data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['run01_values', 'run04_values'], var_name='sequence', value_name='value')
     data_long['sequence'] = data_long['sequence'].map({'run01_values': 'RUN01', 'run04_values': 'RUN04'})
@@ -3669,17 +3671,17 @@ if answer7 == 'y':
     rosenberg_column = rosenberg_vis_1 + rosenberg_vis_2 + rosenberg_vis_3 + rosenberg_vis_4 + rosenberg_vis_5
 
     qids_vis_1 = ecrf_df.loc['qids_vis_1'].tolist()
-    qids_vis_2 = ['n/a'] * 20
+    qids_vis_2 = [np.nan] * 20
     qids_vis_3 = ecrf_df.loc['qids_vis_3'].tolist()
     qids_vis_4 = ecrf_df.loc['qids_vis_4'].tolist()
     qids_vis_5 = ecrf_df.loc['qids_vis_5'].tolist()
     qids_column = qids_vis_1 + qids_vis_2 + qids_vis_3 + qids_vis_4 + qids_vis_5 
 
     madrs_vis_1 = ecrf_df.loc['madrs_vis_1'].tolist()
-    madrs_vis_2 = ['n/a'] * 20
-    madrs_vis_3 = ecrf_df.loc['madrs_vis_1'].tolist()
-    madrs_vis_4 = ['n/a'] * 20
-    madrs_vis_5 = ['n/a'] * 20
+    madrs_vis_2 = [np.nan] * 20
+    madrs_vis_3 = ecrf_df.loc['madrs_vis_3'].tolist()
+    madrs_vis_4 = [np.nan] * 20
+    madrs_vis_5 = [np.nan] * 20
     madrs_column = madrs_vis_1 + madrs_vis_2 + madrs_vis_3 + madrs_vis_4 + madrs_vis_5
 
     rqm_df['p_id'] = p_id_column

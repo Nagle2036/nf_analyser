@@ -43,9 +43,9 @@ from plotnine import *
 from scipy import stats
 from pingouin import rm_anova
 import json
-import rpy2.robjects as ro
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import importr
+# import rpy2.robjects as ro
+# from rpy2.robjects import pandas2ri
+# from rpy2.robjects.packages import importr
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -3727,33 +3727,33 @@ if answer7 == 'y':
             rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
             rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
 
-    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    pandas2ri.activate()
-    r = ro.r
-    utils = importr('utils')
-    utils.chooseCRANmirror(ind=1)
-    r_script = """
-    library(lme4)
-    library(lmerTest)
-    library(emmeans)
-    rosenberg_df <- as.data.frame(rosenberg_df)
-    model <- lmer(rosenberg~visit*intervention + (1|p_id), data = rosenberg_df)
-    residuals_model <- residuals(model)
-    shapiro_test_result <- shapiro.test(residuals_model)
-    print(shapiro_test_result)
-    if (shapiro_test_result$p.value > 0.05) {
-    print("Rosenberg LMM residuals meet normality assumptions.")
-    anova_result <- anova(model)
-    print(anova_result)
-    emmeans_results <- emmeans(model, pairwise ~ visit)
-    print(summary(emmeans_results))
-    } else {
-    print("Rosenberg LMM residuals do not meet normality assumptions.")
-    }
-    """
-    ro.globalenv['rosenberg_df'] = pandas2ri.py2rpy(rosenberg_df)
-    result = r(r_script)
-    print(result)
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # rosenberg_df <- as.data.frame(rosenberg_df)
+    # model <- lmer(rosenberg~visit*intervention + (1|p_id), data = rosenberg_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("Rosenberg LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # emmeans_results <- emmeans(model, pairwise ~ visit)
+    # print(summary(emmeans_results))
+    # } else {
+    # print("Rosenberg LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['rosenberg_df'] = pandas2ri.py2rpy(rosenberg_df)
+    # result = r(r_script)
+    # print(result)
 
     data = {
         'visit': [1, 2, 3, 4, 5] * 2,
@@ -3807,33 +3807,33 @@ if answer7 == 'y':
             qids_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
             qids_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
     
-    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    pandas2ri.activate()
-    r = ro.r
-    utils = importr('utils')
-    utils.chooseCRANmirror(ind=1)
-    r_script = """
-    library(lme4)
-    library(lmerTest)
-    library(emmeans)
-    qids_df <- as.data.frame(qids_df)
-    model <- lmer(qids~visit*intervention + (1|p_id), data = qids_df)
-    residuals_model <- residuals(model)
-    shapiro_test_result <- shapiro.test(residuals_model)
-    print(shapiro_test_result)
-    if (shapiro_test_result$p.value > 0.05) {
-    print("QIDS LMM residuals meet normality assumptions.")
-    anova_result <- anova(model)
-    print(anova_result)
-    emmeans_results <- emmeans(model, pairwise ~ visit)
-    print(summary(emmeans_results))
-    } else {
-    print("QIDS LMM residuals do not meet normality assumptions.")
-    }
-    """
-    ro.globalenv['qids_df'] = pandas2ri.py2rpy(qids_df)
-    result = r(r_script)
-    print(result)
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # qids_df <- as.data.frame(qids_df)
+    # model <- lmer(qids~visit*intervention + (1|p_id), data = qids_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("QIDS LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # emmeans_results <- emmeans(model, pairwise ~ visit)
+    # print(summary(emmeans_results))
+    # } else {
+    # print("QIDS LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['qids_df'] = pandas2ri.py2rpy(qids_df)
+    # result = r(r_script)
+    # print(result)
 
     data = {
         'visit': [1, 2, 3, 4, 5] * 2,
@@ -3890,31 +3890,31 @@ if answer7 == 'y':
             madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
             madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
 
-    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    pandas2ri.activate()
-    r = ro.r
-    utils = importr('utils')
-    utils.chooseCRANmirror(ind=1)
-    r_script = """
-    library(lme4)
-    library(lmerTest)
-    library(emmeans)
-    madrs_df <- as.data.frame(madrs_df)
-    model <- lmer(madrs~visit*intervention + (1|p_id), data = madrs_df)
-    residuals_model <- residuals(model)
-    shapiro_test_result <- shapiro.test(residuals_model)
-    print(shapiro_test_result)
-    if (shapiro_test_result$p.value > 0.05) {
-    print("MADRS LMM residuals meet normality assumptions.")
-    anova_result <- anova(model)
-    print(anova_result)
-    } else {
-    print("MADRS LMM residuals do not meet normality assumptions.")
-    }
-    """
-    ro.globalenv['madrs_df'] = pandas2ri.py2rpy(madrs_df)
-    result = r(r_script)
-    print(result)
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # madrs_df <- as.data.frame(madrs_df)
+    # model <- lmer(madrs~visit*intervention + (1|p_id), data = madrs_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("MADRS LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("MADRS LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['madrs_df'] = pandas2ri.py2rpy(madrs_df)
+    # result = r(r_script)
+    # print(result)
 
     data = {
         'visit': [1, 3] * 2,
@@ -3965,31 +3965,31 @@ if answer7 == 'y':
             gad_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
             gad_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
 
-    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    pandas2ri.activate()
-    r = ro.r
-    utils = importr('utils')
-    utils.chooseCRANmirror(ind=1)
-    r_script = """
-    library(lme4)
-    library(lmerTest)
-    library(emmeans)
-    gad_df <- as.data.frame(gad_df)
-    model <- lmer(gad~visit*intervention + (1|p_id), data = gad_df)
-    residuals_model <- residuals(model)
-    shapiro_test_result <- shapiro.test(residuals_model)
-    print(shapiro_test_result)
-    if (shapiro_test_result$p.value > 0.05) {
-    print("GAD LMM residuals meet normality assumptions.")
-    anova_result <- anova(model)
-    print(anova_result)
-    } else {
-    print("GAD LMM residuals do not meet normality assumptions.")
-    }
-    """
-    ro.globalenv['gad_df'] = pandas2ri.py2rpy(gad_df)
-    result = r(r_script)
-    print(result)
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # gad_df <- as.data.frame(gad_df)
+    # model <- lmer(gad~visit*intervention + (1|p_id), data = gad_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("GAD LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("GAD LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['gad_df'] = pandas2ri.py2rpy(gad_df)
+    # result = r(r_script)
+    # print(result)
 
     data = {
         'visit': [1, 3] * 2,
@@ -4038,31 +4038,31 @@ if answer7 == 'y':
             panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
             panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
 
-    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    pandas2ri.activate()
-    r = ro.r
-    utils = importr('utils')
-    utils.chooseCRANmirror(ind=1)
-    r_script = """
-    library(lme4)
-    library(lmerTest)
-    library(emmeans)
-    panas_pos_df <- as.data.frame(panas_pos_df)
-    model <- lmer(panas_pos~visit*intervention + (1|p_id), data = panas_pos_df)
-    residuals_model <- residuals(model)
-    shapiro_test_result <- shapiro.test(residuals_model)
-    print(shapiro_test_result)
-    if (shapiro_test_result$p.value > 0.05) {
-    print("PANAS Positive LMM residuals meet normality assumptions.")
-    anova_result <- anova(model)
-    print(anova_result)
-    } else {
-    print("PANAS Positive LMM residuals do not meet normality assumptions.")
-    }
-    """
-    ro.globalenv['panas_pos_df'] = pandas2ri.py2rpy(panas_pos_df)
-    result = r(r_script)
-    print(result)
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # panas_pos_df <- as.data.frame(panas_pos_df)
+    # model <- lmer(panas_pos~visit*intervention + (1|p_id), data = panas_pos_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("PANAS Positive LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("PANAS Positive LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['panas_pos_df'] = pandas2ri.py2rpy(panas_pos_df)
+    # result = r(r_script)
+    # print(result)
 
     data = {
         'visit': [1, 3] * 2,
@@ -4113,31 +4113,31 @@ if answer7 == 'y':
             panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
             panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
 
-    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    pandas2ri.activate()
-    r = ro.r
-    utils = importr('utils')
-    utils.chooseCRANmirror(ind=1)
-    r_script = """
-    library(lme4)
-    library(lmerTest)
-    library(emmeans)
-    panas_neg_df <- as.data.frame(panas_neg_df)
-    model <- lmer(panas_neg~visit*intervention + (1|p_id), data = panas_neg_df)
-    residuals_model <- residuals(model)
-    shapiro_test_result <- shapiro.test(residuals_model)
-    print(shapiro_test_result)
-    if (shapiro_test_result$p.value > 0.05) {
-    print("PANAS Negative LMM residuals meet normality assumptions.")
-    anova_result <- anova(model)
-    print(anova_result)
-    } else {
-    print("PANAS Negative LMM residuals do not meet normality assumptions.")
-    }
-    """
-    ro.globalenv['panas_neg_df'] = pandas2ri.py2rpy(panas_neg_df)
-    result = r(r_script)
-    print(result)
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # panas_neg_df <- as.data.frame(panas_neg_df)
+    # model <- lmer(panas_neg~visit*intervention + (1|p_id), data = panas_neg_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("PANAS Negative LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("PANAS Negative LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['panas_neg_df'] = pandas2ri.py2rpy(panas_neg_df)
+    # result = r(r_script)
+    # print(result)
 
     data = {
         'visit': [1, 3] * 2,

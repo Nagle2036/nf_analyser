@@ -43,6 +43,9 @@ from plotnine import *
 from scipy import stats
 from pingouin import rm_anova
 import json
+import rpy2.robjects as ro
+from rpy2.robjects import pandas2ri
+from rpy2.robjects.packages import importr
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -362,7 +365,7 @@ if answer4 == 'y':
         shutil.copytree('bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg'):
         print("Copying fmriprep singularity image to cluster...")
-        shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_23.2.2.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_22.0.0.simg')
+        shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_23.2.2.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg')
     
     # Step 2: Run fmriprep on cluster server.
 
@@ -374,7 +377,7 @@ if answer4 == 'y':
     #$ -e /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs
     #$ -l m_mem_free=8G 
     #$ -l 'h=!node001&!node069&!node072&!node076&!node077' # nodes NOT to use 
-    #$ -t 1-1 #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n
+    #$ -t 1-20 #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n
     #$ -tc 10 #maximum tasks running simultaeneously .
 
     module add sge
@@ -3654,43 +3657,517 @@ if answer7 == 'y':
     warnings.resetwarnings()
 
     # Step 3: Run 2-Way ANOVA of Rosenberg, QIDS, and MADRS Scores.
-    print("\n###### STEP 3: RUN 2-WAY ANOVA OF ROSENBERG, QIDS, AND MADRS SCORES ######")
-    
-    columns = ['p_id', 'visit', 'intervention', 'rosenberg', 'qids', 'madrs']
-    rqm_df = pd.DataFrame(columns=columns)
+    print("\n###### STEP 3: RUN LMMs OF CLINICAL ASSESSMENT SCORES ######")
+    columns = ['p_id', 'visit', 'intervention', 'rosenberg', 'qids', 'madrs', 'gad', 'panas_pos', 'panas_neg']
+    rqmgp_df = pd.DataFrame(columns=columns)
     p_id_column = participants * 5
     visit_column = ['1'] * 20 + ['2'] * 20 + ['3'] * 20 + ['4'] * 20 + ['5'] * 20
     intervention_values = ecrf_df.loc['intervention'].tolist()
     intervention_column = list(intervention_values) * 5
-    
     rosenberg_vis_1 = ecrf_df.loc['rosenberg_vis_1'].tolist()
     rosenberg_vis_2 = ecrf_df.loc['rosenberg_vis_2'].tolist()
     rosenberg_vis_3 = ecrf_df.loc['rosenberg_vis_3'].tolist()
     rosenberg_vis_4 = ecrf_df.loc['rosenberg_vis_4'].tolist()
     rosenberg_vis_5 = ecrf_df.loc['rosenberg_vis_5'].tolist()
     rosenberg_column = rosenberg_vis_1 + rosenberg_vis_2 + rosenberg_vis_3 + rosenberg_vis_4 + rosenberg_vis_5
-
     qids_vis_1 = ecrf_df.loc['qids_vis_1'].tolist()
     qids_vis_2 = [np.nan] * 20
     qids_vis_3 = ecrf_df.loc['qids_vis_3'].tolist()
     qids_vis_4 = ecrf_df.loc['qids_vis_4'].tolist()
     qids_vis_5 = ecrf_df.loc['qids_vis_5'].tolist()
-    qids_column = qids_vis_1 + qids_vis_2 + qids_vis_3 + qids_vis_4 + qids_vis_5 
-
+    qids_column = qids_vis_1 + qids_vis_2 + qids_vis_3 + qids_vis_4 + qids_vis_5
     madrs_vis_1 = ecrf_df.loc['madrs_vis_1'].tolist()
     madrs_vis_2 = [np.nan] * 20
     madrs_vis_3 = ecrf_df.loc['madrs_vis_3'].tolist()
     madrs_vis_4 = [np.nan] * 20
     madrs_vis_5 = [np.nan] * 20
     madrs_column = madrs_vis_1 + madrs_vis_2 + madrs_vis_3 + madrs_vis_4 + madrs_vis_5
+    gad_vis_1 = ecrf_df.loc['gad_vis_1'].tolist()
+    gad_vis_2 = [np.nan] * 20
+    gad_vis_3 = ecrf_df.loc['gad_vis_3'].tolist()
+    gad_vis_4 = [np.nan] * 20
+    gad_vis_5 = [np.nan] * 20
+    gad_column = gad_vis_1 + gad_vis_2 + gad_vis_3 + gad_vis_4 + gad_vis_5
+    panas_pos_vis_1 = ecrf_df.loc['panas_pos_vis_1'].tolist()
+    panas_pos_vis_2 = [np.nan] * 20
+    panas_pos_vis_3 = ecrf_df.loc['panas_pos_vis_3'].tolist()
+    panas_pos_vis_4 = [np.nan] * 20
+    panas_pos_vis_5 = [np.nan] * 20
+    panas_pos_column = panas_pos_vis_1 + panas_pos_vis_2 + panas_pos_vis_3 + panas_pos_vis_4 + panas_pos_vis_5
+    panas_neg_vis_1 = ecrf_df.loc['panas_neg_vis_1'].tolist()
+    panas_neg_vis_2 = [np.nan] * 20
+    panas_neg_vis_3 = ecrf_df.loc['panas_neg_vis_3'].tolist()
+    panas_neg_vis_4 = [np.nan] * 20
+    panas_neg_vis_5 = [np.nan] * 20
+    panas_neg_column = panas_neg_vis_1 + panas_neg_vis_2 + panas_neg_vis_3 + panas_neg_vis_4 + panas_neg_vis_5
+    rqmgp_df['p_id'] = p_id_column
+    rqmgp_df['visit'] = visit_column
+    rqmgp_df['intervention'] = intervention_column
+    rqmgp_df['rosenberg'] = rosenberg_column
+    rqmgp_df['qids'] = qids_column
+    rqmgp_df['madrs'] = madrs_column
+    rqmgp_df['gad'] = gad_column
+    rqmgp_df['panas_pos'] = panas_pos_column
+    rqmgp_df['panas_neg'] = panas_neg_column
 
-    rqm_df['p_id'] = p_id_column
-    rqm_df['visit'] = visit_column
-    rqm_df['intervention'] = intervention_column
-    rqm_df['rosenberg'] = rosenberg_column
-    rqm_df['qids'] = qids_column
-    rqm_df['madrs'] = madrs_column
+    rosenberg_df = rqmgp_df.dropna(subset=['rosenberg'])
+    visits = ['1', '2', '3', '4', '5']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis2_inta', 'vis3_inta', 'vis4_inta', 'vis5_inta', 'vis1_intb', 'vis2_intb', 'vis3_intb', 'vis4_intb', 'vis5_intb']
+    rosenberg_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = rosenberg_df[(rosenberg_df['visit'] == visit) & (rosenberg_df['intervention'] == intervention)]['rosenberg'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
 
+    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    pandas2ri.activate()
+    r = ro.r
+    utils = importr('utils')
+    utils.chooseCRANmirror(ind=1)
+    r_script = """
+    library(lme4)
+    library(lmerTest)
+    library(emmeans)
+    rosenberg_df <- as.data.frame(rosenberg_df)
+    model <- lmer(rosenberg~visit*intervention + (1|p_id), data = rosenberg_df)
+    residuals_model <- residuals(model)
+    shapiro_test_result <- shapiro.test(residuals_model)
+    print(shapiro_test_result)
+    if (shapiro_test_result$p.value > 0.05) {
+    print("Rosenberg LMM residuals meet normality assumptions.")
+    anova_result <- anova(model)
+    print(anova_result)
+    emmeans_results <- emmeans(model, pairwise ~ visit)
+    print(summary(emmeans_results))
+    } else {
+    print("Rosenberg LMM residuals do not meet normality assumptions.")
+    }
+    """
+    ro.globalenv['rosenberg_df'] = pandas2ri.py2rpy(rosenberg_df)
+    result = r(r_script)
+    print(result)
+
+    data = {
+        'visit': [1, 2, 3, 4, 5] * 2,
+        'intervention': ['A'] * 5 + ['B'] * 5,
+        'mean': [
+            rosenberg_stats_df.loc['vis1_inta', 'mean'], rosenberg_stats_df.loc['vis2_inta', 'mean'], rosenberg_stats_df.loc['vis3_inta', 'mean'],
+            rosenberg_stats_df.loc['vis4_inta', 'mean'], rosenberg_stats_df.loc['vis5_inta', 'mean'], 
+            rosenberg_stats_df.loc['vis1_intb', 'mean'], rosenberg_stats_df.loc['vis2_intb', 'mean'], rosenberg_stats_df.loc['vis3_intb', 'mean'], 
+            rosenberg_stats_df.loc['vis4_intb', 'mean'], rosenberg_stats_df.loc['vis5_intb', 'mean'], 
+        ],
+        'std_error': [
+            rosenberg_stats_df.loc['vis1_inta', 'std_error'], rosenberg_stats_df.loc['vis2_inta', 'std_error'], rosenberg_stats_df.loc['vis3_inta', 'std_error'], 
+            rosenberg_stats_df.loc['vis4_inta', 'std_error'], rosenberg_stats_df.loc['vis5_inta', 'std_error'], 
+            rosenberg_stats_df.loc['vis1_intb', 'std_error'], rosenberg_stats_df.loc['vis2_intb', 'std_error'], rosenberg_stats_df.loc['vis3_intb', 'std_error'], 
+            rosenberg_stats_df.loc['vis4_intb', 'std_error'], rosenberg_stats_df.loc['vis5_intb', 'std_error'], 
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    rosenberg_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + labs(title='Rosenberg Scores Across Study Visits',
+                x='Visit',
+                y='Rosenberg Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[18,28])
+            )
+    rosenberg_plot = rosenberg_plot + annotate("text", x=2, y=max(plot_data['mean']) + 2.5, label="*", size=16, color="black") + \
+        annotate("segment", x=1, xend=3, y=max(plot_data['mean']) +2.25, yend=max(plot_data['mean']) + 2.25, color="black") + \
+            annotate("text", x=2.5, y=max(plot_data['mean']) + 3.5, label="*", size=16, color="black") + \
+                annotate("segment", x=2, xend=3, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black")
+    rosenberg_plot.save('group/behavioural/rosenberg_plot.png')
+
+    qids_df = rqmgp_df.dropna(subset=['qids'])
+    visits = ['1', '3', '4', '5']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis4_inta', 'vis5_inta', 'vis1_intb', 'vis3_intb', 'vis4_intb', 'vis5_intb']
+    qids_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = qids_df[(qids_df['visit'] == visit) & (qids_df['intervention'] == intervention)]['qids'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+    
+    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    pandas2ri.activate()
+    r = ro.r
+    utils = importr('utils')
+    utils.chooseCRANmirror(ind=1)
+    r_script = """
+    library(lme4)
+    library(lmerTest)
+    library(emmeans)
+    qids_df <- as.data.frame(qids_df)
+    model <- lmer(qids~visit*intervention + (1|p_id), data = qids_df)
+    residuals_model <- residuals(model)
+    shapiro_test_result <- shapiro.test(residuals_model)
+    print(shapiro_test_result)
+    if (shapiro_test_result$p.value > 0.05) {
+    print("QIDS LMM residuals meet normality assumptions.")
+    anova_result <- anova(model)
+    print(anova_result)
+    emmeans_results <- emmeans(model, pairwise ~ visit)
+    print(summary(emmeans_results))
+    } else {
+    print("QIDS LMM residuals do not meet normality assumptions.")
+    }
+    """
+    ro.globalenv['qids_df'] = pandas2ri.py2rpy(qids_df)
+    result = r(r_script)
+    print(result)
+
+    data = {
+        'visit': [1, 2, 3, 4, 5] * 2,
+        'intervention': ['A'] * 5 + ['B'] * 5,
+        'mean': [
+            qids_stats_df.loc['vis1_inta', 'mean'], np.nan, qids_stats_df.loc['vis3_inta', 'mean'], 
+            qids_stats_df.loc['vis4_inta', 'mean'], qids_stats_df.loc['vis5_inta', 'mean'], 
+            qids_stats_df.loc['vis1_intb', 'mean'], np.nan, qids_stats_df.loc['vis3_intb', 'mean'], 
+            qids_stats_df.loc['vis4_intb', 'mean'], qids_stats_df.loc['vis5_intb', 'mean'], 
+        ],
+        'std_error': [
+            qids_stats_df.loc['vis1_inta', 'std_error'], np.nan, qids_stats_df.loc['vis3_inta', 'std_error'], 
+            qids_stats_df.loc['vis4_inta', 'std_error'], qids_stats_df.loc['vis5_inta', 'std_error'], 
+            qids_stats_df.loc['vis1_intb', 'std_error'], np.nan, qids_stats_df.loc['vis3_intb', 'std_error'], 
+            qids_stats_df.loc['vis4_intb', 'std_error'], qids_stats_df.loc['vis5_intb', 'std_error'], 
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data_line = plot_data[plot_data['visit'] != 2]
+    qids_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention'))
+            + geom_line(data=plot_data_line, size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + labs(title='QIDS Scores Across Study Visits',
+                x='Visit',
+                y='QIDS Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[8,20], breaks=[8,10,12,14,16,18,20])
+            )
+    qids_plot = qids_plot + annotate("text", x=2, y=max(plot_data['mean']) + 2.5, label="**", size=16, color="black") + \
+        annotate("segment", x=1, xend=3, y=max(plot_data['mean']) +2.25, yend=max(plot_data['mean']) + 2.25, color="black") + \
+            annotate("text", x=2.5, y=max(plot_data['mean']) + 3.5, label="***", size=16, color="black") + \
+                annotate("segment", x=1, xend=4, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black") + \
+                    annotate("text", x=3, y=max(plot_data['mean']) + 4.5, label="***", size=16, color="black") + \
+                        annotate("segment", x=1, xend=5, y=max(plot_data['mean']) +4.25, yend=max(plot_data['mean']) + 4.25, color="black")
+    qids_plot.save('group/behavioural/qids_plot.png')
+
+    madrs_df = rqmgp_df.dropna(subset=['madrs'])
+    visits = ['1', '3']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
+    madrs_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = madrs_df[(madrs_df['visit'] == visit) & (madrs_df['intervention'] == intervention)]['madrs'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+
+    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    pandas2ri.activate()
+    r = ro.r
+    utils = importr('utils')
+    utils.chooseCRANmirror(ind=1)
+    r_script = """
+    library(lme4)
+    library(lmerTest)
+    library(emmeans)
+    madrs_df <- as.data.frame(madrs_df)
+    model <- lmer(madrs~visit*intervention + (1|p_id), data = madrs_df)
+    residuals_model <- residuals(model)
+    shapiro_test_result <- shapiro.test(residuals_model)
+    print(shapiro_test_result)
+    if (shapiro_test_result$p.value > 0.05) {
+    print("MADRS LMM residuals meet normality assumptions.")
+    anova_result <- anova(model)
+    print(anova_result)
+    } else {
+    print("MADRS LMM residuals do not meet normality assumptions.")
+    }
+    """
+    ro.globalenv['madrs_df'] = pandas2ri.py2rpy(madrs_df)
+    result = r(r_script)
+    print(result)
+
+    data = {
+        'visit': [1, 3] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            madrs_stats_df.loc['vis1_inta', 'mean'], madrs_stats_df.loc['vis3_inta', 'mean'],
+            madrs_stats_df.loc['vis1_intb', 'mean'], madrs_stats_df.loc['vis3_intb', 'mean']
+        ],
+        'std_error': [
+            madrs_stats_df.loc['vis1_inta', 'std_error'], madrs_stats_df.loc['vis3_inta', 'std_error'], 
+            madrs_stats_df.loc['vis1_intb', 'std_error'], madrs_stats_df.loc['vis3_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['visit'] = pd.Categorical(
+        plot_data['visit'], categories=[1, 3], ordered=True)
+    madrs_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Visit')
+            + labs(title='MADRS Scores Across Study Visits',
+                x='Visit',
+                y='MADRS Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[16,32])
+            )
+    madrs_plot = madrs_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="***", size=16, color="black") + \
+        annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
+    madrs_plot.save('group/behavioural/madrs_plot.png')
+
+    gad_df = rqmgp_df.dropna(subset=['gad'])
+    visits = ['1', '3']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
+    gad_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = gad_df[(gad_df['visit'] == visit) & (gad_df['intervention'] == intervention)]['gad'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+
+    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    pandas2ri.activate()
+    r = ro.r
+    utils = importr('utils')
+    utils.chooseCRANmirror(ind=1)
+    r_script = """
+    library(lme4)
+    library(lmerTest)
+    library(emmeans)
+    gad_df <- as.data.frame(gad_df)
+    model <- lmer(gad~visit*intervention + (1|p_id), data = gad_df)
+    residuals_model <- residuals(model)
+    shapiro_test_result <- shapiro.test(residuals_model)
+    print(shapiro_test_result)
+    if (shapiro_test_result$p.value > 0.05) {
+    print("GAD LMM residuals meet normality assumptions.")
+    anova_result <- anova(model)
+    print(anova_result)
+    } else {
+    print("GAD LMM residuals do not meet normality assumptions.")
+    }
+    """
+    ro.globalenv['gad_df'] = pandas2ri.py2rpy(gad_df)
+    result = r(r_script)
+    print(result)
+
+    data = {
+        'visit': [1, 3] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            gad_stats_df.loc['vis1_inta', 'mean'], gad_stats_df.loc['vis3_inta', 'mean'],
+            gad_stats_df.loc['vis1_intb', 'mean'], gad_stats_df.loc['vis3_intb', 'mean']
+        ],
+        'std_error': [
+            gad_stats_df.loc['vis1_inta', 'std_error'], gad_stats_df.loc['vis3_inta', 'std_error'], 
+            gad_stats_df.loc['vis1_intb', 'std_error'], gad_stats_df.loc['vis3_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['visit'] = pd.Categorical(
+        plot_data['visit'], categories=[1, 3], ordered=True)
+    gad_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Visit')
+            + labs(title='GAD Scores Across Study Visits',
+                x='Visit',
+                y='GAD Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[4,12])
+            )
+    gad_plot.save('group/behavioural/gad_plot.png')
+
+    panas_pos_df = rqmgp_df.dropna(subset=['panas_pos'])
+    visits = ['1', '3']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
+    panas_pos_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = panas_pos_df[(panas_pos_df['visit'] == visit) & (panas_pos_df['intervention'] == intervention)]['panas_pos'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+
+    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    pandas2ri.activate()
+    r = ro.r
+    utils = importr('utils')
+    utils.chooseCRANmirror(ind=1)
+    r_script = """
+    library(lme4)
+    library(lmerTest)
+    library(emmeans)
+    panas_pos_df <- as.data.frame(panas_pos_df)
+    model <- lmer(panas_pos~visit*intervention + (1|p_id), data = panas_pos_df)
+    residuals_model <- residuals(model)
+    shapiro_test_result <- shapiro.test(residuals_model)
+    print(shapiro_test_result)
+    if (shapiro_test_result$p.value > 0.05) {
+    print("PANAS Positive LMM residuals meet normality assumptions.")
+    anova_result <- anova(model)
+    print(anova_result)
+    } else {
+    print("PANAS Positive LMM residuals do not meet normality assumptions.")
+    }
+    """
+    ro.globalenv['panas_pos_df'] = pandas2ri.py2rpy(panas_pos_df)
+    result = r(r_script)
+    print(result)
+
+    data = {
+        'visit': [1, 3] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            panas_pos_stats_df.loc['vis1_inta', 'mean'], panas_pos_stats_df.loc['vis3_inta', 'mean'],
+            panas_pos_stats_df.loc['vis1_intb', 'mean'], panas_pos_stats_df.loc['vis3_intb', 'mean']
+        ],
+        'std_error': [
+            panas_pos_stats_df.loc['vis1_inta', 'std_error'], panas_pos_stats_df.loc['vis3_inta', 'std_error'], 
+            panas_pos_stats_df.loc['vis1_intb', 'std_error'], panas_pos_stats_df.loc['vis3_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['visit'] = pd.Categorical(
+        plot_data['visit'], categories=[1, 3], ordered=True)
+    panas_pos_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Visit')
+            + labs(title='PANAS Positive Scores Across Study Visits',
+                x='Visit',
+                y='PANAS Positive Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[18,28])
+            )
+    panas_pos_plot = panas_pos_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="*", size=16, color="black") + \
+        annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
+    panas_pos_plot.save('group/behavioural/panas_pos_plot.png')
+
+    panas_neg_df = rqmgp_df.dropna(subset=['panas_neg'])
+    visits = ['1', '3']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
+    panas_neg_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = panas_neg_df[(panas_neg_df['visit'] == visit) & (panas_neg_df['intervention'] == intervention)]['panas_neg'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+
+    os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    pandas2ri.activate()
+    r = ro.r
+    utils = importr('utils')
+    utils.chooseCRANmirror(ind=1)
+    r_script = """
+    library(lme4)
+    library(lmerTest)
+    library(emmeans)
+    panas_neg_df <- as.data.frame(panas_neg_df)
+    model <- lmer(panas_neg~visit*intervention + (1|p_id), data = panas_neg_df)
+    residuals_model <- residuals(model)
+    shapiro_test_result <- shapiro.test(residuals_model)
+    print(shapiro_test_result)
+    if (shapiro_test_result$p.value > 0.05) {
+    print("PANAS Negative LMM residuals meet normality assumptions.")
+    anova_result <- anova(model)
+    print(anova_result)
+    } else {
+    print("PANAS Negative LMM residuals do not meet normality assumptions.")
+    }
+    """
+    ro.globalenv['panas_neg_df'] = pandas2ri.py2rpy(panas_neg_df)
+    result = r(r_script)
+    print(result)
+
+    data = {
+        'visit': [1, 3] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            panas_neg_stats_df.loc['vis1_inta', 'mean'], panas_neg_stats_df.loc['vis3_inta', 'mean'],
+            panas_neg_stats_df.loc['vis1_intb', 'mean'], panas_neg_stats_df.loc['vis3_intb', 'mean']
+        ],
+        'std_error': [
+            panas_neg_stats_df.loc['vis1_inta', 'std_error'], panas_neg_stats_df.loc['vis3_inta', 'std_error'], 
+            panas_neg_stats_df.loc['vis1_intb', 'std_error'], panas_neg_stats_df.loc['vis3_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['visit'] = pd.Categorical(
+        plot_data['visit'], categories=[1, 3], ordered=True)
+    panas_neg_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Visit')
+            + labs(title='PANAS Negative Scores Across Study Visits',
+                x='Visit',
+                y='PANAS Negative Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[20,30])
+            )
+    panas_neg_plot.save('group/behavioural/panas_neg_plot.png')
 
 
 

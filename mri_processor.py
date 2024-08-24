@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
 ###TO DO###
-# Organise files in BIDS format.
 # Add percentage completion metric.
 # Output mri_processor.py Bash terminal outputs / prints into .txt log file
-# Add option to run analysis for all subjects. E.g. for fMRI preprocessing, the input question could be: "Enter the participant's ID (e.g. P001), or write 'ALL' to execute for all participants."
-# Potentially recreate preprocessing pipeline with fmriprep just to show that I can use it. And maybe compare analysis results after my preprocessing and fmriprep preprocessing
 
-#region IMPORT PACKAGES.
+#region 1) IMPORT PACKAGES.
 
 import time
 import urllib.parse
@@ -51,7 +48,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 #endregion
 
-#region INSTRUCTIONS.
+#region 2) INSTRUCTIONS.
 print("\nWelcome to the MRI analysis processor. Please complete the following before proceeding:\n")
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
@@ -61,7 +58,7 @@ if answer != 'y':
     sys.exit()
 #endregion
 
-#region DOWNLOAD BOX FILES TO SERVER.
+#region 3) DOWNLOAD BOX FILES TO SERVER.
 
 answer2 = input("Would you like to update your files from Box? (y/n)\n")
 if answer2 == 'y':
@@ -249,7 +246,1106 @@ if answer2 == 'y':
     server_thread.join()
 #endregion
 
-#region CONVERT DICOMS TO BIDS FORMAT.
+#region 4) THERMOMETER ANALYSIS.
+
+answer5 = input("Would you like to execute thermometer analysis? (y/n)\n")
+if answer5 == 'y':
+
+
+
+    
+    # Step 1: Access Run 2 and 3 tbv_script thermometer files and extract relevant data into dataframe.
+    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    def find_second_and_third_largest(files):
+        sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]), reverse=True)
+        second_largest_path = os.path.join(folder_path, sorted_files[-2])
+        third_largest_path = os.path.join(folder_path, sorted_files[-3])
+        return second_largest_path, third_largest_path
+    df = pd.DataFrame(columns=participants)
+    for x in participants:
+        analysis_folder = os.path.join(os.getcwd(), f'{x}', 'analysis')
+        if not os.path.exists(analysis_folder):
+            subprocess.run(['mkdir', f'{x}/analysis'])
+        therm_folder = os.path.join(os.getcwd(), f'{x}', 'analysis', 'therm')
+        if not os.path.exists(therm_folder):
+            subprocess.run(['mkdir', f'{x}/analysis/therm'])
+        group_folder = os.path.join(os.getcwd(), 'group')
+        if not os.path.exists(group_folder):
+            subprocess.run(['mkdir', 'group'])
+        group_therm_folder = os.path.join(os.getcwd(), 'group', 'therm')
+        if not os.path.exists(group_therm_folder):
+            subprocess.run(['mkdir', 'group', 'therm'])
+        folder_path = os.path.join(os.getcwd(), f'{x}', 'data', 'neurofeedback', 'tbv_script', 'data')
+        files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+        if len(files) == 4:
+            run2_path, run3_path = find_second_and_third_largest(files)
+        else:
+            print("Error: The folder should contain exactly 4 files.")
+        def process_file(file_path):
+            if os.path.exists(file_path):
+                with open(file_path, 'r') as file:
+                    lines = file.readlines()[12:]
+                current_value = None
+                value_counter = {}
+                for line in lines:
+                    values = line.strip().split(',')
+                    if values[2] != current_value:
+                        current_value = values[2]
+                        value_counter[current_value] = value_counter.get(current_value, 0) + 1
+                    condition = f"{current_value.lower()}{value_counter[current_value]:02d}"
+                    if 'rest' in condition:
+                        condition = condition.replace('rest', 'sub')
+                    if 'guilt first' in condition:
+                        condition = condition.replace('guilt first', 'guilt_first')
+                    if 'guilt second' in condition:
+                        condition = condition.replace('guilt second', 'guilt_second')
+                    if 'indignation first' in condition:
+                        condition = condition.replace('indignation first', 'indig_first')
+                    if 'indignation second' in condition:
+                        condition = condition.replace('indignation second', 'indig_second')
+                    row_header = 'r' + values[1] + '_' + condition + '_' + 'vol' + values[3] + '_val'
+                    feedback_lvl_header = 'r' + values[1] + '_' + condition + '_' + 'vol' + values[3] + '_lvl'
+                    value = float(values[8])
+                    feedback_lvl = float(values[9])
+                    if row_header not in df.index:
+                        df.loc[row_header] = [None] * len(participants)
+                    df.at[row_header, f'{x}'] = value
+                    if feedback_lvl_header not in df.index:
+                        df.loc[feedback_lvl_header] = [None] * len(participants)
+                    df.at[feedback_lvl_header, f'{x}'] = feedback_lvl
+        process_file(run2_path)
+        process_file(run3_path)
+    output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/therm/therm_data.xlsx'
+    df.to_excel(output_excel_path, index=True)
+    
+    # Step 2: Access eCRF document and extract relevant data into dataframe.
+    warnings.simplefilter("ignore", UserWarning)
+    df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'intervention', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3']
+    data_df = pd.DataFrame(index = df_row_headers)
+    ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
+    password = 'SussexDepNF22'
+    df_values_dict = {}
+    location_dict = {
+        'P004_vis_1_locations': {'dob': (77, 3), 'gender': (81, 3),  'handedness': (82, 3), 'exercise': (83, 3), 'education': (84, 3), 'work_status': (85, 3), 'panic': (132, 3), 'agoraphobia': (134, 3), 'social_anx': (135, 3), 'ocd': (137, 3), 'ptsd': (140, 3), 'gad': (141, 3), 'comorbid_anx': (142, 3), 'msm': (120, 3), 'psi_sociotropy': (151, 3), 'psi_autonomy': (152, 3), 'raads': (155, 3), 'panas_pos_vis_1': (161, 3), 'panas_neg_vis_1': (162, 3), 'qids_vis_1': (172, 3), 'gad_vis_1': (173, 3), 'rosenberg_vis_1': (174, 3), 'madrs_vis_1': (185, 3)},
+        'P004_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 3), 'pre_memory_intensity_guilt_2': (43, 3), 'pre_memory_intensity_indignation_1': (49, 3), 'pre_memory_intensity_indignation_2': (54, 3), 'intervention': (78, 3), 'techniques_guilt': (84, 3), 'techniques_indignation': (85, 3), 'perceived_success_guilt': (86, 3), 'perceived_success_indignation': (87, 3), 'post_memory_intensity_guilt_1': (88, 3), 'post_memory_intensity_guilt 2': (92, 3), 'post_memory_intensity_indignation_1': (97, 3), 'post_memory_indignation_2': (101, 3), 'rosenberg_vis_2': (104, 3)},
+        'P004_vis_3_locations': {'panas_pos_vis_3': (36, 3), 'panas_neg_vis_3': (37, 3), 'qids_vis_3': (47, 3), 'gad_vis_3': (48, 3), 'rosenberg_vis_3': (49, 3), 'madrs_vis_3': (60, 3)},
+        
+        'P006_vis_1_locations': {'dob': (77, 4), 'gender': (81, 4),  'handedness': (82, 4), 'exercise': (83, 4), 'education': (84, 4), 'work_status': (85, 4), 'panic': (132, 4), 'agoraphobia': (134, 4), 'social_anx': (135, 4), 'ocd': (137, 4), 'ptsd': (140, 4), 'gad': (141, 4), 'comorbid_anx': (142, 4), 'msm': (120, 4), 'psi_sociotropy': (151, 4), 'psi_autonomy': (152, 4), 'raads': (155, 4), 'panas_pos_vis_1': (161, 4), 'panas_neg_vis_1': (162, 4), 'qids_vis_1': (172, 4), 'gad_vis_1': (173, 4), 'rosenberg_vis_1': (174, 4), 'madrs_vis_1': (185, 4)},
+        'P006_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 4), 'pre_memory_intensity_guilt_2': (43, 4), 'pre_memory_intensity_indignation_1': (49, 4), 'pre_memory_intensity_indignation_2': (54, 4), 'intervention': (78, 4), 'techniques_guilt': (84, 4), 'techniques_indignation': (85, 4), 'perceived_success_guilt': (86, 4), 'perceived_success_indignation': (87, 4), 'post_memory_intensity_guilt_1': (88, 4), 'post_memory_intensity_guilt 2': (92, 4), 'post_memory_intensity_indignation_1': (97, 4), 'post_memory_indignation_2': (101, 4), 'rosenberg_vis_2': (104, 4)},
+        'P006_vis_3_locations': {'panas_pos_vis_3': (36, 4), 'panas_neg_vis_3': (37, 4), 'qids_vis_3': (47, 4), 'gad_vis_3': (48, 4), 'rosenberg_vis_3': (49, 4), 'madrs_vis_3': (60, 4)},
+    
+        'P020_vis_1_locations': {'dob': (77, 7), 'gender': (81, 7),  'handedness': (82, 7), 'exercise': (83, 7), 'education': (84, 7), 'work_status': (85, 7), 'panic': (132, 7), 'agoraphobia': (134, 7), 'social_anx': (135, 7), 'ocd': (137, 7), 'ptsd': (140, 7), 'gad': (141, 7), 'comorbid_anx': (142, 7), 'msm': (120, 7), 'psi_sociotropy': (151, 7), 'psi_autonomy': (152, 7), 'raads': (155, 7), 'panas_pos_vis_1': (161, 7), 'panas_neg_vis_1': (162, 7), 'qids_vis_1': (172, 7), 'gad_vis_1': (173, 7), 'rosenberg_vis_1': (174, 7), 'madrs_vis_1': (185, 7)},
+        'P020_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 6), 'pre_memory_intensity_guilt_2': (43, 6), 'pre_memory_intensity_indignation_1': (49, 6), 'pre_memory_intensity_indignation_2': (54, 6), 'intervention': (78, 6), 'techniques_guilt': (84, 6), 'techniques_indignation': (85, 6), 'perceived_success_guilt': (86, 6), 'perceived_success_indignation': (87, 6), 'post_memory_intensity_guilt_1': (88, 6), 'post_memory_intensity_guilt 2': (92, 6), 'post_memory_intensity_indignation_1': (97, 6), 'post_memory_indignation_2': (101, 6), 'rosenberg_vis_2': (104, 6)},
+        'P020_vis_3_locations': {'panas_pos_vis_3': (36, 6), 'panas_neg_vis_3': (37, 6), 'qids_vis_3': (47, 6), 'gad_vis_3': (48, 6), 'rosenberg_vis_3': (49, 6), 'madrs_vis_3': (60, 6)},
+    
+        'P030_vis_1_locations': {'dob': (77, 6), 'gender': (81, 6),  'handedness': (82, 6), 'exercise': (83, 6), 'education': (84, 6), 'work_status': (85, 6), 'panic': (132, 6), 'agoraphobia': (134, 6), 'social_anx': (135, 6), 'ocd': (137, 6), 'ptsd': (140, 6), 'gad': (141, 6), 'comorbid_anx': (142, 6), 'msm': (120, 6), 'psi_sociotropy': (151, 6), 'psi_autonomy': (152, 6), 'raads': (155, 6), 'panas_pos_vis_1': (161, 6), 'panas_neg_vis_1': (162, 6), 'qids_vis_1': (172, 6), 'gad_vis_1': (173, 6), 'rosenberg_vis_1': (174, 6), 'madrs_vis_1': (185, 6)},
+        'P030_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 5), 'pre_memory_intensity_guilt_2': (43, 5), 'pre_memory_intensity_indignation_1': (49, 5), 'pre_memory_intensity_indignation_2': (54, 5), 'intervention': (78, 5), 'techniques_guilt': (84, 5), 'techniques_indignation': (85, 5), 'perceived_success_guilt': (86, 5), 'perceived_success_indignation': (87, 5), 'post_memory_intensity_guilt_1': (88, 5), 'post_memory_intensity_guilt 2': (92, 5), 'post_memory_intensity_indignation_1': (97, 5), 'post_memory_indignation_2': (101, 5), 'rosenberg_vis_2': (104, 5)},
+        'P030_vis_3_locations': {'panas_pos_vis_3': (36, 5), 'panas_neg_vis_3': (37, 5), 'qids_vis_3': (47, 5), 'gad_vis_3': (48, 5), 'rosenberg_vis_3': (49, 5), 'madrs_vis_3': (60, 5)},
+    
+        'P059_vis_1_locations': {'dob': (77, 23), 'gender': (81, 23),  'handedness': (82, 23), 'exercise': (83, 23), 'education': (84, 23), 'work_status': (85, 23), 'panic': (132, 23), 'agoraphobia': (134, 23), 'social_anx': (135, 23), 'ocd': (137, 23), 'ptsd': (140, 23), 'gad': (141, 23), 'comorbid_anx': (142, 23), 'msm': (120, 23), 'psi_sociotropy': (151, 23), 'psi_autonomy': (152, 23), 'raads': (155, 23), 'panas_pos_vis_1': (161, 23), 'panas_neg_vis_1': (162, 23), 'qids_vis_1': (172, 23), 'gad_vis_1': (173, 23), 'rosenberg_vis_1': (174, 23), 'madrs_vis_1': (185, 23)},
+        'P059_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 20), 'pre_memory_intensity_guilt_2': (43, 20), 'pre_memory_intensity_indignation_1': (49, 20), 'pre_memory_intensity_indignation_2': (54, 20), 'intervention': (78, 20), 'techniques_guilt': (84, 20), 'techniques_indignation': (85, 20), 'perceived_success_guilt': (86, 20), 'perceived_success_indignation': (87, 20), 'post_memory_intensity_guilt_1': (88, 20), 'post_memory_intensity_guilt 2': (92, 20), 'post_memory_intensity_indignation_1': (97, 20), 'post_memory_indignation_2': (101, 20), 'rosenberg_vis_2': (104, 20)},
+        'P059_vis_3_locations': {'panas_pos_vis_3': (36, 19), 'panas_neg_vis_3': (37, 19), 'qids_vis_3': (47, 19), 'gad_vis_3': (48, 19), 'rosenberg_vis_3': (49, 19), 'madrs_vis_3': (60, 19)},
+    
+        'P078_vis_1_locations': {'dob': (77, 9), 'gender': (81, 9),  'handedness': (82, 9), 'exercise': (83, 9), 'education': (84, 9), 'work_status': (85, 9), 'panic': (132, 9), 'agoraphobia': (134, 9), 'social_anx': (135, 9), 'ocd': (137, 9), 'ptsd': (140, 9), 'gad': (141, 9), 'comorbid_anx': (142, 9), 'msm': (120, 9), 'psi_sociotropy': (151, 9), 'psi_autonomy': (152, 9), 'raads': (155, 9), 'panas_pos_vis_1': (161, 9), 'panas_neg_vis_1': (162, 9), 'qids_vis_1': (172, 9), 'gad_vis_1': (173, 9), 'rosenberg_vis_1': (174, 9), 'madrs_vis_1': (185, 9)},
+        'P078_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 7), 'pre_memory_intensity_guilt_2': (43, 7), 'pre_memory_intensity_indignation_1': (49, 7), 'pre_memory_intensity_indignation_2': (54, 7), 'intervention': (78, 7), 'techniques_guilt': (84, 7), 'techniques_indignation': (85, 7), 'perceived_success_guilt': (86, 7), 'perceived_success_indignation': (87, 7), 'post_memory_intensity_guilt_1': (88, 7), 'post_memory_intensity_guilt 2': (92, 7), 'post_memory_intensity_indignation_1': (97, 7), 'post_memory_indignation_2': (101, 7), 'rosenberg_vis_2': (104, 7)},
+        'P078_vis_3_locations': {'panas_pos_vis_3': (36, 7), 'panas_neg_vis_3': (37, 7), 'qids_vis_3': (47, 7), 'gad_vis_3': (48, 7), 'rosenberg_vis_3': (49, 7), 'madrs_vis_3': (60, 7)},
+    
+        'P093_vis_1_locations': {'dob': (77, 11), 'gender': (81, 11),  'handedness': (82, 11), 'exercise': (83, 11), 'education': (84, 11), 'work_status': (85, 11), 'panic': (132, 11), 'agoraphobia': (134, 11), 'social_anx': (135, 11), 'ocd': (137, 11), 'ptsd': (140, 11), 'gad': (141, 11), 'comorbid_anx': (142, 11), 'msm': (120, 11), 'psi_sociotropy': (151, 11), 'psi_autonomy': (152, 11), 'raads': (155, 11), 'panas_pos_vis_1': (161, 11), 'panas_neg_vis_1': (162, 11), 'qids_vis_1': (172, 11), 'gad_vis_1': (173, 11), 'rosenberg_vis_1': (174, 11), 'madrs_vis_1': (185, 11)},
+        'P093_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 8), 'pre_memory_intensity_guilt_2': (43, 8), 'pre_memory_intensity_indignation_1': (49, 8), 'pre_memory_intensity_indignation_2': (54, 8), 'intervention': (78, 8), 'techniques_guilt': (84, 8), 'techniques_indignation': (85, 8), 'perceived_success_guilt': (86, 8), 'perceived_success_indignation': (87, 8), 'post_memory_intensity_guilt_1': (88, 8), 'post_memory_intensity_guilt 2': (92, 8), 'post_memory_intensity_indignation_1': (97, 8), 'post_memory_indignation_2': (101, 8), 'rosenberg_vis_2': (104, 8)},
+        'P093_vis_3_locations': {'panas_pos_vis_3': (36, 8), 'panas_neg_vis_3': (37, 8), 'qids_vis_3': (47, 8), 'gad_vis_3': (48, 8), 'rosenberg_vis_3': (49, 8), 'madrs_vis_3': (60, 8)},
+    
+        'P094_vis_1_locations': {'dob': (77, 12), 'gender': (81, 12),  'handedness': (82, 12), 'exercise': (83, 12), 'education': (84, 12), 'work_status': (85, 12), 'panic': (132, 12), 'agoraphobia': (134, 12), 'social_anx': (135, 12), 'ocd': (137, 12), 'ptsd': (140, 12), 'gad': (141, 12), 'comorbid_anx': (142, 12), 'msm': (120, 12), 'psi_sociotropy': (151, 12), 'psi_autonomy': (152, 12), 'raads': (155, 12), 'panas_pos_vis_1': (161, 12), 'panas_neg_vis_1': (162, 12), 'qids_vis_1': (172, 12), 'gad_vis_1': (173, 12), 'rosenberg_vis_1': (174, 12), 'madrs_vis_1': (185, 12)},
+        'P094_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 9), 'pre_memory_intensity_guilt_2': (43, 9), 'pre_memory_intensity_indignation_1': (49, 9), 'pre_memory_intensity_indignation_2': (54, 9), 'intervention': (78, 9), 'techniques_guilt': (84, 9), 'techniques_indignation': (85, 9), 'perceived_success_guilt': (86, 9), 'perceived_success_indignation': (87, 9), 'post_memory_intensity_guilt_1': (88, 9), 'post_memory_intensity_guilt 2': (92, 9), 'post_memory_intensity_indignation_1': (97, 9), 'post_memory_indignation_2': (101, 9), 'rosenberg_vis_2': (104, 9)},
+        'P094_vis_3_locations': {'panas_pos_vis_3': (36, 9), 'panas_neg_vis_3': (37, 9), 'qids_vis_3': (47, 9), 'gad_vis_3': (48, 9), 'rosenberg_vis_3': (49, 9), 'madrs_vis_3': (60, 9)},
+    
+        'P100_vis_1_locations': {'dob': (77, 13), 'gender': (81, 13),  'handedness': (82, 13), 'exercise': (83, 13), 'education': (84, 13), 'work_status': (85, 13), 'panic': (132, 13), 'agoraphobia': (134, 13), 'social_anx': (135, 13), 'ocd': (137, 13), 'ptsd': (140, 13), 'gad': (141, 13), 'comorbid_anx': (142, 13), 'msm': (120, 13), 'psi_sociotropy': (151, 13), 'psi_autonomy': (152, 13), 'raads': (155, 13), 'panas_pos_vis_1': (161, 13), 'panas_neg_vis_1': (162, 13), 'qids_vis_1': (172, 13), 'gad_vis_1': (173, 13), 'rosenberg_vis_1': (174, 13), 'madrs_vis_1': (185, 13)},
+        'P100_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 10), 'pre_memory_intensity_guilt_2': (43, 10), 'pre_memory_intensity_indignation_1': (49, 10), 'pre_memory_intensity_indignation_2': (54, 10), 'intervention': (78, 10), 'techniques_guilt': (84, 10), 'techniques_indignation': (85, 10), 'perceived_success_guilt': (86, 10), 'perceived_success_indignation': (87, 10), 'post_memory_intensity_guilt_1': (88, 10), 'post_memory_intensity_guilt 2': (92, 10), 'post_memory_intensity_indignation_1': (97, 10), 'post_memory_indignation_2': (101, 10), 'rosenberg_vis_2': (104, 10)},
+        'P100_vis_3_locations': {'panas_pos_vis_3': (36, 10), 'panas_neg_vis_3': (37, 10), 'qids_vis_3': (47, 10), 'gad_vis_3': (48, 10), 'rosenberg_vis_3': (49, 10), 'madrs_vis_3': (60, 10)},
+    
+        'P107_vis_1_locations': {'dob': (77, 14), 'gender': (81, 14),  'handedness': (82, 14), 'exercise': (83, 14), 'education': (84, 14), 'work_status': (85, 14), 'panic': (132, 14), 'agoraphobia': (134, 14), 'social_anx': (135, 14), 'ocd': (137, 14), 'ptsd': (140, 14), 'gad': (141, 14), 'comorbid_anx': (142, 14), 'msm': (120, 14), 'psi_sociotropy': (151, 14), 'psi_autonomy': (152, 14), 'raads': (155, 14), 'panas_pos_vis_1': (161, 14), 'panas_neg_vis_1': (162, 14), 'qids_vis_1': (172, 14), 'gad_vis_1': (173, 14), 'rosenberg_vis_1': (174, 14), 'madrs_vis_1': (185, 14)},
+        'P107_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 11), 'pre_memory_intensity_guilt_2': (43, 11), 'pre_memory_intensity_indignation_1': (49, 11), 'pre_memory_intensity_indignation_2': (54, 11), 'intervention': (78, 11), 'techniques_guilt': (84, 11), 'techniques_indignation': (85, 11), 'perceived_success_guilt': (86, 11), 'perceived_success_indignation': (87, 11), 'post_memory_intensity_guilt_1': (88, 11), 'post_memory_intensity_guilt 2': (92, 11), 'post_memory_intensity_indignation_1': (97, 11), 'post_memory_indignation_2': (101, 11), 'rosenberg_vis_2': (104, 11)},
+        'P107_vis_3_locations': {'panas_pos_vis_3': (36, 11), 'panas_neg_vis_3': (37, 11), 'qids_vis_3': (47, 11), 'gad_vis_3': (48, 11), 'rosenberg_vis_3': (49, 11), 'madrs_vis_3': (60, 11)},
+    
+        'P122_vis_1_locations': {'dob': (77, 17), 'gender': (81, 17),  'handedness': (82, 17), 'exercise': (83, 17), 'education': (84, 17), 'work_status': (85, 17), 'panic': (132, 17), 'agoraphobia': (134, 17), 'social_anx': (135, 17), 'ocd': (137, 17), 'ptsd': (140, 17), 'gad': (141, 17), 'comorbid_anx': (142, 17), 'msm': (120, 17), 'psi_sociotropy': (151, 17), 'psi_autonomy': (152, 17), 'raads': (155, 17), 'panas_pos_vis_1': (161, 17), 'panas_neg_vis_1': (162, 17), 'qids_vis_1': (172, 17), 'gad_vis_1': (173, 17), 'rosenberg_vis_1': (174, 17), 'madrs_vis_1': (185, 17)},
+        'P122_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 14), 'pre_memory_intensity_guilt_2': (43, 14), 'pre_memory_intensity_indignation_1': (49, 14), 'pre_memory_intensity_indignation_2': (54, 14), 'intervention': (78, 14), 'techniques_guilt': (84, 14), 'techniques_indignation': (85, 14), 'perceived_success_guilt': (86, 14), 'perceived_success_indignation': (87, 14), 'post_memory_intensity_guilt_1': (88, 14), 'post_memory_intensity_guilt 2': (92, 14), 'post_memory_intensity_indignation_1': (97, 14), 'post_memory_indignation_2': (101, 14), 'rosenberg_vis_2': (104, 14)},
+        'P122_vis_3_locations': {'panas_pos_vis_3': (36, 14), 'panas_neg_vis_3': (37, 14), 'qids_vis_3': (47, 14), 'gad_vis_3': (48, 14), 'rosenberg_vis_3': (49, 14), 'madrs_vis_3': (60, 14)},
+    
+        'P125_vis_1_locations': {'dob': (77, 18), 'gender': (81, 18),  'handedness': (82, 18), 'exercise': (83, 18), 'education': (84, 18), 'work_status': (85, 18), 'panic': (132, 18), 'agoraphobia': (134, 18), 'social_anx': (135, 18), 'ocd': (137, 18), 'ptsd': (140, 18), 'gad': (141, 18), 'comorbid_anx': (142, 18), 'msm': (120, 18), 'psi_sociotropy': (151, 18), 'psi_autonomy': (152, 18), 'raads': (155, 18), 'panas_pos_vis_1': (161, 18), 'panas_neg_vis_1': (162, 18), 'qids_vis_1': (172, 18), 'gad_vis_1': (173, 18), 'rosenberg_vis_1': (174, 18), 'madrs_vis_1': (185, 18)},
+        'P125_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 15), 'pre_memory_intensity_guilt_2': (43, 15), 'pre_memory_intensity_indignation_1': (49, 15), 'pre_memory_intensity_indignation_2': (54, 15), 'intervention': (78, 15), 'techniques_guilt': (84, 15), 'techniques_indignation': (85, 15), 'perceived_success_guilt': (86, 15), 'perceived_success_indignation': (87, 15), 'post_memory_intensity_guilt_1': (88, 15), 'post_memory_intensity_guilt 2': (92, 15), 'post_memory_intensity_indignation_1': (97, 15), 'post_memory_indignation_2': (101, 15), 'rosenberg_vis_2': (104, 15)},
+        'P125_vis_3_locations': {'panas_pos_vis_3': (36, 15), 'panas_neg_vis_3': (37, 15), 'qids_vis_3': (47, 15), 'gad_vis_3': (48, 15), 'rosenberg_vis_3': (49, 15), 'madrs_vis_3': (60, 15)},
+    
+        'P127_vis_1_locations': {'dob': (77, 16), 'gender': (81, 16),  'handedness': (82, 16), 'exercise': (83, 16), 'education': (84, 16), 'work_status': (85, 16), 'panic': (132, 16), 'agoraphobia': (134, 16), 'social_anx': (135, 16), 'ocd': (137, 16), 'ptsd': (140, 16), 'gad': (141, 16), 'comorbid_anx': (142, 16), 'msm': (120, 16), 'psi_sociotropy': (151, 16), 'psi_autonomy': (152, 16), 'raads': (155, 16), 'panas_pos_vis_1': (161, 16), 'panas_neg_vis_1': (162, 16), 'qids_vis_1': (172, 16), 'gad_vis_1': (173, 16), 'rosenberg_vis_1': (174, 16), 'madrs_vis_1': (185, 16)},
+        'P127_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 13), 'pre_memory_intensity_guilt_2': (43, 13), 'pre_memory_intensity_indignation_1': (49, 13), 'pre_memory_intensity_indignation_2': (54, 13), 'intervention': (78, 13), 'techniques_guilt': (84, 13), 'techniques_indignation': (85, 13), 'perceived_success_guilt': (86, 13), 'perceived_success_indignation': (87, 13), 'post_memory_intensity_guilt_1': (88, 13), 'post_memory_intensity_guilt 2': (92, 13), 'post_memory_intensity_indignation_1': (97, 13), 'post_memory_indignation_2': (101, 13), 'rosenberg_vis_2': (104, 13)},
+        'P127_vis_3_locations': {'panas_pos_vis_3': (36, 13), 'panas_neg_vis_3': (37, 13), 'qids_vis_3': (47, 13), 'gad_vis_3': (48, 13), 'rosenberg_vis_3': (49, 13), 'madrs_vis_3': (60, 13)},
+   
+        'P128_vis_1_locations': {'dob': (77, 15), 'gender': (81, 15),  'handedness': (82, 15), 'exercise': (83, 15), 'education': (84, 15), 'work_status': (85, 15), 'panic': (132, 15), 'agoraphobia': (134, 15), 'social_anx': (135, 15), 'ocd': (137, 15), 'ptsd': (140, 15), 'gad': (141, 15), 'comorbid_anx': (142, 15), 'msm': (120, 15), 'psi_sociotropy': (151, 15), 'psi_autonomy': (152, 15), 'raads': (155, 15), 'panas_pos_vis_1': (161, 15), 'panas_neg_vis_1': (162, 15), 'qids_vis_1': (172, 15), 'gad_vis_1': (173, 15), 'rosenberg_vis_1': (174, 15), 'madrs_vis_1': (185, 15)},
+        'P128_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 12), 'pre_memory_intensity_guilt_2': (43, 12), 'pre_memory_intensity_indignation_1': (49, 12), 'pre_memory_intensity_indignation_2': (54, 12), 'intervention': (78, 12), 'techniques_guilt': (84, 12), 'techniques_indignation': (85, 12), 'perceived_success_guilt': (86, 12), 'perceived_success_indignation': (87, 12), 'post_memory_intensity_guilt_1': (88, 12), 'post_memory_intensity_guilt 2': (92, 12), 'post_memory_intensity_indignation_1': (97, 12), 'post_memory_indignation_2': (101, 12), 'rosenberg_vis_2': (104, 12)},
+        'P128_vis_3_locations': {'panas_pos_vis_3': (36, 12), 'panas_neg_vis_3': (37, 12), 'qids_vis_3': (47, 12), 'gad_vis_3': (48, 12), 'rosenberg_vis_3': (49, 12), 'madrs_vis_3': (60, 12)},
+    
+        'P136_vis_1_locations': {'dob': (77, 19), 'gender': (81, 19),  'handedness': (82, 19), 'exercise': (83, 19), 'education': (84, 19), 'work_status': (85, 19), 'panic': (132, 19), 'agoraphobia': (134, 19), 'social_anx': (135, 19), 'ocd': (137, 19), 'ptsd': (140, 19), 'gad': (141, 19), 'comorbid_anx': (142, 19), 'msm': (120, 19), 'psi_sociotropy': (151, 19), 'psi_autonomy': (152, 19), 'raads': (155, 19), 'panas_pos_vis_1': (161, 19), 'panas_neg_vis_1': (162, 19), 'qids_vis_1': (172, 19), 'gad_vis_1': (173, 19), 'rosenberg_vis_1': (174, 19), 'madrs_vis_1': (185, 19)},
+        'P136_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 16), 'pre_memory_intensity_guilt_2': (43, 16), 'pre_memory_intensity_indignation_1': (49, 16), 'pre_memory_intensity_indignation_2': (54, 16), 'intervention': (78, 16), 'techniques_guilt': (84, 16), 'techniques_indignation': (85, 16), 'perceived_success_guilt': (86, 16), 'perceived_success_indignation': (87, 16), 'post_memory_intensity_guilt_1': (88, 16), 'post_memory_intensity_guilt 2': (92, 16), 'post_memory_intensity_indignation_1': (97, 16), 'post_memory_indignation_2': (101, 16), 'rosenberg_vis_2': (104, 16)},
+        'P136_vis_3_locations': {'panas_pos_vis_3': (36, 16), 'panas_neg_vis_3': (37, 16), 'qids_vis_3': (47, 16), 'gad_vis_3': (48, 16), 'rosenberg_vis_3': (49, 16), 'madrs_vis_3': (60, 16)},
+    
+        'P145_vis_1_locations': {'dob': (77, 21), 'gender': (81, 21),  'handedness': (82, 21), 'exercise': (83, 21), 'education': (84, 21), 'work_status': (85, 21), 'panic': (132, 21), 'agoraphobia': (134, 21), 'social_anx': (135, 21), 'ocd': (137, 21), 'ptsd': (140, 21), 'gad': (141, 21), 'comorbid_anx': (142, 21), 'msm': (120, 21), 'psi_sociotropy': (151, 21), 'psi_autonomy': (152, 21), 'raads': (155, 21), 'panas_pos_vis_1': (161, 21), 'panas_neg_vis_1': (162, 21), 'qids_vis_1': (172, 21), 'gad_vis_1': (173, 21), 'rosenberg_vis_1': (174, 21), 'madrs_vis_1': (185, 21)},
+        'P145_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 18), 'pre_memory_intensity_guilt_2': (43, 18), 'pre_memory_intensity_indignation_1': (49, 18), 'pre_memory_intensity_indignation_2': (54, 18), 'intervention': (78, 18), 'techniques_guilt': (84, 18), 'techniques_indignation': (85, 18), 'perceived_success_guilt': (86, 18), 'perceived_success_indignation': (87, 18), 'post_memory_intensity_guilt_1': (88, 18), 'post_memory_intensity_guilt 2': (92, 18), 'post_memory_intensity_indignation_1': (97, 18), 'post_memory_indignation_2': (101, 18), 'rosenberg_vis_2': (104, 18)},
+        'P145_vis_3_locations': {'panas_pos_vis_3': (36, 17), 'panas_neg_vis_3': (37, 17), 'qids_vis_3': (47, 17), 'gad_vis_3': (48, 17), 'rosenberg_vis_3': (49, 17), 'madrs_vis_3': (60, 17)},
+    
+        'P155_vis_1_locations': {'dob': (77, 22), 'gender': (81, 22),  'handedness': (82, 22), 'exercise': (83, 22), 'education': (84, 22), 'work_status': (85, 22), 'panic': (132, 22), 'agoraphobia': (134, 22), 'social_anx': (135, 22), 'ocd': (137, 22), 'ptsd': (140, 22), 'gad': (141, 22), 'comorbid_anx': (142, 22), 'msm': (120, 22), 'psi_sociotropy': (151, 22), 'psi_autonomy': (152, 22), 'raads': (155, 22), 'panas_pos_vis_1': (161, 22), 'panas_neg_vis_1': (162, 22), 'qids_vis_1': (172, 22), 'gad_vis_1': (173, 22), 'rosenberg_vis_1': (174, 22), 'madrs_vis_1': (185, 22)},
+        'P155_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 19), 'pre_memory_intensity_guilt_2': (43, 19), 'pre_memory_intensity_indignation_1': (49, 19), 'pre_memory_intensity_indignation_2': (54, 19), 'intervention': (78, 19), 'techniques_guilt': (84, 19), 'techniques_indignation': (85, 19), 'perceived_success_guilt': (86, 19), 'perceived_success_indignation': (87, 19), 'post_memory_intensity_guilt_1': (88, 19), 'post_memory_intensity_guilt 2': (92, 19), 'post_memory_intensity_indignation_1': (97, 19), 'post_memory_indignation_2': (101, 19), 'rosenberg_vis_2': (104, 19)},
+        'P155_vis_3_locations': {'panas_pos_vis_3': (36, 18), 'panas_neg_vis_3': (37, 18), 'qids_vis_3': (47, 18), 'gad_vis_3': (48, 18), 'rosenberg_vis_3': (49, 18), 'madrs_vis_3': (60, 18)},
+    
+        'P199_vis_1_locations': {'dob': (77, 27), 'gender': (81, 27),  'handedness': (82, 27), 'exercise': (83, 27), 'education': (84, 27), 'work_status': (85, 27), 'panic': (132, 27), 'agoraphobia': (134, 27), 'social_anx': (135, 27), 'ocd': (137, 27), 'ptsd': (140, 27), 'gad': (141, 27), 'comorbid_anx': (142, 27), 'msm': (120, 27), 'psi_sociotropy': (151, 27), 'psi_autonomy': (152, 27), 'raads': (155, 27), 'panas_pos_vis_1': (161, 27), 'panas_neg_vis_1': (162, 27), 'qids_vis_1': (172, 27), 'gad_vis_1': (173, 27), 'rosenberg_vis_1': (174, 27), 'madrs_vis_1': (185, 27)},
+        'P199_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 22), 'pre_memory_intensity_guilt_2': (43, 22), 'pre_memory_intensity_indignation_1': (49, 22), 'pre_memory_intensity_indignation_2': (54, 22), 'intervention': (78, 22), 'techniques_guilt': (84, 22), 'techniques_indignation': (85, 22), 'perceived_success_guilt': (86, 22), 'perceived_success_indignation': (87, 22), 'post_memory_intensity_guilt_1': (88, 22), 'post_memory_intensity_guilt 2': (92, 22), 'post_memory_intensity_indignation_1': (97, 22), 'post_memory_indignation_2': (101, 22), 'rosenberg_vis_2': (104, 22)},
+        'P199_vis_3_locations': {'panas_pos_vis_3': (36, 21), 'panas_neg_vis_3': (37, 21), 'qids_vis_3': (47, 21), 'gad_vis_3': (48, 21), 'rosenberg_vis_3': (49, 21), 'madrs_vis_3': (60, 21)},
+
+        'P215_vis_1_locations': {'dob': (77, 26), 'gender': (81, 26),  'handedness': (82, 26), 'exercise': (83, 26), 'education': (84, 26), 'work_status': (85, 26), 'panic': (132, 26), 'agoraphobia': (134, 26), 'social_anx': (135, 26), 'ocd': (137, 26), 'ptsd': (140, 26), 'gad': (141, 26), 'comorbid_anx': (142, 26), 'msm': (120, 26), 'psi_sociotropy': (151, 26), 'psi_autonomy': (152, 26), 'raads': (155, 26), 'panas_pos_vis_1': (161, 26), 'panas_neg_vis_1': (162, 26), 'qids_vis_1': (172, 26), 'gad_vis_1': (173, 26), 'rosenberg_vis_1': (174, 26), 'madrs_vis_1': (185, 26)},
+        'P215_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 21), 'pre_memory_intensity_guilt_2': (43, 21), 'pre_memory_intensity_indignation_1': (49, 21), 'pre_memory_intensity_indignation_2': (54, 21), 'intervention': (78, 21), 'techniques_guilt': (84, 21), 'techniques_indignation': (85, 21), 'perceived_success_guilt': (86, 21), 'perceived_success_indignation': (87, 21), 'post_memory_intensity_guilt_1': (88, 21), 'post_memory_intensity_guilt 2': (92, 21), 'post_memory_intensity_indignation_1': (97, 21), 'post_memory_indignation_2': (101, 21), 'rosenberg_vis_2': (104, 21)},
+        'P215_vis_3_locations': {'panas_pos_vis_3': (36, 20), 'panas_neg_vis_3': (37, 20), 'qids_vis_3': (47, 20), 'gad_vis_3': (48, 20), 'rosenberg_vis_3': (49, 20), 'madrs_vis_3': (60, 20)},
+
+        'P216_vis_1_locations': {'dob': (77, 28), 'gender': (81, 28),  'handedness': (82, 28), 'exercise': (83, 28), 'education': (84, 28), 'work_status': (85, 28), 'panic': (132, 28), 'agoraphobia': (134, 28), 'social_anx': (135, 28), 'ocd': (137, 28), 'ptsd': (140, 28), 'gad': (141, 28), 'comorbid_anx': (142, 28), 'msm': (120, 28), 'psi_sociotropy': (151, 28), 'psi_autonomy': (152, 28), 'raads': (155, 28), 'panas_pos_vis_1': (161, 28), 'panas_neg_vis_1': (162, 28), 'qids_vis_1': (172, 28), 'gad_vis_1': (173, 28), 'rosenberg_vis_1': (174, 28), 'madrs_vis_1': (185, 28)},
+        'P216_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 23), 'pre_memory_intensity_guilt_2': (43, 23), 'pre_memory_intensity_indignation_1': (49, 23), 'pre_memory_intensity_indignation_2': (54, 23), 'intervention': (78, 23), 'techniques_guilt': (84, 23), 'techniques_indignation': (85, 23), 'perceived_success_guilt': (86, 23), 'perceived_success_indignation': (87, 23), 'post_memory_intensity_guilt_1': (88, 23), 'post_memory_intensity_guilt 2': (92, 23), 'post_memory_intensity_indignation_1': (97, 23), 'post_memory_indignation_2': (101, 23), 'rosenberg_vis_2': (104, 23)},
+        'P216_vis_3_locations': {'panas_pos_vis_3': (36, 22), 'panas_neg_vis_3': (37, 22), 'qids_vis_3': (47, 22), 'gad_vis_3': (48, 22), 'rosenberg_vis_3': (49, 22), 'madrs_vis_3': (60, 22)}
+    }
+    for x in participants:
+        print(f'Extracting {x} data from eCRF.xlsx.')
+        decrypted_workbook = io.BytesIO()
+        with open(ecrf_file_path, 'rb') as file:
+            office_file = msoffcrypto.OfficeFile(file)
+            office_file.load_key(password=password)
+            office_file.decrypt(decrypted_workbook)
+        workbook = openpyxl.load_workbook(decrypted_workbook, data_only = True)
+        ecrf_sheet = workbook['Visit 1']
+        vis_1_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_1_locations'].values()]
+        ecrf_sheet = workbook['Visit 2']
+        vis_2_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_2_locations'].values()]
+        ecrf_sheet = workbook['Visit 3']
+        vis_3_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_3_locations'].values()]
+        df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values
+        for key, values in df_values_dict.items():
+            data_df[key] = values
+        output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/ecrf_data.xlsx'
+        data_df.to_excel(output_excel_path, index=True)
+        print(f'{x} data from eCRF.xlsx successfully extracted.')
+        workbook.close()
+    warnings.resetwarnings()
+
+    # Step 3: Calculate and plot thermometer movement success for each participant. 
+
+    
+    # Could the participants move the thermometer?
+    # How did this differ between guilt and indignation tasks?
+    # How did this differ between the two intervention groups?
+    # Did it vary based on any demographic or clinical factors?
+    # Did their actual success correlate with perceived success?
+    # Does thermometer movement success change between run 2 and run 3? i.e. Do participants reach somewhat of a breakthrough moment?
+    # Try different metrics for thermometer movement success (e.g. mean level, median level, level stability, level stability + mean / median level). Can also include a threshold for successful movement which is based on the movement of the thermometer if left to chance(?). Maybe favour mean over median because it is not possible to have major outliers in the data (the thermometer level can only be between 0 and 10).
+    # Can also try: number of volumes where thermometer level was above 5. Or plot histogram of the frequency of different thermometer levels. Can include levels that are also outside of the thermometer range, and have these values in a slightly more faded colour.
+    # Find amount of time that participant spent above or below thermometer range to test whether thermometer range was suitable.
+    # Does thermometer movement success vary in accordance with memory intensity?
+    # Test if MeanSignal stabilises each time during rest blocks.
+    # Clearly define MeanSignal, Baseline, Value, Thermometer Level etc from tbv_script text file.
+    # Calculate the average number of blocks that the thermometer goes up or down each volume, in order to ascertain how erratically or stably the thermometer is moving. 
+    # Could create a heatmap overlayed onto the thermometer in order to provide a visual demonstration of the thermometer levels that were most frequently occupied.
+    # How well does thermometer success correlate with the different techniques used. Can try to classify the qualitative reports into several categories of techniques.
+    # Does perceived success correlate with any demographic or clinical factors?
+    # Does actual or perceived success correlate with improvements in self-esteem / depression ratings?
+    # If you have high success with guilt thermometer, does that predict low success with indignation thermometer, and vice versa. I.e. is it difficult to be good at moving thermometer under both conditions, or is one condition always favoured.
+
+
+
+#endregion
+
+#region 5) BEHAVIOURAL ANALYSIS.
+
+answer7 = input("Would you like to execute behavioural analysis? (y/n)\n")
+if answer7 == 'y':
+    p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
+    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    runs = ['run01', 'run02', 'run03', 'run04']
+    if p_id == 'ALL':
+        participants_to_iterate = participants
+    else:
+        participants_to_iterate = [p_id]
+    restart = input("Would you like to start the behavioural analysis from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/behavioural' and 'group' folders associated with them. (y/n)\n")
+    if restart == 'y':
+        double_check = input("Are you sure? (y/n)\n")
+        if double_check == 'y':
+            for p_id in participants_to_iterate:
+                behavioural_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'behavioural')
+                if os.path.exists(behavioural_folder):
+                    print(f"Deleting {p_id} behavioural folder...")
+                    shutil.rmtree(behavioural_folder)
+                    print(f"{p_id} behavioural folder successfully deleted.")
+                else:
+                    print(f"{p_id} behavioural folder does not exist.")
+                group_behavioural_folder = os.path.join(os.getcwd(), 'group', 'behavioural')
+            if os.path.exists(group_behavioural_folder):
+                print(f"Deleting {p_id} group/behavioural folder...")
+                shutil.rmtree(group_behavioural_folder)
+                print(f"{p_id} group/behavioural folder successfully deleted.")
+            else:
+                print(f"{p_id} group/behavioural folder does not exist.")
+        else:
+            sys.exit()
+
+    # Step 1: Create directories.
+    print("\n###### STEP 1: CREATE DIRECTORIES ######")
+    for p_id in participants_to_iterate:
+        p_id_folder = os.path.join(os.getcwd(), p_id)
+        os.makedirs(p_id_folder, exist_ok=True)
+        analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
+        os.makedirs(analysis_folder, exist_ok=True)
+        behavioural_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'behavioural')
+        os.makedirs(behavioural_folder, exist_ok=True)
+        group_folder = os.path.join(os.getcwd(), "group")
+        os.makedirs(group_folder, exist_ok=True)
+        group_behavioural_folder = os.path.join(os.getcwd(), "group", "behavioural")
+        os.makedirs(group_behavioural_folder, exist_ok=True)
+
+    # Step 2: Access eCRF document and extract relevant data into dataframe.
+    print("\n###### STEP 2: ACCESS eCRF FILE AND CONVERT TO DATAFRAME ######")
+    warnings.simplefilter("ignore", UserWarning)
+    df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'intervention', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3', 'qids_vis_4', 'rosenberg_vis_4', 'qids_vis_5', 'rosenberg_vis_5']
+    ecrf_df = pd.DataFrame(index = df_row_headers)
+    ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
+    password = 'SussexDepNF22'
+    df_values_dict = {}
+    location_dict = {
+        'P004_vis_1_locations': {'dob': (77, 3), 'gender': (81, 3),  'handedness': (82, 3), 'exercise': (83, 3), 'education': (84, 3), 'work_status': (85, 3), 'panic': (132, 3), 'agoraphobia': (134, 3), 'social_anx': (135, 3), 'ocd': (137, 3), 'ptsd': (140, 3), 'gad': (141, 3), 'comorbid_anx': (142, 3), 'msm': (120, 3), 'psi_sociotropy': (151, 3), 'psi_autonomy': (152, 3), 'raads': (155, 3), 'panas_pos_vis_1': (161, 3), 'panas_neg_vis_1': (162, 3), 'qids_vis_1': (172, 3), 'gad_vis_1': (173, 3), 'rosenberg_vis_1': (174, 3), 'madrs_vis_1': (185, 3)},
+        'P004_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 3), 'pre_memory_intensity_guilt_2': (43, 3), 'pre_memory_intensity_indignation_1': (49, 3), 'pre_memory_intensity_indignation_2': (54, 3), 'intervention': (78, 3), 'techniques_guilt': (84, 3), 'techniques_indignation': (85, 3), 'perceived_success_guilt': (86, 3), 'perceived_success_indignation': (87, 3), 'post_memory_intensity_guilt_1': (88, 3), 'post_memory_intensity_guilt 2': (92, 3), 'post_memory_intensity_indignation_1': (97, 3), 'post_memory_indignation_2': (101, 3), 'rosenberg_vis_2': (104, 3)},
+        'P004_vis_3_locations': {'panas_pos_vis_3': (36, 3), 'panas_neg_vis_3': (37, 3), 'qids_vis_3': (47, 3), 'gad_vis_3': (48, 3), 'rosenberg_vis_3': (49, 3), 'madrs_vis_3': (60, 3)},
+        'P004_vis_4_locations': {'qids_vis_4': (26, 3), 'rosenberg_vis_4': (27, 3)},
+        'P004_vis_5_locations': {'qids_vis_5': (28, 3), 'rosenberg_vis_5': (29, 3)},
+
+        'P006_vis_1_locations': {'dob': (77, 4), 'gender': (81, 4),  'handedness': (82, 4), 'exercise': (83, 4), 'education': (84, 4), 'work_status': (85, 4), 'panic': (132, 4), 'agoraphobia': (134, 4), 'social_anx': (135, 4), 'ocd': (137, 4), 'ptsd': (140, 4), 'gad': (141, 4), 'comorbid_anx': (142, 4), 'msm': (120, 4), 'psi_sociotropy': (151, 4), 'psi_autonomy': (152, 4), 'raads': (155, 4), 'panas_pos_vis_1': (161, 4), 'panas_neg_vis_1': (162, 4), 'qids_vis_1': (172, 4), 'gad_vis_1': (173, 4), 'rosenberg_vis_1': (174, 4), 'madrs_vis_1': (185, 4)},
+        'P006_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 4), 'pre_memory_intensity_guilt_2': (43, 4), 'pre_memory_intensity_indignation_1': (49, 4), 'pre_memory_intensity_indignation_2': (54, 4), 'intervention': (78, 4), 'techniques_guilt': (84, 4), 'techniques_indignation': (85, 4), 'perceived_success_guilt': (86, 4), 'perceived_success_indignation': (87, 4), 'post_memory_intensity_guilt_1': (88, 4), 'post_memory_intensity_guilt 2': (92, 4), 'post_memory_intensity_indignation_1': (97, 4), 'post_memory_indignation_2': (101, 4), 'rosenberg_vis_2': (104, 4)},
+        'P006_vis_3_locations': {'panas_pos_vis_3': (36, 4), 'panas_neg_vis_3': (37, 4), 'qids_vis_3': (47, 4), 'gad_vis_3': (48, 4), 'rosenberg_vis_3': (49, 4), 'madrs_vis_3': (60, 4)},
+        'P006_vis_4_locations': {'qids_vis_4': (26, 4), 'rosenberg_vis_4': (27, 4)},
+        'P006_vis_5_locations': {'qids_vis_5': (28, 4), 'rosenberg_vis_5': (29, 4)},
+
+        'P020_vis_1_locations': {'dob': (77, 7), 'gender': (81, 7),  'handedness': (82, 7), 'exercise': (83, 7), 'education': (84, 7), 'work_status': (85, 7), 'panic': (132, 7), 'agoraphobia': (134, 7), 'social_anx': (135, 7), 'ocd': (137, 7), 'ptsd': (140, 7), 'gad': (141, 7), 'comorbid_anx': (142, 7), 'msm': (120, 7), 'psi_sociotropy': (151, 7), 'psi_autonomy': (152, 7), 'raads': (155, 7), 'panas_pos_vis_1': (161, 7), 'panas_neg_vis_1': (162, 7), 'qids_vis_1': (172, 7), 'gad_vis_1': (173, 7), 'rosenberg_vis_1': (174, 7), 'madrs_vis_1': (185, 7)},
+        'P020_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 6), 'pre_memory_intensity_guilt_2': (43, 6), 'pre_memory_intensity_indignation_1': (49, 6), 'pre_memory_intensity_indignation_2': (54, 6), 'intervention': (78, 6), 'techniques_guilt': (84, 6), 'techniques_indignation': (85, 6), 'perceived_success_guilt': (86, 6), 'perceived_success_indignation': (87, 6), 'post_memory_intensity_guilt_1': (88, 6), 'post_memory_intensity_guilt 2': (92, 6), 'post_memory_intensity_indignation_1': (97, 6), 'post_memory_indignation_2': (101, 6), 'rosenberg_vis_2': (104, 6)},
+        'P020_vis_3_locations': {'panas_pos_vis_3': (36, 6), 'panas_neg_vis_3': (37, 6), 'qids_vis_3': (47, 6), 'gad_vis_3': (48, 6), 'rosenberg_vis_3': (49, 6), 'madrs_vis_3': (60, 6)},
+        'P020_vis_4_locations': {'qids_vis_4': (26, 6), 'rosenberg_vis_4': (27, 6)},
+        'P020_vis_5_locations': {'qids_vis_5': (28, 6), 'rosenberg_vis_5': (29, 6)},
+
+        'P030_vis_1_locations': {'dob': (77, 6), 'gender': (81, 6),  'handedness': (82, 6), 'exercise': (83, 6), 'education': (84, 6), 'work_status': (85, 6), 'panic': (132, 6), 'agoraphobia': (134, 6), 'social_anx': (135, 6), 'ocd': (137, 6), 'ptsd': (140, 6), 'gad': (141, 6), 'comorbid_anx': (142, 6), 'msm': (120, 6), 'psi_sociotropy': (151, 6), 'psi_autonomy': (152, 6), 'raads': (155, 6), 'panas_pos_vis_1': (161, 6), 'panas_neg_vis_1': (162, 6), 'qids_vis_1': (172, 6), 'gad_vis_1': (173, 6), 'rosenberg_vis_1': (174, 6), 'madrs_vis_1': (185, 6)},
+        'P030_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 5), 'pre_memory_intensity_guilt_2': (43, 5), 'pre_memory_intensity_indignation_1': (49, 5), 'pre_memory_intensity_indignation_2': (54, 5), 'intervention': (78, 5), 'techniques_guilt': (84, 5), 'techniques_indignation': (85, 5), 'perceived_success_guilt': (86, 5), 'perceived_success_indignation': (87, 5), 'post_memory_intensity_guilt_1': (88, 5), 'post_memory_intensity_guilt 2': (92, 5), 'post_memory_intensity_indignation_1': (97, 5), 'post_memory_indignation_2': (101, 5), 'rosenberg_vis_2': (104, 5)},
+        'P030_vis_3_locations': {'panas_pos_vis_3': (36, 5), 'panas_neg_vis_3': (37, 5), 'qids_vis_3': (47, 5), 'gad_vis_3': (48, 5), 'rosenberg_vis_3': (49, 5), 'madrs_vis_3': (60, 5)},
+        'P030_vis_4_locations': {'qids_vis_4': (26, 5), 'rosenberg_vis_4': (27, 5)},
+        'P030_vis_5_locations': {'qids_vis_5': (28, 5), 'rosenberg_vis_5': (29, 5)},
+
+        'P059_vis_1_locations': {'dob': (77, 23), 'gender': (81, 23),  'handedness': (82, 23), 'exercise': (83, 23), 'education': (84, 23), 'work_status': (85, 23), 'panic': (132, 23), 'agoraphobia': (134, 23), 'social_anx': (135, 23), 'ocd': (137, 23), 'ptsd': (140, 23), 'gad': (141, 23), 'comorbid_anx': (142, 23), 'msm': (120, 23), 'psi_sociotropy': (151, 23), 'psi_autonomy': (152, 23), 'raads': (155, 23), 'panas_pos_vis_1': (161, 23), 'panas_neg_vis_1': (162, 23), 'qids_vis_1': (172, 23), 'gad_vis_1': (173, 23), 'rosenberg_vis_1': (174, 23), 'madrs_vis_1': (185, 23)},
+        'P059_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 20), 'pre_memory_intensity_guilt_2': (43, 20), 'pre_memory_intensity_indignation_1': (49, 20), 'pre_memory_intensity_indignation_2': (54, 20), 'intervention': (78, 20), 'techniques_guilt': (84, 20), 'techniques_indignation': (85, 20), 'perceived_success_guilt': (86, 20), 'perceived_success_indignation': (87, 20), 'post_memory_intensity_guilt_1': (88, 20), 'post_memory_intensity_guilt 2': (92, 20), 'post_memory_intensity_indignation_1': (97, 20), 'post_memory_indignation_2': (101, 20), 'rosenberg_vis_2': (104, 20)},
+        'P059_vis_3_locations': {'panas_pos_vis_3': (36, 19), 'panas_neg_vis_3': (37, 19), 'qids_vis_3': (47, 19), 'gad_vis_3': (48, 19), 'rosenberg_vis_3': (49, 19), 'madrs_vis_3': (60, 19)},
+        'P059_vis_4_locations': {'qids_vis_4': (26, 19), 'rosenberg_vis_4': (27, 19)},
+        'P059_vis_5_locations': {'qids_vis_5': (28, 19), 'rosenberg_vis_5': (29, 19)},
+
+        'P078_vis_1_locations': {'dob': (77, 9), 'gender': (81, 9),  'handedness': (82, 9), 'exercise': (83, 9), 'education': (84, 9), 'work_status': (85, 9), 'panic': (132, 9), 'agoraphobia': (134, 9), 'social_anx': (135, 9), 'ocd': (137, 9), 'ptsd': (140, 9), 'gad': (141, 9), 'comorbid_anx': (142, 9), 'msm': (120, 9), 'psi_sociotropy': (151, 9), 'psi_autonomy': (152, 9), 'raads': (155, 9), 'panas_pos_vis_1': (161, 9), 'panas_neg_vis_1': (162, 9), 'qids_vis_1': (172, 9), 'gad_vis_1': (173, 9), 'rosenberg_vis_1': (174, 9), 'madrs_vis_1': (185, 9)},
+        'P078_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 7), 'pre_memory_intensity_guilt_2': (43, 7), 'pre_memory_intensity_indignation_1': (49, 7), 'pre_memory_intensity_indignation_2': (54, 7), 'intervention': (78, 7), 'techniques_guilt': (84, 7), 'techniques_indignation': (85, 7), 'perceived_success_guilt': (86, 7), 'perceived_success_indignation': (87, 7), 'post_memory_intensity_guilt_1': (88, 7), 'post_memory_intensity_guilt 2': (92, 7), 'post_memory_intensity_indignation_1': (97, 7), 'post_memory_indignation_2': (101, 7), 'rosenberg_vis_2': (104, 7)},
+        'P078_vis_3_locations': {'panas_pos_vis_3': (36, 7), 'panas_neg_vis_3': (37, 7), 'qids_vis_3': (47, 7), 'gad_vis_3': (48, 7), 'rosenberg_vis_3': (49, 7), 'madrs_vis_3': (60, 7)},
+        'P078_vis_4_locations': {'qids_vis_4': (26, 7), 'rosenberg_vis_4': (27, 7)},
+        'P078_vis_5_locations': {'qids_vis_5': (28, 7), 'rosenberg_vis_5': (29, 7)},
+
+        'P093_vis_1_locations': {'dob': (77, 11), 'gender': (81, 11),  'handedness': (82, 11), 'exercise': (83, 11), 'education': (84, 11), 'work_status': (85, 11), 'panic': (132, 11), 'agoraphobia': (134, 11), 'social_anx': (135, 11), 'ocd': (137, 11), 'ptsd': (140, 11), 'gad': (141, 11), 'comorbid_anx': (142, 11), 'msm': (120, 11), 'psi_sociotropy': (151, 11), 'psi_autonomy': (152, 11), 'raads': (155, 11), 'panas_pos_vis_1': (161, 11), 'panas_neg_vis_1': (162, 11), 'qids_vis_1': (172, 11), 'gad_vis_1': (173, 11), 'rosenberg_vis_1': (174, 11), 'madrs_vis_1': (185, 11)},
+        'P093_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 8), 'pre_memory_intensity_guilt_2': (43, 8), 'pre_memory_intensity_indignation_1': (49, 8), 'pre_memory_intensity_indignation_2': (54, 8), 'intervention': (78, 8), 'techniques_guilt': (84, 8), 'techniques_indignation': (85, 8), 'perceived_success_guilt': (86, 8), 'perceived_success_indignation': (87, 8), 'post_memory_intensity_guilt_1': (88, 8), 'post_memory_intensity_guilt 2': (92, 8), 'post_memory_intensity_indignation_1': (97, 8), 'post_memory_indignation_2': (101, 8), 'rosenberg_vis_2': (104, 8)},
+        'P093_vis_3_locations': {'panas_pos_vis_3': (36, 8), 'panas_neg_vis_3': (37, 8), 'qids_vis_3': (47, 8), 'gad_vis_3': (48, 8), 'rosenberg_vis_3': (49, 8), 'madrs_vis_3': (60, 8)},
+        'P093_vis_4_locations': {'qids_vis_4': (26, 8), 'rosenberg_vis_4': (27, 8)},
+        'P093_vis_5_locations': {'qids_vis_5': (28, 8), 'rosenberg_vis_5': (29, 8)},
+
+        'P094_vis_1_locations': {'dob': (77, 12), 'gender': (81, 12),  'handedness': (82, 12), 'exercise': (83, 12), 'education': (84, 12), 'work_status': (85, 12), 'panic': (132, 12), 'agoraphobia': (134, 12), 'social_anx': (135, 12), 'ocd': (137, 12), 'ptsd': (140, 12), 'gad': (141, 12), 'comorbid_anx': (142, 12), 'msm': (120, 12), 'psi_sociotropy': (151, 12), 'psi_autonomy': (152, 12), 'raads': (155, 12), 'panas_pos_vis_1': (161, 12), 'panas_neg_vis_1': (162, 12), 'qids_vis_1': (172, 12), 'gad_vis_1': (173, 12), 'rosenberg_vis_1': (174, 12), 'madrs_vis_1': (185, 12)},
+        'P094_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 9), 'pre_memory_intensity_guilt_2': (43, 9), 'pre_memory_intensity_indignation_1': (49, 9), 'pre_memory_intensity_indignation_2': (54, 9), 'intervention': (78, 9), 'techniques_guilt': (84, 9), 'techniques_indignation': (85, 9), 'perceived_success_guilt': (86, 9), 'perceived_success_indignation': (87, 9), 'post_memory_intensity_guilt_1': (88, 9), 'post_memory_intensity_guilt 2': (92, 9), 'post_memory_intensity_indignation_1': (97, 9), 'post_memory_indignation_2': (101, 9), 'rosenberg_vis_2': (104, 9)},
+        'P094_vis_3_locations': {'panas_pos_vis_3': (36, 9), 'panas_neg_vis_3': (37, 9), 'qids_vis_3': (47, 9), 'gad_vis_3': (48, 9), 'rosenberg_vis_3': (49, 9), 'madrs_vis_3': (60, 9)},
+        'P094_vis_4_locations': {'qids_vis_4': (26, 9), 'rosenberg_vis_4': (27, 9)},
+        'P094_vis_5_locations': {'qids_vis_5': (28, 9), 'rosenberg_vis_5': (29, 9)},
+
+        'P100_vis_1_locations': {'dob': (77, 13), 'gender': (81, 13),  'handedness': (82, 13), 'exercise': (83, 13), 'education': (84, 13), 'work_status': (85, 13), 'panic': (132, 13), 'agoraphobia': (134, 13), 'social_anx': (135, 13), 'ocd': (137, 13), 'ptsd': (140, 13), 'gad': (141, 13), 'comorbid_anx': (142, 13), 'msm': (120, 13), 'psi_sociotropy': (151, 13), 'psi_autonomy': (152, 13), 'raads': (155, 13), 'panas_pos_vis_1': (161, 13), 'panas_neg_vis_1': (162, 13), 'qids_vis_1': (172, 13), 'gad_vis_1': (173, 13), 'rosenberg_vis_1': (174, 13), 'madrs_vis_1': (185, 13)},
+        'P100_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 10), 'pre_memory_intensity_guilt_2': (43, 10), 'pre_memory_intensity_indignation_1': (49, 10), 'pre_memory_intensity_indignation_2': (54, 10), 'intervention': (78, 10), 'techniques_guilt': (84, 10), 'techniques_indignation': (85, 10), 'perceived_success_guilt': (86, 10), 'perceived_success_indignation': (87, 10), 'post_memory_intensity_guilt_1': (88, 10), 'post_memory_intensity_guilt 2': (92, 10), 'post_memory_intensity_indignation_1': (97, 10), 'post_memory_indignation_2': (101, 10), 'rosenberg_vis_2': (104, 10)},
+        'P100_vis_3_locations': {'panas_pos_vis_3': (36, 10), 'panas_neg_vis_3': (37, 10), 'qids_vis_3': (47, 10), 'gad_vis_3': (48, 10), 'rosenberg_vis_3': (49, 10), 'madrs_vis_3': (60, 10)},
+        'P100_vis_4_locations': {'qids_vis_4': (26, 10), 'rosenberg_vis_4': (27, 10)},
+        'P100_vis_5_locations': {'qids_vis_5': (28, 10), 'rosenberg_vis_5': (29, 10)},
+
+        'P107_vis_1_locations': {'dob': (77, 14), 'gender': (81, 14),  'handedness': (82, 14), 'exercise': (83, 14), 'education': (84, 14), 'work_status': (85, 14), 'panic': (132, 14), 'agoraphobia': (134, 14), 'social_anx': (135, 14), 'ocd': (137, 14), 'ptsd': (140, 14), 'gad': (141, 14), 'comorbid_anx': (142, 14), 'msm': (120, 14), 'psi_sociotropy': (151, 14), 'psi_autonomy': (152, 14), 'raads': (155, 14), 'panas_pos_vis_1': (161, 14), 'panas_neg_vis_1': (162, 14), 'qids_vis_1': (172, 14), 'gad_vis_1': (173, 14), 'rosenberg_vis_1': (174, 14), 'madrs_vis_1': (185, 14)},
+        'P107_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 11), 'pre_memory_intensity_guilt_2': (43, 11), 'pre_memory_intensity_indignation_1': (49, 11), 'pre_memory_intensity_indignation_2': (54, 11), 'intervention': (78, 11), 'techniques_guilt': (84, 11), 'techniques_indignation': (85, 11), 'perceived_success_guilt': (86, 11), 'perceived_success_indignation': (87, 11), 'post_memory_intensity_guilt_1': (88, 11), 'post_memory_intensity_guilt 2': (92, 11), 'post_memory_intensity_indignation_1': (97, 11), 'post_memory_indignation_2': (101, 11), 'rosenberg_vis_2': (104, 11)},
+        'P107_vis_3_locations': {'panas_pos_vis_3': (36, 11), 'panas_neg_vis_3': (37, 11), 'qids_vis_3': (47, 11), 'gad_vis_3': (48, 11), 'rosenberg_vis_3': (49, 11), 'madrs_vis_3': (60, 11)},
+        'P107_vis_4_locations': {'qids_vis_4': (26, 11), 'rosenberg_vis_4': (27, 11)},
+        'P107_vis_5_locations': {'qids_vis_5': (28, 11), 'rosenberg_vis_5': (29, 11)},
+
+        'P122_vis_1_locations': {'dob': (77, 17), 'gender': (81, 17),  'handedness': (82, 17), 'exercise': (83, 17), 'education': (84, 17), 'work_status': (85, 17), 'panic': (132, 17), 'agoraphobia': (134, 17), 'social_anx': (135, 17), 'ocd': (137, 17), 'ptsd': (140, 17), 'gad': (141, 17), 'comorbid_anx': (142, 17), 'msm': (120, 17), 'psi_sociotropy': (151, 17), 'psi_autonomy': (152, 17), 'raads': (155, 17), 'panas_pos_vis_1': (161, 17), 'panas_neg_vis_1': (162, 17), 'qids_vis_1': (172, 17), 'gad_vis_1': (173, 17), 'rosenberg_vis_1': (174, 17), 'madrs_vis_1': (185, 17)},
+        'P122_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 14), 'pre_memory_intensity_guilt_2': (43, 14), 'pre_memory_intensity_indignation_1': (49, 14), 'pre_memory_intensity_indignation_2': (54, 14), 'intervention': (78, 14), 'techniques_guilt': (84, 14), 'techniques_indignation': (85, 14), 'perceived_success_guilt': (86, 14), 'perceived_success_indignation': (87, 14), 'post_memory_intensity_guilt_1': (88, 14), 'post_memory_intensity_guilt 2': (92, 14), 'post_memory_intensity_indignation_1': (97, 14), 'post_memory_indignation_2': (101, 14), 'rosenberg_vis_2': (104, 14)},
+        'P122_vis_3_locations': {'panas_pos_vis_3': (36, 14), 'panas_neg_vis_3': (37, 14), 'qids_vis_3': (47, 14), 'gad_vis_3': (48, 14), 'rosenberg_vis_3': (49, 14), 'madrs_vis_3': (60, 14)},
+        'P122_vis_4_locations': {'qids_vis_4': (26, 14), 'rosenberg_vis_4': (27, 14)},
+        'P122_vis_5_locations': {'qids_vis_5': (28, 14), 'rosenberg_vis_5': (29, 14)},
+
+        'P125_vis_1_locations': {'dob': (77, 18), 'gender': (81, 18),  'handedness': (82, 18), 'exercise': (83, 18), 'education': (84, 18), 'work_status': (85, 18), 'panic': (132, 18), 'agoraphobia': (134, 18), 'social_anx': (135, 18), 'ocd': (137, 18), 'ptsd': (140, 18), 'gad': (141, 18), 'comorbid_anx': (142, 18), 'msm': (120, 18), 'psi_sociotropy': (151, 18), 'psi_autonomy': (152, 18), 'raads': (155, 18), 'panas_pos_vis_1': (161, 18), 'panas_neg_vis_1': (162, 18), 'qids_vis_1': (172, 18), 'gad_vis_1': (173, 18), 'rosenberg_vis_1': (174, 18), 'madrs_vis_1': (185, 18)},
+        'P125_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 15), 'pre_memory_intensity_guilt_2': (43, 15), 'pre_memory_intensity_indignation_1': (49, 15), 'pre_memory_intensity_indignation_2': (54, 15), 'intervention': (78, 15), 'techniques_guilt': (84, 15), 'techniques_indignation': (85, 15), 'perceived_success_guilt': (86, 15), 'perceived_success_indignation': (87, 15), 'post_memory_intensity_guilt_1': (88, 15), 'post_memory_intensity_guilt 2': (92, 15), 'post_memory_intensity_indignation_1': (97, 15), 'post_memory_indignation_2': (101, 15), 'rosenberg_vis_2': (104, 15)},
+        'P125_vis_3_locations': {'panas_pos_vis_3': (36, 15), 'panas_neg_vis_3': (37, 15), 'qids_vis_3': (47, 15), 'gad_vis_3': (48, 15), 'rosenberg_vis_3': (49, 15), 'madrs_vis_3': (60, 15)},
+        'P125_vis_4_locations': {'qids_vis_4': (26, 15), 'rosenberg_vis_4': (27, 15)},
+        'P125_vis_5_locations': {'qids_vis_5': (28, 15), 'rosenberg_vis_5': (29, 15)},
+
+        'P127_vis_1_locations': {'dob': (77, 16), 'gender': (81, 16),  'handedness': (82, 16), 'exercise': (83, 16), 'education': (84, 16), 'work_status': (85, 16), 'panic': (132, 16), 'agoraphobia': (134, 16), 'social_anx': (135, 16), 'ocd': (137, 16), 'ptsd': (140, 16), 'gad': (141, 16), 'comorbid_anx': (142, 16), 'msm': (120, 16), 'psi_sociotropy': (151, 16), 'psi_autonomy': (152, 16), 'raads': (155, 16), 'panas_pos_vis_1': (161, 16), 'panas_neg_vis_1': (162, 16), 'qids_vis_1': (172, 16), 'gad_vis_1': (173, 16), 'rosenberg_vis_1': (174, 16), 'madrs_vis_1': (185, 16)},
+        'P127_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 13), 'pre_memory_intensity_guilt_2': (43, 13), 'pre_memory_intensity_indignation_1': (49, 13), 'pre_memory_intensity_indignation_2': (54, 13), 'intervention': (78, 13), 'techniques_guilt': (84, 13), 'techniques_indignation': (85, 13), 'perceived_success_guilt': (86, 13), 'perceived_success_indignation': (87, 13), 'post_memory_intensity_guilt_1': (88, 13), 'post_memory_intensity_guilt 2': (92, 13), 'post_memory_intensity_indignation_1': (97, 13), 'post_memory_indignation_2': (101, 13), 'rosenberg_vis_2': (104, 13)},
+        'P127_vis_3_locations': {'panas_pos_vis_3': (36, 13), 'panas_neg_vis_3': (37, 13), 'qids_vis_3': (47, 13), 'gad_vis_3': (48, 13), 'rosenberg_vis_3': (49, 13), 'madrs_vis_3': (60, 13)},
+        'P127_vis_4_locations': {'qids_vis_4': (26, 13), 'rosenberg_vis_4': (27, 13)},
+        'P127_vis_5_locations': {'qids_vis_5': (28, 13), 'rosenberg_vis_5': (29, 13)},
+
+        'P128_vis_1_locations': {'dob': (77, 15), 'gender': (81, 15),  'handedness': (82, 15), 'exercise': (83, 15), 'education': (84, 15), 'work_status': (85, 15), 'panic': (132, 15), 'agoraphobia': (134, 15), 'social_anx': (135, 15), 'ocd': (137, 15), 'ptsd': (140, 15), 'gad': (141, 15), 'comorbid_anx': (142, 15), 'msm': (120, 15), 'psi_sociotropy': (151, 15), 'psi_autonomy': (152, 15), 'raads': (155, 15), 'panas_pos_vis_1': (161, 15), 'panas_neg_vis_1': (162, 15), 'qids_vis_1': (172, 15), 'gad_vis_1': (173, 15), 'rosenberg_vis_1': (174, 15), 'madrs_vis_1': (185, 15)},
+        'P128_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 12), 'pre_memory_intensity_guilt_2': (43, 12), 'pre_memory_intensity_indignation_1': (49, 12), 'pre_memory_intensity_indignation_2': (54, 12), 'intervention': (78, 12), 'techniques_guilt': (84, 12), 'techniques_indignation': (85, 12), 'perceived_success_guilt': (86, 12), 'perceived_success_indignation': (87, 12), 'post_memory_intensity_guilt_1': (88, 12), 'post_memory_intensity_guilt 2': (92, 12), 'post_memory_intensity_indignation_1': (97, 12), 'post_memory_indignation_2': (101, 12), 'rosenberg_vis_2': (104, 12)},
+        'P128_vis_3_locations': {'panas_pos_vis_3': (36, 12), 'panas_neg_vis_3': (37, 12), 'qids_vis_3': (47, 12), 'gad_vis_3': (48, 12), 'rosenberg_vis_3': (49, 12), 'madrs_vis_3': (60, 12)},
+        'P128_vis_4_locations': {'qids_vis_4': (26, 12), 'rosenberg_vis_4': (27, 12)},
+        'P128_vis_5_locations': {'qids_vis_5': (28, 12), 'rosenberg_vis_5': (29, 12)},
+
+        'P136_vis_1_locations': {'dob': (77, 19), 'gender': (81, 19),  'handedness': (82, 19), 'exercise': (83, 19), 'education': (84, 19), 'work_status': (85, 19), 'panic': (132, 19), 'agoraphobia': (134, 19), 'social_anx': (135, 19), 'ocd': (137, 19), 'ptsd': (140, 19), 'gad': (141, 19), 'comorbid_anx': (142, 19), 'msm': (120, 19), 'psi_sociotropy': (151, 19), 'psi_autonomy': (152, 19), 'raads': (155, 19), 'panas_pos_vis_1': (161, 19), 'panas_neg_vis_1': (162, 19), 'qids_vis_1': (172, 19), 'gad_vis_1': (173, 19), 'rosenberg_vis_1': (174, 19), 'madrs_vis_1': (185, 19)},
+        'P136_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 16), 'pre_memory_intensity_guilt_2': (43, 16), 'pre_memory_intensity_indignation_1': (49, 16), 'pre_memory_intensity_indignation_2': (54, 16), 'intervention': (78, 16), 'techniques_guilt': (84, 16), 'techniques_indignation': (85, 16), 'perceived_success_guilt': (86, 16), 'perceived_success_indignation': (87, 16), 'post_memory_intensity_guilt_1': (88, 16), 'post_memory_intensity_guilt 2': (92, 16), 'post_memory_intensity_indignation_1': (97, 16), 'post_memory_indignation_2': (101, 16), 'rosenberg_vis_2': (104, 16)},
+        'P136_vis_3_locations': {'panas_pos_vis_3': (36, 16), 'panas_neg_vis_3': (37, 16), 'qids_vis_3': (47, 16), 'gad_vis_3': (48, 16), 'rosenberg_vis_3': (49, 16), 'madrs_vis_3': (60, 16)},
+        'P136_vis_4_locations': {'qids_vis_4': (26, 16), 'rosenberg_vis_4': (27, 16)},
+        'P136_vis_5_locations': {'qids_vis_5': (28, 16), 'rosenberg_vis_5': (29, 16)},
+
+        'P145_vis_1_locations': {'dob': (77, 21), 'gender': (81, 21),  'handedness': (82, 21), 'exercise': (83, 21), 'education': (84, 21), 'work_status': (85, 21), 'panic': (132, 21), 'agoraphobia': (134, 21), 'social_anx': (135, 21), 'ocd': (137, 21), 'ptsd': (140, 21), 'gad': (141, 21), 'comorbid_anx': (142, 21), 'msm': (120, 21), 'psi_sociotropy': (151, 21), 'psi_autonomy': (152, 21), 'raads': (155, 21), 'panas_pos_vis_1': (161, 21), 'panas_neg_vis_1': (162, 21), 'qids_vis_1': (172, 21), 'gad_vis_1': (173, 21), 'rosenberg_vis_1': (174, 21), 'madrs_vis_1': (185, 21)},
+        'P145_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 18), 'pre_memory_intensity_guilt_2': (43, 18), 'pre_memory_intensity_indignation_1': (49, 18), 'pre_memory_intensity_indignation_2': (54, 18), 'intervention': (78, 18), 'techniques_guilt': (84, 18), 'techniques_indignation': (85, 18), 'perceived_success_guilt': (86, 18), 'perceived_success_indignation': (87, 18), 'post_memory_intensity_guilt_1': (88, 18), 'post_memory_intensity_guilt 2': (92, 18), 'post_memory_intensity_indignation_1': (97, 18), 'post_memory_indignation_2': (101, 18), 'rosenberg_vis_2': (104, 18)},
+        'P145_vis_3_locations': {'panas_pos_vis_3': (36, 17), 'panas_neg_vis_3': (37, 17), 'qids_vis_3': (47, 17), 'gad_vis_3': (48, 17), 'rosenberg_vis_3': (49, 17), 'madrs_vis_3': (60, 17)},
+        'P145_vis_4_locations': {'qids_vis_4': (26, 17), 'rosenberg_vis_4': (27, 17)},
+        'P145_vis_5_locations': {'qids_vis_5': (28, 17), 'rosenberg_vis_5': (29, 17)},
+
+        'P155_vis_1_locations': {'dob': (77, 22), 'gender': (81, 22),  'handedness': (82, 22), 'exercise': (83, 22), 'education': (84, 22), 'work_status': (85, 22), 'panic': (132, 22), 'agoraphobia': (134, 22), 'social_anx': (135, 22), 'ocd': (137, 22), 'ptsd': (140, 22), 'gad': (141, 22), 'comorbid_anx': (142, 22), 'msm': (120, 22), 'psi_sociotropy': (151, 22), 'psi_autonomy': (152, 22), 'raads': (155, 22), 'panas_pos_vis_1': (161, 22), 'panas_neg_vis_1': (162, 22), 'qids_vis_1': (172, 22), 'gad_vis_1': (173, 22), 'rosenberg_vis_1': (174, 22), 'madrs_vis_1': (185, 22)},
+        'P155_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 19), 'pre_memory_intensity_guilt_2': (43, 19), 'pre_memory_intensity_indignation_1': (49, 19), 'pre_memory_intensity_indignation_2': (54, 19), 'intervention': (78, 19), 'techniques_guilt': (84, 19), 'techniques_indignation': (85, 19), 'perceived_success_guilt': (86, 19), 'perceived_success_indignation': (87, 19), 'post_memory_intensity_guilt_1': (88, 19), 'post_memory_intensity_guilt 2': (92, 19), 'post_memory_intensity_indignation_1': (97, 19), 'post_memory_indignation_2': (101, 19), 'rosenberg_vis_2': (104, 19)},
+        'P155_vis_3_locations': {'panas_pos_vis_3': (36, 18), 'panas_neg_vis_3': (37, 18), 'qids_vis_3': (47, 18), 'gad_vis_3': (48, 18), 'rosenberg_vis_3': (49, 18), 'madrs_vis_3': (60, 18)},
+        'P155_vis_4_locations': {'qids_vis_4': (26, 18), 'rosenberg_vis_4': (27, 18)},
+        'P155_vis_5_locations': {'qids_vis_5': (28, 18), 'rosenberg_vis_5': (29, 18)},
+
+        'P199_vis_1_locations': {'dob': (77, 27), 'gender': (81, 27),  'handedness': (82, 27), 'exercise': (83, 27), 'education': (84, 27), 'work_status': (85, 27), 'panic': (132, 27), 'agoraphobia': (134, 27), 'social_anx': (135, 27), 'ocd': (137, 27), 'ptsd': (140, 27), 'gad': (141, 27), 'comorbid_anx': (142, 27), 'msm': (120, 27), 'psi_sociotropy': (151, 27), 'psi_autonomy': (152, 27), 'raads': (155, 27), 'panas_pos_vis_1': (161, 27), 'panas_neg_vis_1': (162, 27), 'qids_vis_1': (172, 27), 'gad_vis_1': (173, 27), 'rosenberg_vis_1': (174, 27), 'madrs_vis_1': (185, 27)},
+        'P199_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 22), 'pre_memory_intensity_guilt_2': (43, 22), 'pre_memory_intensity_indignation_1': (49, 22), 'pre_memory_intensity_indignation_2': (54, 22), 'intervention': (78, 22), 'techniques_guilt': (84, 22), 'techniques_indignation': (85, 22), 'perceived_success_guilt': (86, 22), 'perceived_success_indignation': (87, 22), 'post_memory_intensity_guilt_1': (88, 22), 'post_memory_intensity_guilt 2': (92, 22), 'post_memory_intensity_indignation_1': (97, 22), 'post_memory_indignation_2': (101, 22), 'rosenberg_vis_2': (104, 22)},
+        'P199_vis_3_locations': {'panas_pos_vis_3': (36, 21), 'panas_neg_vis_3': (37, 21), 'qids_vis_3': (47, 21), 'gad_vis_3': (48, 21), 'rosenberg_vis_3': (49, 21), 'madrs_vis_3': (60, 21)},
+        'P199_vis_4_locations': {'qids_vis_4': (26, 21), 'rosenberg_vis_4': (27, 21)},
+        'P199_vis_5_locations': {'qids_vis_5': (28, 21), 'rosenberg_vis_5': (29, 21)},
+
+        'P215_vis_1_locations': {'dob': (77, 26), 'gender': (81, 26),  'handedness': (82, 26), 'exercise': (83, 26), 'education': (84, 26), 'work_status': (85, 26), 'panic': (132, 26), 'agoraphobia': (134, 26), 'social_anx': (135, 26), 'ocd': (137, 26), 'ptsd': (140, 26), 'gad': (141, 26), 'comorbid_anx': (142, 26), 'msm': (120, 26), 'psi_sociotropy': (151, 26), 'psi_autonomy': (152, 26), 'raads': (155, 26), 'panas_pos_vis_1': (161, 26), 'panas_neg_vis_1': (162, 26), 'qids_vis_1': (172, 26), 'gad_vis_1': (173, 26), 'rosenberg_vis_1': (174, 26), 'madrs_vis_1': (185, 26)},
+        'P215_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 21), 'pre_memory_intensity_guilt_2': (43, 21), 'pre_memory_intensity_indignation_1': (49, 21), 'pre_memory_intensity_indignation_2': (54, 21), 'intervention': (78, 21), 'techniques_guilt': (84, 21), 'techniques_indignation': (85, 21), 'perceived_success_guilt': (86, 21), 'perceived_success_indignation': (87, 21), 'post_memory_intensity_guilt_1': (88, 21), 'post_memory_intensity_guilt 2': (92, 21), 'post_memory_intensity_indignation_1': (97, 21), 'post_memory_indignation_2': (101, 21), 'rosenberg_vis_2': (104, 21)},
+        'P215_vis_3_locations': {'panas_pos_vis_3': (36, 20), 'panas_neg_vis_3': (37, 20), 'qids_vis_3': (47, 20), 'gad_vis_3': (48, 20), 'rosenberg_vis_3': (49, 20), 'madrs_vis_3': (60, 20)},
+        'P215_vis_4_locations': {'qids_vis_4': (26, 20), 'rosenberg_vis_4': (27, 20)},
+        'P215_vis_5_locations': {'qids_vis_5': (28, 20), 'rosenberg_vis_5': (29, 20)},
+
+        'P216_vis_1_locations': {'dob': (77, 28), 'gender': (81, 28),  'handedness': (82, 28), 'exercise': (83, 28), 'education': (84, 28), 'work_status': (85, 28), 'panic': (132, 28), 'agoraphobia': (134, 28), 'social_anx': (135, 28), 'ocd': (137, 28), 'ptsd': (140, 28), 'gad': (141, 28), 'comorbid_anx': (142, 28), 'msm': (120, 28), 'psi_sociotropy': (151, 28), 'psi_autonomy': (152, 28), 'raads': (155, 28), 'panas_pos_vis_1': (161, 28), 'panas_neg_vis_1': (162, 28), 'qids_vis_1': (172, 28), 'gad_vis_1': (173, 28), 'rosenberg_vis_1': (174, 28), 'madrs_vis_1': (185, 28)},
+        'P216_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 23), 'pre_memory_intensity_guilt_2': (43, 23), 'pre_memory_intensity_indignation_1': (49, 23), 'pre_memory_intensity_indignation_2': (54, 23), 'intervention': (78, 23), 'techniques_guilt': (84, 23), 'techniques_indignation': (85, 23), 'perceived_success_guilt': (86, 23), 'perceived_success_indignation': (87, 23), 'post_memory_intensity_guilt_1': (88, 23), 'post_memory_intensity_guilt 2': (92, 23), 'post_memory_intensity_indignation_1': (97, 23), 'post_memory_indignation_2': (101, 23), 'rosenberg_vis_2': (104, 23)},
+        'P216_vis_3_locations': {'panas_pos_vis_3': (36, 22), 'panas_neg_vis_3': (37, 22), 'qids_vis_3': (47, 22), 'gad_vis_3': (48, 22), 'rosenberg_vis_3': (49, 22), 'madrs_vis_3': (60, 22)},
+        'P216_vis_4_locations': {'qids_vis_4': (26, 22), 'rosenberg_vis_4': (27, 22)},
+        'P216_vis_5_locations': {'qids_vis_5': (28, 22), 'rosenberg_vis_5': (29, 22)}
+    }
+    for x in participants_to_iterate:
+        print(f'Extracting {x} data from eCRF.xlsx...')
+        decrypted_workbook = io.BytesIO()
+        with open(ecrf_file_path, 'rb') as file:
+            office_file = msoffcrypto.OfficeFile(file)
+            office_file.load_key(password=password)
+            office_file.decrypt(decrypted_workbook)
+        workbook = openpyxl.load_workbook(decrypted_workbook, data_only = True)
+        ecrf_sheet = workbook['Visit 1']
+        vis_1_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_1_locations'].values()]
+        ecrf_sheet = workbook['Visit 2']
+        vis_2_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_2_locations'].values()]
+        ecrf_sheet = workbook['Visit 3']
+        vis_3_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_3_locations'].values()]
+        ecrf_sheet = workbook['Online 1']
+        vis_4_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_4_locations'].values()]
+        ecrf_sheet = workbook['Online 2']
+        vis_5_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_5_locations'].values()]
+        df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values + vis_4_values + vis_5_values
+        for key, values in df_values_dict.items():
+            ecrf_df[key] = values
+        output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/ecrf_data.xlsx'
+        ecrf_df.to_excel(output_excel_path, index=True)
+        workbook.close()
+    warnings.resetwarnings()
+
+    # Step 3: Run LMMs of Clinical Assessment Scores.
+    print("\n###### STEP 3: RUN LMMs OF CLINICAL ASSESSMENT SCORES ######")
+    columns = ['p_id', 'visit', 'intervention', 'rosenberg', 'qids', 'madrs', 'gad', 'panas_pos', 'panas_neg']
+    rqmgp_df = pd.DataFrame(columns=columns)
+    p_id_column = participants * 5
+    visit_column = ['1'] * 20 + ['2'] * 20 + ['3'] * 20 + ['4'] * 20 + ['5'] * 20
+    intervention_values = ecrf_df.loc['intervention'].tolist()
+    intervention_column = list(intervention_values) * 5
+    rosenberg_vis_1 = ecrf_df.loc['rosenberg_vis_1'].tolist()
+    rosenberg_vis_2 = ecrf_df.loc['rosenberg_vis_2'].tolist()
+    rosenberg_vis_3 = ecrf_df.loc['rosenberg_vis_3'].tolist()
+    rosenberg_vis_4 = ecrf_df.loc['rosenberg_vis_4'].tolist()
+    rosenberg_vis_5 = ecrf_df.loc['rosenberg_vis_5'].tolist()
+    rosenberg_column = rosenberg_vis_1 + rosenberg_vis_2 + rosenberg_vis_3 + rosenberg_vis_4 + rosenberg_vis_5
+    qids_vis_1 = ecrf_df.loc['qids_vis_1'].tolist()
+    qids_vis_2 = [np.nan] * 20
+    qids_vis_3 = ecrf_df.loc['qids_vis_3'].tolist()
+    qids_vis_4 = ecrf_df.loc['qids_vis_4'].tolist()
+    qids_vis_5 = ecrf_df.loc['qids_vis_5'].tolist()
+    qids_column = qids_vis_1 + qids_vis_2 + qids_vis_3 + qids_vis_4 + qids_vis_5
+    madrs_vis_1 = ecrf_df.loc['madrs_vis_1'].tolist()
+    madrs_vis_2 = [np.nan] * 20
+    madrs_vis_3 = ecrf_df.loc['madrs_vis_3'].tolist()
+    madrs_vis_4 = [np.nan] * 20
+    madrs_vis_5 = [np.nan] * 20
+    madrs_column = madrs_vis_1 + madrs_vis_2 + madrs_vis_3 + madrs_vis_4 + madrs_vis_5
+    gad_vis_1 = ecrf_df.loc['gad_vis_1'].tolist()
+    gad_vis_2 = [np.nan] * 20
+    gad_vis_3 = ecrf_df.loc['gad_vis_3'].tolist()
+    gad_vis_4 = [np.nan] * 20
+    gad_vis_5 = [np.nan] * 20
+    gad_column = gad_vis_1 + gad_vis_2 + gad_vis_3 + gad_vis_4 + gad_vis_5
+    panas_pos_vis_1 = ecrf_df.loc['panas_pos_vis_1'].tolist()
+    panas_pos_vis_2 = [np.nan] * 20
+    panas_pos_vis_3 = ecrf_df.loc['panas_pos_vis_3'].tolist()
+    panas_pos_vis_4 = [np.nan] * 20
+    panas_pos_vis_5 = [np.nan] * 20
+    panas_pos_column = panas_pos_vis_1 + panas_pos_vis_2 + panas_pos_vis_3 + panas_pos_vis_4 + panas_pos_vis_5
+    panas_neg_vis_1 = ecrf_df.loc['panas_neg_vis_1'].tolist()
+    panas_neg_vis_2 = [np.nan] * 20
+    panas_neg_vis_3 = ecrf_df.loc['panas_neg_vis_3'].tolist()
+    panas_neg_vis_4 = [np.nan] * 20
+    panas_neg_vis_5 = [np.nan] * 20
+    panas_neg_column = panas_neg_vis_1 + panas_neg_vis_2 + panas_neg_vis_3 + panas_neg_vis_4 + panas_neg_vis_5
+    rqmgp_df['p_id'] = p_id_column
+    rqmgp_df['visit'] = visit_column
+    rqmgp_df['intervention'] = intervention_column
+    rqmgp_df['rosenberg'] = rosenberg_column
+    rqmgp_df['qids'] = qids_column
+    rqmgp_df['madrs'] = madrs_column
+    rqmgp_df['gad'] = gad_column
+    rqmgp_df['panas_pos'] = panas_pos_column
+    rqmgp_df['panas_neg'] = panas_neg_column
+
+    rosenberg_df = rqmgp_df.dropna(subset=['rosenberg'])
+    visits = ['1', '2', '3', '4', '5']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis2_inta', 'vis3_inta', 'vis4_inta', 'vis5_inta', 'vis1_intb', 'vis2_intb', 'vis3_intb', 'vis4_intb', 'vis5_intb']
+    rosenberg_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = rosenberg_df[(rosenberg_df['visit'] == visit) & (rosenberg_df['intervention'] == intervention)]['rosenberg'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # rosenberg_df <- as.data.frame(rosenberg_df)
+    # model <- lmer(rosenberg~visit*intervention + (1|p_id), data = rosenberg_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("Rosenberg LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # emmeans_results <- emmeans(model, pairwise ~ visit)
+    # print(summary(emmeans_results))
+    # } else {
+    # print("Rosenberg LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['rosenberg_df'] = pandas2ri.py2rpy(rosenberg_df)
+    # result = r(r_script)
+    # print(result)
+
+    data = {
+        'visit': [1, 2, 3, 4, 5] * 2,
+        'intervention': ['A'] * 5 + ['B'] * 5,
+        'mean': [
+            rosenberg_stats_df.loc['vis1_inta', 'mean'], rosenberg_stats_df.loc['vis2_inta', 'mean'], rosenberg_stats_df.loc['vis3_inta', 'mean'],
+            rosenberg_stats_df.loc['vis4_inta', 'mean'], rosenberg_stats_df.loc['vis5_inta', 'mean'], 
+            rosenberg_stats_df.loc['vis1_intb', 'mean'], rosenberg_stats_df.loc['vis2_intb', 'mean'], rosenberg_stats_df.loc['vis3_intb', 'mean'], 
+            rosenberg_stats_df.loc['vis4_intb', 'mean'], rosenberg_stats_df.loc['vis5_intb', 'mean'], 
+        ],
+        'std_error': [
+            rosenberg_stats_df.loc['vis1_inta', 'std_error'], rosenberg_stats_df.loc['vis2_inta', 'std_error'], rosenberg_stats_df.loc['vis3_inta', 'std_error'], 
+            rosenberg_stats_df.loc['vis4_inta', 'std_error'], rosenberg_stats_df.loc['vis5_inta', 'std_error'], 
+            rosenberg_stats_df.loc['vis1_intb', 'std_error'], rosenberg_stats_df.loc['vis2_intb', 'std_error'], rosenberg_stats_df.loc['vis3_intb', 'std_error'], 
+            rosenberg_stats_df.loc['vis4_intb', 'std_error'], rosenberg_stats_df.loc['vis5_intb', 'std_error'], 
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    rosenberg_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + labs(title='Rosenberg Scores Across Study Visits',
+                x='Visit',
+                y='Rosenberg Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[18,28])
+            )
+    rosenberg_plot = rosenberg_plot + annotate("text", x=2, y=max(plot_data['mean']) + 2.5, label="*", size=16, color="black") + \
+        annotate("segment", x=1, xend=3, y=max(plot_data['mean']) +2.25, yend=max(plot_data['mean']) + 2.25, color="black") + \
+            annotate("text", x=2.5, y=max(plot_data['mean']) + 3.5, label="*", size=16, color="black") + \
+                annotate("segment", x=2, xend=3, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black")
+    rosenberg_plot.save('group/behavioural/rosenberg_plot.png')
+
+    qids_df = rqmgp_df.dropna(subset=['qids'])
+    visits = ['1', '3', '4', '5']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis4_inta', 'vis5_inta', 'vis1_intb', 'vis3_intb', 'vis4_intb', 'vis5_intb']
+    qids_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = qids_df[(qids_df['visit'] == visit) & (qids_df['intervention'] == intervention)]['qids'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+    
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # qids_df <- as.data.frame(qids_df)
+    # model <- lmer(qids~visit*intervention + (1|p_id), data = qids_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("QIDS LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # emmeans_results <- emmeans(model, pairwise ~ visit)
+    # print(summary(emmeans_results))
+    # } else {
+    # print("QIDS LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['qids_df'] = pandas2ri.py2rpy(qids_df)
+    # result = r(r_script)
+    # print(result)
+
+    data = {
+        'visit': [1, 2, 3, 4, 5] * 2,
+        'intervention': ['A'] * 5 + ['B'] * 5,
+        'mean': [
+            qids_stats_df.loc['vis1_inta', 'mean'], np.nan, qids_stats_df.loc['vis3_inta', 'mean'], 
+            qids_stats_df.loc['vis4_inta', 'mean'], qids_stats_df.loc['vis5_inta', 'mean'], 
+            qids_stats_df.loc['vis1_intb', 'mean'], np.nan, qids_stats_df.loc['vis3_intb', 'mean'], 
+            qids_stats_df.loc['vis4_intb', 'mean'], qids_stats_df.loc['vis5_intb', 'mean'], 
+        ],
+        'std_error': [
+            qids_stats_df.loc['vis1_inta', 'std_error'], np.nan, qids_stats_df.loc['vis3_inta', 'std_error'], 
+            qids_stats_df.loc['vis4_inta', 'std_error'], qids_stats_df.loc['vis5_inta', 'std_error'], 
+            qids_stats_df.loc['vis1_intb', 'std_error'], np.nan, qids_stats_df.loc['vis3_intb', 'std_error'], 
+            qids_stats_df.loc['vis4_intb', 'std_error'], qids_stats_df.loc['vis5_intb', 'std_error'], 
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data_line = plot_data[plot_data['visit'] != 2]
+    qids_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention'))
+            + geom_line(data=plot_data_line, size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + labs(title='QIDS Scores Across Study Visits',
+                x='Visit',
+                y='QIDS Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[8,20], breaks=[8,10,12,14,16,18,20])
+            )
+    qids_plot = qids_plot + annotate("text", x=2, y=max(plot_data['mean']) + 2.5, label="**", size=16, color="black") + \
+        annotate("segment", x=1, xend=3, y=max(plot_data['mean']) +2.25, yend=max(plot_data['mean']) + 2.25, color="black") + \
+            annotate("text", x=2.5, y=max(plot_data['mean']) + 3.5, label="***", size=16, color="black") + \
+                annotate("segment", x=1, xend=4, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black") + \
+                    annotate("text", x=3, y=max(plot_data['mean']) + 4.5, label="***", size=16, color="black") + \
+                        annotate("segment", x=1, xend=5, y=max(plot_data['mean']) +4.25, yend=max(plot_data['mean']) + 4.25, color="black")
+    qids_plot.save('group/behavioural/qids_plot.png')
+
+    madrs_df = rqmgp_df.dropna(subset=['madrs'])
+    visits = ['1', '3']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
+    madrs_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = madrs_df[(madrs_df['visit'] == visit) & (madrs_df['intervention'] == intervention)]['madrs'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # madrs_df <- as.data.frame(madrs_df)
+    # model <- lmer(madrs~visit*intervention + (1|p_id), data = madrs_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("MADRS LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("MADRS LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['madrs_df'] = pandas2ri.py2rpy(madrs_df)
+    # result = r(r_script)
+    # print(result)
+
+    data = {
+        'visit': [1, 3] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            madrs_stats_df.loc['vis1_inta', 'mean'], madrs_stats_df.loc['vis3_inta', 'mean'],
+            madrs_stats_df.loc['vis1_intb', 'mean'], madrs_stats_df.loc['vis3_intb', 'mean']
+        ],
+        'std_error': [
+            madrs_stats_df.loc['vis1_inta', 'std_error'], madrs_stats_df.loc['vis3_inta', 'std_error'], 
+            madrs_stats_df.loc['vis1_intb', 'std_error'], madrs_stats_df.loc['vis3_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['visit'] = pd.Categorical(
+        plot_data['visit'], categories=[1, 3], ordered=True)
+    madrs_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Visit')
+            + labs(title='MADRS Scores Across Study Visits',
+                x='Visit',
+                y='MADRS Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[16,32])
+            )
+    madrs_plot = madrs_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="***", size=16, color="black") + \
+        annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
+    madrs_plot.save('group/behavioural/madrs_plot.png')
+
+    gad_df = rqmgp_df.dropna(subset=['gad'])
+    visits = ['1', '3']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
+    gad_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = gad_df[(gad_df['visit'] == visit) & (gad_df['intervention'] == intervention)]['gad'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # gad_df <- as.data.frame(gad_df)
+    # model <- lmer(gad~visit*intervention + (1|p_id), data = gad_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("GAD LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("GAD LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['gad_df'] = pandas2ri.py2rpy(gad_df)
+    # result = r(r_script)
+    # print(result)
+
+    data = {
+        'visit': [1, 3] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            gad_stats_df.loc['vis1_inta', 'mean'], gad_stats_df.loc['vis3_inta', 'mean'],
+            gad_stats_df.loc['vis1_intb', 'mean'], gad_stats_df.loc['vis3_intb', 'mean']
+        ],
+        'std_error': [
+            gad_stats_df.loc['vis1_inta', 'std_error'], gad_stats_df.loc['vis3_inta', 'std_error'], 
+            gad_stats_df.loc['vis1_intb', 'std_error'], gad_stats_df.loc['vis3_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['visit'] = pd.Categorical(
+        plot_data['visit'], categories=[1, 3], ordered=True)
+    gad_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Visit')
+            + labs(title='GAD Scores Across Study Visits',
+                x='Visit',
+                y='GAD Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[4,12])
+            )
+    gad_plot.save('group/behavioural/gad_plot.png')
+
+    panas_pos_df = rqmgp_df.dropna(subset=['panas_pos'])
+    visits = ['1', '3']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
+    panas_pos_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = panas_pos_df[(panas_pos_df['visit'] == visit) & (panas_pos_df['intervention'] == intervention)]['panas_pos'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # panas_pos_df <- as.data.frame(panas_pos_df)
+    # model <- lmer(panas_pos~visit*intervention + (1|p_id), data = panas_pos_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("PANAS Positive LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("PANAS Positive LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['panas_pos_df'] = pandas2ri.py2rpy(panas_pos_df)
+    # result = r(r_script)
+    # print(result)
+
+    data = {
+        'visit': [1, 3] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            panas_pos_stats_df.loc['vis1_inta', 'mean'], panas_pos_stats_df.loc['vis3_inta', 'mean'],
+            panas_pos_stats_df.loc['vis1_intb', 'mean'], panas_pos_stats_df.loc['vis3_intb', 'mean']
+        ],
+        'std_error': [
+            panas_pos_stats_df.loc['vis1_inta', 'std_error'], panas_pos_stats_df.loc['vis3_inta', 'std_error'], 
+            panas_pos_stats_df.loc['vis1_intb', 'std_error'], panas_pos_stats_df.loc['vis3_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['visit'] = pd.Categorical(
+        plot_data['visit'], categories=[1, 3], ordered=True)
+    panas_pos_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Visit')
+            + labs(title='PANAS Positive Scores Across Study Visits',
+                x='Visit',
+                y='PANAS Positive Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[18,28])
+            )
+    panas_pos_plot = panas_pos_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="*", size=16, color="black") + \
+        annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
+    panas_pos_plot.save('group/behavioural/panas_pos_plot.png')
+
+    panas_neg_df = rqmgp_df.dropna(subset=['panas_neg'])
+    visits = ['1', '3']
+    interventions = ['a', 'b']
+    columns = ['vals', 'mean', 'std_error', 'shap_p']
+    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
+    panas_neg_stats_df = pd.DataFrame(columns=columns, index=index)
+    for visit in visits:
+        for intervention in interventions:
+            vals = panas_neg_df[(panas_neg_df['visit'] == visit) & (panas_neg_df['intervention'] == intervention)]['panas_neg'].tolist()
+            mean = np.mean(vals)
+            std_error = np.std(vals) / np.sqrt(len(vals))
+            _, shap_p = stats.shapiro(vals)
+            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
+            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
+            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
+            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # panas_neg_df <- as.data.frame(panas_neg_df)
+    # model <- lmer(panas_neg~visit*intervention + (1|p_id), data = panas_neg_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("PANAS Negative LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("PANAS Negative LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['panas_neg_df'] = pandas2ri.py2rpy(panas_neg_df)
+    # result = r(r_script)
+    # print(result)
+
+    data = {
+        'visit': [1, 3] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            panas_neg_stats_df.loc['vis1_inta', 'mean'], panas_neg_stats_df.loc['vis3_inta', 'mean'],
+            panas_neg_stats_df.loc['vis1_intb', 'mean'], panas_neg_stats_df.loc['vis3_intb', 'mean']
+        ],
+        'std_error': [
+            panas_neg_stats_df.loc['vis1_inta', 'std_error'], panas_neg_stats_df.loc['vis3_inta', 'std_error'], 
+            panas_neg_stats_df.loc['vis1_intb', 'std_error'], panas_neg_stats_df.loc['vis3_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['visit'] = pd.Categorical(
+        plot_data['visit'], categories=[1, 3], ordered=True)
+    panas_neg_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Visit')
+            + labs(title='PANAS Negative Scores Across Study Visits',
+                x='Visit',
+                y='PANAS Negative Score',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[20,30])
+            )
+    panas_neg_plot.save('group/behavioural/panas_neg_plot.png')
+
+    # Step 4: Run LMMs of Memory Intensity Ratings.
+    columns = ['p_id', 'time', 'intervention', 'guilt_rating', 'indignation_rating']
+    mem_intensity_df = pd.DataFrame(columns=columns)
+    p_id_column = participants * 2
+    time_column = ['pre'] * 20 + ['post'] * 20
+    intervention_values = ecrf_df.loc['intervention'].tolist()
+    intervention_column = list(intervention_values) * 2
+    pre_memory_intensity_guilt_1 = ecrf_df.loc['pre_memory_intensity_guilt_1'].tolist()
+    pre_memory_intensity_guilt_2 = ecrf_df.loc['pre_memory_intensity_guilt_2'].tolist()
+    pre_memory_intensity_indignation_1 = ecrf_df.loc['pre_memory_intensity_indignation_1'].tolist()
+    pre_memory_intensity_indignation_2 = ecrf_df.loc['pre_memory_intensity_indignation_2'].tolist()
+    post_memory_intensity_guilt_1 = ecrf_df.loc['post_memory_intensity_guilt_1'].tolist()
+    post_memory_intensity_guilt_2 = ecrf_df.loc['post_memory_intensity_guilt_2'].tolist()
+    post_memory_intensity_indignation_1 = ecrf_df.loc['post_memory_intensity_indignation_1'].tolist()
+    post_memory_intensity_indignation_2 = ecrf_df.loc['post_memory_intensity_indignation_2'].tolist()
+    pre_guilt = [(a + b) / 2 for a, b in zip(pre_memory_intensity_guilt_1, pre_memory_intensity_guilt_2)]
+    pre_indignation = [(a + b) / 2 for a, b in zip(pre_memory_intensity_indignation_1, pre_memory_intensity_indignation_2)]
+    post_guilt = [(a + b) / 2 for a, b in zip(post_memory_intensity_guilt_1, post_memory_intensity_guilt_2)]
+    post_indignation = [(a + b) / 2 for a, b in zip(post_memory_intensity_indignation_1, post_memory_intensity_indignation_2)]
+    guilt_rating_column = pre_guilt + post_guilt
+    indignation_rating_column = pre_indignation +  post_indignation
+    mem_intensity_df['p_id'] = p_id_column
+    mem_intensity_df['time'] = time_column
+    mem_intensity_df['intervention'] = intervention_column
+    mem_intensity_df['guilt_rating'] = guilt_rating_column
+    mem_intensity_df['indignation_rating'] = indignation_rating_column
+
+    time = ['pre', 'post']
+    interventions = ['a', 'b']
+    columns = ['rating', 'mean', 'std_error', 'shap_p']
+    index = ['pre_inta', 'post_inta', 'pre_intb', 'post_intb']
+    guilt_mem_intensity_stats_df = pd.DataFrame(columns=columns, index=index)
+    for item in time:
+        for intervention in interventions:
+            ratings = mem_intensity_df[(mem_intensity_df['time'] == item) & (mem_intensity_df['intervention'] == intervention)]['guilt_rating'].tolist()
+            mean = np.mean(ratings)
+            std_error = np.std(ratings) / np.sqrt(len(ratings))
+            _, shap_p = stats.shapiro(vals)
+            guilt_mem_intensity_stats_df.loc[f'{item}_int{intervention}', 'rating'] = ratings
+            guilt_mem_intensity_stats_df.loc[f'{item}_int{intervention}', 'mean'] = mean
+            guilt_mem_intensity_stats_df.loc[f'{item}_int{intervention}', 'std_error'] = std_error
+            guilt_mem_intensity_stats_df.loc[f'{item}_int{intervention}', 'shap_p'] = shap_p
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # mem_intensity_df <- as.data.frame(mem_intensity_df)
+    # model <- lmer(guilt_rating~time*intervention + (1|p_id), data = mem_intensity_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("Guilt Memory Intensity LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("Guilt Memory Intensity LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['mem_intensity_df'] = pandas2ri.py2rpy(mem_intensity_df)
+    # result = r(r_script)
+    # print(result)
+
+    data = {
+        'time': ['Pre-neurofeedback', 'Post-neurofeedback'] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            guilt_mem_intensity_stats_df.loc['pre_inta', 'mean'], guilt_mem_intensity_stats_df.loc['post_inta', 'mean'],
+            guilt_mem_intensity_stats_df.loc['pre_intb', 'mean'], guilt_mem_intensity_stats_df.loc['post_intb', 'mean']
+        ],
+        'std_error': [
+            guilt_mem_intensity_stats_df.loc['pre_inta', 'std_error'], guilt_mem_intensity_stats_df.loc['post_inta', 'std_error'], 
+            guilt_mem_intensity_stats_df.loc['pre_intb', 'std_error'], guilt_mem_intensity_stats_df.loc['post_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['time'] = pd.Categorical(
+        plot_data['time'], categories=['Pre-neurofeedback', 'Post-neurofeedback'], ordered=True)
+    guilt_mem_intensity_plot = (ggplot(plot_data, aes(x='time', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Time')
+            + labs(title='Guilt Memory Intensity Ratings Before and After Neurofeedback',
+                x='Time',
+                y='Mean Guilt Memory Intensity Rating',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[5,7])
+            )
+    print(guilt_mem_intensity_plot)
+    guilt_mem_intensity_plot.save('guilt_mem_intensity_plot.png')
+
+    time = ['pre', 'post']
+    interventions = ['a', 'b']
+    columns = ['rating', 'mean', 'std_error', 'shap_p']
+    index = ['pre_inta', 'post_inta', 'pre_intb', 'post_intb']
+    indignation_mem_intensity_stats_df = pd.DataFrame(columns=columns, index=index)
+    for item in time:
+        for intervention in interventions:
+            ratings = mem_intensity_df[(mem_intensity_df['time'] == item) & (mem_intensity_df['intervention'] == intervention)]['indignation_rating'].tolist()
+            mean = np.mean(ratings)
+            std_error = np.std(ratings) / np.sqrt(len(ratings))
+            _, shap_p = stats.shapiro(vals)
+            indignation_mem_intensity_stats_df.loc[f'{item}_int{intervention}', 'rating'] = ratings
+            indignation_mem_intensity_stats_df.loc[f'{item}_int{intervention}', 'mean'] = mean
+            indignation_mem_intensity_stats_df.loc[f'{item}_int{intervention}', 'std_error'] = std_error
+            indignation_mem_intensity_stats_df.loc[f'{item}_int{intervention}', 'shap_p'] = shap_p
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # mem_intensity_df <- as.data.frame(mem_intensity_df)
+    # model <- lmer(indignation_rating~time*intervention + (1|p_id), data = mem_intensity_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("Indignation Memory Intensity LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("Indignation Memory Intensity LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['mem_intensity_df'] = pandas2ri.py2rpy(mem_intensity_df)
+    # result = r(r_script)
+    # print(result)
+
+    data = {
+        'time': ['Pre-neurofeedback', 'Post-neurofeedback'] * 2,
+        'intervention': ['A'] * 2 + ['B'] * 2,
+        'mean': [
+            indignation_mem_intensity_stats_df.loc['pre_inta', 'mean'], indignation_mem_intensity_stats_df.loc['post_inta', 'mean'],
+            indignation_mem_intensity_stats_df.loc['pre_intb', 'mean'], indignation_mem_intensity_stats_df.loc['post_intb', 'mean']
+        ],
+        'std_error': [
+            indignation_mem_intensity_stats_df.loc['pre_inta', 'std_error'], indignation_mem_intensity_stats_df.loc['post_inta', 'std_error'], 
+            indignation_mem_intensity_stats_df.loc['pre_intb', 'std_error'], indignation_mem_intensity_stats_df.loc['post_intb', 'std_error']
+        ]
+    }
+    plot_data = pd.DataFrame(data)
+    plot_data['time'] = pd.Categorical(
+        plot_data['time'], categories=['Pre-neurofeedback', 'Post-neurofeedback'], ordered=True)
+    indignation_mem_intensity_plot = (ggplot(plot_data, aes(x='time', y='mean', color='intervention', group='intervention'))
+            + geom_line(size=2)
+            + geom_point(size=4)
+            + geom_errorbar(aes(ymin='mean - std_error',
+                            ymax='mean + std_error'), width=0.2)
+            + scale_x_discrete(name='Time')
+            + labs(title='Indignation Memory Intensity Ratings Before and After Neurofeedback',
+                x='Time',
+                y='Mean Indignation Memory Intensity Rating',
+                color='Intervention')
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0), limits=[5,7])
+            )
+    print(indignation_mem_intensity_plot)
+    indignation_mem_intensity_plot.save('indignation_mem_intensity_plot.png')
+
+#endregion
+
+#region 6) FMRI PREPARATION.
 
 answer3 = input("Would you like to convert raw DICOMs to BIDS format? (y/n)\n")
 if answer3 == 'y':
@@ -326,7 +1422,7 @@ if answer3 == 'y':
                     print(f"{fieldmap_json} already labelled for {p_id}. Skipping process.")
 #endregion
 
-#region FMRI PREPROCESSING.
+#region 7) FMRI PREPROCESSING.
 
 answer4 = input("Would you like to execute fMRI preprocessing? (y/n)\n")
 if answer4 == 'y':
@@ -351,9 +1447,9 @@ if answer4 == 'y':
                     print(f"{p_id} preproc folder does not exist.")
             group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
             if os.path.exists(group_preproc_folder):
-                print(f"Deleting {p_id} group/preproc folder...")
+                print(f"Deleting group/preproc folder...")
                 shutil.rmtree(group_preproc_folder)
-                print(f"{p_id} group/preproc folder successfully deleted.")
+                print(f"group/preproc folder successfully deleted.")
             else:
                 print(f"{p_id} group/preproc folder does not exist.")
         else:
@@ -1082,216 +2178,11 @@ if answer4 == 'y':
 
 #endregion
 
-#region THERMOMETER ANALYSIS.
-
-answer5 = input("Would you like to execute thermometer analysis? (y/n)\n")
-if answer5 == 'y':
-
-
-
-    
-    # Step 1: Access Run 2 and 3 tbv_script thermometer files and extract relevant data into dataframe.
-    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    def find_second_and_third_largest(files):
-        sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]), reverse=True)
-        second_largest_path = os.path.join(folder_path, sorted_files[-2])
-        third_largest_path = os.path.join(folder_path, sorted_files[-3])
-        return second_largest_path, third_largest_path
-    df = pd.DataFrame(columns=participants)
-    for x in participants:
-        analysis_folder = os.path.join(os.getcwd(), f'{x}', 'analysis')
-        if not os.path.exists(analysis_folder):
-            subprocess.run(['mkdir', f'{x}/analysis'])
-        therm_folder = os.path.join(os.getcwd(), f'{x}', 'analysis', 'therm')
-        if not os.path.exists(therm_folder):
-            subprocess.run(['mkdir', f'{x}/analysis/therm'])
-        group_folder = os.path.join(os.getcwd(), 'group')
-        if not os.path.exists(group_folder):
-            subprocess.run(['mkdir', 'group'])
-        group_therm_folder = os.path.join(os.getcwd(), 'group', 'therm')
-        if not os.path.exists(group_therm_folder):
-            subprocess.run(['mkdir', 'group', 'therm'])
-        folder_path = os.path.join(os.getcwd(), f'{x}', 'data', 'neurofeedback', 'tbv_script', 'data')
-        files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
-        if len(files) == 4:
-            run2_path, run3_path = find_second_and_third_largest(files)
-        else:
-            print("Error: The folder should contain exactly 4 files.")
-        def process_file(file_path):
-            if os.path.exists(file_path):
-                with open(file_path, 'r') as file:
-                    lines = file.readlines()[12:]
-                current_value = None
-                value_counter = {}
-                for line in lines:
-                    values = line.strip().split(',')
-                    if values[2] != current_value:
-                        current_value = values[2]
-                        value_counter[current_value] = value_counter.get(current_value, 0) + 1
-                    condition = f"{current_value.lower()}{value_counter[current_value]:02d}"
-                    if 'rest' in condition:
-                        condition = condition.replace('rest', 'sub')
-                    if 'guilt first' in condition:
-                        condition = condition.replace('guilt first', 'guilt_first')
-                    if 'guilt second' in condition:
-                        condition = condition.replace('guilt second', 'guilt_second')
-                    if 'indignation first' in condition:
-                        condition = condition.replace('indignation first', 'indig_first')
-                    if 'indignation second' in condition:
-                        condition = condition.replace('indignation second', 'indig_second')
-                    row_header = 'r' + values[1] + '_' + condition + '_' + 'vol' + values[3] + '_val'
-                    feedback_lvl_header = 'r' + values[1] + '_' + condition + '_' + 'vol' + values[3] + '_lvl'
-                    value = float(values[8])
-                    feedback_lvl = float(values[9])
-                    if row_header not in df.index:
-                        df.loc[row_header] = [None] * len(participants)
-                    df.at[row_header, f'{x}'] = value
-                    if feedback_lvl_header not in df.index:
-                        df.loc[feedback_lvl_header] = [None] * len(participants)
-                    df.at[feedback_lvl_header, f'{x}'] = feedback_lvl
-        process_file(run2_path)
-        process_file(run3_path)
-    output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/therm/therm_data.xlsx'
-    df.to_excel(output_excel_path, index=True)
-    
-    # Step 2: Access eCRF document and extract relevant data into dataframe.
-    warnings.simplefilter("ignore", UserWarning)
-    df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'intervention', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3']
-    data_df = pd.DataFrame(index = df_row_headers)
-    ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
-    password = 'SussexDepNF22'
-    df_values_dict = {}
-    location_dict = {
-        'P004_vis_1_locations': {'dob': (77, 3), 'gender': (81, 3),  'handedness': (82, 3), 'exercise': (83, 3), 'education': (84, 3), 'work_status': (85, 3), 'panic': (132, 3), 'agoraphobia': (134, 3), 'social_anx': (135, 3), 'ocd': (137, 3), 'ptsd': (140, 3), 'gad': (141, 3), 'comorbid_anx': (142, 3), 'msm': (120, 3), 'psi_sociotropy': (151, 3), 'psi_autonomy': (152, 3), 'raads': (155, 3), 'panas_pos_vis_1': (161, 3), 'panas_neg_vis_1': (162, 3), 'qids_vis_1': (172, 3), 'gad_vis_1': (173, 3), 'rosenberg_vis_1': (174, 3), 'madrs_vis_1': (185, 3)},
-        'P004_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 3), 'pre_memory_intensity_guilt_2': (43, 3), 'pre_memory_intensity_indignation_1': (49, 3), 'pre_memory_intensity_indignation_2': (54, 3), 'intervention': (78, 3), 'techniques_guilt': (84, 3), 'techniques_indignation': (85, 3), 'perceived_success_guilt': (86, 3), 'perceived_success_indignation': (87, 3), 'post_memory_intensity_guilt_1': (88, 3), 'post_memory_intensity_guilt 2': (92, 3), 'post_memory_intensity_indignation_1': (97, 3), 'post_memory_indignation_2': (101, 3), 'rosenberg_vis_2': (104, 3)},
-        'P004_vis_3_locations': {'panas_pos_vis_3': (36, 3), 'panas_neg_vis_3': (37, 3), 'qids_vis_3': (47, 3), 'gad_vis_3': (48, 3), 'rosenberg_vis_3': (49, 3), 'madrs_vis_3': (60, 3)},
-        
-        'P006_vis_1_locations': {'dob': (77, 4), 'gender': (81, 4),  'handedness': (82, 4), 'exercise': (83, 4), 'education': (84, 4), 'work_status': (85, 4), 'panic': (132, 4), 'agoraphobia': (134, 4), 'social_anx': (135, 4), 'ocd': (137, 4), 'ptsd': (140, 4), 'gad': (141, 4), 'comorbid_anx': (142, 4), 'msm': (120, 4), 'psi_sociotropy': (151, 4), 'psi_autonomy': (152, 4), 'raads': (155, 4), 'panas_pos_vis_1': (161, 4), 'panas_neg_vis_1': (162, 4), 'qids_vis_1': (172, 4), 'gad_vis_1': (173, 4), 'rosenberg_vis_1': (174, 4), 'madrs_vis_1': (185, 4)},
-        'P006_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 4), 'pre_memory_intensity_guilt_2': (43, 4), 'pre_memory_intensity_indignation_1': (49, 4), 'pre_memory_intensity_indignation_2': (54, 4), 'intervention': (78, 4), 'techniques_guilt': (84, 4), 'techniques_indignation': (85, 4), 'perceived_success_guilt': (86, 4), 'perceived_success_indignation': (87, 4), 'post_memory_intensity_guilt_1': (88, 4), 'post_memory_intensity_guilt 2': (92, 4), 'post_memory_intensity_indignation_1': (97, 4), 'post_memory_indignation_2': (101, 4), 'rosenberg_vis_2': (104, 4)},
-        'P006_vis_3_locations': {'panas_pos_vis_3': (36, 4), 'panas_neg_vis_3': (37, 4), 'qids_vis_3': (47, 4), 'gad_vis_3': (48, 4), 'rosenberg_vis_3': (49, 4), 'madrs_vis_3': (60, 4)},
-    
-        'P020_vis_1_locations': {'dob': (77, 7), 'gender': (81, 7),  'handedness': (82, 7), 'exercise': (83, 7), 'education': (84, 7), 'work_status': (85, 7), 'panic': (132, 7), 'agoraphobia': (134, 7), 'social_anx': (135, 7), 'ocd': (137, 7), 'ptsd': (140, 7), 'gad': (141, 7), 'comorbid_anx': (142, 7), 'msm': (120, 7), 'psi_sociotropy': (151, 7), 'psi_autonomy': (152, 7), 'raads': (155, 7), 'panas_pos_vis_1': (161, 7), 'panas_neg_vis_1': (162, 7), 'qids_vis_1': (172, 7), 'gad_vis_1': (173, 7), 'rosenberg_vis_1': (174, 7), 'madrs_vis_1': (185, 7)},
-        'P020_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 6), 'pre_memory_intensity_guilt_2': (43, 6), 'pre_memory_intensity_indignation_1': (49, 6), 'pre_memory_intensity_indignation_2': (54, 6), 'intervention': (78, 6), 'techniques_guilt': (84, 6), 'techniques_indignation': (85, 6), 'perceived_success_guilt': (86, 6), 'perceived_success_indignation': (87, 6), 'post_memory_intensity_guilt_1': (88, 6), 'post_memory_intensity_guilt 2': (92, 6), 'post_memory_intensity_indignation_1': (97, 6), 'post_memory_indignation_2': (101, 6), 'rosenberg_vis_2': (104, 6)},
-        'P020_vis_3_locations': {'panas_pos_vis_3': (36, 6), 'panas_neg_vis_3': (37, 6), 'qids_vis_3': (47, 6), 'gad_vis_3': (48, 6), 'rosenberg_vis_3': (49, 6), 'madrs_vis_3': (60, 6)},
-    
-        'P030_vis_1_locations': {'dob': (77, 6), 'gender': (81, 6),  'handedness': (82, 6), 'exercise': (83, 6), 'education': (84, 6), 'work_status': (85, 6), 'panic': (132, 6), 'agoraphobia': (134, 6), 'social_anx': (135, 6), 'ocd': (137, 6), 'ptsd': (140, 6), 'gad': (141, 6), 'comorbid_anx': (142, 6), 'msm': (120, 6), 'psi_sociotropy': (151, 6), 'psi_autonomy': (152, 6), 'raads': (155, 6), 'panas_pos_vis_1': (161, 6), 'panas_neg_vis_1': (162, 6), 'qids_vis_1': (172, 6), 'gad_vis_1': (173, 6), 'rosenberg_vis_1': (174, 6), 'madrs_vis_1': (185, 6)},
-        'P030_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 5), 'pre_memory_intensity_guilt_2': (43, 5), 'pre_memory_intensity_indignation_1': (49, 5), 'pre_memory_intensity_indignation_2': (54, 5), 'intervention': (78, 5), 'techniques_guilt': (84, 5), 'techniques_indignation': (85, 5), 'perceived_success_guilt': (86, 5), 'perceived_success_indignation': (87, 5), 'post_memory_intensity_guilt_1': (88, 5), 'post_memory_intensity_guilt 2': (92, 5), 'post_memory_intensity_indignation_1': (97, 5), 'post_memory_indignation_2': (101, 5), 'rosenberg_vis_2': (104, 5)},
-        'P030_vis_3_locations': {'panas_pos_vis_3': (36, 5), 'panas_neg_vis_3': (37, 5), 'qids_vis_3': (47, 5), 'gad_vis_3': (48, 5), 'rosenberg_vis_3': (49, 5), 'madrs_vis_3': (60, 5)},
-    
-        'P059_vis_1_locations': {'dob': (77, 23), 'gender': (81, 23),  'handedness': (82, 23), 'exercise': (83, 23), 'education': (84, 23), 'work_status': (85, 23), 'panic': (132, 23), 'agoraphobia': (134, 23), 'social_anx': (135, 23), 'ocd': (137, 23), 'ptsd': (140, 23), 'gad': (141, 23), 'comorbid_anx': (142, 23), 'msm': (120, 23), 'psi_sociotropy': (151, 23), 'psi_autonomy': (152, 23), 'raads': (155, 23), 'panas_pos_vis_1': (161, 23), 'panas_neg_vis_1': (162, 23), 'qids_vis_1': (172, 23), 'gad_vis_1': (173, 23), 'rosenberg_vis_1': (174, 23), 'madrs_vis_1': (185, 23)},
-        'P059_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 20), 'pre_memory_intensity_guilt_2': (43, 20), 'pre_memory_intensity_indignation_1': (49, 20), 'pre_memory_intensity_indignation_2': (54, 20), 'intervention': (78, 20), 'techniques_guilt': (84, 20), 'techniques_indignation': (85, 20), 'perceived_success_guilt': (86, 20), 'perceived_success_indignation': (87, 20), 'post_memory_intensity_guilt_1': (88, 20), 'post_memory_intensity_guilt 2': (92, 20), 'post_memory_intensity_indignation_1': (97, 20), 'post_memory_indignation_2': (101, 20), 'rosenberg_vis_2': (104, 20)},
-        'P059_vis_3_locations': {'panas_pos_vis_3': (36, 19), 'panas_neg_vis_3': (37, 19), 'qids_vis_3': (47, 19), 'gad_vis_3': (48, 19), 'rosenberg_vis_3': (49, 19), 'madrs_vis_3': (60, 19)},
-    
-        'P078_vis_1_locations': {'dob': (77, 9), 'gender': (81, 9),  'handedness': (82, 9), 'exercise': (83, 9), 'education': (84, 9), 'work_status': (85, 9), 'panic': (132, 9), 'agoraphobia': (134, 9), 'social_anx': (135, 9), 'ocd': (137, 9), 'ptsd': (140, 9), 'gad': (141, 9), 'comorbid_anx': (142, 9), 'msm': (120, 9), 'psi_sociotropy': (151, 9), 'psi_autonomy': (152, 9), 'raads': (155, 9), 'panas_pos_vis_1': (161, 9), 'panas_neg_vis_1': (162, 9), 'qids_vis_1': (172, 9), 'gad_vis_1': (173, 9), 'rosenberg_vis_1': (174, 9), 'madrs_vis_1': (185, 9)},
-        'P078_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 7), 'pre_memory_intensity_guilt_2': (43, 7), 'pre_memory_intensity_indignation_1': (49, 7), 'pre_memory_intensity_indignation_2': (54, 7), 'intervention': (78, 7), 'techniques_guilt': (84, 7), 'techniques_indignation': (85, 7), 'perceived_success_guilt': (86, 7), 'perceived_success_indignation': (87, 7), 'post_memory_intensity_guilt_1': (88, 7), 'post_memory_intensity_guilt 2': (92, 7), 'post_memory_intensity_indignation_1': (97, 7), 'post_memory_indignation_2': (101, 7), 'rosenberg_vis_2': (104, 7)},
-        'P078_vis_3_locations': {'panas_pos_vis_3': (36, 7), 'panas_neg_vis_3': (37, 7), 'qids_vis_3': (47, 7), 'gad_vis_3': (48, 7), 'rosenberg_vis_3': (49, 7), 'madrs_vis_3': (60, 7)},
-    
-        'P093_vis_1_locations': {'dob': (77, 11), 'gender': (81, 11),  'handedness': (82, 11), 'exercise': (83, 11), 'education': (84, 11), 'work_status': (85, 11), 'panic': (132, 11), 'agoraphobia': (134, 11), 'social_anx': (135, 11), 'ocd': (137, 11), 'ptsd': (140, 11), 'gad': (141, 11), 'comorbid_anx': (142, 11), 'msm': (120, 11), 'psi_sociotropy': (151, 11), 'psi_autonomy': (152, 11), 'raads': (155, 11), 'panas_pos_vis_1': (161, 11), 'panas_neg_vis_1': (162, 11), 'qids_vis_1': (172, 11), 'gad_vis_1': (173, 11), 'rosenberg_vis_1': (174, 11), 'madrs_vis_1': (185, 11)},
-        'P093_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 8), 'pre_memory_intensity_guilt_2': (43, 8), 'pre_memory_intensity_indignation_1': (49, 8), 'pre_memory_intensity_indignation_2': (54, 8), 'intervention': (78, 8), 'techniques_guilt': (84, 8), 'techniques_indignation': (85, 8), 'perceived_success_guilt': (86, 8), 'perceived_success_indignation': (87, 8), 'post_memory_intensity_guilt_1': (88, 8), 'post_memory_intensity_guilt 2': (92, 8), 'post_memory_intensity_indignation_1': (97, 8), 'post_memory_indignation_2': (101, 8), 'rosenberg_vis_2': (104, 8)},
-        'P093_vis_3_locations': {'panas_pos_vis_3': (36, 8), 'panas_neg_vis_3': (37, 8), 'qids_vis_3': (47, 8), 'gad_vis_3': (48, 8), 'rosenberg_vis_3': (49, 8), 'madrs_vis_3': (60, 8)},
-    
-        'P094_vis_1_locations': {'dob': (77, 12), 'gender': (81, 12),  'handedness': (82, 12), 'exercise': (83, 12), 'education': (84, 12), 'work_status': (85, 12), 'panic': (132, 12), 'agoraphobia': (134, 12), 'social_anx': (135, 12), 'ocd': (137, 12), 'ptsd': (140, 12), 'gad': (141, 12), 'comorbid_anx': (142, 12), 'msm': (120, 12), 'psi_sociotropy': (151, 12), 'psi_autonomy': (152, 12), 'raads': (155, 12), 'panas_pos_vis_1': (161, 12), 'panas_neg_vis_1': (162, 12), 'qids_vis_1': (172, 12), 'gad_vis_1': (173, 12), 'rosenberg_vis_1': (174, 12), 'madrs_vis_1': (185, 12)},
-        'P094_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 9), 'pre_memory_intensity_guilt_2': (43, 9), 'pre_memory_intensity_indignation_1': (49, 9), 'pre_memory_intensity_indignation_2': (54, 9), 'intervention': (78, 9), 'techniques_guilt': (84, 9), 'techniques_indignation': (85, 9), 'perceived_success_guilt': (86, 9), 'perceived_success_indignation': (87, 9), 'post_memory_intensity_guilt_1': (88, 9), 'post_memory_intensity_guilt 2': (92, 9), 'post_memory_intensity_indignation_1': (97, 9), 'post_memory_indignation_2': (101, 9), 'rosenberg_vis_2': (104, 9)},
-        'P094_vis_3_locations': {'panas_pos_vis_3': (36, 9), 'panas_neg_vis_3': (37, 9), 'qids_vis_3': (47, 9), 'gad_vis_3': (48, 9), 'rosenberg_vis_3': (49, 9), 'madrs_vis_3': (60, 9)},
-    
-        'P100_vis_1_locations': {'dob': (77, 13), 'gender': (81, 13),  'handedness': (82, 13), 'exercise': (83, 13), 'education': (84, 13), 'work_status': (85, 13), 'panic': (132, 13), 'agoraphobia': (134, 13), 'social_anx': (135, 13), 'ocd': (137, 13), 'ptsd': (140, 13), 'gad': (141, 13), 'comorbid_anx': (142, 13), 'msm': (120, 13), 'psi_sociotropy': (151, 13), 'psi_autonomy': (152, 13), 'raads': (155, 13), 'panas_pos_vis_1': (161, 13), 'panas_neg_vis_1': (162, 13), 'qids_vis_1': (172, 13), 'gad_vis_1': (173, 13), 'rosenberg_vis_1': (174, 13), 'madrs_vis_1': (185, 13)},
-        'P100_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 10), 'pre_memory_intensity_guilt_2': (43, 10), 'pre_memory_intensity_indignation_1': (49, 10), 'pre_memory_intensity_indignation_2': (54, 10), 'intervention': (78, 10), 'techniques_guilt': (84, 10), 'techniques_indignation': (85, 10), 'perceived_success_guilt': (86, 10), 'perceived_success_indignation': (87, 10), 'post_memory_intensity_guilt_1': (88, 10), 'post_memory_intensity_guilt 2': (92, 10), 'post_memory_intensity_indignation_1': (97, 10), 'post_memory_indignation_2': (101, 10), 'rosenberg_vis_2': (104, 10)},
-        'P100_vis_3_locations': {'panas_pos_vis_3': (36, 10), 'panas_neg_vis_3': (37, 10), 'qids_vis_3': (47, 10), 'gad_vis_3': (48, 10), 'rosenberg_vis_3': (49, 10), 'madrs_vis_3': (60, 10)},
-    
-        'P107_vis_1_locations': {'dob': (77, 14), 'gender': (81, 14),  'handedness': (82, 14), 'exercise': (83, 14), 'education': (84, 14), 'work_status': (85, 14), 'panic': (132, 14), 'agoraphobia': (134, 14), 'social_anx': (135, 14), 'ocd': (137, 14), 'ptsd': (140, 14), 'gad': (141, 14), 'comorbid_anx': (142, 14), 'msm': (120, 14), 'psi_sociotropy': (151, 14), 'psi_autonomy': (152, 14), 'raads': (155, 14), 'panas_pos_vis_1': (161, 14), 'panas_neg_vis_1': (162, 14), 'qids_vis_1': (172, 14), 'gad_vis_1': (173, 14), 'rosenberg_vis_1': (174, 14), 'madrs_vis_1': (185, 14)},
-        'P107_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 11), 'pre_memory_intensity_guilt_2': (43, 11), 'pre_memory_intensity_indignation_1': (49, 11), 'pre_memory_intensity_indignation_2': (54, 11), 'intervention': (78, 11), 'techniques_guilt': (84, 11), 'techniques_indignation': (85, 11), 'perceived_success_guilt': (86, 11), 'perceived_success_indignation': (87, 11), 'post_memory_intensity_guilt_1': (88, 11), 'post_memory_intensity_guilt 2': (92, 11), 'post_memory_intensity_indignation_1': (97, 11), 'post_memory_indignation_2': (101, 11), 'rosenberg_vis_2': (104, 11)},
-        'P107_vis_3_locations': {'panas_pos_vis_3': (36, 11), 'panas_neg_vis_3': (37, 11), 'qids_vis_3': (47, 11), 'gad_vis_3': (48, 11), 'rosenberg_vis_3': (49, 11), 'madrs_vis_3': (60, 11)},
-    
-        'P122_vis_1_locations': {'dob': (77, 17), 'gender': (81, 17),  'handedness': (82, 17), 'exercise': (83, 17), 'education': (84, 17), 'work_status': (85, 17), 'panic': (132, 17), 'agoraphobia': (134, 17), 'social_anx': (135, 17), 'ocd': (137, 17), 'ptsd': (140, 17), 'gad': (141, 17), 'comorbid_anx': (142, 17), 'msm': (120, 17), 'psi_sociotropy': (151, 17), 'psi_autonomy': (152, 17), 'raads': (155, 17), 'panas_pos_vis_1': (161, 17), 'panas_neg_vis_1': (162, 17), 'qids_vis_1': (172, 17), 'gad_vis_1': (173, 17), 'rosenberg_vis_1': (174, 17), 'madrs_vis_1': (185, 17)},
-        'P122_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 14), 'pre_memory_intensity_guilt_2': (43, 14), 'pre_memory_intensity_indignation_1': (49, 14), 'pre_memory_intensity_indignation_2': (54, 14), 'intervention': (78, 14), 'techniques_guilt': (84, 14), 'techniques_indignation': (85, 14), 'perceived_success_guilt': (86, 14), 'perceived_success_indignation': (87, 14), 'post_memory_intensity_guilt_1': (88, 14), 'post_memory_intensity_guilt 2': (92, 14), 'post_memory_intensity_indignation_1': (97, 14), 'post_memory_indignation_2': (101, 14), 'rosenberg_vis_2': (104, 14)},
-        'P122_vis_3_locations': {'panas_pos_vis_3': (36, 14), 'panas_neg_vis_3': (37, 14), 'qids_vis_3': (47, 14), 'gad_vis_3': (48, 14), 'rosenberg_vis_3': (49, 14), 'madrs_vis_3': (60, 14)},
-    
-        'P125_vis_1_locations': {'dob': (77, 18), 'gender': (81, 18),  'handedness': (82, 18), 'exercise': (83, 18), 'education': (84, 18), 'work_status': (85, 18), 'panic': (132, 18), 'agoraphobia': (134, 18), 'social_anx': (135, 18), 'ocd': (137, 18), 'ptsd': (140, 18), 'gad': (141, 18), 'comorbid_anx': (142, 18), 'msm': (120, 18), 'psi_sociotropy': (151, 18), 'psi_autonomy': (152, 18), 'raads': (155, 18), 'panas_pos_vis_1': (161, 18), 'panas_neg_vis_1': (162, 18), 'qids_vis_1': (172, 18), 'gad_vis_1': (173, 18), 'rosenberg_vis_1': (174, 18), 'madrs_vis_1': (185, 18)},
-        'P125_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 15), 'pre_memory_intensity_guilt_2': (43, 15), 'pre_memory_intensity_indignation_1': (49, 15), 'pre_memory_intensity_indignation_2': (54, 15), 'intervention': (78, 15), 'techniques_guilt': (84, 15), 'techniques_indignation': (85, 15), 'perceived_success_guilt': (86, 15), 'perceived_success_indignation': (87, 15), 'post_memory_intensity_guilt_1': (88, 15), 'post_memory_intensity_guilt 2': (92, 15), 'post_memory_intensity_indignation_1': (97, 15), 'post_memory_indignation_2': (101, 15), 'rosenberg_vis_2': (104, 15)},
-        'P125_vis_3_locations': {'panas_pos_vis_3': (36, 15), 'panas_neg_vis_3': (37, 15), 'qids_vis_3': (47, 15), 'gad_vis_3': (48, 15), 'rosenberg_vis_3': (49, 15), 'madrs_vis_3': (60, 15)},
-    
-        'P127_vis_1_locations': {'dob': (77, 16), 'gender': (81, 16),  'handedness': (82, 16), 'exercise': (83, 16), 'education': (84, 16), 'work_status': (85, 16), 'panic': (132, 16), 'agoraphobia': (134, 16), 'social_anx': (135, 16), 'ocd': (137, 16), 'ptsd': (140, 16), 'gad': (141, 16), 'comorbid_anx': (142, 16), 'msm': (120, 16), 'psi_sociotropy': (151, 16), 'psi_autonomy': (152, 16), 'raads': (155, 16), 'panas_pos_vis_1': (161, 16), 'panas_neg_vis_1': (162, 16), 'qids_vis_1': (172, 16), 'gad_vis_1': (173, 16), 'rosenberg_vis_1': (174, 16), 'madrs_vis_1': (185, 16)},
-        'P127_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 13), 'pre_memory_intensity_guilt_2': (43, 13), 'pre_memory_intensity_indignation_1': (49, 13), 'pre_memory_intensity_indignation_2': (54, 13), 'intervention': (78, 13), 'techniques_guilt': (84, 13), 'techniques_indignation': (85, 13), 'perceived_success_guilt': (86, 13), 'perceived_success_indignation': (87, 13), 'post_memory_intensity_guilt_1': (88, 13), 'post_memory_intensity_guilt 2': (92, 13), 'post_memory_intensity_indignation_1': (97, 13), 'post_memory_indignation_2': (101, 13), 'rosenberg_vis_2': (104, 13)},
-        'P127_vis_3_locations': {'panas_pos_vis_3': (36, 13), 'panas_neg_vis_3': (37, 13), 'qids_vis_3': (47, 13), 'gad_vis_3': (48, 13), 'rosenberg_vis_3': (49, 13), 'madrs_vis_3': (60, 13)},
-   
-        'P128_vis_1_locations': {'dob': (77, 15), 'gender': (81, 15),  'handedness': (82, 15), 'exercise': (83, 15), 'education': (84, 15), 'work_status': (85, 15), 'panic': (132, 15), 'agoraphobia': (134, 15), 'social_anx': (135, 15), 'ocd': (137, 15), 'ptsd': (140, 15), 'gad': (141, 15), 'comorbid_anx': (142, 15), 'msm': (120, 15), 'psi_sociotropy': (151, 15), 'psi_autonomy': (152, 15), 'raads': (155, 15), 'panas_pos_vis_1': (161, 15), 'panas_neg_vis_1': (162, 15), 'qids_vis_1': (172, 15), 'gad_vis_1': (173, 15), 'rosenberg_vis_1': (174, 15), 'madrs_vis_1': (185, 15)},
-        'P128_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 12), 'pre_memory_intensity_guilt_2': (43, 12), 'pre_memory_intensity_indignation_1': (49, 12), 'pre_memory_intensity_indignation_2': (54, 12), 'intervention': (78, 12), 'techniques_guilt': (84, 12), 'techniques_indignation': (85, 12), 'perceived_success_guilt': (86, 12), 'perceived_success_indignation': (87, 12), 'post_memory_intensity_guilt_1': (88, 12), 'post_memory_intensity_guilt 2': (92, 12), 'post_memory_intensity_indignation_1': (97, 12), 'post_memory_indignation_2': (101, 12), 'rosenberg_vis_2': (104, 12)},
-        'P128_vis_3_locations': {'panas_pos_vis_3': (36, 12), 'panas_neg_vis_3': (37, 12), 'qids_vis_3': (47, 12), 'gad_vis_3': (48, 12), 'rosenberg_vis_3': (49, 12), 'madrs_vis_3': (60, 12)},
-    
-        'P136_vis_1_locations': {'dob': (77, 19), 'gender': (81, 19),  'handedness': (82, 19), 'exercise': (83, 19), 'education': (84, 19), 'work_status': (85, 19), 'panic': (132, 19), 'agoraphobia': (134, 19), 'social_anx': (135, 19), 'ocd': (137, 19), 'ptsd': (140, 19), 'gad': (141, 19), 'comorbid_anx': (142, 19), 'msm': (120, 19), 'psi_sociotropy': (151, 19), 'psi_autonomy': (152, 19), 'raads': (155, 19), 'panas_pos_vis_1': (161, 19), 'panas_neg_vis_1': (162, 19), 'qids_vis_1': (172, 19), 'gad_vis_1': (173, 19), 'rosenberg_vis_1': (174, 19), 'madrs_vis_1': (185, 19)},
-        'P136_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 16), 'pre_memory_intensity_guilt_2': (43, 16), 'pre_memory_intensity_indignation_1': (49, 16), 'pre_memory_intensity_indignation_2': (54, 16), 'intervention': (78, 16), 'techniques_guilt': (84, 16), 'techniques_indignation': (85, 16), 'perceived_success_guilt': (86, 16), 'perceived_success_indignation': (87, 16), 'post_memory_intensity_guilt_1': (88, 16), 'post_memory_intensity_guilt 2': (92, 16), 'post_memory_intensity_indignation_1': (97, 16), 'post_memory_indignation_2': (101, 16), 'rosenberg_vis_2': (104, 16)},
-        'P136_vis_3_locations': {'panas_pos_vis_3': (36, 16), 'panas_neg_vis_3': (37, 16), 'qids_vis_3': (47, 16), 'gad_vis_3': (48, 16), 'rosenberg_vis_3': (49, 16), 'madrs_vis_3': (60, 16)},
-    
-        'P145_vis_1_locations': {'dob': (77, 21), 'gender': (81, 21),  'handedness': (82, 21), 'exercise': (83, 21), 'education': (84, 21), 'work_status': (85, 21), 'panic': (132, 21), 'agoraphobia': (134, 21), 'social_anx': (135, 21), 'ocd': (137, 21), 'ptsd': (140, 21), 'gad': (141, 21), 'comorbid_anx': (142, 21), 'msm': (120, 21), 'psi_sociotropy': (151, 21), 'psi_autonomy': (152, 21), 'raads': (155, 21), 'panas_pos_vis_1': (161, 21), 'panas_neg_vis_1': (162, 21), 'qids_vis_1': (172, 21), 'gad_vis_1': (173, 21), 'rosenberg_vis_1': (174, 21), 'madrs_vis_1': (185, 21)},
-        'P145_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 18), 'pre_memory_intensity_guilt_2': (43, 18), 'pre_memory_intensity_indignation_1': (49, 18), 'pre_memory_intensity_indignation_2': (54, 18), 'intervention': (78, 18), 'techniques_guilt': (84, 18), 'techniques_indignation': (85, 18), 'perceived_success_guilt': (86, 18), 'perceived_success_indignation': (87, 18), 'post_memory_intensity_guilt_1': (88, 18), 'post_memory_intensity_guilt 2': (92, 18), 'post_memory_intensity_indignation_1': (97, 18), 'post_memory_indignation_2': (101, 18), 'rosenberg_vis_2': (104, 18)},
-        'P145_vis_3_locations': {'panas_pos_vis_3': (36, 17), 'panas_neg_vis_3': (37, 17), 'qids_vis_3': (47, 17), 'gad_vis_3': (48, 17), 'rosenberg_vis_3': (49, 17), 'madrs_vis_3': (60, 17)},
-    
-        'P155_vis_1_locations': {'dob': (77, 22), 'gender': (81, 22),  'handedness': (82, 22), 'exercise': (83, 22), 'education': (84, 22), 'work_status': (85, 22), 'panic': (132, 22), 'agoraphobia': (134, 22), 'social_anx': (135, 22), 'ocd': (137, 22), 'ptsd': (140, 22), 'gad': (141, 22), 'comorbid_anx': (142, 22), 'msm': (120, 22), 'psi_sociotropy': (151, 22), 'psi_autonomy': (152, 22), 'raads': (155, 22), 'panas_pos_vis_1': (161, 22), 'panas_neg_vis_1': (162, 22), 'qids_vis_1': (172, 22), 'gad_vis_1': (173, 22), 'rosenberg_vis_1': (174, 22), 'madrs_vis_1': (185, 22)},
-        'P155_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 19), 'pre_memory_intensity_guilt_2': (43, 19), 'pre_memory_intensity_indignation_1': (49, 19), 'pre_memory_intensity_indignation_2': (54, 19), 'intervention': (78, 19), 'techniques_guilt': (84, 19), 'techniques_indignation': (85, 19), 'perceived_success_guilt': (86, 19), 'perceived_success_indignation': (87, 19), 'post_memory_intensity_guilt_1': (88, 19), 'post_memory_intensity_guilt 2': (92, 19), 'post_memory_intensity_indignation_1': (97, 19), 'post_memory_indignation_2': (101, 19), 'rosenberg_vis_2': (104, 19)},
-        'P155_vis_3_locations': {'panas_pos_vis_3': (36, 18), 'panas_neg_vis_3': (37, 18), 'qids_vis_3': (47, 18), 'gad_vis_3': (48, 18), 'rosenberg_vis_3': (49, 18), 'madrs_vis_3': (60, 18)},
-    
-        'P199_vis_1_locations': {'dob': (77, 27), 'gender': (81, 27),  'handedness': (82, 27), 'exercise': (83, 27), 'education': (84, 27), 'work_status': (85, 27), 'panic': (132, 27), 'agoraphobia': (134, 27), 'social_anx': (135, 27), 'ocd': (137, 27), 'ptsd': (140, 27), 'gad': (141, 27), 'comorbid_anx': (142, 27), 'msm': (120, 27), 'psi_sociotropy': (151, 27), 'psi_autonomy': (152, 27), 'raads': (155, 27), 'panas_pos_vis_1': (161, 27), 'panas_neg_vis_1': (162, 27), 'qids_vis_1': (172, 27), 'gad_vis_1': (173, 27), 'rosenberg_vis_1': (174, 27), 'madrs_vis_1': (185, 27)},
-        'P199_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 22), 'pre_memory_intensity_guilt_2': (43, 22), 'pre_memory_intensity_indignation_1': (49, 22), 'pre_memory_intensity_indignation_2': (54, 22), 'intervention': (78, 22), 'techniques_guilt': (84, 22), 'techniques_indignation': (85, 22), 'perceived_success_guilt': (86, 22), 'perceived_success_indignation': (87, 22), 'post_memory_intensity_guilt_1': (88, 22), 'post_memory_intensity_guilt 2': (92, 22), 'post_memory_intensity_indignation_1': (97, 22), 'post_memory_indignation_2': (101, 22), 'rosenberg_vis_2': (104, 22)},
-        'P199_vis_3_locations': {'panas_pos_vis_3': (36, 21), 'panas_neg_vis_3': (37, 21), 'qids_vis_3': (47, 21), 'gad_vis_3': (48, 21), 'rosenberg_vis_3': (49, 21), 'madrs_vis_3': (60, 21)},
-
-        'P215_vis_1_locations': {'dob': (77, 26), 'gender': (81, 26),  'handedness': (82, 26), 'exercise': (83, 26), 'education': (84, 26), 'work_status': (85, 26), 'panic': (132, 26), 'agoraphobia': (134, 26), 'social_anx': (135, 26), 'ocd': (137, 26), 'ptsd': (140, 26), 'gad': (141, 26), 'comorbid_anx': (142, 26), 'msm': (120, 26), 'psi_sociotropy': (151, 26), 'psi_autonomy': (152, 26), 'raads': (155, 26), 'panas_pos_vis_1': (161, 26), 'panas_neg_vis_1': (162, 26), 'qids_vis_1': (172, 26), 'gad_vis_1': (173, 26), 'rosenberg_vis_1': (174, 26), 'madrs_vis_1': (185, 26)},
-        'P215_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 21), 'pre_memory_intensity_guilt_2': (43, 21), 'pre_memory_intensity_indignation_1': (49, 21), 'pre_memory_intensity_indignation_2': (54, 21), 'intervention': (78, 21), 'techniques_guilt': (84, 21), 'techniques_indignation': (85, 21), 'perceived_success_guilt': (86, 21), 'perceived_success_indignation': (87, 21), 'post_memory_intensity_guilt_1': (88, 21), 'post_memory_intensity_guilt 2': (92, 21), 'post_memory_intensity_indignation_1': (97, 21), 'post_memory_indignation_2': (101, 21), 'rosenberg_vis_2': (104, 21)},
-        'P215_vis_3_locations': {'panas_pos_vis_3': (36, 20), 'panas_neg_vis_3': (37, 20), 'qids_vis_3': (47, 20), 'gad_vis_3': (48, 20), 'rosenberg_vis_3': (49, 20), 'madrs_vis_3': (60, 20)},
-
-        'P216_vis_1_locations': {'dob': (77, 28), 'gender': (81, 28),  'handedness': (82, 28), 'exercise': (83, 28), 'education': (84, 28), 'work_status': (85, 28), 'panic': (132, 28), 'agoraphobia': (134, 28), 'social_anx': (135, 28), 'ocd': (137, 28), 'ptsd': (140, 28), 'gad': (141, 28), 'comorbid_anx': (142, 28), 'msm': (120, 28), 'psi_sociotropy': (151, 28), 'psi_autonomy': (152, 28), 'raads': (155, 28), 'panas_pos_vis_1': (161, 28), 'panas_neg_vis_1': (162, 28), 'qids_vis_1': (172, 28), 'gad_vis_1': (173, 28), 'rosenberg_vis_1': (174, 28), 'madrs_vis_1': (185, 28)},
-        'P216_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 23), 'pre_memory_intensity_guilt_2': (43, 23), 'pre_memory_intensity_indignation_1': (49, 23), 'pre_memory_intensity_indignation_2': (54, 23), 'intervention': (78, 23), 'techniques_guilt': (84, 23), 'techniques_indignation': (85, 23), 'perceived_success_guilt': (86, 23), 'perceived_success_indignation': (87, 23), 'post_memory_intensity_guilt_1': (88, 23), 'post_memory_intensity_guilt 2': (92, 23), 'post_memory_intensity_indignation_1': (97, 23), 'post_memory_indignation_2': (101, 23), 'rosenberg_vis_2': (104, 23)},
-        'P216_vis_3_locations': {'panas_pos_vis_3': (36, 22), 'panas_neg_vis_3': (37, 22), 'qids_vis_3': (47, 22), 'gad_vis_3': (48, 22), 'rosenberg_vis_3': (49, 22), 'madrs_vis_3': (60, 22)}
-    }
-    for x in participants:
-        print(f'Extracting {x} data from eCRF.xlsx.')
-        decrypted_workbook = io.BytesIO()
-        with open(ecrf_file_path, 'rb') as file:
-            office_file = msoffcrypto.OfficeFile(file)
-            office_file.load_key(password=password)
-            office_file.decrypt(decrypted_workbook)
-        workbook = openpyxl.load_workbook(decrypted_workbook, data_only = True)
-        ecrf_sheet = workbook['Visit 1']
-        vis_1_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_1_locations'].values()]
-        ecrf_sheet = workbook['Visit 2']
-        vis_2_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_2_locations'].values()]
-        ecrf_sheet = workbook['Visit 3']
-        vis_3_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_3_locations'].values()]
-        df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values
-        for key, values in df_values_dict.items():
-            data_df[key] = values
-        output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/ecrf_data.xlsx'
-        data_df.to_excel(output_excel_path, index=True)
-        print(f'{x} data from eCRF.xlsx successfully extracted.')
-        workbook.close()
-    warnings.resetwarnings()
-
-    # Step 3: Calculate and plot thermometer movement success for each participant. 
-
-    
-    # Could the participants move the thermometer?
-    # How did this differ between guilt and indignation tasks?
-    # How did this differ between the two intervention groups?
-    # Did it vary based on any demographic or clinical factors?
-    # Did their actual success correlate with perceived success?
-    # Does thermometer movement success change between run 2 and run 3? i.e. Do participants reach somewhat of a breakthrough moment?
-    # Try different metrics for thermometer movement success (e.g. mean level, median level, level stability, level stability + mean / median level). Can also include a threshold for successful movement which is based on the movement of the thermometer if left to chance(?). Maybe favour mean over median because it is not possible to have major outliers in the data (the thermometer level can only be between 0 and 10).
-    # Can also try: number of volumes where thermometer level was above 5. Or plot histogram of the frequency of different thermometer levels. Can include levels that are also outside of the thermometer range, and have these values in a slightly more faded colour.
-    # Find amount of time that participant spent above or below thermometer range to test whether thermometer range was suitable.
-    # Does thermometer movement success vary in accordance with memory intensity?
-    # Test if MeanSignal stabilises each time during rest blocks.
-    # Clearly define MeanSignal, Baseline, Value, Thermometer Level etc from tbv_script text file.
-    # Calculate the average number of blocks that the thermometer goes up or down each volume, in order to ascertain how erratically or stably the thermometer is moving. 
-    # Could create a heatmap overlayed onto the thermometer in order to provide a visual demonstration of the thermometer levels that were most frequently occupied.
-    # How well does thermometer success correlate with the different techniques used. Can try to classify the qualitative reports into several categories of techniques.
-    # Does perceived success correlate with any demographic or clinical factors?
-    # Does actual or perceived success correlate with improvements in self-esteem / depression ratings?
-    # If you have high success with guilt thermometer, does that predict low success with indignation thermometer, and vice versa. I.e. is it difficult to be good at moving thermometer under both conditions, or is one condition always favoured.
-
-
+#region 8) FMRI ANALYSIS.
 
 #endregion
 
-#region SUSCEPTIBILITY ANALYSIS.
+#region 9) SUSCEPTIBILITY ANALYSIS.
 
 answer6 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
 if answer6 == 'y':
@@ -3451,724 +4342,5 @@ if answer6 == 'y':
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
     group_voxel_intensity_plot.save('group/susceptibility/fnirt_test/4/group_voxel_intensity_plot.png')
-
-#endregion
-
-#region BEHAVIOURAL ANALYSIS.
-
-answer7 = input("Would you like to execute behavioural analysis? (y/n)\n")
-if answer7 == 'y':
-    p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
-    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    runs = ['run01', 'run02', 'run03', 'run04']
-    if p_id == 'ALL':
-        participants_to_iterate = participants
-    else:
-        participants_to_iterate = [p_id]
-    restart = input("Would you like to start the behavioural analysis from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/behavioural' and 'group' folders associated with them. (y/n)\n")
-    if restart == 'y':
-        double_check = input("Are you sure? (y/n)\n")
-        if double_check == 'y':
-            for p_id in participants_to_iterate:
-                behavioural_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'behavioural')
-                if os.path.exists(behavioural_folder):
-                    print(f"Deleting {p_id} behavioural folder...")
-                    shutil.rmtree(behavioural_folder)
-                    print(f"{p_id} behavioural folder successfully deleted.")
-                else:
-                    print(f"{p_id} behavioural folder does not exist.")
-                group_behavioural_folder = os.path.join(os.getcwd(), 'group', 'behavioural')
-            if os.path.exists(group_behavioural_folder):
-                print(f"Deleting {p_id} group/behavioural folder...")
-                shutil.rmtree(group_behavioural_folder)
-                print(f"{p_id} group/behavioural folder successfully deleted.")
-            else:
-                print(f"{p_id} group/behavioural folder does not exist.")
-        else:
-            sys.exit()
-
-    # Step 1: Create directories.
-    print("\n###### STEP 1: CREATE DIRECTORIES ######")
-    for p_id in participants_to_iterate:
-        p_id_folder = os.path.join(os.getcwd(), p_id)
-        os.makedirs(p_id_folder, exist_ok=True)
-        analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
-        os.makedirs(analysis_folder, exist_ok=True)
-        behavioural_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'behavioural')
-        os.makedirs(behavioural_folder, exist_ok=True)
-        group_folder = os.path.join(os.getcwd(), "group")
-        os.makedirs(group_folder, exist_ok=True)
-        group_behavioural_folder = os.path.join(os.getcwd(), "group", "behavioural")
-        os.makedirs(group_behavioural_folder, exist_ok=True)
-
-    # Step 2: Access eCRF document and extract relevant data into dataframe.
-    print("\n###### STEP 2: ACCESS eCRF FILE AND CONVERT TO DATAFRAME ######")
-    warnings.simplefilter("ignore", UserWarning)
-    df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'intervention', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3', 'qids_vis_4', 'rosenberg_vis_4', 'qids_vis_5', 'rosenberg_vis_5']
-    ecrf_df = pd.DataFrame(index = df_row_headers)
-    ecrf_file_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/eCRF.xlsx'
-    password = 'SussexDepNF22'
-    df_values_dict = {}
-    location_dict = {
-        'P004_vis_1_locations': {'dob': (77, 3), 'gender': (81, 3),  'handedness': (82, 3), 'exercise': (83, 3), 'education': (84, 3), 'work_status': (85, 3), 'panic': (132, 3), 'agoraphobia': (134, 3), 'social_anx': (135, 3), 'ocd': (137, 3), 'ptsd': (140, 3), 'gad': (141, 3), 'comorbid_anx': (142, 3), 'msm': (120, 3), 'psi_sociotropy': (151, 3), 'psi_autonomy': (152, 3), 'raads': (155, 3), 'panas_pos_vis_1': (161, 3), 'panas_neg_vis_1': (162, 3), 'qids_vis_1': (172, 3), 'gad_vis_1': (173, 3), 'rosenberg_vis_1': (174, 3), 'madrs_vis_1': (185, 3)},
-        'P004_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 3), 'pre_memory_intensity_guilt_2': (43, 3), 'pre_memory_intensity_indignation_1': (49, 3), 'pre_memory_intensity_indignation_2': (54, 3), 'intervention': (78, 3), 'techniques_guilt': (84, 3), 'techniques_indignation': (85, 3), 'perceived_success_guilt': (86, 3), 'perceived_success_indignation': (87, 3), 'post_memory_intensity_guilt_1': (88, 3), 'post_memory_intensity_guilt 2': (92, 3), 'post_memory_intensity_indignation_1': (97, 3), 'post_memory_indignation_2': (101, 3), 'rosenberg_vis_2': (104, 3)},
-        'P004_vis_3_locations': {'panas_pos_vis_3': (36, 3), 'panas_neg_vis_3': (37, 3), 'qids_vis_3': (47, 3), 'gad_vis_3': (48, 3), 'rosenberg_vis_3': (49, 3), 'madrs_vis_3': (60, 3)},
-        'P004_vis_4_locations': {'qids_vis_4': (26, 3), 'rosenberg_vis_4': (27, 3)},
-        'P004_vis_5_locations': {'qids_vis_5': (28, 3), 'rosenberg_vis_5': (29, 3)},
-
-        'P006_vis_1_locations': {'dob': (77, 4), 'gender': (81, 4),  'handedness': (82, 4), 'exercise': (83, 4), 'education': (84, 4), 'work_status': (85, 4), 'panic': (132, 4), 'agoraphobia': (134, 4), 'social_anx': (135, 4), 'ocd': (137, 4), 'ptsd': (140, 4), 'gad': (141, 4), 'comorbid_anx': (142, 4), 'msm': (120, 4), 'psi_sociotropy': (151, 4), 'psi_autonomy': (152, 4), 'raads': (155, 4), 'panas_pos_vis_1': (161, 4), 'panas_neg_vis_1': (162, 4), 'qids_vis_1': (172, 4), 'gad_vis_1': (173, 4), 'rosenberg_vis_1': (174, 4), 'madrs_vis_1': (185, 4)},
-        'P006_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 4), 'pre_memory_intensity_guilt_2': (43, 4), 'pre_memory_intensity_indignation_1': (49, 4), 'pre_memory_intensity_indignation_2': (54, 4), 'intervention': (78, 4), 'techniques_guilt': (84, 4), 'techniques_indignation': (85, 4), 'perceived_success_guilt': (86, 4), 'perceived_success_indignation': (87, 4), 'post_memory_intensity_guilt_1': (88, 4), 'post_memory_intensity_guilt 2': (92, 4), 'post_memory_intensity_indignation_1': (97, 4), 'post_memory_indignation_2': (101, 4), 'rosenberg_vis_2': (104, 4)},
-        'P006_vis_3_locations': {'panas_pos_vis_3': (36, 4), 'panas_neg_vis_3': (37, 4), 'qids_vis_3': (47, 4), 'gad_vis_3': (48, 4), 'rosenberg_vis_3': (49, 4), 'madrs_vis_3': (60, 4)},
-        'P006_vis_4_locations': {'qids_vis_4': (26, 4), 'rosenberg_vis_4': (27, 4)},
-        'P006_vis_5_locations': {'qids_vis_5': (28, 4), 'rosenberg_vis_5': (29, 4)},
-
-        'P020_vis_1_locations': {'dob': (77, 7), 'gender': (81, 7),  'handedness': (82, 7), 'exercise': (83, 7), 'education': (84, 7), 'work_status': (85, 7), 'panic': (132, 7), 'agoraphobia': (134, 7), 'social_anx': (135, 7), 'ocd': (137, 7), 'ptsd': (140, 7), 'gad': (141, 7), 'comorbid_anx': (142, 7), 'msm': (120, 7), 'psi_sociotropy': (151, 7), 'psi_autonomy': (152, 7), 'raads': (155, 7), 'panas_pos_vis_1': (161, 7), 'panas_neg_vis_1': (162, 7), 'qids_vis_1': (172, 7), 'gad_vis_1': (173, 7), 'rosenberg_vis_1': (174, 7), 'madrs_vis_1': (185, 7)},
-        'P020_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 6), 'pre_memory_intensity_guilt_2': (43, 6), 'pre_memory_intensity_indignation_1': (49, 6), 'pre_memory_intensity_indignation_2': (54, 6), 'intervention': (78, 6), 'techniques_guilt': (84, 6), 'techniques_indignation': (85, 6), 'perceived_success_guilt': (86, 6), 'perceived_success_indignation': (87, 6), 'post_memory_intensity_guilt_1': (88, 6), 'post_memory_intensity_guilt 2': (92, 6), 'post_memory_intensity_indignation_1': (97, 6), 'post_memory_indignation_2': (101, 6), 'rosenberg_vis_2': (104, 6)},
-        'P020_vis_3_locations': {'panas_pos_vis_3': (36, 6), 'panas_neg_vis_3': (37, 6), 'qids_vis_3': (47, 6), 'gad_vis_3': (48, 6), 'rosenberg_vis_3': (49, 6), 'madrs_vis_3': (60, 6)},
-        'P020_vis_4_locations': {'qids_vis_4': (26, 6), 'rosenberg_vis_4': (27, 6)},
-        'P020_vis_5_locations': {'qids_vis_5': (28, 6), 'rosenberg_vis_5': (29, 6)},
-
-        'P030_vis_1_locations': {'dob': (77, 6), 'gender': (81, 6),  'handedness': (82, 6), 'exercise': (83, 6), 'education': (84, 6), 'work_status': (85, 6), 'panic': (132, 6), 'agoraphobia': (134, 6), 'social_anx': (135, 6), 'ocd': (137, 6), 'ptsd': (140, 6), 'gad': (141, 6), 'comorbid_anx': (142, 6), 'msm': (120, 6), 'psi_sociotropy': (151, 6), 'psi_autonomy': (152, 6), 'raads': (155, 6), 'panas_pos_vis_1': (161, 6), 'panas_neg_vis_1': (162, 6), 'qids_vis_1': (172, 6), 'gad_vis_1': (173, 6), 'rosenberg_vis_1': (174, 6), 'madrs_vis_1': (185, 6)},
-        'P030_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 5), 'pre_memory_intensity_guilt_2': (43, 5), 'pre_memory_intensity_indignation_1': (49, 5), 'pre_memory_intensity_indignation_2': (54, 5), 'intervention': (78, 5), 'techniques_guilt': (84, 5), 'techniques_indignation': (85, 5), 'perceived_success_guilt': (86, 5), 'perceived_success_indignation': (87, 5), 'post_memory_intensity_guilt_1': (88, 5), 'post_memory_intensity_guilt 2': (92, 5), 'post_memory_intensity_indignation_1': (97, 5), 'post_memory_indignation_2': (101, 5), 'rosenberg_vis_2': (104, 5)},
-        'P030_vis_3_locations': {'panas_pos_vis_3': (36, 5), 'panas_neg_vis_3': (37, 5), 'qids_vis_3': (47, 5), 'gad_vis_3': (48, 5), 'rosenberg_vis_3': (49, 5), 'madrs_vis_3': (60, 5)},
-        'P030_vis_4_locations': {'qids_vis_4': (26, 5), 'rosenberg_vis_4': (27, 5)},
-        'P030_vis_5_locations': {'qids_vis_5': (28, 5), 'rosenberg_vis_5': (29, 5)},
-
-        'P059_vis_1_locations': {'dob': (77, 23), 'gender': (81, 23),  'handedness': (82, 23), 'exercise': (83, 23), 'education': (84, 23), 'work_status': (85, 23), 'panic': (132, 23), 'agoraphobia': (134, 23), 'social_anx': (135, 23), 'ocd': (137, 23), 'ptsd': (140, 23), 'gad': (141, 23), 'comorbid_anx': (142, 23), 'msm': (120, 23), 'psi_sociotropy': (151, 23), 'psi_autonomy': (152, 23), 'raads': (155, 23), 'panas_pos_vis_1': (161, 23), 'panas_neg_vis_1': (162, 23), 'qids_vis_1': (172, 23), 'gad_vis_1': (173, 23), 'rosenberg_vis_1': (174, 23), 'madrs_vis_1': (185, 23)},
-        'P059_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 20), 'pre_memory_intensity_guilt_2': (43, 20), 'pre_memory_intensity_indignation_1': (49, 20), 'pre_memory_intensity_indignation_2': (54, 20), 'intervention': (78, 20), 'techniques_guilt': (84, 20), 'techniques_indignation': (85, 20), 'perceived_success_guilt': (86, 20), 'perceived_success_indignation': (87, 20), 'post_memory_intensity_guilt_1': (88, 20), 'post_memory_intensity_guilt 2': (92, 20), 'post_memory_intensity_indignation_1': (97, 20), 'post_memory_indignation_2': (101, 20), 'rosenberg_vis_2': (104, 20)},
-        'P059_vis_3_locations': {'panas_pos_vis_3': (36, 19), 'panas_neg_vis_3': (37, 19), 'qids_vis_3': (47, 19), 'gad_vis_3': (48, 19), 'rosenberg_vis_3': (49, 19), 'madrs_vis_3': (60, 19)},
-        'P059_vis_4_locations': {'qids_vis_4': (26, 19), 'rosenberg_vis_4': (27, 19)},
-        'P059_vis_5_locations': {'qids_vis_5': (28, 19), 'rosenberg_vis_5': (29, 19)},
-
-        'P078_vis_1_locations': {'dob': (77, 9), 'gender': (81, 9),  'handedness': (82, 9), 'exercise': (83, 9), 'education': (84, 9), 'work_status': (85, 9), 'panic': (132, 9), 'agoraphobia': (134, 9), 'social_anx': (135, 9), 'ocd': (137, 9), 'ptsd': (140, 9), 'gad': (141, 9), 'comorbid_anx': (142, 9), 'msm': (120, 9), 'psi_sociotropy': (151, 9), 'psi_autonomy': (152, 9), 'raads': (155, 9), 'panas_pos_vis_1': (161, 9), 'panas_neg_vis_1': (162, 9), 'qids_vis_1': (172, 9), 'gad_vis_1': (173, 9), 'rosenberg_vis_1': (174, 9), 'madrs_vis_1': (185, 9)},
-        'P078_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 7), 'pre_memory_intensity_guilt_2': (43, 7), 'pre_memory_intensity_indignation_1': (49, 7), 'pre_memory_intensity_indignation_2': (54, 7), 'intervention': (78, 7), 'techniques_guilt': (84, 7), 'techniques_indignation': (85, 7), 'perceived_success_guilt': (86, 7), 'perceived_success_indignation': (87, 7), 'post_memory_intensity_guilt_1': (88, 7), 'post_memory_intensity_guilt 2': (92, 7), 'post_memory_intensity_indignation_1': (97, 7), 'post_memory_indignation_2': (101, 7), 'rosenberg_vis_2': (104, 7)},
-        'P078_vis_3_locations': {'panas_pos_vis_3': (36, 7), 'panas_neg_vis_3': (37, 7), 'qids_vis_3': (47, 7), 'gad_vis_3': (48, 7), 'rosenberg_vis_3': (49, 7), 'madrs_vis_3': (60, 7)},
-        'P078_vis_4_locations': {'qids_vis_4': (26, 7), 'rosenberg_vis_4': (27, 7)},
-        'P078_vis_5_locations': {'qids_vis_5': (28, 7), 'rosenberg_vis_5': (29, 7)},
-
-        'P093_vis_1_locations': {'dob': (77, 11), 'gender': (81, 11),  'handedness': (82, 11), 'exercise': (83, 11), 'education': (84, 11), 'work_status': (85, 11), 'panic': (132, 11), 'agoraphobia': (134, 11), 'social_anx': (135, 11), 'ocd': (137, 11), 'ptsd': (140, 11), 'gad': (141, 11), 'comorbid_anx': (142, 11), 'msm': (120, 11), 'psi_sociotropy': (151, 11), 'psi_autonomy': (152, 11), 'raads': (155, 11), 'panas_pos_vis_1': (161, 11), 'panas_neg_vis_1': (162, 11), 'qids_vis_1': (172, 11), 'gad_vis_1': (173, 11), 'rosenberg_vis_1': (174, 11), 'madrs_vis_1': (185, 11)},
-        'P093_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 8), 'pre_memory_intensity_guilt_2': (43, 8), 'pre_memory_intensity_indignation_1': (49, 8), 'pre_memory_intensity_indignation_2': (54, 8), 'intervention': (78, 8), 'techniques_guilt': (84, 8), 'techniques_indignation': (85, 8), 'perceived_success_guilt': (86, 8), 'perceived_success_indignation': (87, 8), 'post_memory_intensity_guilt_1': (88, 8), 'post_memory_intensity_guilt 2': (92, 8), 'post_memory_intensity_indignation_1': (97, 8), 'post_memory_indignation_2': (101, 8), 'rosenberg_vis_2': (104, 8)},
-        'P093_vis_3_locations': {'panas_pos_vis_3': (36, 8), 'panas_neg_vis_3': (37, 8), 'qids_vis_3': (47, 8), 'gad_vis_3': (48, 8), 'rosenberg_vis_3': (49, 8), 'madrs_vis_3': (60, 8)},
-        'P093_vis_4_locations': {'qids_vis_4': (26, 8), 'rosenberg_vis_4': (27, 8)},
-        'P093_vis_5_locations': {'qids_vis_5': (28, 8), 'rosenberg_vis_5': (29, 8)},
-
-        'P094_vis_1_locations': {'dob': (77, 12), 'gender': (81, 12),  'handedness': (82, 12), 'exercise': (83, 12), 'education': (84, 12), 'work_status': (85, 12), 'panic': (132, 12), 'agoraphobia': (134, 12), 'social_anx': (135, 12), 'ocd': (137, 12), 'ptsd': (140, 12), 'gad': (141, 12), 'comorbid_anx': (142, 12), 'msm': (120, 12), 'psi_sociotropy': (151, 12), 'psi_autonomy': (152, 12), 'raads': (155, 12), 'panas_pos_vis_1': (161, 12), 'panas_neg_vis_1': (162, 12), 'qids_vis_1': (172, 12), 'gad_vis_1': (173, 12), 'rosenberg_vis_1': (174, 12), 'madrs_vis_1': (185, 12)},
-        'P094_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 9), 'pre_memory_intensity_guilt_2': (43, 9), 'pre_memory_intensity_indignation_1': (49, 9), 'pre_memory_intensity_indignation_2': (54, 9), 'intervention': (78, 9), 'techniques_guilt': (84, 9), 'techniques_indignation': (85, 9), 'perceived_success_guilt': (86, 9), 'perceived_success_indignation': (87, 9), 'post_memory_intensity_guilt_1': (88, 9), 'post_memory_intensity_guilt 2': (92, 9), 'post_memory_intensity_indignation_1': (97, 9), 'post_memory_indignation_2': (101, 9), 'rosenberg_vis_2': (104, 9)},
-        'P094_vis_3_locations': {'panas_pos_vis_3': (36, 9), 'panas_neg_vis_3': (37, 9), 'qids_vis_3': (47, 9), 'gad_vis_3': (48, 9), 'rosenberg_vis_3': (49, 9), 'madrs_vis_3': (60, 9)},
-        'P094_vis_4_locations': {'qids_vis_4': (26, 9), 'rosenberg_vis_4': (27, 9)},
-        'P094_vis_5_locations': {'qids_vis_5': (28, 9), 'rosenberg_vis_5': (29, 9)},
-
-        'P100_vis_1_locations': {'dob': (77, 13), 'gender': (81, 13),  'handedness': (82, 13), 'exercise': (83, 13), 'education': (84, 13), 'work_status': (85, 13), 'panic': (132, 13), 'agoraphobia': (134, 13), 'social_anx': (135, 13), 'ocd': (137, 13), 'ptsd': (140, 13), 'gad': (141, 13), 'comorbid_anx': (142, 13), 'msm': (120, 13), 'psi_sociotropy': (151, 13), 'psi_autonomy': (152, 13), 'raads': (155, 13), 'panas_pos_vis_1': (161, 13), 'panas_neg_vis_1': (162, 13), 'qids_vis_1': (172, 13), 'gad_vis_1': (173, 13), 'rosenberg_vis_1': (174, 13), 'madrs_vis_1': (185, 13)},
-        'P100_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 10), 'pre_memory_intensity_guilt_2': (43, 10), 'pre_memory_intensity_indignation_1': (49, 10), 'pre_memory_intensity_indignation_2': (54, 10), 'intervention': (78, 10), 'techniques_guilt': (84, 10), 'techniques_indignation': (85, 10), 'perceived_success_guilt': (86, 10), 'perceived_success_indignation': (87, 10), 'post_memory_intensity_guilt_1': (88, 10), 'post_memory_intensity_guilt 2': (92, 10), 'post_memory_intensity_indignation_1': (97, 10), 'post_memory_indignation_2': (101, 10), 'rosenberg_vis_2': (104, 10)},
-        'P100_vis_3_locations': {'panas_pos_vis_3': (36, 10), 'panas_neg_vis_3': (37, 10), 'qids_vis_3': (47, 10), 'gad_vis_3': (48, 10), 'rosenberg_vis_3': (49, 10), 'madrs_vis_3': (60, 10)},
-        'P100_vis_4_locations': {'qids_vis_4': (26, 10), 'rosenberg_vis_4': (27, 10)},
-        'P100_vis_5_locations': {'qids_vis_5': (28, 10), 'rosenberg_vis_5': (29, 10)},
-
-        'P107_vis_1_locations': {'dob': (77, 14), 'gender': (81, 14),  'handedness': (82, 14), 'exercise': (83, 14), 'education': (84, 14), 'work_status': (85, 14), 'panic': (132, 14), 'agoraphobia': (134, 14), 'social_anx': (135, 14), 'ocd': (137, 14), 'ptsd': (140, 14), 'gad': (141, 14), 'comorbid_anx': (142, 14), 'msm': (120, 14), 'psi_sociotropy': (151, 14), 'psi_autonomy': (152, 14), 'raads': (155, 14), 'panas_pos_vis_1': (161, 14), 'panas_neg_vis_1': (162, 14), 'qids_vis_1': (172, 14), 'gad_vis_1': (173, 14), 'rosenberg_vis_1': (174, 14), 'madrs_vis_1': (185, 14)},
-        'P107_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 11), 'pre_memory_intensity_guilt_2': (43, 11), 'pre_memory_intensity_indignation_1': (49, 11), 'pre_memory_intensity_indignation_2': (54, 11), 'intervention': (78, 11), 'techniques_guilt': (84, 11), 'techniques_indignation': (85, 11), 'perceived_success_guilt': (86, 11), 'perceived_success_indignation': (87, 11), 'post_memory_intensity_guilt_1': (88, 11), 'post_memory_intensity_guilt 2': (92, 11), 'post_memory_intensity_indignation_1': (97, 11), 'post_memory_indignation_2': (101, 11), 'rosenberg_vis_2': (104, 11)},
-        'P107_vis_3_locations': {'panas_pos_vis_3': (36, 11), 'panas_neg_vis_3': (37, 11), 'qids_vis_3': (47, 11), 'gad_vis_3': (48, 11), 'rosenberg_vis_3': (49, 11), 'madrs_vis_3': (60, 11)},
-        'P107_vis_4_locations': {'qids_vis_4': (26, 11), 'rosenberg_vis_4': (27, 11)},
-        'P107_vis_5_locations': {'qids_vis_5': (28, 11), 'rosenberg_vis_5': (29, 11)},
-
-        'P122_vis_1_locations': {'dob': (77, 17), 'gender': (81, 17),  'handedness': (82, 17), 'exercise': (83, 17), 'education': (84, 17), 'work_status': (85, 17), 'panic': (132, 17), 'agoraphobia': (134, 17), 'social_anx': (135, 17), 'ocd': (137, 17), 'ptsd': (140, 17), 'gad': (141, 17), 'comorbid_anx': (142, 17), 'msm': (120, 17), 'psi_sociotropy': (151, 17), 'psi_autonomy': (152, 17), 'raads': (155, 17), 'panas_pos_vis_1': (161, 17), 'panas_neg_vis_1': (162, 17), 'qids_vis_1': (172, 17), 'gad_vis_1': (173, 17), 'rosenberg_vis_1': (174, 17), 'madrs_vis_1': (185, 17)},
-        'P122_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 14), 'pre_memory_intensity_guilt_2': (43, 14), 'pre_memory_intensity_indignation_1': (49, 14), 'pre_memory_intensity_indignation_2': (54, 14), 'intervention': (78, 14), 'techniques_guilt': (84, 14), 'techniques_indignation': (85, 14), 'perceived_success_guilt': (86, 14), 'perceived_success_indignation': (87, 14), 'post_memory_intensity_guilt_1': (88, 14), 'post_memory_intensity_guilt 2': (92, 14), 'post_memory_intensity_indignation_1': (97, 14), 'post_memory_indignation_2': (101, 14), 'rosenberg_vis_2': (104, 14)},
-        'P122_vis_3_locations': {'panas_pos_vis_3': (36, 14), 'panas_neg_vis_3': (37, 14), 'qids_vis_3': (47, 14), 'gad_vis_3': (48, 14), 'rosenberg_vis_3': (49, 14), 'madrs_vis_3': (60, 14)},
-        'P122_vis_4_locations': {'qids_vis_4': (26, 14), 'rosenberg_vis_4': (27, 14)},
-        'P122_vis_5_locations': {'qids_vis_5': (28, 14), 'rosenberg_vis_5': (29, 14)},
-
-        'P125_vis_1_locations': {'dob': (77, 18), 'gender': (81, 18),  'handedness': (82, 18), 'exercise': (83, 18), 'education': (84, 18), 'work_status': (85, 18), 'panic': (132, 18), 'agoraphobia': (134, 18), 'social_anx': (135, 18), 'ocd': (137, 18), 'ptsd': (140, 18), 'gad': (141, 18), 'comorbid_anx': (142, 18), 'msm': (120, 18), 'psi_sociotropy': (151, 18), 'psi_autonomy': (152, 18), 'raads': (155, 18), 'panas_pos_vis_1': (161, 18), 'panas_neg_vis_1': (162, 18), 'qids_vis_1': (172, 18), 'gad_vis_1': (173, 18), 'rosenberg_vis_1': (174, 18), 'madrs_vis_1': (185, 18)},
-        'P125_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 15), 'pre_memory_intensity_guilt_2': (43, 15), 'pre_memory_intensity_indignation_1': (49, 15), 'pre_memory_intensity_indignation_2': (54, 15), 'intervention': (78, 15), 'techniques_guilt': (84, 15), 'techniques_indignation': (85, 15), 'perceived_success_guilt': (86, 15), 'perceived_success_indignation': (87, 15), 'post_memory_intensity_guilt_1': (88, 15), 'post_memory_intensity_guilt 2': (92, 15), 'post_memory_intensity_indignation_1': (97, 15), 'post_memory_indignation_2': (101, 15), 'rosenberg_vis_2': (104, 15)},
-        'P125_vis_3_locations': {'panas_pos_vis_3': (36, 15), 'panas_neg_vis_3': (37, 15), 'qids_vis_3': (47, 15), 'gad_vis_3': (48, 15), 'rosenberg_vis_3': (49, 15), 'madrs_vis_3': (60, 15)},
-        'P125_vis_4_locations': {'qids_vis_4': (26, 15), 'rosenberg_vis_4': (27, 15)},
-        'P125_vis_5_locations': {'qids_vis_5': (28, 15), 'rosenberg_vis_5': (29, 15)},
-
-        'P127_vis_1_locations': {'dob': (77, 16), 'gender': (81, 16),  'handedness': (82, 16), 'exercise': (83, 16), 'education': (84, 16), 'work_status': (85, 16), 'panic': (132, 16), 'agoraphobia': (134, 16), 'social_anx': (135, 16), 'ocd': (137, 16), 'ptsd': (140, 16), 'gad': (141, 16), 'comorbid_anx': (142, 16), 'msm': (120, 16), 'psi_sociotropy': (151, 16), 'psi_autonomy': (152, 16), 'raads': (155, 16), 'panas_pos_vis_1': (161, 16), 'panas_neg_vis_1': (162, 16), 'qids_vis_1': (172, 16), 'gad_vis_1': (173, 16), 'rosenberg_vis_1': (174, 16), 'madrs_vis_1': (185, 16)},
-        'P127_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 13), 'pre_memory_intensity_guilt_2': (43, 13), 'pre_memory_intensity_indignation_1': (49, 13), 'pre_memory_intensity_indignation_2': (54, 13), 'intervention': (78, 13), 'techniques_guilt': (84, 13), 'techniques_indignation': (85, 13), 'perceived_success_guilt': (86, 13), 'perceived_success_indignation': (87, 13), 'post_memory_intensity_guilt_1': (88, 13), 'post_memory_intensity_guilt 2': (92, 13), 'post_memory_intensity_indignation_1': (97, 13), 'post_memory_indignation_2': (101, 13), 'rosenberg_vis_2': (104, 13)},
-        'P127_vis_3_locations': {'panas_pos_vis_3': (36, 13), 'panas_neg_vis_3': (37, 13), 'qids_vis_3': (47, 13), 'gad_vis_3': (48, 13), 'rosenberg_vis_3': (49, 13), 'madrs_vis_3': (60, 13)},
-        'P127_vis_4_locations': {'qids_vis_4': (26, 13), 'rosenberg_vis_4': (27, 13)},
-        'P127_vis_5_locations': {'qids_vis_5': (28, 13), 'rosenberg_vis_5': (29, 13)},
-
-        'P128_vis_1_locations': {'dob': (77, 15), 'gender': (81, 15),  'handedness': (82, 15), 'exercise': (83, 15), 'education': (84, 15), 'work_status': (85, 15), 'panic': (132, 15), 'agoraphobia': (134, 15), 'social_anx': (135, 15), 'ocd': (137, 15), 'ptsd': (140, 15), 'gad': (141, 15), 'comorbid_anx': (142, 15), 'msm': (120, 15), 'psi_sociotropy': (151, 15), 'psi_autonomy': (152, 15), 'raads': (155, 15), 'panas_pos_vis_1': (161, 15), 'panas_neg_vis_1': (162, 15), 'qids_vis_1': (172, 15), 'gad_vis_1': (173, 15), 'rosenberg_vis_1': (174, 15), 'madrs_vis_1': (185, 15)},
-        'P128_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 12), 'pre_memory_intensity_guilt_2': (43, 12), 'pre_memory_intensity_indignation_1': (49, 12), 'pre_memory_intensity_indignation_2': (54, 12), 'intervention': (78, 12), 'techniques_guilt': (84, 12), 'techniques_indignation': (85, 12), 'perceived_success_guilt': (86, 12), 'perceived_success_indignation': (87, 12), 'post_memory_intensity_guilt_1': (88, 12), 'post_memory_intensity_guilt 2': (92, 12), 'post_memory_intensity_indignation_1': (97, 12), 'post_memory_indignation_2': (101, 12), 'rosenberg_vis_2': (104, 12)},
-        'P128_vis_3_locations': {'panas_pos_vis_3': (36, 12), 'panas_neg_vis_3': (37, 12), 'qids_vis_3': (47, 12), 'gad_vis_3': (48, 12), 'rosenberg_vis_3': (49, 12), 'madrs_vis_3': (60, 12)},
-        'P128_vis_4_locations': {'qids_vis_4': (26, 12), 'rosenberg_vis_4': (27, 12)},
-        'P128_vis_5_locations': {'qids_vis_5': (28, 12), 'rosenberg_vis_5': (29, 12)},
-
-        'P136_vis_1_locations': {'dob': (77, 19), 'gender': (81, 19),  'handedness': (82, 19), 'exercise': (83, 19), 'education': (84, 19), 'work_status': (85, 19), 'panic': (132, 19), 'agoraphobia': (134, 19), 'social_anx': (135, 19), 'ocd': (137, 19), 'ptsd': (140, 19), 'gad': (141, 19), 'comorbid_anx': (142, 19), 'msm': (120, 19), 'psi_sociotropy': (151, 19), 'psi_autonomy': (152, 19), 'raads': (155, 19), 'panas_pos_vis_1': (161, 19), 'panas_neg_vis_1': (162, 19), 'qids_vis_1': (172, 19), 'gad_vis_1': (173, 19), 'rosenberg_vis_1': (174, 19), 'madrs_vis_1': (185, 19)},
-        'P136_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 16), 'pre_memory_intensity_guilt_2': (43, 16), 'pre_memory_intensity_indignation_1': (49, 16), 'pre_memory_intensity_indignation_2': (54, 16), 'intervention': (78, 16), 'techniques_guilt': (84, 16), 'techniques_indignation': (85, 16), 'perceived_success_guilt': (86, 16), 'perceived_success_indignation': (87, 16), 'post_memory_intensity_guilt_1': (88, 16), 'post_memory_intensity_guilt 2': (92, 16), 'post_memory_intensity_indignation_1': (97, 16), 'post_memory_indignation_2': (101, 16), 'rosenberg_vis_2': (104, 16)},
-        'P136_vis_3_locations': {'panas_pos_vis_3': (36, 16), 'panas_neg_vis_3': (37, 16), 'qids_vis_3': (47, 16), 'gad_vis_3': (48, 16), 'rosenberg_vis_3': (49, 16), 'madrs_vis_3': (60, 16)},
-        'P136_vis_4_locations': {'qids_vis_4': (26, 16), 'rosenberg_vis_4': (27, 16)},
-        'P136_vis_5_locations': {'qids_vis_5': (28, 16), 'rosenberg_vis_5': (29, 16)},
-
-        'P145_vis_1_locations': {'dob': (77, 21), 'gender': (81, 21),  'handedness': (82, 21), 'exercise': (83, 21), 'education': (84, 21), 'work_status': (85, 21), 'panic': (132, 21), 'agoraphobia': (134, 21), 'social_anx': (135, 21), 'ocd': (137, 21), 'ptsd': (140, 21), 'gad': (141, 21), 'comorbid_anx': (142, 21), 'msm': (120, 21), 'psi_sociotropy': (151, 21), 'psi_autonomy': (152, 21), 'raads': (155, 21), 'panas_pos_vis_1': (161, 21), 'panas_neg_vis_1': (162, 21), 'qids_vis_1': (172, 21), 'gad_vis_1': (173, 21), 'rosenberg_vis_1': (174, 21), 'madrs_vis_1': (185, 21)},
-        'P145_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 18), 'pre_memory_intensity_guilt_2': (43, 18), 'pre_memory_intensity_indignation_1': (49, 18), 'pre_memory_intensity_indignation_2': (54, 18), 'intervention': (78, 18), 'techniques_guilt': (84, 18), 'techniques_indignation': (85, 18), 'perceived_success_guilt': (86, 18), 'perceived_success_indignation': (87, 18), 'post_memory_intensity_guilt_1': (88, 18), 'post_memory_intensity_guilt 2': (92, 18), 'post_memory_intensity_indignation_1': (97, 18), 'post_memory_indignation_2': (101, 18), 'rosenberg_vis_2': (104, 18)},
-        'P145_vis_3_locations': {'panas_pos_vis_3': (36, 17), 'panas_neg_vis_3': (37, 17), 'qids_vis_3': (47, 17), 'gad_vis_3': (48, 17), 'rosenberg_vis_3': (49, 17), 'madrs_vis_3': (60, 17)},
-        'P145_vis_4_locations': {'qids_vis_4': (26, 17), 'rosenberg_vis_4': (27, 17)},
-        'P145_vis_5_locations': {'qids_vis_5': (28, 17), 'rosenberg_vis_5': (29, 17)},
-
-        'P155_vis_1_locations': {'dob': (77, 22), 'gender': (81, 22),  'handedness': (82, 22), 'exercise': (83, 22), 'education': (84, 22), 'work_status': (85, 22), 'panic': (132, 22), 'agoraphobia': (134, 22), 'social_anx': (135, 22), 'ocd': (137, 22), 'ptsd': (140, 22), 'gad': (141, 22), 'comorbid_anx': (142, 22), 'msm': (120, 22), 'psi_sociotropy': (151, 22), 'psi_autonomy': (152, 22), 'raads': (155, 22), 'panas_pos_vis_1': (161, 22), 'panas_neg_vis_1': (162, 22), 'qids_vis_1': (172, 22), 'gad_vis_1': (173, 22), 'rosenberg_vis_1': (174, 22), 'madrs_vis_1': (185, 22)},
-        'P155_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 19), 'pre_memory_intensity_guilt_2': (43, 19), 'pre_memory_intensity_indignation_1': (49, 19), 'pre_memory_intensity_indignation_2': (54, 19), 'intervention': (78, 19), 'techniques_guilt': (84, 19), 'techniques_indignation': (85, 19), 'perceived_success_guilt': (86, 19), 'perceived_success_indignation': (87, 19), 'post_memory_intensity_guilt_1': (88, 19), 'post_memory_intensity_guilt 2': (92, 19), 'post_memory_intensity_indignation_1': (97, 19), 'post_memory_indignation_2': (101, 19), 'rosenberg_vis_2': (104, 19)},
-        'P155_vis_3_locations': {'panas_pos_vis_3': (36, 18), 'panas_neg_vis_3': (37, 18), 'qids_vis_3': (47, 18), 'gad_vis_3': (48, 18), 'rosenberg_vis_3': (49, 18), 'madrs_vis_3': (60, 18)},
-        'P155_vis_4_locations': {'qids_vis_4': (26, 18), 'rosenberg_vis_4': (27, 18)},
-        'P155_vis_5_locations': {'qids_vis_5': (28, 18), 'rosenberg_vis_5': (29, 18)},
-
-        'P199_vis_1_locations': {'dob': (77, 27), 'gender': (81, 27),  'handedness': (82, 27), 'exercise': (83, 27), 'education': (84, 27), 'work_status': (85, 27), 'panic': (132, 27), 'agoraphobia': (134, 27), 'social_anx': (135, 27), 'ocd': (137, 27), 'ptsd': (140, 27), 'gad': (141, 27), 'comorbid_anx': (142, 27), 'msm': (120, 27), 'psi_sociotropy': (151, 27), 'psi_autonomy': (152, 27), 'raads': (155, 27), 'panas_pos_vis_1': (161, 27), 'panas_neg_vis_1': (162, 27), 'qids_vis_1': (172, 27), 'gad_vis_1': (173, 27), 'rosenberg_vis_1': (174, 27), 'madrs_vis_1': (185, 27)},
-        'P199_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 22), 'pre_memory_intensity_guilt_2': (43, 22), 'pre_memory_intensity_indignation_1': (49, 22), 'pre_memory_intensity_indignation_2': (54, 22), 'intervention': (78, 22), 'techniques_guilt': (84, 22), 'techniques_indignation': (85, 22), 'perceived_success_guilt': (86, 22), 'perceived_success_indignation': (87, 22), 'post_memory_intensity_guilt_1': (88, 22), 'post_memory_intensity_guilt 2': (92, 22), 'post_memory_intensity_indignation_1': (97, 22), 'post_memory_indignation_2': (101, 22), 'rosenberg_vis_2': (104, 22)},
-        'P199_vis_3_locations': {'panas_pos_vis_3': (36, 21), 'panas_neg_vis_3': (37, 21), 'qids_vis_3': (47, 21), 'gad_vis_3': (48, 21), 'rosenberg_vis_3': (49, 21), 'madrs_vis_3': (60, 21)},
-        'P199_vis_4_locations': {'qids_vis_4': (26, 21), 'rosenberg_vis_4': (27, 21)},
-        'P199_vis_5_locations': {'qids_vis_5': (28, 21), 'rosenberg_vis_5': (29, 21)},
-
-        'P215_vis_1_locations': {'dob': (77, 26), 'gender': (81, 26),  'handedness': (82, 26), 'exercise': (83, 26), 'education': (84, 26), 'work_status': (85, 26), 'panic': (132, 26), 'agoraphobia': (134, 26), 'social_anx': (135, 26), 'ocd': (137, 26), 'ptsd': (140, 26), 'gad': (141, 26), 'comorbid_anx': (142, 26), 'msm': (120, 26), 'psi_sociotropy': (151, 26), 'psi_autonomy': (152, 26), 'raads': (155, 26), 'panas_pos_vis_1': (161, 26), 'panas_neg_vis_1': (162, 26), 'qids_vis_1': (172, 26), 'gad_vis_1': (173, 26), 'rosenberg_vis_1': (174, 26), 'madrs_vis_1': (185, 26)},
-        'P215_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 21), 'pre_memory_intensity_guilt_2': (43, 21), 'pre_memory_intensity_indignation_1': (49, 21), 'pre_memory_intensity_indignation_2': (54, 21), 'intervention': (78, 21), 'techniques_guilt': (84, 21), 'techniques_indignation': (85, 21), 'perceived_success_guilt': (86, 21), 'perceived_success_indignation': (87, 21), 'post_memory_intensity_guilt_1': (88, 21), 'post_memory_intensity_guilt 2': (92, 21), 'post_memory_intensity_indignation_1': (97, 21), 'post_memory_indignation_2': (101, 21), 'rosenberg_vis_2': (104, 21)},
-        'P215_vis_3_locations': {'panas_pos_vis_3': (36, 20), 'panas_neg_vis_3': (37, 20), 'qids_vis_3': (47, 20), 'gad_vis_3': (48, 20), 'rosenberg_vis_3': (49, 20), 'madrs_vis_3': (60, 20)},
-        'P215_vis_4_locations': {'qids_vis_4': (26, 20), 'rosenberg_vis_4': (27, 20)},
-        'P215_vis_5_locations': {'qids_vis_5': (28, 20), 'rosenberg_vis_5': (29, 20)},
-
-        'P216_vis_1_locations': {'dob': (77, 28), 'gender': (81, 28),  'handedness': (82, 28), 'exercise': (83, 28), 'education': (84, 28), 'work_status': (85, 28), 'panic': (132, 28), 'agoraphobia': (134, 28), 'social_anx': (135, 28), 'ocd': (137, 28), 'ptsd': (140, 28), 'gad': (141, 28), 'comorbid_anx': (142, 28), 'msm': (120, 28), 'psi_sociotropy': (151, 28), 'psi_autonomy': (152, 28), 'raads': (155, 28), 'panas_pos_vis_1': (161, 28), 'panas_neg_vis_1': (162, 28), 'qids_vis_1': (172, 28), 'gad_vis_1': (173, 28), 'rosenberg_vis_1': (174, 28), 'madrs_vis_1': (185, 28)},
-        'P216_vis_2_locations': {'pre_memory_intensity_guilt_1': (38, 23), 'pre_memory_intensity_guilt_2': (43, 23), 'pre_memory_intensity_indignation_1': (49, 23), 'pre_memory_intensity_indignation_2': (54, 23), 'intervention': (78, 23), 'techniques_guilt': (84, 23), 'techniques_indignation': (85, 23), 'perceived_success_guilt': (86, 23), 'perceived_success_indignation': (87, 23), 'post_memory_intensity_guilt_1': (88, 23), 'post_memory_intensity_guilt 2': (92, 23), 'post_memory_intensity_indignation_1': (97, 23), 'post_memory_indignation_2': (101, 23), 'rosenberg_vis_2': (104, 23)},
-        'P216_vis_3_locations': {'panas_pos_vis_3': (36, 22), 'panas_neg_vis_3': (37, 22), 'qids_vis_3': (47, 22), 'gad_vis_3': (48, 22), 'rosenberg_vis_3': (49, 22), 'madrs_vis_3': (60, 22)},
-        'P216_vis_4_locations': {'qids_vis_4': (26, 22), 'rosenberg_vis_4': (27, 22)},
-        'P216_vis_5_locations': {'qids_vis_5': (28, 22), 'rosenberg_vis_5': (29, 22)}
-    }
-    for x in participants_to_iterate:
-        print(f'Extracting {x} data from eCRF.xlsx...')
-        decrypted_workbook = io.BytesIO()
-        with open(ecrf_file_path, 'rb') as file:
-            office_file = msoffcrypto.OfficeFile(file)
-            office_file.load_key(password=password)
-            office_file.decrypt(decrypted_workbook)
-        workbook = openpyxl.load_workbook(decrypted_workbook, data_only = True)
-        ecrf_sheet = workbook['Visit 1']
-        vis_1_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_1_locations'].values()]
-        ecrf_sheet = workbook['Visit 2']
-        vis_2_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_2_locations'].values()]
-        ecrf_sheet = workbook['Visit 3']
-        vis_3_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_3_locations'].values()]
-        ecrf_sheet = workbook['Online 1']
-        vis_4_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_4_locations'].values()]
-        ecrf_sheet = workbook['Online 2']
-        vis_5_values = [ecrf_sheet.cell(row=row, column=column).value for (row, column) in location_dict[f'{x}_vis_5_locations'].values()]
-        df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values + vis_4_values + vis_5_values
-        for key, values in df_values_dict.items():
-            ecrf_df[key] = values
-        output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/ecrf_data.xlsx'
-        ecrf_df.to_excel(output_excel_path, index=True)
-        workbook.close()
-    warnings.resetwarnings()
-
-    # Step 3: Run 2-Way ANOVA of Rosenberg, QIDS, and MADRS Scores.
-    print("\n###### STEP 3: RUN LMMs OF CLINICAL ASSESSMENT SCORES ######")
-    columns = ['p_id', 'visit', 'intervention', 'rosenberg', 'qids', 'madrs', 'gad', 'panas_pos', 'panas_neg']
-    rqmgp_df = pd.DataFrame(columns=columns)
-    p_id_column = participants * 5
-    visit_column = ['1'] * 20 + ['2'] * 20 + ['3'] * 20 + ['4'] * 20 + ['5'] * 20
-    intervention_values = ecrf_df.loc['intervention'].tolist()
-    intervention_column = list(intervention_values) * 5
-    rosenberg_vis_1 = ecrf_df.loc['rosenberg_vis_1'].tolist()
-    rosenberg_vis_2 = ecrf_df.loc['rosenberg_vis_2'].tolist()
-    rosenberg_vis_3 = ecrf_df.loc['rosenberg_vis_3'].tolist()
-    rosenberg_vis_4 = ecrf_df.loc['rosenberg_vis_4'].tolist()
-    rosenberg_vis_5 = ecrf_df.loc['rosenberg_vis_5'].tolist()
-    rosenberg_column = rosenberg_vis_1 + rosenberg_vis_2 + rosenberg_vis_3 + rosenberg_vis_4 + rosenberg_vis_5
-    qids_vis_1 = ecrf_df.loc['qids_vis_1'].tolist()
-    qids_vis_2 = [np.nan] * 20
-    qids_vis_3 = ecrf_df.loc['qids_vis_3'].tolist()
-    qids_vis_4 = ecrf_df.loc['qids_vis_4'].tolist()
-    qids_vis_5 = ecrf_df.loc['qids_vis_5'].tolist()
-    qids_column = qids_vis_1 + qids_vis_2 + qids_vis_3 + qids_vis_4 + qids_vis_5
-    madrs_vis_1 = ecrf_df.loc['madrs_vis_1'].tolist()
-    madrs_vis_2 = [np.nan] * 20
-    madrs_vis_3 = ecrf_df.loc['madrs_vis_3'].tolist()
-    madrs_vis_4 = [np.nan] * 20
-    madrs_vis_5 = [np.nan] * 20
-    madrs_column = madrs_vis_1 + madrs_vis_2 + madrs_vis_3 + madrs_vis_4 + madrs_vis_5
-    gad_vis_1 = ecrf_df.loc['gad_vis_1'].tolist()
-    gad_vis_2 = [np.nan] * 20
-    gad_vis_3 = ecrf_df.loc['gad_vis_3'].tolist()
-    gad_vis_4 = [np.nan] * 20
-    gad_vis_5 = [np.nan] * 20
-    gad_column = gad_vis_1 + gad_vis_2 + gad_vis_3 + gad_vis_4 + gad_vis_5
-    panas_pos_vis_1 = ecrf_df.loc['panas_pos_vis_1'].tolist()
-    panas_pos_vis_2 = [np.nan] * 20
-    panas_pos_vis_3 = ecrf_df.loc['panas_pos_vis_3'].tolist()
-    panas_pos_vis_4 = [np.nan] * 20
-    panas_pos_vis_5 = [np.nan] * 20
-    panas_pos_column = panas_pos_vis_1 + panas_pos_vis_2 + panas_pos_vis_3 + panas_pos_vis_4 + panas_pos_vis_5
-    panas_neg_vis_1 = ecrf_df.loc['panas_neg_vis_1'].tolist()
-    panas_neg_vis_2 = [np.nan] * 20
-    panas_neg_vis_3 = ecrf_df.loc['panas_neg_vis_3'].tolist()
-    panas_neg_vis_4 = [np.nan] * 20
-    panas_neg_vis_5 = [np.nan] * 20
-    panas_neg_column = panas_neg_vis_1 + panas_neg_vis_2 + panas_neg_vis_3 + panas_neg_vis_4 + panas_neg_vis_5
-    rqmgp_df['p_id'] = p_id_column
-    rqmgp_df['visit'] = visit_column
-    rqmgp_df['intervention'] = intervention_column
-    rqmgp_df['rosenberg'] = rosenberg_column
-    rqmgp_df['qids'] = qids_column
-    rqmgp_df['madrs'] = madrs_column
-    rqmgp_df['gad'] = gad_column
-    rqmgp_df['panas_pos'] = panas_pos_column
-    rqmgp_df['panas_neg'] = panas_neg_column
-
-    rosenberg_df = rqmgp_df.dropna(subset=['rosenberg'])
-    visits = ['1', '2', '3', '4', '5']
-    interventions = ['a', 'b']
-    columns = ['vals', 'mean', 'std_error', 'shap_p']
-    index = ['vis1_inta', 'vis2_inta', 'vis3_inta', 'vis4_inta', 'vis5_inta', 'vis1_intb', 'vis2_intb', 'vis3_intb', 'vis4_intb', 'vis5_intb']
-    rosenberg_stats_df = pd.DataFrame(columns=columns, index=index)
-    for visit in visits:
-        for intervention in interventions:
-            vals = rosenberg_df[(rosenberg_df['visit'] == visit) & (rosenberg_df['intervention'] == intervention)]['rosenberg'].tolist()
-            mean = np.mean(vals)
-            std_error = np.std(vals) / np.sqrt(len(vals))
-            _, shap_p = stats.shapiro(vals)
-            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
-            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
-            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
-            rosenberg_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
-
-    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    # pandas2ri.activate()
-    # r = ro.r
-    # utils = importr('utils')
-    # utils.chooseCRANmirror(ind=1)
-    # r_script = """
-    # library(lme4)
-    # library(lmerTest)
-    # library(emmeans)
-    # rosenberg_df <- as.data.frame(rosenberg_df)
-    # model <- lmer(rosenberg~visit*intervention + (1|p_id), data = rosenberg_df)
-    # residuals_model <- residuals(model)
-    # shapiro_test_result <- shapiro.test(residuals_model)
-    # print(shapiro_test_result)
-    # if (shapiro_test_result$p.value > 0.05) {
-    # print("Rosenberg LMM residuals meet normality assumptions.")
-    # anova_result <- anova(model)
-    # print(anova_result)
-    # emmeans_results <- emmeans(model, pairwise ~ visit)
-    # print(summary(emmeans_results))
-    # } else {
-    # print("Rosenberg LMM residuals do not meet normality assumptions.")
-    # }
-    # """
-    # ro.globalenv['rosenberg_df'] = pandas2ri.py2rpy(rosenberg_df)
-    # result = r(r_script)
-    # print(result)
-
-    data = {
-        'visit': [1, 2, 3, 4, 5] * 2,
-        'intervention': ['A'] * 5 + ['B'] * 5,
-        'mean': [
-            rosenberg_stats_df.loc['vis1_inta', 'mean'], rosenberg_stats_df.loc['vis2_inta', 'mean'], rosenberg_stats_df.loc['vis3_inta', 'mean'],
-            rosenberg_stats_df.loc['vis4_inta', 'mean'], rosenberg_stats_df.loc['vis5_inta', 'mean'], 
-            rosenberg_stats_df.loc['vis1_intb', 'mean'], rosenberg_stats_df.loc['vis2_intb', 'mean'], rosenberg_stats_df.loc['vis3_intb', 'mean'], 
-            rosenberg_stats_df.loc['vis4_intb', 'mean'], rosenberg_stats_df.loc['vis5_intb', 'mean'], 
-        ],
-        'std_error': [
-            rosenberg_stats_df.loc['vis1_inta', 'std_error'], rosenberg_stats_df.loc['vis2_inta', 'std_error'], rosenberg_stats_df.loc['vis3_inta', 'std_error'], 
-            rosenberg_stats_df.loc['vis4_inta', 'std_error'], rosenberg_stats_df.loc['vis5_inta', 'std_error'], 
-            rosenberg_stats_df.loc['vis1_intb', 'std_error'], rosenberg_stats_df.loc['vis2_intb', 'std_error'], rosenberg_stats_df.loc['vis3_intb', 'std_error'], 
-            rosenberg_stats_df.loc['vis4_intb', 'std_error'], rosenberg_stats_df.loc['vis5_intb', 'std_error'], 
-        ]
-    }
-    plot_data = pd.DataFrame(data)
-    rosenberg_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention'))
-            + geom_line(size=2)
-            + geom_point(size=4)
-            + geom_errorbar(aes(ymin='mean - std_error',
-                            ymax='mean + std_error'), width=0.2)
-            + labs(title='Rosenberg Scores Across Study Visits',
-                x='Visit',
-                y='Rosenberg Score',
-                color='Intervention')
-            + theme_classic()
-            + scale_y_continuous(expand=(0, 0), limits=[18,28])
-            )
-    rosenberg_plot = rosenberg_plot + annotate("text", x=2, y=max(plot_data['mean']) + 2.5, label="*", size=16, color="black") + \
-        annotate("segment", x=1, xend=3, y=max(plot_data['mean']) +2.25, yend=max(plot_data['mean']) + 2.25, color="black") + \
-            annotate("text", x=2.5, y=max(plot_data['mean']) + 3.5, label="*", size=16, color="black") + \
-                annotate("segment", x=2, xend=3, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black")
-    rosenberg_plot.save('group/behavioural/rosenberg_plot.png')
-
-    qids_df = rqmgp_df.dropna(subset=['qids'])
-    visits = ['1', '3', '4', '5']
-    interventions = ['a', 'b']
-    columns = ['vals', 'mean', 'std_error', 'shap_p']
-    index = ['vis1_inta', 'vis3_inta', 'vis4_inta', 'vis5_inta', 'vis1_intb', 'vis3_intb', 'vis4_intb', 'vis5_intb']
-    qids_stats_df = pd.DataFrame(columns=columns, index=index)
-    for visit in visits:
-        for intervention in interventions:
-            vals = qids_df[(qids_df['visit'] == visit) & (qids_df['intervention'] == intervention)]['qids'].tolist()
-            mean = np.mean(vals)
-            std_error = np.std(vals) / np.sqrt(len(vals))
-            _, shap_p = stats.shapiro(vals)
-            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
-            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
-            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
-            qids_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
-    
-    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    # pandas2ri.activate()
-    # r = ro.r
-    # utils = importr('utils')
-    # utils.chooseCRANmirror(ind=1)
-    # r_script = """
-    # library(lme4)
-    # library(lmerTest)
-    # library(emmeans)
-    # qids_df <- as.data.frame(qids_df)
-    # model <- lmer(qids~visit*intervention + (1|p_id), data = qids_df)
-    # residuals_model <- residuals(model)
-    # shapiro_test_result <- shapiro.test(residuals_model)
-    # print(shapiro_test_result)
-    # if (shapiro_test_result$p.value > 0.05) {
-    # print("QIDS LMM residuals meet normality assumptions.")
-    # anova_result <- anova(model)
-    # print(anova_result)
-    # emmeans_results <- emmeans(model, pairwise ~ visit)
-    # print(summary(emmeans_results))
-    # } else {
-    # print("QIDS LMM residuals do not meet normality assumptions.")
-    # }
-    # """
-    # ro.globalenv['qids_df'] = pandas2ri.py2rpy(qids_df)
-    # result = r(r_script)
-    # print(result)
-
-    data = {
-        'visit': [1, 2, 3, 4, 5] * 2,
-        'intervention': ['A'] * 5 + ['B'] * 5,
-        'mean': [
-            qids_stats_df.loc['vis1_inta', 'mean'], np.nan, qids_stats_df.loc['vis3_inta', 'mean'], 
-            qids_stats_df.loc['vis4_inta', 'mean'], qids_stats_df.loc['vis5_inta', 'mean'], 
-            qids_stats_df.loc['vis1_intb', 'mean'], np.nan, qids_stats_df.loc['vis3_intb', 'mean'], 
-            qids_stats_df.loc['vis4_intb', 'mean'], qids_stats_df.loc['vis5_intb', 'mean'], 
-        ],
-        'std_error': [
-            qids_stats_df.loc['vis1_inta', 'std_error'], np.nan, qids_stats_df.loc['vis3_inta', 'std_error'], 
-            qids_stats_df.loc['vis4_inta', 'std_error'], qids_stats_df.loc['vis5_inta', 'std_error'], 
-            qids_stats_df.loc['vis1_intb', 'std_error'], np.nan, qids_stats_df.loc['vis3_intb', 'std_error'], 
-            qids_stats_df.loc['vis4_intb', 'std_error'], qids_stats_df.loc['vis5_intb', 'std_error'], 
-        ]
-    }
-    plot_data = pd.DataFrame(data)
-    plot_data_line = plot_data[plot_data['visit'] != 2]
-    qids_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention'))
-            + geom_line(data=plot_data_line, size=2)
-            + geom_point(size=4)
-            + geom_errorbar(aes(ymin='mean - std_error',
-                            ymax='mean + std_error'), width=0.2)
-            + labs(title='QIDS Scores Across Study Visits',
-                x='Visit',
-                y='QIDS Score',
-                color='Intervention')
-            + theme_classic()
-            + scale_y_continuous(expand=(0, 0), limits=[8,20], breaks=[8,10,12,14,16,18,20])
-            )
-    qids_plot = qids_plot + annotate("text", x=2, y=max(plot_data['mean']) + 2.5, label="**", size=16, color="black") + \
-        annotate("segment", x=1, xend=3, y=max(plot_data['mean']) +2.25, yend=max(plot_data['mean']) + 2.25, color="black") + \
-            annotate("text", x=2.5, y=max(plot_data['mean']) + 3.5, label="***", size=16, color="black") + \
-                annotate("segment", x=1, xend=4, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black") + \
-                    annotate("text", x=3, y=max(plot_data['mean']) + 4.5, label="***", size=16, color="black") + \
-                        annotate("segment", x=1, xend=5, y=max(plot_data['mean']) +4.25, yend=max(plot_data['mean']) + 4.25, color="black")
-    qids_plot.save('group/behavioural/qids_plot.png')
-
-    madrs_df = rqmgp_df.dropna(subset=['madrs'])
-    visits = ['1', '3']
-    interventions = ['a', 'b']
-    columns = ['vals', 'mean', 'std_error', 'shap_p']
-    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
-    madrs_stats_df = pd.DataFrame(columns=columns, index=index)
-    for visit in visits:
-        for intervention in interventions:
-            vals = madrs_df[(madrs_df['visit'] == visit) & (madrs_df['intervention'] == intervention)]['madrs'].tolist()
-            mean = np.mean(vals)
-            std_error = np.std(vals) / np.sqrt(len(vals))
-            _, shap_p = stats.shapiro(vals)
-            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
-            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
-            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
-            madrs_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
-
-    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    # pandas2ri.activate()
-    # r = ro.r
-    # utils = importr('utils')
-    # utils.chooseCRANmirror(ind=1)
-    # r_script = """
-    # library(lme4)
-    # library(lmerTest)
-    # library(emmeans)
-    # madrs_df <- as.data.frame(madrs_df)
-    # model <- lmer(madrs~visit*intervention + (1|p_id), data = madrs_df)
-    # residuals_model <- residuals(model)
-    # shapiro_test_result <- shapiro.test(residuals_model)
-    # print(shapiro_test_result)
-    # if (shapiro_test_result$p.value > 0.05) {
-    # print("MADRS LMM residuals meet normality assumptions.")
-    # anova_result <- anova(model)
-    # print(anova_result)
-    # } else {
-    # print("MADRS LMM residuals do not meet normality assumptions.")
-    # }
-    # """
-    # ro.globalenv['madrs_df'] = pandas2ri.py2rpy(madrs_df)
-    # result = r(r_script)
-    # print(result)
-
-    data = {
-        'visit': [1, 3] * 2,
-        'intervention': ['A'] * 2 + ['B'] * 2,
-        'mean': [
-            madrs_stats_df.loc['vis1_inta', 'mean'], madrs_stats_df.loc['vis3_inta', 'mean'],
-            madrs_stats_df.loc['vis1_intb', 'mean'], madrs_stats_df.loc['vis3_intb', 'mean']
-        ],
-        'std_error': [
-            madrs_stats_df.loc['vis1_inta', 'std_error'], madrs_stats_df.loc['vis3_inta', 'std_error'], 
-            madrs_stats_df.loc['vis1_intb', 'std_error'], madrs_stats_df.loc['vis3_intb', 'std_error']
-        ]
-    }
-    plot_data = pd.DataFrame(data)
-    plot_data['visit'] = pd.Categorical(
-        plot_data['visit'], categories=[1, 3], ordered=True)
-    madrs_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
-            + geom_line(size=2)
-            + geom_point(size=4)
-            + geom_errorbar(aes(ymin='mean - std_error',
-                            ymax='mean + std_error'), width=0.2)
-            + scale_x_discrete(name='Visit')
-            + labs(title='MADRS Scores Across Study Visits',
-                x='Visit',
-                y='MADRS Score',
-                color='Intervention')
-            + theme_classic()
-            + scale_y_continuous(expand=(0, 0), limits=[16,32])
-            )
-    madrs_plot = madrs_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="***", size=16, color="black") + \
-        annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
-    madrs_plot.save('group/behavioural/madrs_plot.png')
-
-    gad_df = rqmgp_df.dropna(subset=['gad'])
-    visits = ['1', '3']
-    interventions = ['a', 'b']
-    columns = ['vals', 'mean', 'std_error', 'shap_p']
-    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
-    gad_stats_df = pd.DataFrame(columns=columns, index=index)
-    for visit in visits:
-        for intervention in interventions:
-            vals = gad_df[(gad_df['visit'] == visit) & (gad_df['intervention'] == intervention)]['gad'].tolist()
-            mean = np.mean(vals)
-            std_error = np.std(vals) / np.sqrt(len(vals))
-            _, shap_p = stats.shapiro(vals)
-            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
-            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
-            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
-            gad_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
-
-    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    # pandas2ri.activate()
-    # r = ro.r
-    # utils = importr('utils')
-    # utils.chooseCRANmirror(ind=1)
-    # r_script = """
-    # library(lme4)
-    # library(lmerTest)
-    # library(emmeans)
-    # gad_df <- as.data.frame(gad_df)
-    # model <- lmer(gad~visit*intervention + (1|p_id), data = gad_df)
-    # residuals_model <- residuals(model)
-    # shapiro_test_result <- shapiro.test(residuals_model)
-    # print(shapiro_test_result)
-    # if (shapiro_test_result$p.value > 0.05) {
-    # print("GAD LMM residuals meet normality assumptions.")
-    # anova_result <- anova(model)
-    # print(anova_result)
-    # } else {
-    # print("GAD LMM residuals do not meet normality assumptions.")
-    # }
-    # """
-    # ro.globalenv['gad_df'] = pandas2ri.py2rpy(gad_df)
-    # result = r(r_script)
-    # print(result)
-
-    data = {
-        'visit': [1, 3] * 2,
-        'intervention': ['A'] * 2 + ['B'] * 2,
-        'mean': [
-            gad_stats_df.loc['vis1_inta', 'mean'], gad_stats_df.loc['vis3_inta', 'mean'],
-            gad_stats_df.loc['vis1_intb', 'mean'], gad_stats_df.loc['vis3_intb', 'mean']
-        ],
-        'std_error': [
-            gad_stats_df.loc['vis1_inta', 'std_error'], gad_stats_df.loc['vis3_inta', 'std_error'], 
-            gad_stats_df.loc['vis1_intb', 'std_error'], gad_stats_df.loc['vis3_intb', 'std_error']
-        ]
-    }
-    plot_data = pd.DataFrame(data)
-    plot_data['visit'] = pd.Categorical(
-        plot_data['visit'], categories=[1, 3], ordered=True)
-    gad_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
-            + geom_line(size=2)
-            + geom_point(size=4)
-            + geom_errorbar(aes(ymin='mean - std_error',
-                            ymax='mean + std_error'), width=0.2)
-            + scale_x_discrete(name='Visit')
-            + labs(title='GAD Scores Across Study Visits',
-                x='Visit',
-                y='GAD Score',
-                color='Intervention')
-            + theme_classic()
-            + scale_y_continuous(expand=(0, 0), limits=[4,12])
-            )
-    gad_plot.save('group/behavioural/gad_plot.png')
-
-    panas_pos_df = rqmgp_df.dropna(subset=['panas_pos'])
-    visits = ['1', '3']
-    interventions = ['a', 'b']
-    columns = ['vals', 'mean', 'std_error', 'shap_p']
-    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
-    panas_pos_stats_df = pd.DataFrame(columns=columns, index=index)
-    for visit in visits:
-        for intervention in interventions:
-            vals = panas_pos_df[(panas_pos_df['visit'] == visit) & (panas_pos_df['intervention'] == intervention)]['panas_pos'].tolist()
-            mean = np.mean(vals)
-            std_error = np.std(vals) / np.sqrt(len(vals))
-            _, shap_p = stats.shapiro(vals)
-            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
-            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
-            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
-            panas_pos_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
-
-    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    # pandas2ri.activate()
-    # r = ro.r
-    # utils = importr('utils')
-    # utils.chooseCRANmirror(ind=1)
-    # r_script = """
-    # library(lme4)
-    # library(lmerTest)
-    # library(emmeans)
-    # panas_pos_df <- as.data.frame(panas_pos_df)
-    # model <- lmer(panas_pos~visit*intervention + (1|p_id), data = panas_pos_df)
-    # residuals_model <- residuals(model)
-    # shapiro_test_result <- shapiro.test(residuals_model)
-    # print(shapiro_test_result)
-    # if (shapiro_test_result$p.value > 0.05) {
-    # print("PANAS Positive LMM residuals meet normality assumptions.")
-    # anova_result <- anova(model)
-    # print(anova_result)
-    # } else {
-    # print("PANAS Positive LMM residuals do not meet normality assumptions.")
-    # }
-    # """
-    # ro.globalenv['panas_pos_df'] = pandas2ri.py2rpy(panas_pos_df)
-    # result = r(r_script)
-    # print(result)
-
-    data = {
-        'visit': [1, 3] * 2,
-        'intervention': ['A'] * 2 + ['B'] * 2,
-        'mean': [
-            panas_pos_stats_df.loc['vis1_inta', 'mean'], panas_pos_stats_df.loc['vis3_inta', 'mean'],
-            panas_pos_stats_df.loc['vis1_intb', 'mean'], panas_pos_stats_df.loc['vis3_intb', 'mean']
-        ],
-        'std_error': [
-            panas_pos_stats_df.loc['vis1_inta', 'std_error'], panas_pos_stats_df.loc['vis3_inta', 'std_error'], 
-            panas_pos_stats_df.loc['vis1_intb', 'std_error'], panas_pos_stats_df.loc['vis3_intb', 'std_error']
-        ]
-    }
-    plot_data = pd.DataFrame(data)
-    plot_data['visit'] = pd.Categorical(
-        plot_data['visit'], categories=[1, 3], ordered=True)
-    panas_pos_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
-            + geom_line(size=2)
-            + geom_point(size=4)
-            + geom_errorbar(aes(ymin='mean - std_error',
-                            ymax='mean + std_error'), width=0.2)
-            + scale_x_discrete(name='Visit')
-            + labs(title='PANAS Positive Scores Across Study Visits',
-                x='Visit',
-                y='PANAS Positive Score',
-                color='Intervention')
-            + theme_classic()
-            + scale_y_continuous(expand=(0, 0), limits=[18,28])
-            )
-    panas_pos_plot = panas_pos_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="*", size=16, color="black") + \
-        annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
-    panas_pos_plot.save('group/behavioural/panas_pos_plot.png')
-
-    panas_neg_df = rqmgp_df.dropna(subset=['panas_neg'])
-    visits = ['1', '3']
-    interventions = ['a', 'b']
-    columns = ['vals', 'mean', 'std_error', 'shap_p']
-    index = ['vis1_inta', 'vis3_inta', 'vis1_intb', 'vis3_intb']
-    panas_neg_stats_df = pd.DataFrame(columns=columns, index=index)
-    for visit in visits:
-        for intervention in interventions:
-            vals = panas_neg_df[(panas_neg_df['visit'] == visit) & (panas_neg_df['intervention'] == intervention)]['panas_neg'].tolist()
-            mean = np.mean(vals)
-            std_error = np.std(vals) / np.sqrt(len(vals))
-            _, shap_p = stats.shapiro(vals)
-            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'vals'] = vals
-            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'mean'] = mean
-            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'std_error'] = std_error
-            panas_neg_stats_df.loc[f'vis{visit}_int{intervention}', 'shap_p'] = shap_p
-
-    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
-    # pandas2ri.activate()
-    # r = ro.r
-    # utils = importr('utils')
-    # utils.chooseCRANmirror(ind=1)
-    # r_script = """
-    # library(lme4)
-    # library(lmerTest)
-    # library(emmeans)
-    # panas_neg_df <- as.data.frame(panas_neg_df)
-    # model <- lmer(panas_neg~visit*intervention + (1|p_id), data = panas_neg_df)
-    # residuals_model <- residuals(model)
-    # shapiro_test_result <- shapiro.test(residuals_model)
-    # print(shapiro_test_result)
-    # if (shapiro_test_result$p.value > 0.05) {
-    # print("PANAS Negative LMM residuals meet normality assumptions.")
-    # anova_result <- anova(model)
-    # print(anova_result)
-    # } else {
-    # print("PANAS Negative LMM residuals do not meet normality assumptions.")
-    # }
-    # """
-    # ro.globalenv['panas_neg_df'] = pandas2ri.py2rpy(panas_neg_df)
-    # result = r(r_script)
-    # print(result)
-
-    data = {
-        'visit': [1, 3] * 2,
-        'intervention': ['A'] * 2 + ['B'] * 2,
-        'mean': [
-            panas_neg_stats_df.loc['vis1_inta', 'mean'], panas_neg_stats_df.loc['vis3_inta', 'mean'],
-            panas_neg_stats_df.loc['vis1_intb', 'mean'], panas_neg_stats_df.loc['vis3_intb', 'mean']
-        ],
-        'std_error': [
-            panas_neg_stats_df.loc['vis1_inta', 'std_error'], panas_neg_stats_df.loc['vis3_inta', 'std_error'], 
-            panas_neg_stats_df.loc['vis1_intb', 'std_error'], panas_neg_stats_df.loc['vis3_intb', 'std_error']
-        ]
-    }
-    plot_data = pd.DataFrame(data)
-    plot_data['visit'] = pd.Categorical(
-        plot_data['visit'], categories=[1, 3], ordered=True)
-    panas_neg_plot = (ggplot(plot_data, aes(x='visit', y='mean', color='intervention', group='intervention'))
-            + geom_line(size=2)
-            + geom_point(size=4)
-            + geom_errorbar(aes(ymin='mean - std_error',
-                            ymax='mean + std_error'), width=0.2)
-            + scale_x_discrete(name='Visit')
-            + labs(title='PANAS Negative Scores Across Study Visits',
-                x='Visit',
-                y='PANAS Negative Score',
-                color='Intervention')
-            + theme_classic()
-            + scale_y_continuous(expand=(0, 0), limits=[20,30])
-            )
-    panas_neg_plot.save('group/behavioural/panas_neg_plot.png')
-
-
 
 #endregion

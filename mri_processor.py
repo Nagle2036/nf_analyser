@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-###TO DO###
+### TO DO ###
 # Add percentage completion metric.
-# Output mri_processor.py Bash terminal outputs / prints into .txt log file
+# Output mri_processor.py Bash terminal outputs / prints into .txt log file.
 
 #region 1) IMPORT PACKAGES.
 
@@ -60,8 +60,8 @@ if answer != 'y':
 
 #region 3) BOX FILES DOWNLOAD TO SERVER.
 
-answer2 = input("Would you like to update your files from Box? (y/n)\n")
-if answer2 == 'y':
+answer = input("Would you like to update your files from Box? (y/n)\n")
+if answer == 'y':
     p_id = input("Enter the participant's ID (e.g. P001).\n")
     working_dir = os.getcwd()
     p_id_folder = os.path.join(os.getcwd(), p_id)
@@ -248,8 +248,8 @@ if answer2 == 'y':
 
 #region 4) THERMOMETER ANALYSIS.
 
-answer5 = input("Would you like to execute thermometer analysis? (y/n)\n")
-if answer5 == 'y':
+answer = input("Would you like to execute thermometer analysis? (y/n)\n")
+if answer == 'y':
 
 
 
@@ -457,8 +457,8 @@ if answer5 == 'y':
 
 #region 5) BEHAVIOURAL ANALYSIS.
 
-answer7 = input("Would you like to execute behavioural analysis? (y/n)\n")
-if answer7 == 'y':
+answer = input("Would you like to execute behavioural analysis? (y/n)\n")
+if answer == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
@@ -1347,8 +1347,8 @@ if answer7 == 'y':
 
 #region 6) FMRI PREPARATION AND PREPROCESSING.
 
-answer4 = input("Would you like to execute fMRI preprocessing? (y/n)\n")
-if answer4 == 'y':
+answer = input("Would you like to execute fMRI preprocessing? (y/n)\n")
+if answer == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
@@ -1540,8 +1540,8 @@ if answer4 == 'y':
 
 #region 8) SUSCEPTIBILITY ANALYSIS.
 
-answer6 = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
-if answer6 == 'y':
+answer = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
+if answer == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']

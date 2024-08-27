@@ -1412,14 +1412,13 @@ if answer == 'y':
         
     # Step 2: Convert DICOMS to BIDS Format.
     print("\n###### STEP 2: CONVERT DICOMS TO BIDS FORMAT ######")
-    heudiconv_subject_codes = ['004', '006', '020', '030', '059', '078', '093', '094', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
     if p_id == 'ALL':
-        participants_to_iterate = heudiconv_subject_codes
-    else:
-        if p_id.startswith('P'):
+        participants_to_iterate = [p[1:] if p.startswith('P') else p for p in participants_to_iterate]
+    for p in participants_to_iterate:
+        if p.startswith('P'):
             p_id_stripped = p_id.replace('P', '')
-            participants_to_iterate = [p_id_stripped]
-    for p_id_stripped in participants_to_iterate:
+        else:
+            p_id_stripped = p
         path = os.path.join(os.getcwd(), f'P{p_id_stripped}', 'data', 'neurofeedback')
         cisc_folder = None
         for folder_name in os.listdir(path):
@@ -1437,8 +1436,10 @@ if answer == 'y':
     
     # Step 3: Label Fieldmaps.
     print("\n###### STEP 3: LABEL FIELDMAPS ######")
-    good_participants = ['059', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
-    for p_id_stripped in participants_to_iterate:
+    good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    for p_id in participants_to_iterate:
+        if p_id.startswith('P'):
+            p_id_stripped = p_id.replace('P', '')
         if p_id_stripped in good_participants:
             print(f"Labelling fieldmap JSON files for P{p_id_stripped}...")
             func_directory = f"bids/sub-{p_id_stripped}/func"

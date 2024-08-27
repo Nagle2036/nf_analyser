@@ -1412,14 +1412,14 @@ if answer == 'y':
         
     # Step 2: Convert DICOMS to BIDS Format.
     print("\n###### STEP 2: CONVERT DICOMS TO BIDS FORMAT ######")
-    for p_id_stripped in participants_to_iterate:
+    heudiconv_subject_codes = ['004', '006', '020', '030', '059', '078', '093', '094', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
+    if p_id == 'ALL':
+        participants_to_iterate = heudiconv_subject_codes
+    else:
         if p_id.startswith('P'):
             p_id_stripped = p_id.replace('P', '')
-        heudiconv_subject_codes = ['004', '006', '020', '030', '059', '078', '093', '094', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
-        if p_id == 'ALL':
-            participants_to_iterate = heudiconv_subject_codes
-        else:
             participants_to_iterate = [p_id_stripped]
+    for p_id_stripped in participants_to_iterate:
         path = os.path.join(os.getcwd(), f'P{p_id_stripped}', 'data', 'neurofeedback')
         cisc_folder = None
         for folder_name in os.listdir(path):

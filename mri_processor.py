@@ -1520,7 +1520,7 @@ if answer == 'y':
     """
     with open('fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
-    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'])
+    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub -l h_vmem=4G /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'])
     
     # Step X: XXX
     if p_id == 'ALL':

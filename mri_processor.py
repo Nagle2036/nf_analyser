@@ -1356,6 +1356,10 @@ if answer == 'y':
         participants_to_iterate = participants
     else:
         participants_to_iterate = [p_id]
+
+    print(p_id)
+    print(participants_to_iterate)
+
     code_folder = 'code'
     bids_folder = os.path.join(os.getcwd(), 'bids')
     restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
@@ -1412,14 +1416,8 @@ if answer == 'y':
         
     # Step 2: Convert DICOMS to BIDS Format.
     print("\n###### STEP 2: CONVERT DICOMS TO BIDS FORMAT ######")
-    if p_id == 'ALL':
-        participants_to_iterate = [p[1:] if p.startswith('P') else p for p in participants_to_iterate]
-    for p in participants_to_iterate:
-        if p.startswith('P'):
-            p_id_stripped = p_id.replace('P', '')
-        else:
-            p_id_stripped = p
-        path = os.path.join(os.getcwd(), f'P{p_id_stripped}', 'data', 'neurofeedback')
+    for p_id in participants_to_iterate:
+        path = os.path.join(os.getcwd(), f'{p_id}', 'data', 'neurofeedback')
         cisc_folder = None
         for folder_name in os.listdir(path):
             if "CISC" in folder_name:
@@ -1428,6 +1426,7 @@ if answer == 'y':
         if cisc_folder is None:
             print("No 'CISC' folder found in the 'neurofeedback' directory.")
             exit(1)
+        p_id_stripped = p_id.replace('P', '')
         if not os.path.exists(f"bids/sub-{p_id_stripped}"):
             print(f"Converting DICOMs to BIDS Nifti format for P{p_id_stripped}...")
             subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/code/heuristic.py', '-s', f'{p_id_stripped}', '-c', 'dcm2niix', '-b', '--overwrite'])
@@ -1438,10 +1437,9 @@ if answer == 'y':
     print("\n###### STEP 3: LABEL FIELDMAPS ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     for p_id in participants_to_iterate:
-        if p_id.startswith('P'):
+        if p_id in good_participants:
+            print(f"Labelling fieldmap JSON files for {p_id}...")
             p_id_stripped = p_id.replace('P', '')
-        if p_id_stripped in good_participants:
-            print(f"Labelling fieldmap JSON files for P{p_id_stripped}...")
             func_directory = f"bids/sub-{p_id_stripped}/func"
             func_files = []
             for file_name in os.listdir(func_directory):
@@ -1467,7 +1465,7 @@ if answer == 'y':
                     print(f"{fieldmap_json} already labelled for P{p_id_stripped}. Skipping process.")
 
     # Step 4: Copy BIDS Niftis and singularity image to cluster server.
-    print("\n###### STEP 4: LABEL FIELDMAPS ######")
+    print("\n###### STEP 4: COPY BIDS NIFTIS AND SINGULARITY IMAGE TO CLUSTER ######")
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids'):
         print("Copying BIDS files for all participants to cluster...")
         shutil.copytree('bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')
@@ -1475,7 +1473,8 @@ if answer == 'y':
         print("Copying fmriprep singularity image to cluster...")
         shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_23.2.2.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg')
     
-    # Step 4: Run fmriprep on cluster server.
+    # Step 5: Run fmriprep on cluster server.
+    print("\n###### STEP 5: RUN FMRIPREP ON CLUSTER ######")
     fmriprep_cluster_script = r"""
     #!/bin/bash
     #$ -N bic_fmriprep # job name #one subject test

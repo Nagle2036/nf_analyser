@@ -1410,15 +1410,16 @@ if answer == 'y':
         bids_folder = os.path.join(os.getcwd(), 'bids')
         os.makedirs(bids_folder, exist_ok=True)
         
-    # Step 1: Convert Raw DICOMS to BIDS Format.
-    if p_id.startswith('P'):
-        p_id_stripped = p_id.replace('P', '')
-    heudiconv_subject_codes = ['004', '006', '020', '030', '059', '078', '093', '094', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
-    if p_id == 'ALL':
-        participants_to_iterate = heudiconv_subject_codes
-    else:
-        participants_to_iterate = [p_id_stripped]
+    # Step 2: Convert DICOMS to BIDS Format.
+    print("\n###### STEP 2: CONVERT DICOMS TO BIDS FORMAT ######")
     for p_id_stripped in participants_to_iterate:
+        if p_id.startswith('P'):
+            p_id_stripped = p_id.replace('P', '')
+        heudiconv_subject_codes = ['004', '006', '020', '030', '059', '078', '093', '094', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
+        if p_id == 'ALL':
+            participants_to_iterate = heudiconv_subject_codes
+        else:
+            participants_to_iterate = [p_id_stripped]
         path = os.path.join(os.getcwd(), f'P{p_id_stripped}', 'data', 'neurofeedback')
         cisc_folder = None
         for folder_name in os.listdir(path):
@@ -1434,7 +1435,8 @@ if answer == 'y':
         else: 
             print(f"DICOMs already converted to BIDS Nifti format for P{p_id_stripped}. Skipping process.")
     
-    # Step 2: Label Fieldmaps.
+    # Step 3: Label Fieldmaps.
+    print("\n###### STEP 3: LABEL FIELDMAPS ######")
     good_participants = ['059', '100', '107', '122', '125', '127', '128', '136', '145', '155', '199', '215', '216']
     for p_id_stripped in participants_to_iterate:
         if p_id_stripped in good_participants:
@@ -1463,7 +1465,8 @@ if answer == 'y':
                 else:
                     print(f"{fieldmap_json} already labelled for P{p_id_stripped}. Skipping process.")
 
-    # Step 3: Copy BIDS Niftis and singularity image to cluster server. 
+    # Step 4: Copy BIDS Niftis and singularity image to cluster server.
+    print("\n###### STEP 4: LABEL FIELDMAPS ######")
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids'):
         print("Copying BIDS files for all participants to cluster...")
         shutil.copytree('bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')

@@ -1480,8 +1480,8 @@ if answer == 'y':
     #$ -e /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs
     #$ -l m_mem_free=8G 
     #$ -l 'h=!node001&!node069&!node072&!node076&!node077' # nodes NOT to use 
-    #$ -t 1-20 #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n
-    #$ -tc 10 #maximum tasks running simultaeneously .
+    #$ -t 1 #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n
+    #$ -tc 4 #maximum tasks running simultaneously .
     module add sge
     DATA_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids
     SCRATCH_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch

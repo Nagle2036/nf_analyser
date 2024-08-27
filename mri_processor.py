@@ -1347,7 +1347,7 @@ if answer == 'y':
 
 #region 6) FMRI PREPARATION AND PREPROCESSING.
 
-answer = input("Would you like to execute fMRI preprocessing? (y/n)\n")
+answer = input("Would you like to perform fMRI preparation and preprocessing? (y/n)\n")
 if answer == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
@@ -1356,10 +1356,6 @@ if answer == 'y':
         participants_to_iterate = participants
     else:
         participants_to_iterate = [p_id]
-
-    print(p_id)
-    print(participants_to_iterate)
-
     code_folder = 'code'
     bids_folder = os.path.join(os.getcwd(), 'bids')
     restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
@@ -1413,6 +1409,7 @@ if answer == 'y':
         os.makedirs(group_preproc_folder, exist_ok=True)
         bids_folder = os.path.join(os.getcwd(), 'bids')
         os.makedirs(bids_folder, exist_ok=True)
+    print("Directories created.")
         
     # Step 2: Convert DICOMS to BIDS Format.
     print("\n###### STEP 2: CONVERT DICOMS TO BIDS FORMAT ######")
@@ -1432,7 +1429,8 @@ if answer == 'y':
             subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/code/heuristic.py', '-s', f'{p_id_stripped}', '-c', 'dcm2niix', '-b', '--overwrite'])
         else: 
             print(f"DICOMs already converted to BIDS Nifti format for P{p_id_stripped}. Skipping process.")
-    
+    print("BIDS conversion completed.")
+
     # Step 3: Label Fieldmaps.
     print("\n###### STEP 3: LABEL FIELDMAPS ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
@@ -1472,7 +1470,8 @@ if answer == 'y':
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg'):
         print("Copying fmriprep singularity image to cluster...")
         shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_23.2.2.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg')
-    
+    print("BIDS Niftis and singularity image copied successfully.")
+
     # Step 5: Run fmriprep on cluster server.
     print("\n###### STEP 5: RUN FMRIPREP ON CLUSTER ######")
     fmriprep_cluster_script = r"""
@@ -1521,7 +1520,7 @@ if answer == 'y':
     """
     with open('fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
-    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub -l h_vmem=4G /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'])
+    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'])
     
     # Step X: XXX
     if p_id == 'ALL':

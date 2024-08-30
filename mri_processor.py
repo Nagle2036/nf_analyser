@@ -1527,7 +1527,7 @@ if answer == 'y':
     echo Done
     exit
     """
-    textwrap.dedent(fmriprep_cluster_script)
+    frmriprep_cluster_script = textwrap.dedent(fmriprep_cluster_script)
     with open('bids/fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
     subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])

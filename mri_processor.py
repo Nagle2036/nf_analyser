@@ -40,6 +40,7 @@ from plotnine import *
 from scipy import stats
 from pingouin import rm_anova
 import json
+import textwrap
 # import rpy2.robjects as ro
 # from rpy2.robjects import pandas2ri
 # from rpy2.robjects.packages import importr
@@ -1467,23 +1468,31 @@ if answer == 'y':
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids'):
         print("Copying BIDS files for all participants to cluster...")
         shutil.copytree('bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')
-    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg'):
+    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg'):
         print("Copying fmriprep singularity image to cluster...")
-        shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_23.2.2.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg')
+        shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_24.0.1.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg')
     print("BIDS Niftis and singularity image copied successfully.")
 
     # Step 5: Run fmriprep on cluster server.
     print("\n###### STEP 5: RUN FMRIPREP ON CLUSTER ######")
     fmriprep_cluster_script = r"""
     #!/bin/bash
-    #$ -N bic_fmriprep # job name #one subject test
-    #$ -pe openmp 5 # parralel environment #how many parallel enviroments
-    #$ -o /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs
-    #$ -e /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs
+    #$ -N bic_fmriprep          # job name #one subject test
+    #$ -pe openmp 5             # parallel environment #how many CPU cores to use
+    # # Logging directory o=stdout, e=stderror, -j join them together or not? yes/no (y/n)
+    # #$ -j y
+    #$ -o /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs/
+    #$ -e /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs/
+    # # Memory assigned soft but makes sure it is available
     #$ -l m_mem_free=8G 
+    # # Memory HARD limit
+    #$ -l h_vmem=8G
     #$ -l 'h=!node001&!node069&!node072&!node076&!node077' # nodes NOT to use 
-    #$ -t 1 #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n
-    #$ -tc 4 #maximum tasks running simultaneously .
+    # # Syntax for task array start-stop:step eg. 1-1000:10 == [1,11,21,31,41...]
+    #$ -t 1-20  #This sets SGE_TASK_ID! Set it equal to number of subjects #you can put 1 or 1-n
+    # # Tasks Concurrent (Ie max number of concurrent)
+    #$ -tc 20 #maximum tasks running simultaneously .
+    #$ -jc test.long        # Short=2h, test.default= 8h, test.long=7d 21h, verlong.default=30d
     module add sge
     DATA_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids
     SCRATCH_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch
@@ -1501,33 +1510,33 @@ if answer == 'y':
     SUBJECT=${arr[i]}
     echo $SUBJECT
     singularity run --cleanenv \
-        -B ${DATA_DIR}:/data \
-        -B ${OUT_DIR}/:/out \
-        -B ${SCRATCH_DIR}:/wd \
-        -B ${LICENSE}:/license \
-        /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_23.2.2.simg \
-        --skip_bids_validation \
-        --participant-label ${SUBJECT} \
-        --omp-nthreads 5 --nthreads 5 --mem_mb 30000 \
-        --low-mem --use-aroma\
-        --output-spaces MNI152NLin2009cAsym:res-2 \
-        --fs-license-file /license \
-        --work-dir /wd \
-        --cifti-output 91k \
-        /data /out/ participant
+            -B ${DATA_DIR}:/data \
+            -B ${OUT_DIR}/:/out \
+            -B ${SCRATCH_DIR}:/wd \
+            -B ${LICENSE}:/license \
+            /mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg \
+            --skip_bids_validation \
+            --participant-label ${SUBJECT} \
+            --omp-nthreads 5 --nthreads 5 --mem_mb 30000 \
+            --low-mem --use-aroma\
+            --output-spaces MNI152NLin2009cAsym:res-2 \
+            --fs-license-file /license \
+            --work-dir /wd \
+            --cifti-output 91k \
+            /data /out/ participant
     echo Done
     exit
     """
-    with open('fmriprep_cluster.sh', 'w') as f:
+    textwrap.dedent(fmriprep_cluster_script)
+    with open('bids/fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
-    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub -l h_vmem=10G /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmriprep_cluster.sh'])
+    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])
     
     # Step X: XXX
     if p_id == 'ALL':
         participants_to_iterate = participants
     else:
         participants_to_iterate = [p_id]
-
 
     # fmriprep clean up
     # move remaining fmriprep output files back onto cisc2

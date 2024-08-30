@@ -1518,7 +1518,7 @@ singularity run --cleanenv \
         --skip_bids_validation \
         --participant-label ${SUBJECT} \
         --omp-nthreads 5 --nthreads 5 --mem_mb 30000 \
-        --low-mem --use-aroma True \
+        --low-mem \
         --output-spaces MNI152NLin2009cAsym:res-2 \
         --fs-license-file /license \
         --work-dir /wd \

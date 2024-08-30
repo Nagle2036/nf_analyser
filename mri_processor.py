@@ -1527,10 +1527,9 @@ singularity run --cleanenv \
 echo Done
 exit
 """
-    # frmriprep_cluster_script = textwrap.dedent(fmriprep_cluster_script)
     with open('bids/fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
-    # subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])
+    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])
     
     # Step X: XXX
     if p_id == 'ALL':

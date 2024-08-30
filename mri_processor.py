@@ -1526,7 +1526,7 @@ if answer == 'y':
             /data /out/ participant
     echo Done
     exit
-    """
+"""
     frmriprep_cluster_script = textwrap.dedent(fmriprep_cluster_script)
     with open('bids/fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)

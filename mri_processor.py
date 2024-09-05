@@ -1410,6 +1410,12 @@ if answer == 'y':
         os.makedirs(group_preproc_folder, exist_ok=True)
         bids_folder = os.path.join(os.getcwd(), 'bids')
         os.makedirs(bids_folder, exist_ok=True)
+        derivatives_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives'
+        os.makedirs(derivatives_folder, exist_ok=True)
+        scratch_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch'
+        os.makedirs(scratch_folder, exist_ok=True)
+        logs_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs'
+        os.makedirs(logs_folder, exist_ok=True)
     print("Directories created.")
         
     # Step 2: Convert DICOMS to BIDS Format.
@@ -1537,10 +1543,14 @@ exit
     if os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/desc-aseg_dseg.tsv'):
         # fmriprepcleanup_sim_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprepcleanup_sim' # for simulation purposes.
         # os.makedirs(fmriprepcleanup_sim_folder, exist_ok=True)
-        subprocess.run(['python', 'bids/fMRIPrepCleanup.py', '-dir', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', '-method', 'delete', '-out_path', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprepcleanup_sim'])
+        subprocess.run(['python', 'bids/fMRIPrepCleanup.py', '-dir', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', '-method', 'delete'])
     if not os.path.exists('bids/fmriprep_derivatives'):
         print("Copying fMRIPrep derivatives from cluster server back to analysis server...")
         shutil.copytree('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', 'bids/fmriprep_derivatives')
+    shutil.rmtree(derivatives_folder)
+    shutil.rmtree(scratch_folder)
+    shutil.rmtree(logs_folder)
+
 
 
 

@@ -1473,7 +1473,7 @@ if answer == 'y':
         shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_24.0.1.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg')
     print("BIDS Niftis and singularity image copied successfully.")
 
-    # Step 5: Run fmriprep on cluster server.
+    # Step 5: Run fMRIPrep on cluster server.
     print("\n###### STEP 5: RUN FMRIPREP ON CLUSTER ######")
     fmriprep_cluster_script = r"""
 #!/bin/bash
@@ -1529,8 +1529,19 @@ exit
 """
     with open('bids/fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
-    subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])
-    
+    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/sub-004'):
+        subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])
+
+    # Step 6: Clean up fMRIPrep files.
+    print("\n###### STEP 6: CLEAN UP FMRIPREP FILES ######")
+    if os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch'):
+        subprocess.run(['python', 'bids/fMRIPrepCleanup.py', '-dir', 'bids', '-method', 'sim_link', '-out_path', 'fmriprepcleanup_sim'])
+
+
+
+
+
+
     # Step X: XXX
     if p_id == 'ALL':
         participants_to_iterate = participants

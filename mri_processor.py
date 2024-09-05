@@ -1532,13 +1532,15 @@ exit
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/sub-004'):
         subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])
 
-    # Step 6: Clean up fMRIPrep files.
-    print("\n###### STEP 6: CLEAN UP FMRIPREP FILES ######")
-    if os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch'):
-        fmriprepcleanup_sim_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprepcleanup_sim'
-        os.makedirs(fmriprepcleanup_sim_folder, exist_ok=True)
-        subprocess.run(['python', 'bids/fMRIPrepCleanup.py', '-dir', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', '-method', 'sim_link', '-out_path', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprepcleanup_sim'])
-
+    # Step 6: Clean up fMRIPrep files and move back to main analysis server.
+    print("\n###### STEP 6: CLEAN UP FMRIPREP FILES AND MOVE TO MAIN ANALYSIS SERVER ######")
+    if os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/desc-aseg_dseg.tsv'):
+        # fmriprepcleanup_sim_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprepcleanup_sim' # for simulation purposes.
+        # os.makedirs(fmriprepcleanup_sim_folder, exist_ok=True)
+        subprocess.run(['python', 'bids/fMRIPrepCleanup.py', '-dir', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', '-method', 'delete', '-out_path', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprepcleanup_sim'])
+    if not os.path.exists('bids/fmriprep_derivatives'):
+        print("Copying fMRIPrep derivatives from cluster server back to analysis server...")
+        shutil.copytree('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', 'bids/fmriprep_derivatives')
 
 
 

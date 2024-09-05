@@ -1535,6 +1535,8 @@ exit
     # Step 6: Clean up fMRIPrep files.
     print("\n###### STEP 6: CLEAN UP FMRIPREP FILES ######")
     if os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch'):
+        fmriprepcleanup_sim_folder = os.path.join(os.getcwd(), 'fmriprepcleanup_sim')
+        os.makedirs(fmriprepcleanup_sim_folder, exist_ok=True)
         subprocess.run(['python', 'bids/fMRIPrepCleanup.py', '-dir', 'bids', '-method', 'sim_link', '-out_path', 'fmriprepcleanup_sim'])
 
 

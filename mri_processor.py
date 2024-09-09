@@ -1486,6 +1486,8 @@ if answer == 'y':
             print("Copying fmriprep singularity image to cluster...")
             shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_24.0.1.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg')
         print("BIDS Niftis and singularity image copied successfully.")
+    else:
+        print("Skipping process.")
 
     # Step 5: Run fMRIPrep on Cluster.
     print("\n###### STEP 5: RUN FMRIPREP ON CLUSTER ######")
@@ -1575,12 +1577,12 @@ exit
         func_files = []
         for file_name in os.listdir(func_directory):
             if file_name.endswith("bold.nii.gz"):
-                file_path = os.path.join("func", file_name)
+                file_path = os.path.join(func_directory, file_name)
                 func_files.append(file_path)
         mask_files = []
         for file_name in os.listdir(func_directory):
             if file_name.endswith("res-2_desc-brain_mask.nii.gz"):
-                file_path = os.path.join("func", file_name)
+                file_path = os.path.join(func_directory, file_name)
                 mask_files.append(file_path)
         output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run01_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run02_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run03_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run04_MNI152_func_ss.nii.gz"]
         if not os.path.exists(output_files[0]):
@@ -1592,12 +1594,12 @@ exit
         func_files = []
         for file_name in os.listdir(fully_preproc_func_directory):
             if file_name.endswith(".nii.gz"):
-                file_path = os.path.join("func", file_name)
+                file_path = os.path.join(fully_preproc_func_directory, file_name)
                 func_files.append(file_path)
         mask_files = []
         for file_name in os.listdir(func_directory):
             if file_name.endswith("res-2_desc-brain_mask.nii.gz"):
-                file_path = os.path.join("func", file_name)
+                file_path = os.path.join(func_directory, file_name)
                 mask_files.append(file_path)
         output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run01_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run02_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run03_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run04_MNI152_func_ss_smoothed.nii.gz"]
         if not os.path.exists(output_files[0]):
@@ -1612,12 +1614,12 @@ exit
         func_files = []
         for file_name in os.listdir(fully_preproc_func_directory):
             if file_name.endswith("smoothed.nii.gz"):
-                file_path = os.path.join("func", file_name)
+                file_path = os.path.join(fully_preproc_func_directory, file_name)
                 func_files.append(file_path)
         mask_files = []
         for file_name in os.listdir(func_directory):
             if file_name.endswith("res-2_desc-brain_mask.nii.gz"):
-                file_path = os.path.join("func", file_name)
+                file_path = os.path.join(func_directory, file_name)
                 mask_files.append(file_path)
         output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run01_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run02_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run03_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run04_MNI152_func_fully_preproc.nii.gz"]
         if not os.path.exists(output_files[0]):

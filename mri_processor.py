@@ -456,9 +456,9 @@ if answer == 'y':
 
 #endregion
 
-#region 5) BEHAVIOURAL ANALYSIS.
+#region 5) CLINICAL ANALYSIS.
 
-answer = input("Would you like to execute behavioural analysis? (y/n)\n")
+answer = input("Would you like to execute clinical analysis? (y/n)\n")
 if answer == 'y':
     p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
@@ -467,25 +467,25 @@ if answer == 'y':
         participants_to_iterate = participants
     else:
         participants_to_iterate = [p_id]
-    restart = input("Would you like to start the behavioural analysis from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/behavioural' and 'group' folders associated with them. (y/n)\n")
+    restart = input("Would you like to start the clinical analysis from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/clinical' and 'group' folders associated with them. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
             for p_id in participants_to_iterate:
-                behavioural_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'behavioural')
-                if os.path.exists(behavioural_folder):
-                    print(f"Deleting {p_id} behavioural folder...")
-                    shutil.rmtree(behavioural_folder)
-                    print(f"{p_id} behavioural folder successfully deleted.")
+                clinical_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'clinical')
+                if os.path.exists(clinical_folder):
+                    print(f"Deleting {p_id} clinical folder...")
+                    shutil.rmtree(clinical_folder)
+                    print(f"{p_id} clinical folder successfully deleted.")
                 else:
-                    print(f"{p_id} behavioural folder does not exist.")
-                group_behavioural_folder = os.path.join(os.getcwd(), 'group', 'behavioural')
-            if os.path.exists(group_behavioural_folder):
-                print(f"Deleting {p_id} group/behavioural folder...")
-                shutil.rmtree(group_behavioural_folder)
-                print(f"{p_id} group/behavioural folder successfully deleted.")
+                    print(f"{p_id} clinical folder does not exist.")
+                group_clinical_folder = os.path.join(os.getcwd(), 'group', 'clinical')
+            if os.path.exists(group_clinical_folder):
+                print(f"Deleting {p_id} group/clinical folder...")
+                shutil.rmtree(group_clinical_folder)
+                print(f"{p_id} group/clinical folder successfully deleted.")
             else:
-                print(f"{p_id} group/behavioural folder does not exist.")
+                print(f"{p_id} group/clinical folder does not exist.")
         else:
             sys.exit()
 
@@ -496,12 +496,12 @@ if answer == 'y':
         os.makedirs(p_id_folder, exist_ok=True)
         analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
         os.makedirs(analysis_folder, exist_ok=True)
-        behavioural_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'behavioural')
-        os.makedirs(behavioural_folder, exist_ok=True)
+        clinical_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'clinical')
+        os.makedirs(clinical_folder, exist_ok=True)
         group_folder = os.path.join(os.getcwd(), "group")
         os.makedirs(group_folder, exist_ok=True)
-        group_behavioural_folder = os.path.join(os.getcwd(), "group", "behavioural")
-        os.makedirs(group_behavioural_folder, exist_ok=True)
+        group_clinical_folder = os.path.join(os.getcwd(), "group", "clinical")
+        os.makedirs(group_clinical_folder, exist_ok=True)
 
     # Step 2: Access eCRF document and extract relevant data into dataframe.
     print("\n###### STEP 2: ACCESS eCRF FILE AND CONVERT TO DATAFRAME ######")
@@ -790,7 +790,7 @@ if answer == 'y':
         annotate("segment", x=1, xend=3, y=max(plot_data['mean']) +2.25, yend=max(plot_data['mean']) + 2.25, color="black") + \
             annotate("text", x=2.5, y=max(plot_data['mean']) + 3.5, label="*", size=16, color="black") + \
                 annotate("segment", x=2, xend=3, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black")
-    rosenberg_plot.save('group/behavioural/rosenberg_plot.png')
+    rosenberg_plot.save('group/clinical/rosenberg_plot.png')
 
     qids_df = rqmgp_df.dropna(subset=['qids'])
     visits = ['1', '3', '4', '5']
@@ -873,7 +873,7 @@ if answer == 'y':
                 annotate("segment", x=1, xend=4, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black") + \
                     annotate("text", x=3, y=max(plot_data['mean']) + 4.5, label="***", size=16, color="black") + \
                         annotate("segment", x=1, xend=5, y=max(plot_data['mean']) +4.25, yend=max(plot_data['mean']) + 4.25, color="black")
-    qids_plot.save('group/behavioural/qids_plot.png')
+    qids_plot.save('group/clinical/qids_plot.png')
 
     madrs_df = rqmgp_df.dropna(subset=['madrs'])
     visits = ['1', '3']
@@ -948,7 +948,7 @@ if answer == 'y':
             )
     madrs_plot = madrs_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="***", size=16, color="black") + \
         annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
-    madrs_plot.save('group/behavioural/madrs_plot.png')
+    madrs_plot.save('group/clinical/madrs_plot.png')
 
     gad_df = rqmgp_df.dropna(subset=['gad'])
     visits = ['1', '3']
@@ -1021,7 +1021,7 @@ if answer == 'y':
             + theme_classic()
             + scale_y_continuous(expand=(0, 0), limits=[4,12])
             )
-    gad_plot.save('group/behavioural/gad_plot.png')
+    gad_plot.save('group/clinical/gad_plot.png')
 
     panas_pos_df = rqmgp_df.dropna(subset=['panas_pos'])
     visits = ['1', '3']
@@ -1096,7 +1096,7 @@ if answer == 'y':
             )
     panas_pos_plot = panas_pos_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="*", size=16, color="black") + \
         annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
-    panas_pos_plot.save('group/behavioural/panas_pos_plot.png')
+    panas_pos_plot.save('group/clinical/panas_pos_plot.png')
 
     panas_neg_df = rqmgp_df.dropna(subset=['panas_neg'])
     visits = ['1', '3']
@@ -1169,7 +1169,7 @@ if answer == 'y':
             + theme_classic()
             + scale_y_continuous(expand=(0, 0), limits=[20,30])
             )
-    panas_neg_plot.save('group/behavioural/panas_neg_plot.png')
+    panas_neg_plot.save('group/clinical/panas_neg_plot.png')
 
     # Step 4: Run LMMs of Memory Intensity Ratings.
     columns = ['p_id', 'time', 'intervention', 'guilt_rating', 'indignation_rating']
@@ -1269,7 +1269,7 @@ if answer == 'y':
             + scale_y_continuous(expand=(0, 0), limits=[5,7])
             )
     print(guilt_mem_intensity_plot)
-    guilt_mem_intensity_plot.save('guilt_mem_intensity_plot.png')
+    guilt_mem_intensity_plot.save('group/clinical/guilt_mem_intensity_plot.png')
 
     time = ['pre', 'post']
     interventions = ['a', 'b']
@@ -1342,7 +1342,7 @@ if answer == 'y':
             + scale_y_continuous(expand=(0, 0), limits=[5,7])
             )
     print(indignation_mem_intensity_plot)
-    indignation_mem_intensity_plot.save('indignation_mem_intensity_plot.png')
+    indignation_mem_intensity_plot.save('group/clinical/indignation_mem_intensity_plot.png')
 
 #endregion
 
@@ -1410,6 +1410,12 @@ if answer == 'y':
         os.makedirs(group_preproc_folder, exist_ok=True)
         bids_folder = os.path.join(os.getcwd(), 'bids')
         os.makedirs(bids_folder, exist_ok=True)
+        raw_data_folder = os.path.join(os.getcwd(), 'bids', 'raw_data')
+        os.makedirs(raw_data_folder, exist_ok=True)     
+        fmriprep_derivatives_folder = os.path.join(os.getcwd(), 'bids', 'fmriprep_derivatives')
+        os.makedirs(fmriprep_derivatives_folder, exist_ok=True)
+        fully_preproc_folder = os.path.join(os.getcwd(), 'bids', 'fully_preproc')
+        os.makedirs(fully_preproc_folder, exist_ok=True)
         derivatives_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives'
         os.makedirs(derivatives_folder, exist_ok=True)
         scratch_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch'
@@ -1433,7 +1439,7 @@ if answer == 'y':
         p_id_stripped = p_id.replace('P', '')
         if not os.path.exists(f"bids/sub-{p_id_stripped}"):
             print(f"Converting DICOMs to BIDS Nifti format for P{p_id_stripped}...")
-            subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/code/heuristic.py', '-s', f'{p_id_stripped}', '-c', 'dcm2niix', '-b', '--overwrite'])
+            subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/raw_data/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/raw_data/code/heuristic.py', '-s', f'{p_id_stripped}', '-c', 'dcm2niix', '-b', '--overwrite'])
         else: 
             print(f"DICOMs already converted to BIDS Nifti format for P{p_id_stripped}. Skipping process.")
     print("BIDS conversion completed.")
@@ -1445,7 +1451,7 @@ if answer == 'y':
         if p_id in good_participants:
             print(f"Labelling fieldmap JSON files for {p_id}...")
             p_id_stripped = p_id.replace('P', '')
-            func_directory = f"bids/sub-{p_id_stripped}/func"
+            func_directory = f"bids/raw_data/sub-{p_id_stripped}/func"
             func_files = []
             for file_name in os.listdir(func_directory):
                 if file_name.endswith(".nii.gz"):
@@ -1469,17 +1475,17 @@ if answer == 'y':
                 else:
                     print(f"{fieldmap_json} already labelled for P{p_id_stripped}. Skipping process.")
 
-    # Step 4: Copy BIDS Niftis and singularity image to cluster server.
+    # Step 4: Copy BIDS Niftis and Singularity Image to Cluster.
     print("\n###### STEP 4: COPY BIDS NIFTIS AND SINGULARITY IMAGE TO CLUSTER ######")
-    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids'):
+    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data'):
         print("Copying BIDS files for all participants to cluster...")
-        shutil.copytree('bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')
+        shutil.copytree('bids/raw_data', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data')
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg'):
         print("Copying fmriprep singularity image to cluster...")
         shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_24.0.1.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg')
     print("BIDS Niftis and singularity image copied successfully.")
 
-    # Step 5: Run fMRIPrep on cluster server.
+    # Step 5: Run fMRIPrep on Cluster.
     print("\n###### STEP 5: RUN FMRIPREP ON CLUSTER ######")
     fmriprep_cluster_script = r"""
 #!/bin/bash
@@ -1500,7 +1506,7 @@ if answer == 'y':
 #$ -tc 20 #maximum tasks running simultaneously .
 #$ -jc test.long        # Short=2h, test.default= 8h, test.long=7d 21h, verlong.default=30d
 module add sge
-DATA_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids
+DATA_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data
 SCRATCH_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch
 OUT_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives
 LICENSE=/research/cisc2/shared/fs_license/license.txt  
@@ -1536,36 +1542,90 @@ exit
     with open('bids/fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/sub-004'):
-        subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])
+        answer = input('Would you like to run fMRIPrep? (y/n)\n')
+        if answer == 'y':
+            subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])
+            print('Running fMRIPrep on cluster server...')
+        else:
+            print('Skipping fMRIPrep.')
 
-    # Step 6: Clean up fMRIPrep files and move back to main analysis server.
+    # Step 6: Clean up fMRIPrep Files and Move Back to Main Analysis Server.
     print("\n###### STEP 6: CLEAN UP FMRIPREP FILES AND MOVE TO MAIN ANALYSIS SERVER ######")
     if os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/desc-aseg_dseg.tsv'):
         # fmriprepcleanup_sim_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprepcleanup_sim' # for simulation purposes.
         # os.makedirs(fmriprepcleanup_sim_folder, exist_ok=True)
         subprocess.run(['python', 'bids/fMRIPrepCleanup.py', '-dir', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', '-method', 'delete'])
-    if not os.path.exists('bids/fmriprep_derivatives'):
-        print("Copying fMRIPrep derivatives from cluster server back to analysis server...")
-        shutil.copytree('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', 'bids/fmriprep_derivatives')
-    shutil.rmtree(derivatives_folder)
-    shutil.rmtree(scratch_folder)
-    shutil.rmtree(logs_folder)
+        if not os.path.exists('bids/fmriprep_derivatives'):
+            print("Copying fMRIPrep derivatives from cluster server back to analysis server...")
+            shutil.copytree('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', 'bids/fmriprep_derivatives')
+        shutil.rmtree(derivatives_folder)
+        shutil.rmtree(scratch_folder)
+        shutil.rmtree(logs_folder)
 
-
-
-
-
-
-    # Step X: XXX
+    # Step 7 Brain Extract and Smooth Images:
+    print("\n###### STEP 7: BRAIN EXTRACT AND SMOOTH IMAGES ######") 
     if p_id == 'ALL':
         participants_to_iterate = participants
     else:
         participants_to_iterate = [p_id]
+    for p_id in participants_to_iterate:
+        p_id_stripped = p_id.replace('P', '')
+        
+        func_directory = f"bids/fmriprep_derivatives/sub-{p_id_stripped}/func"
+        func_files = []
+        for file_name in os.listdir(func_directory):
+            if file_name.endswith("bold.nii.gz"):
+                file_path = os.path.join("func", file_name)
+                func_files.append(file_path)
+        mask_files = []
+        for file_name in os.listdir(func_directory):
+            if file_name.endswith("res-2_desc-brain_mask.nii.gz"):
+                file_path = os.path.join("func", file_name)
+                mask_files.append(file_path)
+        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run01_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run02_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run03_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run04_MNI152_func_ss.nii.gz"]
+        if not os.path.exists(output_files[0]):
+            for func, mask, outpath in zip(func_files, mask_files, output_files):
+                print(f'Performing brain extraction on {func} with {mask}, output to {outpath}')
+                subprocess.run(['fslmaths', func, '-mul', mask, outpath])
 
-    # fmriprep clean up
-    # move remaining fmriprep output files back onto cisc2
+        fully_preproc_func_directory = f"bids/fully_preproc/sub-{p_id_stripped}/func"
+        func_files = []
+        for file_name in os.listdir(fully_preproc_func_directory):
+            if file_name.endswith(".nii.gz"):
+                file_path = os.path.join("func", file_name)
+                func_files.append(file_path)
+        mask_files = []
+        for file_name in os.listdir(func_directory):
+            if file_name.endswith("res-2_desc-brain_mask.nii.gz"):
+                file_path = os.path.join("func", file_name)
+                mask_files.append(file_path)
+        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run01_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run02_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run03_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run04_MNI152_func_ss_smoothed.nii.gz"]
+        if not os.path.exists(output_files[0]):
+            for func, mask, outpath in zip(func_files, mask_files, output_files):
+                print(f'Performing smoothing on {func} with {mask}, output to {outpath}')
+                median = subprocess.check_output(['fslstats', func, '-k', mask, '-p', '50'])
+                fwhm = 6
+                sigma = str((fwhm / (2 * np.sqrt(2 * np.log(2)))))
+                bt =  str((float(median) * 0.75))
+                subprocess.run(['susan', func, bt, sigma, '3', '1', '0', outpath])
+        
+        func_files = []
+        for file_name in os.listdir(fully_preproc_func_directory):
+            if file_name.endswith("smoothed.nii.gz"):
+                file_path = os.path.join("func", file_name)
+                func_files.append(file_path)
+        mask_files = []
+        for file_name in os.listdir(func_directory):
+            if file_name.endswith("res-2_desc-brain_mask.nii.gz"):
+                file_path = os.path.join("func", file_name)
+                mask_files.append(file_path)
+        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run01_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run02_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run03_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run04_MNI152_func_fully_preproc.nii.gz"]
+        if not os.path.exists(output_files[0]):
+            for func, mask, outpath in zip(func_files, mask_files, output_files):
+                print(f'Performing brain extraction on {func} with {mask}, output to {outpath}')
+                subprocess.run(['fslmaths', func, '-mul', mask, outpath])
 
-
+        # then delete ss 1 and smoothed files
 
 #endregion
 

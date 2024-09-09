@@ -1398,6 +1398,7 @@ if answer == 'y':
     # Step 1: Create Directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
     for p_id in participants_to_iterate:
+        p_id_stripped = p_id.replace('P', '')
         p_id_folder = os.path.join(os.getcwd(), p_id)
         os.makedirs(p_id_folder, exist_ok=True)
         analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
@@ -1416,6 +1417,10 @@ if answer == 'y':
         os.makedirs(fmriprep_derivatives_folder, exist_ok=True)
         fully_preproc_folder = os.path.join(os.getcwd(), 'bids', 'fully_preproc')
         os.makedirs(fully_preproc_folder, exist_ok=True)
+        fully_preproc_p_id_folder = os.path.join(os.getcwd(), 'bids', 'fully_preproc', f'sub-{p_id_stripped}')
+        os.makedirs(fully_preproc_p_id_folder, exist_ok=True)
+        fully_preproc_func_folder = os.path.join(os.getcwd(), 'bids', 'fully_preproc', f'sub-{p_id_stripped}', 'func')
+        os.makedirs(fully_preproc_func_folder, exist_ok=True)
         derivatives_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives'
         os.makedirs(derivatives_folder, exist_ok=True)
         scratch_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch'

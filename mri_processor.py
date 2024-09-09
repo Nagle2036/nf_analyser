@@ -1477,13 +1477,15 @@ if answer == 'y':
 
     # Step 4: Copy BIDS Niftis and Singularity Image to Cluster.
     print("\n###### STEP 4: COPY BIDS NIFTIS AND SINGULARITY IMAGE TO CLUSTER ######")
-    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data'):
-        print("Copying BIDS files for all participants to cluster...")
-        shutil.copytree('bids/raw_data', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data')
-    if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg'):
-        print("Copying fmriprep singularity image to cluster...")
-        shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_24.0.1.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg')
-    print("BIDS Niftis and singularity image copied successfully.")
+    answer = input('Would you like to copy BIDS Niftis and singularity image to the cluster? (y/n)\n')
+    if answer == 'y':
+        if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data'):
+            print("Copying BIDS files for all participants to cluster...")
+            shutil.copytree('bids/raw_data', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data')
+        if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg'):
+            print("Copying fmriprep singularity image to cluster...")
+            shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_24.0.1.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg')
+        print("BIDS Niftis and singularity image copied successfully.")
 
     # Step 5: Run fMRIPrep on Cluster.
     print("\n###### STEP 5: RUN FMRIPREP ON CLUSTER ######")
@@ -1561,13 +1563,11 @@ exit
         shutil.rmtree(derivatives_folder)
         shutil.rmtree(scratch_folder)
         shutil.rmtree(logs_folder)
+    else:
+        print("fMRIPrep directory already clean. Skipping process.")
 
     # Step 7 Brain Extract and Smooth Images:
     print("\n###### STEP 7: BRAIN EXTRACT AND SMOOTH IMAGES ######") 
-    if p_id == 'ALL':
-        participants_to_iterate = participants
-    else:
-        participants_to_iterate = [p_id]
     for p_id in participants_to_iterate:
         p_id_stripped = p_id.replace('P', '')
         

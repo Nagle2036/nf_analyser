@@ -1584,14 +1584,14 @@ exit
             if file_name.endswith("bold.nii.gz"):
                 file_path = os.path.join(func_directory, file_name)
                 func_files.append(file_path)
-        func_files = sorted(func_files, key=lambda x: int(x.split('_run')[1].split('_')[0]))
+        func_files = sorted(func_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
         mask_files = []
         for file_name in os.listdir(func_directory):
             if file_name.endswith("res-2_desc-brain_mask.nii.gz"):
                 file_path = os.path.join(func_directory, file_name)
                 mask_files.append(file_path)
-        mask_files = sorted(mask_files, key=lambda x: int(x.split('_run')[1].split('_')[0]))
-        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run01_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run02_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run03_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run04_MNI152_func_ss.nii.gz"]
+        mask_files = sorted(mask_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
+        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_ss.nii.gz"]
         if not os.path.exists(output_files[0]):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
                 print(f'Performing brain extraction on {func} with {mask}, output to {outpath}')
@@ -1603,14 +1603,14 @@ exit
             if file_name.endswith(".nii.gz"):
                 file_path = os.path.join(fully_preproc_func_directory, file_name)
                 func_files.append(file_path)
-        func_files = sorted(func_files, key=lambda x: int(x.split('_run')[1].split('_')[0]))
+        func_files = sorted(func_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
         mask_files = []
         for file_name in os.listdir(func_directory):
             if file_name.endswith("res-2_desc-brain_mask.nii.gz"):
                 file_path = os.path.join(func_directory, file_name)
                 mask_files.append(file_path)
-        mask_files = sorted(mask_files, key=lambda x: int(x.split('_run')[1].split('_')[0]))
-        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run01_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run02_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run03_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run04_MNI152_func_ss_smoothed.nii.gz"]
+        mask_files = sorted(mask_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
+        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_ss_smoothed.nii.gz"]
         if not os.path.exists(output_files[0]):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
                 print(f'Performing smoothing on {func} with {mask}, output to {outpath}')
@@ -1625,14 +1625,14 @@ exit
             if file_name.endswith("smoothed.nii.gz"):
                 file_path = os.path.join(fully_preproc_func_directory, file_name)
                 func_files.append(file_path)
-        func_files = sorted(func_files, key=lambda x: int(x.split('_run')[1].split('_')[0]))
+        func_files = sorted(func_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
         mask_files = []
         for file_name in os.listdir(func_directory):
             if file_name.endswith("res-2_desc-brain_mask.nii.gz"):
                 file_path = os.path.join(func_directory, file_name)
                 mask_files.append(file_path)
-        mask_files = sorted(mask_files, key=lambda x: int(x.split('_run')[1].split('_')[0]))
-        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run01_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run02_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run03_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run04_MNI152_func_fully_preproc.nii.gz"]
+        mask_files = sorted(mask_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
+        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_fully_preproc.nii.gz"]
         if not os.path.exists(output_files[0]):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
                 print(f'Performing brain extraction on {func} with {mask}, output to {outpath}')

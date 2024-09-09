@@ -1437,7 +1437,7 @@ if answer == 'y':
             print("No 'CISC' folder found in the 'neurofeedback' directory.")
             exit(1)
         p_id_stripped = p_id.replace('P', '')
-        if not os.path.exists(f"bids/sub-{p_id_stripped}"):
+        if not os.path.exists(f"bids/raw_data/sub-{p_id_stripped}"):
             print(f"Converting DICOMs to BIDS Nifti format for P{p_id_stripped}...")
             subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/raw_data/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/raw_data/code/heuristic.py', '-s', f'{p_id_stripped}', '-c', 'dcm2niix', '-b', '--overwrite'])
         else: 

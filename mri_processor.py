@@ -1457,8 +1457,8 @@ if answer == 'y':
                 if file_name.endswith(".nii.gz"):
                     file_path = os.path.join("func", file_name)
                     func_files.append(file_path)
-            ap_fieldmap_json = f"bids/sub-{p_id_stripped}/fmap/sub-{p_id_stripped}_dir-AP_epi.json"
-            pa_fieldmap_json = f"bids/sub-{p_id_stripped}/fmap/sub-{p_id_stripped}_dir-PA_epi.json"
+            ap_fieldmap_json = f"bids/raw_data/sub-{p_id_stripped}/fmap/sub-{p_id_stripped}_dir-AP_epi.json"
+            pa_fieldmap_json = f"bids/raw_data/sub-{p_id_stripped}/fmap/sub-{p_id_stripped}_dir-PA_epi.json"
             fieldmap_json_files = [ap_fieldmap_json, pa_fieldmap_json]
             for fieldmap_json in fieldmap_json_files:
                 with open(fieldmap_json, 'r') as file:

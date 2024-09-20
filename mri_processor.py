@@ -1203,8 +1203,8 @@ if answer == 'y':
         df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values + vis_4_values + vis_5_values
         for key, values in df_values_dict.items():
             ecrf_df[key] = values
-        output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/ecrf_data.xlsx'
-        ecrf_df.to_excel(output_excel_path, index=True)
+        ecrf_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/ecrf_data.xlsx'
+        ecrf_df.to_excel(ecrf_data_path, index=True)
         workbook.close()
     warnings.resetwarnings()
 
@@ -1893,6 +1893,278 @@ if answer == 'y':
             )
     print(indignation_mem_intensity_plot)
     indignation_mem_intensity_plot.save('group/clinical/indignation_mem_intensity_plot.png')
+
+    #%% Step 5: Correlation of Clinical Score Change with Mean Expanded Thermometer Level.
+    rqmgp_df['visit'] = pd.to_numeric(rqmgp_df['visit'], errors='coerce')
+    columns = ['condition', 'intervention', 'rosenberg_vis_1', 'rosenberg_vis_3', 'rosenberg_diff', 'therm_lvl_exp']
+    clin_therm_corr_df = pd.DataFrame(columns=columns)
+    condition_column = (['guilt'] * 10 + ['indig'] * 10) * 2
+    intervention_column = ['a'] * 20 + ['b'] * 20
+    rosenberg_vis_1_inta = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'a')]['rosenberg'].reset_index(drop=True).tolist()
+    rosenberg_vis_3_inta = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'a')]['rosenberg'].reset_index(drop=True).tolist()
+    rosenberg_vis_1_intb = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'b')]['rosenberg'].reset_index(drop=True).tolist()
+    rosenberg_vis_3_intb = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'b')]['rosenberg'].reset_index(drop=True).tolist()
+    qids_vis_1_inta = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'a')]['qids'].reset_index(drop=True).tolist()
+    qids_vis_3_inta = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'a')]['qids'].reset_index(drop=True).tolist()
+    qids_vis_1_intb = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'b')]['qids'].reset_index(drop=True).tolist()
+    qids_vis_3_intb = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'b')]['qids'].reset_index(drop=True).tolist()
+    madrs_vis_1_inta = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'a')]['madrs'].reset_index(drop=True).tolist()
+    madrs_vis_3_inta = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'a')]['madrs'].reset_index(drop=True).tolist()
+    madrs_vis_1_intb = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'b')]['madrs'].reset_index(drop=True).tolist()
+    madrs_vis_3_intb = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'b')]['madrs'].reset_index(drop=True).tolist()
+    gad_vis_1_inta = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'a')]['gad'].reset_index(drop=True).tolist()
+    gad_vis_3_inta = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'a')]['gad'].reset_index(drop=True).tolist()
+    gad_vis_1_intb = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'b')]['gad'].reset_index(drop=True).tolist()
+    gad_vis_3_intb = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'b')]['gad'].reset_index(drop=True).tolist()
+    panas_pos_vis_1_inta = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'a')]['panas_pos'].reset_index(drop=True).tolist()
+    panas_pos_vis_3_inta = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'a')]['panas_pos'].reset_index(drop=True).tolist()
+    panas_pos_vis_1_intb = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'b')]['panas_pos'].reset_index(drop=True).tolist()
+    panas_pos_vis_3_intb = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'b')]['panas_pos'].reset_index(drop=True).tolist()
+    panas_neg_vis_1_inta = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'a')]['panas_neg'].reset_index(drop=True).tolist()
+    panas_neg_vis_3_inta = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'a')]['panas_neg'].reset_index(drop=True).tolist()
+    panas_neg_vis_1_intb = rqmgp_df[(rqmgp_df['visit'] == 1) & (rqmgp_df['intervention'] == 'b')]['panas_neg'].reset_index(drop=True).tolist()
+    panas_neg_vis_3_intb = rqmgp_df[(rqmgp_df['visit'] == 3) & (rqmgp_df['intervention'] == 'b')]['panas_neg'].reset_index(drop=True).tolist()
+    therm_lvl_exp_guilt_a = [-3.791666667, -0.869047619, -2.261904762, 0.69047619, -1.017857143, -3.869047619, 2.970238095, 1.583333333, -1.761904762, -2.791666667]
+    therm_lvl_exp_indig_a = [5.648809524, 5.482142857, -5.571428571, -1.047619048, 6.511904762, -3.18452381, -4.553571429, -0.714285714, 2.458333333, 0.880952381]
+    therm_lvl_exp_guilt_b = [-6.654761905, 0.017857143, 1.869047619, -0.738095238, -2.130952381, 0.291666667, -0.386904762, -0.928571429, 1.869047619, 0.541666667]
+    therm_lvl_exp_indig_b = [0.654761905, 2.55952381, 5.18452381, 0.81547619, 2.982142857, -2.327380952, 3.81547619, 3.029761905, 5.18452381, -1.017857143]
+    clin_therm_corr_df['condition'] = condition_column 
+    clin_therm_corr_df['intervention'] = intervention_column
+    clin_therm_corr_df['rosenberg_vis_1'] = rosenberg_vis_1_inta * 2 + rosenberg_vis_1_intb * 2
+    clin_therm_corr_df['rosenberg_vis_3'] = rosenberg_vis_3_inta * 2 + rosenberg_vis_3_intb * 2
+    clin_therm_corr_df['rosenberg_diff'] = clin_therm_corr_df['rosenberg_vis_1'] - clin_therm_corr_df['rosenberg_vis_3']
+    clin_therm_corr_df['qids_vis_1'] = qids_vis_1_inta * 2 + qids_vis_1_intb * 2
+    clin_therm_corr_df['qids_vis_3'] = qids_vis_3_inta * 2 + qids_vis_3_intb * 2
+    clin_therm_corr_df['qids_diff'] = clin_therm_corr_df['qids_vis_1'] - clin_therm_corr_df['qids_vis_3']
+    clin_therm_corr_df['madrs_vis_1'] = madrs_vis_1_inta * 2 + madrs_vis_1_intb * 2
+    clin_therm_corr_df['madrs_vis_3'] = madrs_vis_3_inta * 2 + madrs_vis_3_intb * 2
+    clin_therm_corr_df['madrs_diff'] = clin_therm_corr_df['madrs_vis_1'] - clin_therm_corr_df['madrs_vis_3']
+    clin_therm_corr_df['gad_vis_1'] = gad_vis_1_inta * 2 + gad_vis_1_intb * 2
+    clin_therm_corr_df['gad_vis_3'] = gad_vis_3_inta * 2 + gad_vis_3_intb * 2
+    clin_therm_corr_df['gad_diff'] = clin_therm_corr_df['gad_vis_1'] - clin_therm_corr_df['gad_vis_3']
+    clin_therm_corr_df['panas_pos_vis_1'] = panas_pos_vis_1_inta * 2 + panas_pos_vis_1_intb * 2
+    clin_therm_corr_df['panas_pos_vis_3'] = panas_pos_vis_3_inta * 2 + panas_pos_vis_3_intb * 2
+    clin_therm_corr_df['panas_pos_diff'] = clin_therm_corr_df['panas_pos_vis_1'] - clin_therm_corr_df['panas_pos_vis_3']
+    clin_therm_corr_df['panas_neg_vis_1'] = panas_neg_vis_1_inta * 2 + panas_neg_vis_1_intb * 2
+    clin_therm_corr_df['panas_neg_vis_3'] = panas_neg_vis_3_inta * 2 + panas_neg_vis_3_intb * 2
+    clin_therm_corr_df['panas_neg_diff'] = clin_therm_corr_df['panas_neg_vis_1'] - clin_therm_corr_df['panas_neg_vis_3']
+    clin_therm_corr_df['therm_lvl_exp'] = therm_lvl_exp_guilt_a + therm_lvl_exp_indig_a + therm_lvl_exp_guilt_b + therm_lvl_exp_indig_b
+    combinations = [('guilt', 'a'), ('guilt', 'b'), ('indig', 'a'), ('indig', 'b')]
+    for condition, intervention in combinations:
+        subset = clin_therm_corr_df[(clin_therm_corr_df['condition'] == condition) & (clin_therm_corr_df['intervention'] == intervention)]
+        corr_value = subset['rosenberg_diff'].corr(subset['therm_lvl_exp'])
+        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
+        rosenberg_therm_corr_plot = (ggplot(subset, aes(x='rosenberg_diff', y='therm_lvl_exp'))
+            + geom_point()
+            + geom_smooth(method='lm', color='blue')
+            + theme_classic()
+            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='Rosenberg Difference', y='Thermometer Level Exp'))
+        print(rosenberg_therm_corr_plot)
+        rosenberg_therm_corr_plot.save(f'rosenberg_therm_{condition}_{intervention}_corr_plot.png')
+        corr_value = subset['qids_diff'].corr(subset['therm_lvl_exp'])
+        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
+        qids_therm_corr_plot = (ggplot(subset, aes(x='qids_diff', y='therm_lvl_exp'))
+            + geom_point()
+            + geom_smooth(method='lm', color='blue')
+            + theme_classic()
+            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='QIDS Difference', y='Thermometer Level Exp'))
+        print(qids_therm_corr_plot)
+        qids_therm_corr_plot.save(f'qids_therm_{condition}_{intervention}_corr_plot.png')
+        corr_value = subset['madrs_diff'].corr(subset['therm_lvl_exp'])
+        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
+        madrs_therm_corr_plot = (ggplot(subset, aes(x='madrs_diff', y='therm_lvl_exp'))
+            + geom_point()
+            + geom_smooth(method='lm', color='blue')
+            + theme_classic()
+            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='MADRS Difference', y='Thermometer Level Exp'))
+        print(madrs_therm_corr_plot)
+        madrs_therm_corr_plot.save(f'madrs_therm_{condition}_{intervention}_corr_plot.png')
+        corr_value = subset['gad_diff'].corr(subset['therm_lvl_exp'])
+        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
+        gad_therm_corr_plot = (ggplot(subset, aes(x='gad_diff', y='therm_lvl_exp'))
+            + geom_point()
+            + geom_smooth(method='lm', color='blue')
+            + theme_classic()
+            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='GAD Difference', y='Thermometer Level Exp'))
+        print(gad_therm_corr_plot)
+        gad_therm_corr_plot.save(f'gad_therm_{condition}_{intervention}_corr_plot.png')
+        corr_value = subset['panas_pos_diff'].corr(subset['therm_lvl_exp'])
+        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
+        panas_pos_therm_corr_plot = (ggplot(subset, aes(x='panas_pos_diff', y='therm_lvl_exp'))
+            + geom_point()
+            + geom_smooth(method='lm', color='blue')
+            + theme_classic()
+            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='PANAS Pos Difference', y='Thermometer Level Exp'))
+        print(panas_pos_therm_corr_plot)
+        panas_pos_therm_corr_plot.save(f'panas_pos_therm_{condition}_{intervention}_corr_plot.png')
+        corr_value = subset['panas_neg_diff'].corr(subset['therm_lvl_exp'])
+        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
+        panas_neg_therm_corr_plot = (ggplot(subset, aes(x='panas_neg_diff', y='therm_lvl_exp'))
+            + geom_point()
+            + geom_smooth(method='lm', color='blue')
+            + theme_classic()
+            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='PANAS Neg Difference', y='Thermometer Level Exp'))
+        print(panas_neg_therm_corr_plot)
+        panas_neg_therm_corr_plot.save(f'panas_neg_therm_{condition}_{intervention}_corr_plot.png')
+        
+    # Step 6: Analysis of baseline factors.
+    intervention_column = ecrf_df.loc['intervention'].tolist()
+    msm_column = ecrf_df.loc['msm'].tolist()
+    psi_sociotropy_column = ecrf_df.loc['psi_sociotropy'].tolist()
+    psi_autonomy_column = ecrf_df.loc['psi_autonomy'].tolist()
+    raads_column = ecrf_df.loc['raads'].tolist()
+    columns = ['participant', 'intervention', 'factor', 'value']
+    baseline_factors_df = pd.DataFrame(columns=columns)
+    baseline_factors_df['participant'] = participants * 5
+    baseline_factors_df['intervention'] = intervention_column * 5
+    baseline_factors_df['factor'] = ['msm'] * 20 + ['psi_sociotropy'] * 20 + ['psi_autonomy'] * 20 + ['raads'] * 20
+    baseline_factors_df['value'] = msm_column + psi_sociotropy_column + psi_autonomy_column + raads_column + anxiety_column
+    def perform_tests(df, factor):
+        factor_data = df[df['factor'] == factor]
+        group_a = factor_data[factor_data['intervention'] == 'a']['value']
+        group_b = factor_data[factor_data['intervention'] == 'b']['value']
+        shapiro_a = stats.shapiro(group_a)
+        shapiro_b = stats.shapiro(group_b)
+        if shapiro_a.pvalue > 0.05 and shapiro_b.pvalue > 0.05:
+            ttest_result = stats.ttest_ind(group_a, group_b)
+            p_value = ttest_result.pvalue
+        else:
+            mannwhitney_result = stats.mannwhitneyu(group_a, group_b)
+            p_value = mannwhitney_result.pvalue
+        return p_value
+    p_values = {}
+    for factor in baseline_factors_df['factor'].unique():
+        p_values[factor] = perform_tests(baseline_factors_df, factor)
+    baseline_factors_group_df = baseline_factors_df.groupby(['intervention', 'factor']).agg(
+        mean_value=('value', 'mean'),
+        se_value=('value', lambda x: np.std(x, ddof=1) / np.sqrt(len(x)))
+    ).reset_index()
+    baseline_factors_group_df = baseline_factors_group_df[['factor', 'intervention', 'mean_value', 'se_value']]
+    for factor in baseline_factors_group_df['factor'].unique():
+        factor_data = baseline_factors_group_df[baseline_factors_group_df['factor'] == factor]
+        factor_plot = (
+            ggplot(factor_data, aes(x='intervention', y='mean_value', fill='intervention'))
+            + geom_bar(stat='identity', position=position_dodge(width=0.9), width=0.7)
+            + geom_errorbar(
+                aes(ymin='mean_value - se_value', ymax='mean_value + se_value'),
+                width=0.2,
+                position=position_dodge(width=0.9))
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0))
+            + scale_x_discrete(labels={'a': 'A', 'b': 'B'})
+            + labs(
+                title=f'Mean of {factor} by Intervention',
+                x='Intervention',
+                y='Mean',
+                fill='Intervention'))
+        p_value = p_values[factor]
+        if p_value < 0.001:
+            annotation_text = '***'
+        elif p_value < 0.01:
+            annotation_text = '**'
+        elif p_value < 0.05:
+            annotation_text = '*'
+        else:
+            annotation_text = ''
+        if annotation_text:
+            max_value = factor_data['mean_value'].max()
+            factor_plot = factor_plot + annotate('text', x=1.5, y=max_value + 0.2, label=annotation_text, size=10) + \
+                annotate("segment", x=1, xend=2, y=max_value + 0.1, yend=max_value + 0.1, color="black")
+        print(factor_plot)
+        factor_plot.save(f'{factor}_plot.png')
+    anxiety_column = ecrf_df.loc['comorbid_anx'].tolist()
+    replacement_dict = {'Yes': 'comorbid_anx', 'No': 'anx_depression', 'No Anxiety': 'no_anxiety'}
+    anxiety_column = [replacement_dict.get(item, item) for item in anxiety_column]
+    columns = ['participant', 'intervention', 'anxiety']
+    anxiety_df = pd.DataFrame(columns=columns)
+    anxiety_df['participant'] = participants
+    anxiety_df['intervention'] = intervention_column
+    anxiety_df['anxiety'] = anxiety_column
+    anxiety_plot = (
+        ggplot(anxiety_df, aes(x='anxiety', fill='intervention')) +
+        geom_bar(stat='count', position=position_dodge(width=0.9)) +
+        theme_classic() +
+        scale_y_continuous(expand=(0, 0)) +
+        labs(title='Count of Anxiety Levels by Intervention',
+            x='Anxiety Level',
+            y='Count') +
+        scale_x_discrete(labels={'comorbid_anx': 'Comorbid Anxiety',
+                                'anx_depression': 'Anxious Depression',
+                                'no_anxiety': 'No Anxiety'}) +
+        scale_fill_manual(name='Intervention', labels=['A', 'B'], values=['indianred', 'skyblue']))
+    print(anxiety_plot)
+    anxiety_plot.save('anxiety_plot.png')
+
+    # Step 7: Successful participants analysis.
+    successful_participants = ['P030', 'P059', 'P078', 'P093', 'P107', 'P127', 'P155']
+    baseline_factors_df['successful'] = baseline_factors_df['participant'].isin(successful_participants)
+    def perform_tests(df, factor):
+        factor_data = df[df['factor'] == factor]
+        group_successful = factor_data[factor_data['successful']]['value']
+        group_non_successful = factor_data[~factor_data['successful']]['value']
+        shapiro_successful = stats.shapiro(group_successful)
+        shapiro_non_successful = stats.shapiro(group_non_successful)
+        if shapiro_successful.pvalue > 0.05 and shapiro_non_successful.pvalue > 0.05:
+            ttest_result = stats.ttest_ind(group_successful, group_non_successful)
+            p_value = ttest_result.pvalue
+        else:
+            mannwhitney_result = stats.mannwhitneyu(group_successful, group_non_successful)
+            p_value = mannwhitney_result.pvalue
+        return p_value
+    baseline_factors_group_df = baseline_factors_df.groupby(['successful', 'factor']).agg(
+        mean_value=('value', 'mean'),
+        se_value=('value', lambda x: np.std(x, ddof=1) / np.sqrt(len(x)))
+    ).reset_index()
+    p_values = {}
+    for factor in baseline_factors_df['factor'].unique():
+        p_values[factor] = perform_tests(baseline_factors_df, factor)
+    for factor in baseline_factors_group_df['factor'].unique():
+        factor_data = baseline_factors_group_df[baseline_factors_group_df['factor'] == factor]
+        p_value = p_values[factor]
+        if p_value < 0.001:
+            annotation_text = '***'
+        elif p_value < 0.01:
+            annotation_text = '**'
+        elif p_value < 0.05:
+            annotation_text = '*'
+        else:
+            annotation_text = ''
+        factor_plot_successful = (
+            ggplot(factor_data, aes(x='successful', y='mean_value', fill='successful'))
+            + geom_bar(stat='identity', position=position_dodge(width=0.9), width=0.7)
+            + geom_errorbar(
+                aes(ymin='mean_value - se_value', ymax='mean_value + se_value'),
+                width=0.2,
+                position=position_dodge(width=0.9))
+            + theme_classic()
+            + scale_y_continuous(expand=(0, 0))
+            + scale_x_discrete(labels={True: 'Successful', False: 'Not Successful'})
+            + labs(
+                title=f'Mean of {factor} by Success Status',
+                x='Success Status',
+                y='Mean',
+                fill='Success Status'))
+        if annotation_text:
+            max_value = factor_data['mean_value'].max()
+            factor_plot_successful = factor_plot_successful + annotate('text', x=1.5, y=max_value + 0.2, label=annotation_text, size=10) + \
+                annotate("segment", x=1, xend=2, y=max_value + 0.1, yend=max_value + 0.1, color="black")
+        print(factor_plot_successful)
+        factor_plot_successful.save(f'{factor}_plot_successful.png')
+    anxiety_df['successful'] = anxiety_df['participant'].apply(lambda x: 'Successful' if x in successful_participants else 'Not Successful')
+    anxiety_plot_successful = (
+        ggplot(anxiety_df, aes(x='anxiety', fill='successful')) +
+        geom_bar(stat='count', position=position_dodge(width=0.9)) +
+        theme_classic() +
+        scale_y_continuous(expand=(0, 0)) +
+        labs(title='Count of Anxiety Levels by Participant Success',
+            x='Anxiety Level',
+            y='Count') +
+        scale_x_discrete(labels={'comorbid_anx': 'Comorbid Anxiety',
+                                'anx_depression': 'Anxious Depression',
+                                'no_anxiety': 'No Anxiety'}) +
+        scale_fill_manual(name='Participant Status', values=['indianred', 'skyblue']))
+    print(anxiety_plot_successful)
+    anxiety_plot_successful.save('anxiety_plot_successful.png')
 
 #endregion
 

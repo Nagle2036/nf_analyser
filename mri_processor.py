@@ -38,6 +38,7 @@ import nibabel as nib
 from skimage.metrics import structural_similarity as ssim
 from plotnine import *
 from scipy import stats
+from statsmodels.stats.multitest import multipletests
 from pingouin import rm_anova
 import json
 import textwrap
@@ -46,7 +47,6 @@ import textwrap
 # from rpy2.robjects.packages import importr
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-
 #endregion
 
 #region 2) INSTRUCTIONS.
@@ -316,8 +316,8 @@ if answer == 'y':
                     df.at[feedback_lvl_header, f'{x}'] = feedback_lvl
         process_file(run2_path)
         process_file(run3_path)
-    output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/therm/therm_data.xlsx'
-    df.to_excel(output_excel_path, index=True)
+    therm_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/therm/therm_data.xlsx'
+    df.to_excel(therm_data, index=True)
     
     # Step 2: Access eCRF document and extract relevant data into dataframe.
     warnings.simplefilter("ignore", UserWarning)
@@ -424,35 +424,585 @@ if answer == 'y':
         df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values
         for key, values in df_values_dict.items():
             data_df[key] = values
-        output_excel_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/ecrf_data.xlsx'
-        data_df.to_excel(output_excel_path, index=True)
+        ecrf_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/ecrf_data.xlsx'
+        data_df.to_excel(ecrf_data, index=True)
         print(f'{x} data from eCRF.xlsx successfully extracted.')
         workbook.close()
     warnings.resetwarnings()
 
-    # Step 3: Calculate and plot thermometer movement success for each participant. 
+    # Step 1: Organise data.
+    ecrf_data = pd.read_excel(ecrf_data_path, index_col='Unnamed: 0')
+    therm_data = pd.read_excel(therm_data_path, index_col='Unnamed: 0')
+    intervention_row = ecrf_data.loc['intervention', :]
+    therm_data.loc['intervention', :] = intervention_row
+    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    therm_lvl_column = []
+    therm_val_column = []
+    participant_column = []
+    condition_column = []
+    intervention_column = []
+    for participant in participants:
+        if participant in therm_data.columns:
+            guilt_lvls = therm_data.loc[(therm_data.index.str.contains('guilt') & therm_data.index.str.contains('lvl')), therm_data.columns.str.contains(f'{participant}')].values.flatten().tolist()
+            indig_lvls = therm_data.loc[(therm_data.index.str.contains('indig') & therm_data.index.str.contains('lvl')), therm_data.columns.str.contains(f'{participant}')].values.flatten().tolist()
+            guilt_vals = therm_data.loc[(therm_data.index.str.contains('guilt') & therm_data.index.str.contains('val')), therm_data.columns.str.contains(f'{participant}')].values.flatten().tolist()
+            indig_vals = therm_data.loc[(therm_data.index.str.contains('indig') & therm_data.index.str.contains('val')), therm_data.columns.str.contains(f'{participant}')].values.flatten().tolist()
+            therm_lvl_column.extend(guilt_lvls + indig_lvls)
+            therm_val_column.extend(guilt_vals + indig_vals)
+            participant_column += [participant] * (len(guilt_lvls) + len(indig_lvls))
+            condition_column += (['guilt'] * len(guilt_lvls)) + (['indig'] * (len(guilt_lvls)))
+            intervention_column += therm_data.loc['intervention', participant] * (len(guilt_lvls) + len(indig_lvls))
+    columns = ['participant', 'condition','intervention', 'therm_lvl', 'therm_val']
+    therm_df = pd.DataFrame(columns=columns)
+    therm_df['participant'] = participant_column
+    therm_df['condition'] = condition_column
+    therm_df['intervention'] = intervention_column
+    therm_df['therm_lvl'] = therm_lvl_column
+    therm_df['therm_val'] = therm_val_column
 
-    
-    # Could the participants move the thermometer?
-    # How did this differ between guilt and indignation tasks?
-    # How did this differ between the two intervention groups?
-    # Did it vary based on any demographic or clinical factors?
-    # Did their actual success correlate with perceived success?
-    # Does thermometer movement success change between run 2 and run 3? i.e. Do participants reach somewhat of a breakthrough moment?
-    # Try different metrics for thermometer movement success (e.g. mean level, median level, level stability, level stability + mean / median level). Can also include a threshold for successful movement which is based on the movement of the thermometer if left to chance(?). Maybe favour mean over median because it is not possible to have major outliers in the data (the thermometer level can only be between 0 and 10).
-    # Can also try: number of volumes where thermometer level was above 5. Or plot histogram of the frequency of different thermometer levels. Can include levels that are also outside of the thermometer range, and have these values in a slightly more faded colour.
-    # Find amount of time that participant spent above or below thermometer range to test whether thermometer range was suitable.
-    # Does thermometer movement success vary in accordance with memory intensity?
-    # Test if MeanSignal stabilises each time during rest blocks.
-    # Clearly define MeanSignal, Baseline, Value, Thermometer Level etc from tbv_script text file.
-    # Calculate the average number of blocks that the thermometer goes up or down each volume, in order to ascertain how erratically or stably the thermometer is moving. 
-    # Could create a heatmap overlayed onto the thermometer in order to provide a visual demonstration of the thermometer levels that were most frequently occupied.
-    # How well does thermometer success correlate with the different techniques used. Can try to classify the qualitative reports into several categories of techniques.
-    # Does perceived success correlate with any demographic or clinical factors?
-    # Does actual or perceived success correlate with improvements in self-esteem / depression ratings?
-    # If you have high success with guilt thermometer, does that predict low success with indignation thermometer, and vice versa. I.e. is it difficult to be good at moving thermometer under both conditions, or is one condition always favoured.
+    #%% Step 2: Perform LMM of thermometer levels.
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(nortest)
+    # therm_df <- as.data.frame(therm_df)
+    # model <- lmer(therm_lvl~condition*intervention + (1|participant), data = therm_df)
+    # residuals_model <- residuals(model)
+    # ad_test_result <- ad.test(residuals_model)
+    # print(ad_test_result)
+    # if (ad_test_result$p.value > 0.05) {
+    # print("LMM of means residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("LMM of means residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['therm_df'] = pandas2ri.py2rpy(therm_df)
+    # result = r(r_script)
+    # print(result)
 
+    # Step 3: Plot histogram of thermometer level data. 
+    therm_lvl_hist = ggplot(therm_df) + \
+        geom_histogram(aes(x='therm_lvl'), binwidth=1, fill='skyblue', color='black', alpha=1) + \
+        theme_classic() + \
+        xlab('Thermometer Level') + \
+        scale_x_continuous(breaks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) + \
+        scale_y_continuous(expand=(0, 0)) + \
+        labs(y='Count') + \
+        ggtitle('Histogram of Thermometer Levels')
+    print(therm_lvl_hist)
+    therm_lvl_hist.save('therm_lvl_hist.png')
 
+    # Step 4: Plot mean thermometer levels.
+    mean_therm_lvl_df = therm_df.groupby(['participant', 'condition', 'intervention'])['therm_lvl'].mean().reset_index()
+    mean_therm_lvl_group_df = mean_therm_lvl_df.groupby(['condition', 'intervention']).agg(
+        mean_therm_lvl=('therm_lvl', 'mean'),
+        std_dev=('therm_lvl', 'std'),
+        n=('therm_lvl', 'size')
+    ).reset_index()
+    mean_therm_lvl_group_df['std_error'] = mean_therm_lvl_group_df['std_dev'] / np.sqrt(mean_therm_lvl_group_df['n'])
+    mean_therm_lvl_group_df = mean_therm_lvl_group_df.drop(columns=['std_dev'])
+    mean_lvl_plot = (ggplot(mean_therm_lvl_group_df, aes(x='intervention', y='mean_therm_lvl', fill='condition')) +
+        geom_bar(stat='identity', position='dodge') + 
+        geom_errorbar(aes(ymin='mean_therm_lvl - std_error', ymax='mean_therm_lvl + std_error'), position=position_dodge(width=0.9), width=0.2) +
+        theme_classic() +
+        scale_fill_manual(values=['indianred', 'skyblue']) +
+        labs(title="Mean Thermometer Levels for Guilt and Indignation in Interventions A and B.", x='Intervention', y='Mean Thermometer Level') +
+        scale_y_continuous(expand=(0, 0), limits=[0,3.5])
+        )
+    print(mean_lvl_plot)
+    mean_lvl_plot.save('mean_lvl_plot.png')
+
+    # Step 5: Plot proportion of volumes with thermometer levels greater than 0.
+    prop_therm_lvl_df = therm_df.groupby(['participant', 'condition', 'intervention']).agg(
+        prop=('therm_lvl', lambda x: (x > 0).mean())
+    ).reset_index()
+    prop_therm_lvl_group_df = prop_therm_lvl_df.groupby(['condition', 'intervention']).agg(
+        prop=('prop', 'mean'),
+        std_dev=('prop', 'std'),
+        n=('prop', 'size')
+    ).reset_index()
+    prop_therm_lvl_group_df['std_error'] = prop_therm_lvl_group_df['std_dev'] / np.sqrt(prop_therm_lvl_group_df['n'])
+    prop_therm_lvl_group_df = prop_therm_lvl_group_df.drop(columns=['std_dev'])
+    prop_lvl_plot = (ggplot(prop_therm_lvl_group_df, aes(x='intervention', y='prop', fill='condition')) +
+        geom_bar(stat='identity', position='dodge') + 
+        geom_errorbar(aes(ymin='prop - std_error', ymax='prop + std_error'), position=position_dodge(width=0.9), width=0.2) +
+        theme_classic() +
+        scale_fill_manual(values=['indianred', 'skyblue']) +
+        labs(title='Proportion Plot', x='Intervention', y='Proportion Volumes with Therm. Level > 0') +
+        scale_y_continuous(expand=(0, 0), limits=[0,0.8], breaks=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8])
+        )
+    print(prop_lvl_plot)
+    prop_lvl_plot.save('prop_lvl_plot.png')
+
+    # Step 6: Calculate expanded thermometer level values and plot histograms.
+    therm_df['therm_lvl_exp'] = therm_df['therm_val'].round(1)
+    for x in therm_df.index:
+        if (therm_df.loc[x, 'intervention'] == 'a') and (therm_df.loc[x, 'condition'] == 'guilt'):
+            transformed_value = round(abs(therm_df.loc[x, 'therm_lvl_exp'] - 100) * 10)
+            if therm_df.loc[x, 'therm_lvl_exp'] < 100:
+                transformed_value *= -1
+            therm_df.loc[x, 'therm_lvl_exp'] = transformed_value
+        elif (therm_df.loc[x, 'intervention'] == 'a') and (therm_df.loc[x, 'condition'] == 'indig'):
+            transformed_value = round(abs(therm_df.loc[x, 'therm_lvl_exp'] - 100) * 10)
+            if therm_df.loc[x, 'therm_lvl_exp'] > 100:
+                transformed_value *= -1
+            therm_df.loc[x, 'therm_lvl_exp'] = transformed_value
+        elif (therm_df.loc[x, 'intervention'] == 'b') and (therm_df.loc[x, 'condition'] == 'guilt'):
+            transformed_value = round(abs(therm_df.loc[x, 'therm_lvl_exp'] - 100) * 10)
+            if therm_df.loc[x, 'therm_lvl_exp'] > 100:
+                transformed_value *= -1
+            therm_df.loc[x, 'therm_lvl_exp'] = transformed_value
+        elif (therm_df.loc[x, 'intervention'] == 'b') and (therm_df.loc[x, 'condition'] == 'indig'):
+            transformed_value = round(abs(therm_df.loc[x, 'therm_lvl_exp'] - 100) * 10)
+            if therm_df.loc[x, 'therm_lvl_exp'] < 100:
+                transformed_value *= -1
+            therm_df.loc[x, 'therm_lvl_exp'] = transformed_value
+    conditions = ['guilt', 'indig']
+    interventions = ['a', 'b']
+    for condition in conditions:
+        for intervention in interventions:
+            filtered_df = therm_df[(therm_df['condition'] == condition) & (therm_df['intervention'] == intervention)]       
+            therm_lvl_exp_hist = (ggplot(filtered_df, aes(x='therm_lvl_exp')) +
+                geom_histogram(binwidth=1, fill='skyblue', color='black', alpha=1) +
+                labs(title=f'Histogram of Expanded Thermometer Levels for {condition} in {intervention}', x="Expanded Thermometer Level", y="Count") +
+                theme_classic() +
+                geom_vline(xintercept=0, linetype='dashed', color='red') +
+                geom_vline(xintercept=10, linetype='dashed', color='red') +
+                scale_y_continuous(expand=(0, 0), limits=[0,200], breaks=[0,50,100,150,200]) +
+                scale_x_continuous(expand=(0, 0), limits=[-30,30], breaks=[-30,-20,-10,0,10,20,30])
+            )       
+            print(therm_lvl_exp_hist)
+            therm_lvl_exp_hist.save(f'therm_lvl_exp_hist_{condition}_{intervention}.png')
+
+    # Step 7: Correlation of 0-10 and expanded thermometer levels.
+    mean_therm_lvl_exp_df = therm_df.groupby(['participant', 'condition', 'intervention'])['therm_lvl_exp'].mean().reset_index()
+    mean_therm_lvl_exp_group_df = mean_therm_lvl_exp_df.groupby(['condition', 'intervention']).agg(
+        mean_therm_lvl_exp=('therm_lvl_exp', 'mean'),
+        std_dev=('therm_lvl_exp', 'std'),
+        n=('therm_lvl_exp', 'size')
+    ).reset_index()
+    mean_therm_lvl_exp_group_df['std_error'] = mean_therm_lvl_exp_group_df['std_dev'] / np.sqrt(mean_therm_lvl_exp_group_df['n'])
+    mean_therm_lvl_exp_group_df = mean_therm_lvl_exp_group_df.drop(columns=['std_dev'])    
+    merged_df = pd.merge(mean_therm_lvl_df, mean_therm_lvl_exp_df, on=['participant', 'condition', 'intervention'])
+    correlations = merged_df.groupby(['condition', 'intervention']).apply(
+        lambda group: group['therm_lvl'].corr(group['therm_lvl_exp'])
+    ).reset_index(name='correlation')
+    print(correlations)
+    for condition in merged_df['condition'].unique():
+        for intervention in merged_df['intervention'].unique():
+            filtered_df = merged_df[(merged_df['condition'] == condition) & (merged_df['intervention'] == intervention)]
+            correlation = correlations[(correlations['condition'] == condition) & (correlations['intervention'] == intervention)]['correlation'].values[0]
+            correlation_plot = (
+                ggplot(filtered_df, aes(x='therm_lvl', y='therm_lvl_exp'))
+                + geom_point()
+                + geom_smooth(method='lm', color='blue')
+                + theme_classic()
+                + labs(
+                    title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {correlation:.2f}',
+                    x='0-10 Thermometer Level',
+                    y='Expanded Thermometer Level'
+                )
+                + scale_x_continuous(breaks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+            )
+            print(correlation_plot)
+            correlation_plot.save(f'correlation_plot_{condition}_{intervention}.png')
+
+    # Step 8: Perform one-sample t-tests on expanded thermometer level data with prior participant pooling.
+    t_test_results = mean_therm_lvl_exp_df.groupby(['condition', 'intervention']).apply(
+        lambda group: pd.Series({
+            'shapiro_p_val': stats.shapiro(group['therm_lvl_exp']).pvalue,
+            'test_type': 'para' if stats.shapiro(group['therm_lvl_exp']).pvalue > 0.05 else 'non-para',
+            't_stat_or_w_stat': stats.ttest_1samp(group['therm_lvl_exp'], 0).statistic if stats.shapiro(group['therm_lvl_exp']).pvalue > 0.05 else stats.wilcoxon(group['therm_lvl_exp'] - 0).statistic,
+            'p_val': stats.ttest_1samp(group['therm_lvl_exp'], 0).pvalue if stats.shapiro(group['therm_lvl_exp']).pvalue > 0.05 else stats.wilcoxon(group['therm_lvl_exp'] - 0).pvalue
+        })
+    ).reset_index()
+    print(t_test_results)
+        
+    # Step 9: Perform one-sample t-tests on expanded thermometer level data for each participant.
+    t_test_results = therm_df.groupby(['participant', 'condition', 'intervention']).apply(
+        lambda group: pd.Series({
+            'shapiro_p_val': stats.shapiro(group['therm_lvl_exp']).pvalue,
+            'test_type': 'para' if stats.shapiro(group['therm_lvl_exp']).pvalue > 0.05 else 'non-para',
+            't_stat_or_w_stat': (
+                stats.ttest_1samp(group['therm_lvl_exp'], 0).statistic 
+                if stats.shapiro(group['therm_lvl_exp']).pvalue > 0.05 
+                else stats.wilcoxon(group['therm_lvl_exp'] - 0).statistic
+            ),
+            'p_val': (
+                stats.ttest_1samp(group['therm_lvl_exp'], 0).pvalue 
+                if stats.shapiro(group['therm_lvl_exp']).pvalue > 0.05 
+                else stats.wilcoxon(group['therm_lvl_exp'] - 0).pvalue
+            )
+        })
+    ).reset_index()
+    p_values = t_test_results['p_val']
+    adjusted_p_values = multipletests(p_values, method='bonferroni')[1]
+    t_test_results['p_val_adj'] = adjusted_p_values
+    def add_asterisks(p_val):
+        if p_val < 0.001:
+            return '***'
+        elif p_val < 0.01:
+            return '**'
+        elif p_val < 0.05:
+            return '*'
+        else:
+            return ''
+    t_test_results['significance_unadjusted'] = t_test_results['p_val'].apply(add_asterisks)
+    t_test_results['significance_adjusted'] = t_test_results['p_val_adj'].apply(add_asterisks)
+    print(t_test_results)
+
+    # Step 10: Perform LMM on expanded thermometer level data.
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # grdevices = importr('grDevices')
+    # clubSandwich = importr('clubSandwich')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(nortest)
+    # library(clubSandwich)
+    # therm_df <- as.data.frame(therm_df)
+    # model <- lmer(therm_lvl_exp~condition*intervention + (1|participant), data = therm_df)
+    # robust_se <- vcovCR(model, type = "CR0")
+    # residuals_model <- residuals(model)
+    # ad_test_result <- ad.test(residuals_model)
+    # print(ad_test_result)
+    # png(filename="lmm_residuals_qqplot.png")
+    # qqnorm(residuals_model)
+    # qqline(residuals_model, col = 'red')
+    # dev.off()
+    # print("Robust Standard Errors:")
+    # print(robust_se)
+    # t_crit_condition <- qt(0.975, df = 6698)
+    # t_crit_intervention <- qt(0.975, df = 19)
+    # print(t_crit_condition)
+    # print(t_crit_intervention)
+    # if (ad_test_result$p.value > 0.05) {
+    # print("LMM of means residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print("Model Summary:")
+    # print(summary(model))
+    # print("Parameter Estimates:")
+    # estimates <- fixef(model)
+    # print(estimates)
+    # } else {
+    # print("LMM of means residuals do not meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # print("Model Summary:")
+    # print(summary(model))
+    # print("Parameter Estimates:")
+    # estimates <- fixef(model)
+    # print(estimates)
+    # }
+    # """
+    # ro.globalenv['therm_df'] = pandas2ri.py2rpy(therm_df)
+    # result = r(r_script)
+    # print(result)
+
+    # Step 11: Plot mean expanded thermometer levels.
+    guilt_a_rse = 0.4659416
+    indig_a_rse = np.sqrt(0.4659416**2 + 2.647840**2)
+    guilt_b_rse = np.sqrt(0.4659416**2 + 1.0043692**2)
+    indig_b_rse = np.sqrt(0.4659416**2 + 2.647840**2 + 1.0043692**2 + 3.442264**2)
+    rse_column = [guilt_a_rse, indig_a_rse, guilt_b_rse, indig_b_rse]
+    mean_therm_lvl_exp_df = therm_df.groupby(['participant', 'condition', 'intervention'])['therm_lvl_exp'].mean().reset_index()
+    mean_therm_lvl_exp_group_df = mean_therm_lvl_exp_df.groupby(['condition', 'intervention']).agg(
+        mean_therm_lvl_exp=('therm_lvl_exp', 'mean'),
+        std_dev=('therm_lvl_exp', 'std'),
+        n=('therm_lvl_exp', 'size')
+    ).reset_index()
+    mean_therm_lvl_exp_group_df['std_error'] = mean_therm_lvl_exp_group_df['std_dev'] / np.sqrt(mean_therm_lvl_exp_group_df['n'])
+    mean_therm_lvl_exp_group_df = mean_therm_lvl_exp_group_df.drop(columns=['std_dev'])
+    mean_therm_lvl_exp_group_df['rse'] = rse_column
+    mean_lvl_exp_plot = (ggplot(mean_therm_lvl_exp_group_df, aes(x='intervention', y='mean_therm_lvl_exp', fill='condition')) +
+        geom_bar(stat='identity', position='dodge') + 
+        geom_errorbar(aes(ymin='mean_therm_lvl_exp - std_error', ymax='mean_therm_lvl_exp + std_error'), position=position_dodge(width=0.9), width=0.2) +
+        theme_classic() +
+        scale_fill_manual(values=['indianred', 'skyblue']) +
+        labs(title="Mean Expanded Thermometer Levels for Guilt and Indignation in Interventions A and B.", x='Intervention', y='Mean Expanded Thermometer Level') +
+        scale_y_continuous(expand=(0, 0), limits=[-2.5,3.5], breaks=[-2.0,-1.0,0.0,1.0,2.0,3.0]) +
+        scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
+        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5)
+        )
+    print(mean_lvl_exp_plot)
+    mean_lvl_exp_plot.save('mean_lvl_exp_plot.png')
+
+    # Step 12: Plot mean expanded thermometer level for each participant.
+    a_participants = ['P004', 'P006', 'P100', 'P128', 'P122', 'P125', 'P136', 'P145', 'P215', 'P216']
+    b_participants = ['P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P107', 'P127', 'P155', 'P199']
+    a_participant_means = []
+    a_participant_std_errors = []
+    b_participant_means = []
+    b_participant_std_errors = []
+    for participant in a_participants:
+        guilt_a_participant_rows = therm_df[(therm_df['condition'] == 'guilt') & (therm_df['intervention'] == 'a') & (therm_df['participant'] == participant)]
+        guilt_a_mean = guilt_a_participant_rows['therm_lvl_exp'].mean()
+        a_participant_means.append(guilt_a_mean)
+        guilt_a_std_error = guilt_a_participant_rows['therm_lvl_exp'].std() / np.sqrt(len(guilt_a_participant_rows['therm_lvl_exp']))
+        a_participant_std_errors.append(guilt_a_std_error)
+        indig_a_participant_rows = therm_df[(therm_df['condition'] == 'indig') & (therm_df['intervention'] == 'a') & (therm_df['participant'] == participant)]
+        indig_a_mean = indig_a_participant_rows['therm_lvl_exp'].mean()
+        a_participant_means.append(indig_a_mean)
+        indig_a_std_error = indig_a_participant_rows['therm_lvl_exp'].std() / np.sqrt(len(indig_a_participant_rows['therm_lvl_exp']))
+        a_participant_std_errors.append(indig_a_std_error)
+    for participant in b_participants:
+        guilt_b_participant_rows = therm_df[(therm_df['condition'] == 'guilt') & (therm_df['intervention'] == 'b') & (therm_df['participant'] == participant)]
+        guilt_b_mean = guilt_b_participant_rows['therm_lvl_exp'].mean()
+        b_participant_means.append(guilt_b_mean)
+        guilt_b_std_error = guilt_b_participant_rows['therm_lvl_exp'].std() / np.sqrt(len(guilt_b_participant_rows['therm_lvl_exp']))
+        b_participant_std_errors.append(guilt_b_std_error)
+        indig_b_participant_rows = therm_df[(therm_df['condition'] == 'indig') & (therm_df['intervention'] == 'b') & (therm_df['participant'] == participant)]
+        indig_b_mean = indig_b_participant_rows['therm_lvl_exp'].mean()
+        b_participant_means.append(indig_b_mean)
+        indig_b_std_error = indig_b_participant_rows['therm_lvl_exp'].std() / np.sqrt(len(indig_b_participant_rows['therm_lvl_exp']))
+        b_participant_std_errors.append(indig_b_std_error)
+    plot_data = pd.DataFrame({
+        'Condition': ['Guilt', 'Indignation'] * len(a_participants) + ['Guilt', 'Indignation'] * len(b_participants),
+        'Participants': sum([[p, p] for p in a_participants + b_participants], []),
+        'Mean': a_participant_means + b_participant_means,
+        'Std_Error': a_participant_std_errors + b_participant_std_errors
+    })
+    plot_data['Participants'] = pd.Categorical(plot_data['Participants'], categories=a_participants + b_participants, ordered=True)
+    participant_mean_lvl_exp_plot = (ggplot(plot_data, aes(x='Participants', y='Mean', fill='Condition')) +
+        geom_bar(stat='identity', position='dodge') + 
+        geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), position=position_dodge(width=0.9), width=0.2) +
+        theme_classic() +
+        scale_fill_manual(values=['indianred', 'skyblue']) +
+        labs(title='Mean Expanded Thermometer Levels for Guilt and Indignation in Interventions A and B.', y='Mean Expanded Thermometer Level') +
+        theme(axis_text_x=element_text(rotation=45, hjust=1)) +
+        scale_y_continuous(expand=(0, 0), limits=[-8, 8], breaks=[-6, -4, -2, 0, 2, 4, 6]) +
+        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5) +
+        geom_vline(xintercept=10.5, linetype='dotted', color='black', size=0.8)
+        )
+    participant_mean_lvl_exp_plot = participant_mean_lvl_exp_plot + annotate("text", x=5, y=-7, label="Int. A", size=16, color="black") + \
+            annotate("text", x=15, y=-7, label="Int. B", size=16, color="black")
+    print(participant_mean_lvl_exp_plot)
+    participant_mean_lvl_exp_plot.save('participant_mean_lvl_exp_plot.png')
+
+    # Step 13: Run t-tests between 1st and 2nd halves of each run.
+    def split_and_compute_means(df):
+        midpoint = len(df) // 2
+        first_half_mean = df.iloc[:midpoint]['therm_lvl_exp'].mean()  
+        second_half_mean = df.iloc[midpoint:]['therm_lvl_exp'].mean()  
+        return pd.Series({'first_half_mean': first_half_mean, 'second_half_mean': second_half_mean})
+    therm_halves_df = therm_df.groupby(['participant', 'condition', 'intervention']).apply(split_and_compute_means).reset_index()
+    therm_halves_long_df = pd.melt(therm_halves_df, id_vars=['participant', 'condition', 'intervention'], 
+                                value_vars=['first_half_mean', 'second_half_mean'], 
+                                var_name='half', value_name='therm_lvl_exp')
+    mean_therm_lvl_exp_group_df = therm_halves_long_df.groupby(['condition', 'intervention', 'half']).agg(
+        mean_therm_lvl_exp=('therm_lvl_exp', 'mean'),
+        std_dev=('therm_lvl_exp', 'std'),
+        n=('therm_lvl_exp', 'size')
+    ).reset_index()
+    mean_therm_lvl_exp_group_df['std_error'] = mean_therm_lvl_exp_group_df['std_dev'] / np.sqrt(mean_therm_lvl_exp_group_df['n'])
+    mean_therm_lvl_exp_group_df = mean_therm_lvl_exp_group_df.drop(columns=['std_dev'])
+    interventions = ['a', 'b']
+    conditions = ['guilt', 'indig']
+    for intervention in interventions:
+        for condition in conditions:
+            subset = therm_halves_long_df[(therm_halves_long_df['condition'] == condition) & (therm_halves_long_df['intervention'] == intervention)]
+            first_half = subset[subset['half'] == 'first_half_mean']['therm_lvl_exp']
+            second_half = subset[subset['half'] == 'second_half_mean']['therm_lvl_exp']
+            shapiro_first = stats.shapiro(first_half)
+            shapiro_second = stats.shapiro(second_half)
+            print(f"Shapiro-Wilk Test for {condition}, {intervention} - First Half: p-value = {shapiro_first.pvalue}")
+            print(f"Shapiro-Wilk Test for {condition}, {intervention} - Second Half: p-value = {shapiro_second.pvalue}")
+            if shapiro_first.pvalue > 0.05 and shapiro_second.pvalue > 0.05:
+                _, p_value = stats.ttest_rel(first_half, second_half)
+                test_type = "Paired T-Test"
+            else:
+                _, p_value = stats.wilcoxon(first_half, second_half)
+                test_type = "Wilcoxon Signed-Rank Test"
+            print(f"{test_type} for {condition}, {intervention}:")
+            print(f"P-value: {p_value}\n")
+
+    # Step 14: Plot mean expanded thermometer levels for 1st and 2nd halves of each run.
+    run_list = ['Intervention A\n+ Guilt', 'Intervention A\n+ Indig.', 'Intervention B\n+ Guilt', 'Intervention B\n+ Indig']
+    start_list = [mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[0], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[4], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[2], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[6]]
+    end_list = [mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[1], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[5], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[3], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[7]]
+    start_std_error_list = [mean_therm_lvl_exp_group_df['std_error'].iloc[0], mean_therm_lvl_exp_group_df['std_error'].iloc[4], mean_therm_lvl_exp_group_df['std_error'].iloc[2], mean_therm_lvl_exp_group_df['std_error'].iloc[6]]
+    end_std_error_list = [mean_therm_lvl_exp_group_df['std_error'].iloc[1], mean_therm_lvl_exp_group_df['std_error'].iloc[5], mean_therm_lvl_exp_group_df['std_error'].iloc[3], mean_therm_lvl_exp_group_df['std_error'].iloc[7]]
+    plot_data = pd.DataFrame({
+        'run': run_list * 2,
+        'mean': start_list + end_list,
+        'fill': ['Start'] * len(run_list) + ['End'] * len(run_list),
+        'std_error': start_std_error_list + end_std_error_list
+        })
+    plot_data['fill'] = pd.Categorical(plot_data['fill'], categories=['Start', 'End'], ordered=True)
+    run_startend_means_plot = (ggplot(plot_data, aes(x='run', y='mean', fill='fill')) +
+        geom_bar(stat='identity', position='dodge', width=0.8) +
+        geom_errorbar(aes(ymin='mean - std_error', ymax='mean + std_error'), position=position_dodge(width=0.8), width=0.2) +
+        theme_classic() +
+        theme(axis_text_x=element_text()) +  
+        scale_y_continuous(expand=(0, 0), limits=[-4,4], breaks=[-4.0, -2.0, 0.0, 2.0, 4.0]) +
+        labs(x='Run Type', y='Mean Expanded Thermometer Level', fill='Run Stage') +
+        ggtitle('Mean Expanded Thermometer Levels for Run Start vs End') + 
+        scale_fill_manual(values=['indianred', 'skyblue']) +
+        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    print(run_startend_means_plot)
+    run_startend_means_plot.save('run_startend_means_plot.png')
+
+    # Step 15: Calculate proportion of volumes for 1st and 2nd halves of each run where expanded thermometer level > 0, and plot.
+    def split_and_compute_proportion(df):
+        midpoint = len(df) // 2
+        first_half_proportion = (df.iloc[:midpoint]['therm_lvl_exp'] > 0).mean()
+        second_half_proportion = (df.iloc[midpoint:]['therm_lvl_exp'] > 0).mean()
+        return pd.Series({'first_half_proportion': first_half_proportion, 'second_half_proportion': second_half_proportion})
+    therm_halves_df = therm_df.groupby(['participant', 'condition', 'intervention']).apply(split_and_compute_proportion).reset_index()
+    therm_halves_long_df = pd.melt(therm_halves_df, id_vars=['participant', 'condition', 'intervention'], 
+                                value_vars=['first_half_proportion', 'second_half_proportion'], 
+                                var_name='half', value_name='proportion')
+    proportion_group_df = therm_halves_long_df.groupby(['condition', 'intervention', 'half']).agg(
+        mean_proportion=('proportion', 'mean'),
+        std_dev=('proportion', 'std'),
+        n=('proportion', 'size')
+    ).reset_index()
+    proportion_group_df['std_error'] = proportion_group_df['std_dev'] / np.sqrt(proportion_group_df['n'])
+    proportion_group_df = proportion_group_df.drop(columns=['std_dev'])
+    run_list = ['Intervention A\n+ Guilt', 'Intervention A\n+ Indig.', 'Intervention B\n+ Guilt', 'Intervention B\n+ Indig']
+    start_list = [proportion_group_df['mean_proportion'].iloc[0], proportion_group_df['mean_proportion'].iloc[4], proportion_group_df['mean_proportion'].iloc[2], proportion_group_df['mean_proportion'].iloc[6]]
+    end_list = [proportion_group_df['mean_proportion'].iloc[1], proportion_group_df['mean_proportion'].iloc[5], proportion_group_df['mean_proportion'].iloc[3], proportion_group_df['mean_proportion'].iloc[7]]
+    start_std_error_list = [proportion_group_df['std_error'].iloc[0], proportion_group_df['std_error'].iloc[4], proportion_group_df['std_error'].iloc[2], proportion_group_df['std_error'].iloc[6]]
+    end_std_error_list = [proportion_group_df['std_error'].iloc[1], proportion_group_df['std_error'].iloc[5], proportion_group_df['std_error'].iloc[3], proportion_group_df['std_error'].iloc[7]]
+    plot_data = pd.DataFrame({
+        'run': run_list * 2,
+        'mean': start_list + end_list,
+        'fill': ['Start'] * len(run_list) + ['End'] * len(run_list),
+        'std_error': start_std_error_list + end_std_error_list
+        })
+    plot_data['fill'] = pd.Categorical(plot_data['fill'], categories=['Start', 'End'], ordered=True)
+    run_startend_prop_plot = (ggplot(plot_data, aes(x='run', y='mean', fill='fill')) +
+        geom_bar(stat='identity', position='dodge', width=0.8) +
+        geom_errorbar(aes(ymin='mean - std_error', ymax='mean + std_error'), position=position_dodge(width=0.8), width=0.2) +
+        theme_classic() +
+        theme(axis_text_x=element_text()) +  
+        scale_y_continuous(expand=(0, 0), limits=[0,0.75]) +
+        labs(x='Run Type', y='Mean Expanded Thermometer Level', fill='Run Stage') +
+        ggtitle('Mean Expanded Thermometer Levels for Run Start vs End') + 
+        scale_fill_manual(values=['indianred', 'skyblue']) +
+        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    print(run_startend_prop_plot)
+    run_startend_prop_plot.save('run_startend_prop_plot.png')
+
+    # Step 16: Generate TMS Metric and plot.
+    tms_df = therm_df.groupby(['participant', 'condition', 'intervention'])['therm_lvl_exp'].agg(
+        mean_therm_lvl_exp='mean',
+        std_dev='std'
+    ).reset_index()
+    tms_df['cv'] = np.where(tms_df['mean_therm_lvl_exp'] != 0, tms_df['std_dev'] / tms_df['mean_therm_lvl_exp'], 0)
+    tms_df['raw_tms'] = tms_df['mean_therm_lvl_exp'] * (1 - tms_df['cv'])
+    min_tms = tms_df['raw_tms'].min()
+    max_tms = tms_df['raw_tms'].max()
+    tms_df['tms'] = (tms_df['raw_tms'] - min_tms) / (max_tms - min_tms)
+    tms_group_df = tms_df.groupby(['condition', 'intervention']).agg(
+        tms=('tms', 'mean'),
+        std_dev=('tms', 'std'),
+        n=('tms', 'size')
+    ).reset_index()
+    tms_group_df['std_error'] = tms_group_df['std_dev'] / np.sqrt(tms_group_df['n'])
+    tms_group_df = tms_group_df.drop(columns=['std_dev'])   
+    tms_plot = (ggplot(tms_group_df, aes(x='intervention', y='tms', fill='condition')) +
+        geom_bar(stat='identity', position='dodge') + 
+        geom_errorbar(aes(ymin='tms - std_error', ymax='tms + std_error'), position=position_dodge(width=0.9), width=0.2) +
+        theme_classic() +
+        scale_fill_manual(values=['indianred', 'skyblue']) +
+        labs(title="TMS for Guilt and Indignation in Interventions A and B.", x='Intervention', y='TMS') +
+        scale_y_continuous(expand=(0, 0), limits=[0,1]) +
+        scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
+        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5)
+        )
+    print(tms_plot)
+    tms_plot.save('tms_plot.png')
+
+    # Step 17: Perform correlations and Bland-Altman plots of TMS and mean vs. perceived success rating.
+    perceived_success_guilt_values = ecrf_data.loc['perceived_success_guilt', :].tolist()
+    perceived_success_indignation_values = ecrf_data.loc['perceived_success_indignation', :].tolist()
+    interleaved_values = []
+    max_len = max(len(perceived_success_guilt_values), len(perceived_success_indignation_values))
+    for i in range(max_len):
+        if i < len(perceived_success_guilt_values):
+            interleaved_values.append(perceived_success_guilt_values[i])
+        if i < len(perceived_success_indignation_values):
+            interleaved_values.append(perceived_success_indignation_values[i])
+    tms_df['perceived_success'] = interleaved_values
+    correlation = tms_df['tms'].corr(tms_df['perceived_success'])
+    print(f'Correlation between TMS and Perceived Success Ratings: {correlation}')
+    tms_perceived_corr_plot = (ggplot(tms_df, aes(x='tms', y='perceived_success')) +
+            geom_point() +
+            geom_smooth(method='lm', color='blue') +
+            theme_classic() +  
+            labs(title=f'Scatter Plot of TMS vs Perceived Success Ratings\nCorrelation: {correlation}', 
+                x='TMS', 
+                y='Perceived Success Rating'))
+    print(tms_perceived_corr_plot)
+    tms_perceived_corr_plot.save('tms_perceived_corr_plot.png')
+    correlation = tms_df['mean_therm_lvl_exp'].corr(tms_df['perceived_success'])
+    print(f'Correlation between mean therm_lvl_exp and Perceived Success Ratings: {correlation}')
+    mean_perceived_corr_plot = (ggplot(tms_df, aes(x='mean_therm_lvl_exp', y='perceived_success')) +
+            geom_point() +
+            geom_smooth(method='lm', color='blue') +
+            theme_classic() +  
+            labs(title=f'Scatter Plot of mean therm_lvl_exp vs Perceived Success Ratings\nCorrelation: {correlation}', 
+                x='Mean Expanded Thermometer Level', 
+                y='Perceived Success Rating'))
+    print(mean_perceived_corr_plot)
+    mean_perceived_corr_plot.save('mean_perceived_corr_plot.png')
+    tms_df['perceived_success_norm'] = (tms_df['perceived_success'] - tms_df['perceived_success'].min()) / (tms_df['perceived_success'].max() - tms_df['perceived_success'].min())
+    tms_df['mean'] = tms_df[['tms', 'perceived_success_norm']].mean(axis=1)
+    tms_df['difference'] = tms_df['tms'] - tms_df['perceived_success_norm']
+    mean_diff = tms_df['difference'].mean()
+    std_diff = tms_df['difference'].std()
+    loa_upper = mean_diff + 1.96 * std_diff
+    loa_lower = mean_diff - 1.96 * std_diff
+    tms_bland_altman_plot = (
+        ggplot(tms_df, aes(x='mean', y='difference')) +
+        geom_point(alpha=0.5) +
+        geom_hline(yintercept=mean_diff, color='blue', linetype='dashed', size=1) +
+        geom_hline(yintercept=loa_upper, color='red', linetype='dashed', size=1) +
+        geom_hline(yintercept=loa_lower, color='red', linetype='dashed', size=1) +
+        theme_classic() +
+        scale_y_continuous(expand=(0, 0), limits=[-0.5,1]) +
+        labs(
+            title='Bland-Altman Plot of TMS vs Normalised Perceived Success',
+            x='Mean of TMS and Normalised Perceived Success',
+            y='Difference (TMS - Normalised Perceived Success)'
+        )
+    )
+    print(tms_bland_altman_plot)
+    tms_bland_altman_plot.save('tms_bland_altman_plot.png')
+    tms_df['mean_therm_lvl_exp_norm'] = (tms_df['mean_therm_lvl_exp'] - tms_df['mean_therm_lvl_exp'].min()) / (tms_df['mean_therm_lvl_exp'].max() - tms_df['mean_therm_lvl_exp'].min())
+    tms_df['mean'] = tms_df[['mean_therm_lvl_exp_norm', 'perceived_success_norm']].mean(axis=1)
+    tms_df['difference'] = tms_df['mean_therm_lvl_exp_norm'] - tms_df['perceived_success_norm']
+    mean_diff = tms_df['difference'].mean()
+    std_diff = tms_df['difference'].std()
+    loa_upper = mean_diff + 1.96 * std_diff
+    loa_lower = mean_diff - 1.96 * std_diff
+    mean_bland_altman_plot = (
+        ggplot(tms_df, aes(x='mean', y='difference')) +
+        geom_point(alpha=0.5) +
+        geom_hline(yintercept=mean_diff, color='blue', linetype='dashed', size=1) +
+        geom_hline(yintercept=loa_upper, color='red', linetype='dashed', size=1) +
+        geom_hline(yintercept=loa_lower, color='red', linetype='dashed', size=1) +
+        theme_classic() +
+        scale_y_continuous(expand=(0, 0), limits=[-0.5,1]) +
+        labs(
+            title='Bland-Altman Plot of Normalised Mean vs Perceived Success',
+            x='Mean of Normalised Mean and Perceived Success',
+            y='Difference (Normalised Mean - Normalised Perceived Success)'
+        )
+    )
+    print(mean_bland_altman_plot)
+    mean_bland_altman_plot.save('mean_bland_altman_plot.png') 
 
 #endregion
 

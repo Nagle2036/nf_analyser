@@ -2460,7 +2460,11 @@ exit
                 print(f'Performing brain extraction on {func} with {mask}, output to {outpath}')
                 subprocess.run(['fslmaths', func, '-mul', mask, outpath])
 
-        # then delete ss 1 and smoothed files
+        for file_name in os.listdir(fully_preproc_func_directory):
+            file_path = os.path.join(fully_preproc_func_directory, file_name)
+            if not file_name.endswith("preproc.nii.gz"):
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
 
 #endregion
 

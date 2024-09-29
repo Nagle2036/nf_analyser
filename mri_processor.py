@@ -2395,7 +2395,7 @@ exit
     else:
         print("fMRIPrep directory already clean. Skipping process.")
 
-    # Step 7 Brain Extract and Smooth Images:
+    # Step 7: Brain Extract and Smooth Images.
     print("\n###### STEP 7: BRAIN EXTRACT AND SMOOTH IMAGES ######") 
     for p_id in participants_to_iterate:
         p_id_stripped = p_id.replace('P', '')
@@ -2465,10 +2465,50 @@ exit
             if not file_name.endswith("preproc.nii.gz"):
                 if os.path.isfile(file_path):
                     os.remove(file_path)
+    print("Skull-stripping and smoothing completed. Brain images are fully preprocessed.")
 
 #endregion
 
 #region 7) FMRI ANALYSIS.
+
+answer = input("Would you like to perform fMRI analysis? (y/n)\n")
+if answer == 'y':
+    p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
+    participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    runs = ['run01', 'run02', 'run03', 'run04']
+    if p_id == 'ALL':
+        participants_to_iterate = participants
+    else:
+        participants_to_iterate = [p_id]
+    restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
+    if restart == 'y':
+        double_check = input("Are you sure? (y/n)\n")
+        if double_check == 'y':
+            for p_id in participants_to_iterate:
+                pass #temporary placeholder
+        else:
+            sys.exit()
+    
+    # Step 1: Create Directories.
+    print("\n###### STEP 1: CREATE DIRECTORIES ######")
+    for p_id in participants_to_iterate:
+        p_id_stripped = p_id.replace('P', '')
+        p_id_folder = os.path.join(os.getcwd(), p_id)
+        os.makedirs(p_id_folder, exist_ok=True)
+        analysis_1_folder = os.path.join(os.getcwd(), 'bids', 'analysis_1')
+        os.makedirs(analysis_1_folder, exist_ok=True)
+        analysis_1_first_level_folder = os.path.join(os.getcwd(), 'bids', 'analysis_1', 'first_level')
+        os.makedirs(analysis_1_first_level_folder, exist_ok=True)
+        analysis_1_first_level_folder_run1 = os.path.join(os.getcwd(), 'bids', 'analysis_1', 'first_level', 'run1')
+        os.makedirs(analysis_1_first_level_folder_run1, exist_ok=True)
+        analysis_1_first_level_folder_run2 = os.path.join(os.getcwd(), 'bids', 'analysis_1', 'first_level', 'run2')
+        os.makedirs(analysis_1_first_level_folder_run2, exist_ok=True)
+
+    # Step 2: 
+        
+
+
+
 
 #endregion
 

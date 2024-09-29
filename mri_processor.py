@@ -2492,22 +2492,66 @@ if answer == 'y':
     # Step 1: Create Directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
     for p_id in participants_to_iterate:
-        p_id_stripped = p_id.replace('P', '')
-        p_id_folder = os.path.join(os.getcwd(), p_id)
-        os.makedirs(p_id_folder, exist_ok=True)
-        analysis_1_folder = os.path.join(os.getcwd(), 'bids', 'analysis_1')
+        fmri_analysis_folder = 'fmri_analysis'
+        os.makedirs(fmri_analysis_folder, exist_ok=True)
+        analysis_1_folder = 'fmri_analysis/analysis_1'
         os.makedirs(analysis_1_folder, exist_ok=True)
-        analysis_1_first_level_folder = os.path.join(os.getcwd(), 'bids', 'analysis_1', 'first_level')
+        analysis_1_group_folder = 'fmri_analysis/analysis_1/group'
+        os.makedirs(analysis_1_group_folder, exist_ok=True)
+        onset_files_folder = 'fmri_analysis/analysis_1/group/onset_files'
+        os.makedirs(onset_files_folder, exist_ok=True)
+        analysis_1_first_level_folder = 'fmri_analysis/analysis_1/first_level'
         os.makedirs(analysis_1_first_level_folder, exist_ok=True)
-        analysis_1_first_level_folder_run1 = os.path.join(os.getcwd(), 'bids', 'analysis_1', 'first_level', 'run1')
-        os.makedirs(analysis_1_first_level_folder_run1, exist_ok=True)
-        analysis_1_first_level_folder_run2 = os.path.join(os.getcwd(), 'bids', 'analysis_1', 'first_level', 'run2')
-        os.makedirs(analysis_1_first_level_folder_run2, exist_ok=True)
+    print("Directories created.")
 
-    # Step 2: 
+    # Step 2: Create onset timing files.
+    print("\n###### STEP 10: CREATING ONSET TIMING FILES ######")
+    onsetfile_sub = 'fmri_analysis/analysis_1/group/onset_files/onsetfile_sub.txt'
+    with open(onsetfile_sub, 'w') as file:
+        data_rows = [
+            ['0', '20', '1'],
+            ['50', '20', '1'],
+            ['100', '20', '1'],
+            ['150', '20', '1'],
+            ['200', '20', '1'],
+            ['250', '20', '1'],
+            ['300', '20', '1'],
+            ['350', '20', '1'],
+            ['400', '20', '1']
+        ]
+        for row in data_rows:
+            formatted_row = "\t".join(row) + "\n"
+            file.write(formatted_row)
+    onsetfile_guilt = 'fmri_analysis/analysis_1/group/onset_files/onsetfile_guilt.txt'
+    with open(onsetfile_guilt, 'w') as file:
+        data_rows = [
+            ['20', '30', '1'],
+            ['120', '30', '1'],
+            ['220', '30', '1'],
+            ['320', '30', '1']
+        ]
+        for row in data_rows:
+            formatted_row = "\t".join(row) + "\n"
+            file.write(formatted_row)
+    onsetfile_indig = 'fmri_analysis/analysis_1/group/onset_files/onsetfile_indig.txt'
+    with open(onsetfile_indig, 'w') as file:
+        data_rows = [
+            ['70', '30', '1'],
+            ['170', '30', '1'],
+            ['270', '30', '1'],
+            ['370', '30', '1']
+        ]
+        for row in data_rows:
+            formatted_row = "\t".join(row) + "\n"
+            file.write(formatted_row)
+    print('Onset files created.')
         
 
 
+
+
+    for p_id in participants_to_iterate:
+        p_id_stripped = p_id.replace('P', '')
 
 
 #endregion

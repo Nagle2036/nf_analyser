@@ -251,12 +251,26 @@ if answer == 'y':
 
 answer = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer == 'y':
-
-
-
-    
-    # Step 1: Access Run 2 and 3 tbv_script thermometer files and extract relevant data into dataframe.
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    restart = input("Would you like to start the thermometer analysis from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
+    if restart == 'y':
+        double_check = input("Are you sure? (y/n)\n")
+        if double_check == 'y':
+            thermometer_analysis_folder = 'thermometer_analysis'
+            print(f"Deleting {p_id} thermometer_analysis folder...")
+            shutil.rmtree(thermometer_analysis_folder)
+        else:
+            sys.exit()
+
+    # Step 1: Create Directories.
+    print("\n###### STEP 1: CREATE DIRECTORIES ######")
+    for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
+        os.makedirs(thermometer_analysis_folder, exist_ok=True)
+    print("Directories created.")
+
+    # Step 2: Access Run 2 and 3 tbv_script thermometer files and extract relevant data into dataframe.
+    print("\n###### STEP 2: EXTRACT TBV THERMOMETER DATA ######")
     def find_second_and_third_largest(files):
         sorted_files = sorted(files, key=lambda x: int(x.split('_')[-1].split('.')[0]), reverse=True)
         second_largest_path = os.path.join(folder_path, sorted_files[-2])
@@ -264,18 +278,6 @@ if answer == 'y':
         return second_largest_path, third_largest_path
     df = pd.DataFrame(columns=participants)
     for x in participants:
-        analysis_folder = os.path.join(os.getcwd(), f'{x}', 'analysis')
-        if not os.path.exists(analysis_folder):
-            subprocess.run(['mkdir', f'{x}/analysis'])
-        therm_folder = os.path.join(os.getcwd(), f'{x}', 'analysis', 'therm')
-        if not os.path.exists(therm_folder):
-            subprocess.run(['mkdir', f'{x}/analysis/therm'])
-        group_folder = os.path.join(os.getcwd(), 'group')
-        if not os.path.exists(group_folder):
-            subprocess.run(['mkdir', 'group'])
-        group_therm_folder = os.path.join(os.getcwd(), 'group', 'therm')
-        if not os.path.exists(group_therm_folder):
-            subprocess.run(['mkdir', 'group', 'therm'])
         folder_path = os.path.join(os.getcwd(), f'{x}', 'data', 'neurofeedback', 'tbv_script', 'data')
         files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
         if len(files) == 4:
@@ -316,10 +318,12 @@ if answer == 'y':
                     df.at[feedback_lvl_header, f'{x}'] = feedback_lvl
         process_file(run2_path)
         process_file(run3_path)
-    therm_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/therm/therm_data.xlsx'
+    therm_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/thermometer_analysis/therm_data.xlsx'
     df.to_excel(therm_data, index=True)
+    print("TBV thermometer data extracted.")
     
-    # Step 2: Access eCRF document and extract relevant data into dataframe.
+    # Step 3: Access eCRF document and extract relevant data into dataframe.
+    print("\n###### STEP 3: EXTRACT eCRF DATA ######")
     warnings.simplefilter("ignore", UserWarning)
     df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'intervention', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3']
     data_df = pd.DataFrame(index = df_row_headers)
@@ -424,13 +428,15 @@ if answer == 'y':
         df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values
         for key, values in df_values_dict.items():
             data_df[key] = values
-        ecrf_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/group/ecrf_data.xlsx'
+        ecrf_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/thermometer_analysis/ecrf_data.xlsx'
         data_df.to_excel(ecrf_data, index=True)
         print(f'{x} data from eCRF.xlsx successfully extracted.')
         workbook.close()
     warnings.resetwarnings()
+    print("eCRF data extracted.")
 
-    # Step 1: Organise data.
+    # Step 4: Organise data.
+    print("\n###### STEP 4: FORMAT DATA ######")
     ecrf_data = pd.read_excel(ecrf_data_path, index_col='Unnamed: 0')
     therm_data = pd.read_excel(therm_data_path, index_col='Unnamed: 0')
     intervention_row = ecrf_data.loc['intervention', :]
@@ -459,8 +465,10 @@ if answer == 'y':
     therm_df['intervention'] = intervention_column
     therm_df['therm_lvl'] = therm_lvl_column
     therm_df['therm_val'] = therm_val_column
+    print("Data formatted.")
 
-    #%% Step 2: Perform LMM of thermometer levels.
+    # Step 5: Perform LMM of thermometer levels.
+    print("\n###### STEP 5: LMM OF 0-10 THERMOMETER LEVELS ######")
     # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
     # pandas2ri.activate()
     # r = ro.r
@@ -485,8 +493,10 @@ if answer == 'y':
     # ro.globalenv['therm_df'] = pandas2ri.py2rpy(therm_df)
     # result = r(r_script)
     # print(result)
+    print("LMM cannot be performed on server. Please run code instead on local Spyder software.")
 
-    # Step 3: Plot histogram of thermometer level data. 
+    # Step 6: Plot histogram of thermometer level data.
+    print("\n###### STEP 6: PLOT HISTOGRAM OF 0-10 THERMOMETER LEVELS ######")
     therm_lvl_hist = ggplot(therm_df) + \
         geom_histogram(aes(x='therm_lvl'), binwidth=1, fill='skyblue', color='black', alpha=1) + \
         theme_classic() + \
@@ -497,8 +507,10 @@ if answer == 'y':
         ggtitle('Histogram of Thermometer Levels')
     print(therm_lvl_hist)
     therm_lvl_hist.save('therm_lvl_hist.png')
+    print("Histogram of 0-10 thermometer levels plotted.")
 
-    # Step 4: Plot mean thermometer levels.
+    # Step 7: Plot mean thermometer levels.
+    print("\n###### STEP 7: PLOT MEAN 0-10 THERMOMETER LEVELS ######")
     mean_therm_lvl_df = therm_df.groupby(['participant', 'condition', 'intervention'])['therm_lvl'].mean().reset_index()
     mean_therm_lvl_group_df = mean_therm_lvl_df.groupby(['condition', 'intervention']).agg(
         mean_therm_lvl=('therm_lvl', 'mean'),
@@ -516,9 +528,11 @@ if answer == 'y':
         scale_y_continuous(expand=(0, 0), limits=[0,3.5])
         )
     print(mean_lvl_plot)
-    mean_lvl_plot.save('mean_lvl_plot.png')
+    mean_lvl_plot.save('thermometer_analysis/figs/mean_lvl_plot.png')
+    print("Mean 0-10 thermometer levels plotted.")
 
-    # Step 5: Plot proportion of volumes with thermometer levels greater than 0.
+    # Step 8: Plot proportion of volumes with thermometer levels greater than 0.
+    print("\n###### STEP 8: PLOT PROPORTION OF 0-10 THERMOMETER LEVELS > 0 ######")
     prop_therm_lvl_df = therm_df.groupby(['participant', 'condition', 'intervention']).agg(
         prop=('therm_lvl', lambda x: (x > 0).mean())
     ).reset_index()
@@ -538,9 +552,11 @@ if answer == 'y':
         scale_y_continuous(expand=(0, 0), limits=[0,0.8], breaks=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8])
         )
     print(prop_lvl_plot)
-    prop_lvl_plot.save('prop_lvl_plot.png')
+    prop_lvl_plot.save('thermometer_analysis/figs/prop_lvl_plot.png')
+    print("Proportion of 0-10 thermometer levels > 0 plotted.")
 
-    # Step 6: Calculate expanded thermometer level values and plot histograms.
+    # Step 9: Calculate expanded thermometer level values and plot histograms.
+    print("\n###### STEP 9: CALCULATE EXPANDED THERMOMETER LEVELS ######")
     therm_df['therm_lvl_exp'] = therm_df['therm_val'].round(1)
     for x in therm_df.index:
         if (therm_df.loc[x, 'intervention'] == 'a') and (therm_df.loc[x, 'condition'] == 'guilt'):
@@ -578,9 +594,11 @@ if answer == 'y':
                 scale_x_continuous(expand=(0, 0), limits=[-30,30], breaks=[-30,-20,-10,0,10,20,30])
             )       
             print(therm_lvl_exp_hist)
-            therm_lvl_exp_hist.save(f'therm_lvl_exp_hist_{condition}_{intervention}.png')
+            therm_lvl_exp_hist.save(f'thermometer_analysis/figs/therm_lvl_exp_hist_{condition}_{intervention}.png')
+    print("Expanded thermometer levels calculated and histograms plotted.")
 
-    # Step 7: Correlation of 0-10 and expanded thermometer levels.
+    # Step 10: Correlation of 0-10 and expanded thermometer levels.
+    print("\n###### STEP 10: CORRELATION OF 0-10 AND EXPANDED THERMOMETER LEVELS ######")
     mean_therm_lvl_exp_df = therm_df.groupby(['participant', 'condition', 'intervention'])['therm_lvl_exp'].mean().reset_index()
     mean_therm_lvl_exp_group_df = mean_therm_lvl_exp_df.groupby(['condition', 'intervention']).agg(
         mean_therm_lvl_exp=('therm_lvl_exp', 'mean'),
@@ -611,9 +629,11 @@ if answer == 'y':
                 + scale_x_continuous(breaks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
             )
             print(correlation_plot)
-            correlation_plot.save(f'correlation_plot_{condition}_{intervention}.png')
+            correlation_plot.save(f'thermometer_analysis/figs/correlation_plot_{condition}_{intervention}.png')
+    print("Correlation of 0-10 and expanded thermometer levels completed.")
 
-    # Step 8: Perform one-sample t-tests on expanded thermometer level data with prior participant pooling.
+    # Step 11: Perform one-sample t-tests on expanded thermometer level data with prior participant pooling.
+    print("\n###### STEP 11: ONE-SAMPLE T-TESTS OF EXPANDED THERMOMETER LEVELS ######")
     t_test_results = mean_therm_lvl_exp_df.groupby(['condition', 'intervention']).apply(
         lambda group: pd.Series({
             'shapiro_p_val': stats.shapiro(group['therm_lvl_exp']).pvalue,
@@ -623,8 +643,10 @@ if answer == 'y':
         })
     ).reset_index()
     print(t_test_results)
+    print("One-sample t-tests of expanded thermometer levels completed.")
         
-    # Step 9: Perform one-sample t-tests on expanded thermometer level data for each participant.
+    # Step 12: Perform one-sample t-tests on expanded thermometer level data for each participant.
+    print("\n###### STEP 12: ONE-SAMPLE T-TESTS OF EXPANDED THERMOMETER LEVELS PER PARTICIPANT ######")
     t_test_results = therm_df.groupby(['participant', 'condition', 'intervention']).apply(
         lambda group: pd.Series({
             'shapiro_p_val': stats.shapiro(group['therm_lvl_exp']).pvalue,
@@ -656,8 +678,10 @@ if answer == 'y':
     t_test_results['significance_unadjusted'] = t_test_results['p_val'].apply(add_asterisks)
     t_test_results['significance_adjusted'] = t_test_results['p_val_adj'].apply(add_asterisks)
     print(t_test_results)
+    print("Per participant one-sample t-tests of expanded thermometer levels completed.")
 
-    # Step 10: Perform LMM on expanded thermometer level data.
+    # Step 13: Perform LMM on expanded thermometer level data.
+    print("\n###### STEP 13: LMM OF EXPANDED THERMOMETER LEVELS ######")
     # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
     # pandas2ri.activate()
     # r = ro.r
@@ -708,8 +732,10 @@ if answer == 'y':
     # ro.globalenv['therm_df'] = pandas2ri.py2rpy(therm_df)
     # result = r(r_script)
     # print(result)
+    print("LMM cannot be performed on server. Please run code instead on local Spyder software.")
 
-    # Step 11: Plot mean expanded thermometer levels.
+    # Step 14: Plot mean expanded thermometer levels.
+    print("\n###### STEP 14: PLOT MEAN EXPANDED THERMOMETER LEVELS ######")
     guilt_a_rse = 0.4659416
     indig_a_rse = np.sqrt(0.4659416**2 + 2.647840**2)
     guilt_b_rse = np.sqrt(0.4659416**2 + 1.0043692**2)
@@ -735,9 +761,11 @@ if answer == 'y':
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5)
         )
     print(mean_lvl_exp_plot)
-    mean_lvl_exp_plot.save('mean_lvl_exp_plot.png')
+    mean_lvl_exp_plot.save('thermometer_analysis/figs/mean_lvl_exp_plot.png')
+    print("Mean expanded thermomter levels plotted.")
 
-    # Step 12: Plot mean expanded thermometer level for each participant.
+    # Step 15: Plot mean expanded thermometer level for each participant.
+    print("\n###### STEP 15: PLOT MEAN EXPANDED THERMOMTER LEVELS PER PARTICIPANT ######")
     a_participants = ['P004', 'P006', 'P100', 'P128', 'P122', 'P125', 'P136', 'P145', 'P215', 'P216']
     b_participants = ['P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P107', 'P127', 'P155', 'P199']
     a_participant_means = []
@@ -787,9 +815,11 @@ if answer == 'y':
     participant_mean_lvl_exp_plot = participant_mean_lvl_exp_plot + annotate("text", x=5, y=-7, label="Int. A", size=16, color="black") + \
             annotate("text", x=15, y=-7, label="Int. B", size=16, color="black")
     print(participant_mean_lvl_exp_plot)
-    participant_mean_lvl_exp_plot.save('participant_mean_lvl_exp_plot.png')
+    participant_mean_lvl_exp_plot.save('thermometer_analysis/figs/participant_mean_lvl_exp_plot.png')
+    print("Per participant mean expanded thermometer levels plotted.")
 
-    # Step 13: Run t-tests between 1st and 2nd halves of each run.
+    # Step 16: Run t-tests between 1st and 2nd halves of each run.
+    print("\n###### STEP 16: T-TESTS OF RUN-STARTS AND RUN-ENDS ######")
     def split_and_compute_means(df):
         midpoint = len(df) // 2
         first_half_mean = df.iloc[:midpoint]['therm_lvl_exp'].mean()  
@@ -825,8 +855,10 @@ if answer == 'y':
                 test_type = "Wilcoxon Signed-Rank Test"
             print(f"{test_type} for {condition}, {intervention}:")
             print(f"P-value: {p_value}\n")
+    print("T-tests of run-starts and run-ends completed.")
 
-    # Step 14: Plot mean expanded thermometer levels for 1st and 2nd halves of each run.
+    # Step 17: Plot mean expanded thermometer levels for 1st and 2nd halves of each run.
+    print("\n###### STEP 17: PLOT MEAN EXPANDED THERMOMETER LEVELS FOR RUN-START AND RUN-END ######")
     run_list = ['Intervention A\n+ Guilt', 'Intervention A\n+ Indig.', 'Intervention B\n+ Guilt', 'Intervention B\n+ Indig']
     start_list = [mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[0], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[4], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[2], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[6]]
     end_list = [mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[1], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[5], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[3], mean_therm_lvl_exp_group_df['mean_therm_lvl_exp'].iloc[7]]
@@ -850,9 +882,11 @@ if answer == 'y':
         scale_fill_manual(values=['indianred', 'skyblue']) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
     print(run_startend_means_plot)
-    run_startend_means_plot.save('run_startend_means_plot.png')
+    run_startend_means_plot.save('thermometer_analysis/figs/run_startend_means_plot.png')
+    print("Mean expanded thermometer levels for run-start and run-end plotted.")
 
-    # Step 15: Calculate proportion of volumes for 1st and 2nd halves of each run where expanded thermometer level > 0, and plot.
+    # Step 18: Calculate proportion of volumes for 1st and 2nd halves of each run where expanded thermometer level > 0, and plot.
+    print("\n###### STEP 18: PROPORTION OF EXPANDED THERMOMETER LEVELS > 0 FOR RUN-START AND RUN-END ######")
     def split_and_compute_proportion(df):
         midpoint = len(df) // 2
         first_half_proportion = (df.iloc[:midpoint]['therm_lvl_exp'] > 0).mean()
@@ -892,9 +926,11 @@ if answer == 'y':
         scale_fill_manual(values=['indianred', 'skyblue']) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
     print(run_startend_prop_plot)
-    run_startend_prop_plot.save('run_startend_prop_plot.png')
+    run_startend_prop_plot.save('thermometer_analysis/figs/run_startend_prop_plot.png')
+    print("Proportion of expanded thermometer levels > 0 for run-start and run-end plotted.")
 
-    # Step 16: Generate TMS Metric and plot.
+    # Step 19: Generate TMS Metric and plot.
+    print("\n###### STEP 19: GENERATE TMS METRIC ######")
     tms_df = therm_df.groupby(['participant', 'condition', 'intervention'])['therm_lvl_exp'].agg(
         mean_therm_lvl_exp='mean',
         std_dev='std'
@@ -922,9 +958,11 @@ if answer == 'y':
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5)
         )
     print(tms_plot)
-    tms_plot.save('tms_plot.png')
+    tms_plot.save('thermometer_analysis/figs/tms_plot.png')
+    print("TMS metric generated.")
 
-    # Step 17: Perform correlations and Bland-Altman plots of TMS and mean vs. perceived success rating.
+    # Step 20: Perform correlations and Bland-Altman plots of TMS and mean vs. perceived success rating.
+    print("\n###### STEP 20: CORRELATIONS OF TMS AND MEAN VS PERCEIVED SUCCESS RATING ######")
     perceived_success_guilt_values = ecrf_data.loc['perceived_success_guilt', :].tolist()
     perceived_success_indignation_values = ecrf_data.loc['perceived_success_indignation', :].tolist()
     interleaved_values = []
@@ -945,7 +983,7 @@ if answer == 'y':
                 x='TMS', 
                 y='Perceived Success Rating'))
     print(tms_perceived_corr_plot)
-    tms_perceived_corr_plot.save('tms_perceived_corr_plot.png')
+    tms_perceived_corr_plot.save('thermometer_analysis/figs/tms_perceived_corr_plot.png')
     correlation = tms_df['mean_therm_lvl_exp'].corr(tms_df['perceived_success'])
     print(f'Correlation between mean therm_lvl_exp and Perceived Success Ratings: {correlation}')
     mean_perceived_corr_plot = (ggplot(tms_df, aes(x='mean_therm_lvl_exp', y='perceived_success')) +
@@ -956,7 +994,7 @@ if answer == 'y':
                 x='Mean Expanded Thermometer Level', 
                 y='Perceived Success Rating'))
     print(mean_perceived_corr_plot)
-    mean_perceived_corr_plot.save('mean_perceived_corr_plot.png')
+    mean_perceived_corr_plot.save('thermometer_analysis/figs/mean_perceived_corr_plot.png')
     tms_df['perceived_success_norm'] = (tms_df['perceived_success'] - tms_df['perceived_success'].min()) / (tms_df['perceived_success'].max() - tms_df['perceived_success'].min())
     tms_df['mean'] = tms_df[['tms', 'perceived_success_norm']].mean(axis=1)
     tms_df['difference'] = tms_df['tms'] - tms_df['perceived_success_norm']
@@ -979,7 +1017,7 @@ if answer == 'y':
         )
     )
     print(tms_bland_altman_plot)
-    tms_bland_altman_plot.save('tms_bland_altman_plot.png')
+    tms_bland_altman_plot.save('thermometer_analysis/figs/tms_bland_altman_plot.png')
     tms_df['mean_therm_lvl_exp_norm'] = (tms_df['mean_therm_lvl_exp'] - tms_df['mean_therm_lvl_exp'].min()) / (tms_df['mean_therm_lvl_exp'].max() - tms_df['mean_therm_lvl_exp'].min())
     tms_df['mean'] = tms_df[['mean_therm_lvl_exp_norm', 'perceived_success_norm']].mean(axis=1)
     tms_df['difference'] = tms_df['mean_therm_lvl_exp_norm'] - tms_df['perceived_success_norm']
@@ -1002,7 +1040,8 @@ if answer == 'y':
         )
     )
     print(mean_bland_altman_plot)
-    mean_bland_altman_plot.save('mean_bland_altman_plot.png') 
+    mean_bland_altman_plot.save('thermometer_analysis/figs/mean_bland_altman_plot.png') 
+    print("Correlations of TMS and mean expanded thermometer levels versus perceived success rating completed.")
 
 #endregion
 
@@ -2530,7 +2569,6 @@ if answer == 'y':
         else:
             print(f"No Run 4 confounds file found for {p_id}.")
     print("Motion parameters extracted.")
-
 
     # Step 3: Create onset timing files.
     print("\n###### STEP 3: CREATING ONSET TIMING FILES ######")

@@ -2513,16 +2513,22 @@ if answer == 'y':
     for p_id in participants_to_iterate:
         p_id_stripped = p_id.replace('P', '')
         confounds_run1_file_path = f'bids/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_desc-confounds_timeseries.tsv'
-        confounds_run1_file = pd.read_csv(confounds_run1_file_path, sep='\t')
-        motion_params_run1 = confounds_run1_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
-        motion_params_run1_file_path = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run1.txt'
-        motion_params_run1.to_csv(motion_params_run1_file_path, sep=' ', header=False, index=False)
+        if os.path.exists(confounds_run1_file_path):
+            confounds_run1_file = pd.read_csv(confounds_run1_file_path, sep='\t')
+            motion_params_run1 = confounds_run1_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
+            motion_params_run1_file_path = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run1.txt'
+            motion_params_run1.to_csv(motion_params_run1_file_path, sep=' ', header=False, index=False)
+        else:
+            print(f"No Run 1 confounds file found for {p_id}.")
 
         confounds_run4_file_path = f'bids/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_desc-confounds_timeseries.tsv'
-        confounds_run4_file = pd.read_csv(confounds_run4_file_path, sep='\t')
-        motion_params_run4 = confounds_run4_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
-        motion_params_run4_file_path = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run4.txt'
-        motion_params_run4.to_csv(motion_params_run4_file_path, sep=' ', header=False, index=False)
+        if os.path.exists(confounds_run4_file_path):
+            confounds_run4_file = pd.read_csv(confounds_run4_file_path, sep='\t')
+            motion_params_run4 = confounds_run4_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
+            motion_params_run4_file_path = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run4.txt'
+            motion_params_run4.to_csv(motion_params_run4_file_path, sep=' ', header=False, index=False)
+        else:
+            print(f"No Run 4 confounds file found for {p_id}.")
     print("Motion parameters extracted.")
 
 

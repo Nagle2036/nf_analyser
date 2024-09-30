@@ -505,8 +505,7 @@ if answer == 'y':
         scale_y_continuous(expand=(0, 0)) + \
         labs(y='Count') + \
         ggtitle('Histogram of Thermometer Levels')
-    print(therm_lvl_hist)
-    therm_lvl_hist.save('therm_lvl_hist.png')
+    therm_lvl_hist.save('thermometer_analysis/figs/therm_lvl_hist.png')
     print("Histogram of 0-10 thermometer levels plotted.")
 
     # Step 7: Plot mean thermometer levels.
@@ -527,7 +526,6 @@ if answer == 'y':
         labs(title="Mean Thermometer Levels for Guilt and Indignation in Interventions A and B.", x='Intervention', y='Mean Thermometer Level') +
         scale_y_continuous(expand=(0, 0), limits=[0,3.5])
         )
-    print(mean_lvl_plot)
     mean_lvl_plot.save('thermometer_analysis/figs/mean_lvl_plot.png')
     print("Mean 0-10 thermometer levels plotted.")
 
@@ -551,7 +549,6 @@ if answer == 'y':
         labs(title='Proportion Plot', x='Intervention', y='Proportion Volumes with Therm. Level > 0') +
         scale_y_continuous(expand=(0, 0), limits=[0,0.8], breaks=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8])
         )
-    print(prop_lvl_plot)
     prop_lvl_plot.save('thermometer_analysis/figs/prop_lvl_plot.png')
     print("Proportion of 0-10 thermometer levels > 0 plotted.")
 
@@ -593,7 +590,6 @@ if answer == 'y':
                 scale_y_continuous(expand=(0, 0), limits=[0,200], breaks=[0,50,100,150,200]) +
                 scale_x_continuous(expand=(0, 0), limits=[-30,30], breaks=[-30,-20,-10,0,10,20,30])
             )       
-            print(therm_lvl_exp_hist)
             therm_lvl_exp_hist.save(f'thermometer_analysis/figs/therm_lvl_exp_hist_{condition}_{intervention}.png')
     print("Expanded thermometer levels calculated and histograms plotted.")
 
@@ -628,7 +624,6 @@ if answer == 'y':
                 )
                 + scale_x_continuous(breaks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
             )
-            print(correlation_plot)
             correlation_plot.save(f'thermometer_analysis/figs/correlation_plot_{condition}_{intervention}.png')
     print("Correlation of 0-10 and expanded thermometer levels completed.")
 
@@ -760,7 +755,6 @@ if answer == 'y':
         scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5)
         )
-    print(mean_lvl_exp_plot)
     mean_lvl_exp_plot.save('thermometer_analysis/figs/mean_lvl_exp_plot.png')
     print("Mean expanded thermomter levels plotted.")
 
@@ -814,7 +808,6 @@ if answer == 'y':
         )
     participant_mean_lvl_exp_plot = participant_mean_lvl_exp_plot + annotate("text", x=5, y=-7, label="Int. A", size=16, color="black") + \
             annotate("text", x=15, y=-7, label="Int. B", size=16, color="black")
-    print(participant_mean_lvl_exp_plot)
     participant_mean_lvl_exp_plot.save('thermometer_analysis/figs/participant_mean_lvl_exp_plot.png')
     print("Per participant mean expanded thermometer levels plotted.")
 
@@ -881,7 +874,6 @@ if answer == 'y':
         ggtitle('Mean Expanded Thermometer Levels for Run Start vs End') + 
         scale_fill_manual(values=['indianred', 'skyblue']) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    print(run_startend_means_plot)
     run_startend_means_plot.save('thermometer_analysis/figs/run_startend_means_plot.png')
     print("Mean expanded thermometer levels for run-start and run-end plotted.")
 
@@ -925,7 +917,6 @@ if answer == 'y':
         ggtitle('Mean Expanded Thermometer Levels for Run Start vs End') + 
         scale_fill_manual(values=['indianred', 'skyblue']) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    print(run_startend_prop_plot)
     run_startend_prop_plot.save('thermometer_analysis/figs/run_startend_prop_plot.png')
     print("Proportion of expanded thermometer levels > 0 for run-start and run-end plotted.")
 
@@ -957,7 +948,6 @@ if answer == 'y':
         scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5)
         )
-    print(tms_plot)
     tms_plot.save('thermometer_analysis/figs/tms_plot.png')
     print("TMS metric generated.")
 
@@ -982,7 +972,6 @@ if answer == 'y':
             labs(title=f'Scatter Plot of TMS vs Perceived Success Ratings\nCorrelation: {correlation}', 
                 x='TMS', 
                 y='Perceived Success Rating'))
-    print(tms_perceived_corr_plot)
     tms_perceived_corr_plot.save('thermometer_analysis/figs/tms_perceived_corr_plot.png')
     correlation = tms_df['mean_therm_lvl_exp'].corr(tms_df['perceived_success'])
     print(f'Correlation between mean therm_lvl_exp and Perceived Success Ratings: {correlation}')
@@ -993,7 +982,6 @@ if answer == 'y':
             labs(title=f'Scatter Plot of mean therm_lvl_exp vs Perceived Success Ratings\nCorrelation: {correlation}', 
                 x='Mean Expanded Thermometer Level', 
                 y='Perceived Success Rating'))
-    print(mean_perceived_corr_plot)
     mean_perceived_corr_plot.save('thermometer_analysis/figs/mean_perceived_corr_plot.png')
     tms_df['perceived_success_norm'] = (tms_df['perceived_success'] - tms_df['perceived_success'].min()) / (tms_df['perceived_success'].max() - tms_df['perceived_success'].min())
     tms_df['mean'] = tms_df[['tms', 'perceived_success_norm']].mean(axis=1)
@@ -1016,7 +1004,6 @@ if answer == 'y':
             y='Difference (TMS - Normalised Perceived Success)'
         )
     )
-    print(tms_bland_altman_plot)
     tms_bland_altman_plot.save('thermometer_analysis/figs/tms_bland_altman_plot.png')
     tms_df['mean_therm_lvl_exp_norm'] = (tms_df['mean_therm_lvl_exp'] - tms_df['mean_therm_lvl_exp'].min()) / (tms_df['mean_therm_lvl_exp'].max() - tms_df['mean_therm_lvl_exp'].min())
     tms_df['mean'] = tms_df[['mean_therm_lvl_exp_norm', 'perceived_success_norm']].mean(axis=1)
@@ -1039,7 +1026,6 @@ if answer == 'y':
             y='Difference (Normalised Mean - Normalised Perceived Success)'
         )
     )
-    print(mean_bland_altman_plot)
     mean_bland_altman_plot.save('thermometer_analysis/figs/mean_bland_altman_plot.png') 
     print("Correlations of TMS and mean expanded thermometer levels versus perceived success rating completed.")
 

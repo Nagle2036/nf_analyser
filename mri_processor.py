@@ -2492,6 +2492,7 @@ if answer == 'y':
     # Step 1: Create Directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
     for p_id in participants_to_iterate:
+        p_id_stripped = p_id.replace('P', '')
         fmri_analysis_folder = 'fmri_analysis'
         os.makedirs(fmri_analysis_folder, exist_ok=True)
         analysis_1_folder = 'fmri_analysis/analysis_1'
@@ -2502,7 +2503,26 @@ if answer == 'y':
         os.makedirs(onset_files_folder, exist_ok=True)
         analysis_1_first_level_folder = 'fmri_analysis/analysis_1/first_level'
         os.makedirs(analysis_1_first_level_folder, exist_ok=True)
+        analysis_1_first_level_participant_folder = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}'
+        os.makedirs(analysis_1_first_level_participant_folder, exist_ok=True)
+
     print("Directories created.")
+
+    # Step 2: Extract motion parameters
+    for p_id in participants_to_iterate:
+        p_id_stripped = p_id.replace('P', '')
+        confounds_run1_file_path = f'bids/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_desc-confounds_timeseries.tsv'
+        confounds_run1_file = pd.read_csv(confounds_run1_file_path, sep='\t')
+        motion_params_run1 = confounds_run1_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
+        motion_params_run1_file_path = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run1.txt'
+        motion_params_run1.to_csv(motion_params_run1_file_path, sep=' ', header=False, index=False)
+
+        confounds_run4_file_path = f'bids/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_desc-confounds_timeseries.tsv'
+        confounds_run4_file = pd.read_csv(confounds_run4_file_path, sep='\t')
+        motion_params_run4 = confounds_run4_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
+        motion_params_run4_file_path = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run4.txt'
+        motion_params_run4.to_csv(motion_params_run4_file_path, sep=' ', header=False, index=False)
+
 
     # Step 2: Create onset timing files.
     print("\n###### STEP 10: CREATING ONSET TIMING FILES ######")
@@ -2550,8 +2570,7 @@ if answer == 'y':
 
 
 
-    for p_id in participants_to_iterate:
-        p_id_stripped = p_id.replace('P', '')
+    
 
 
 #endregion

@@ -1355,7 +1355,7 @@ if answer == 'y':
     qids_stats_df = pd.DataFrame(columns=columns, index=index)
     for visit in visits:
         for intervention in interventions:
-            vals = qids_df[(qids_df['visit'] == visit) & (qids_df['intervention'] == intervention)]['qids'].tolist()
+            vals = pd.to_numeric(qids_df[(qids_df['visit'] == visit) & (qids_df['intervention'] == intervention)]['qids'], errors='coerce').dropna().tolist()
             mean = np.mean(vals)
             std_error = np.std(vals) / np.sqrt(len(vals))
             _, shap_p = stats.shapiro(vals)
@@ -1438,7 +1438,7 @@ if answer == 'y':
     madrs_stats_df = pd.DataFrame(columns=columns, index=index)
     for visit in visits:
         for intervention in interventions:
-            vals = madrs_df[(madrs_df['visit'] == visit) & (madrs_df['intervention'] == intervention)]['madrs'].tolist()
+            vals = pd.to_numeric(madrs_df[(madrs_df['visit'] == visit) & (madrs_df['intervention'] == intervention)]['madrs'], errors='coerce').dropna().tolist()
             mean = np.mean(vals)
             std_error = np.std(vals) / np.sqrt(len(vals))
             _, shap_p = stats.shapiro(vals)
@@ -1513,7 +1513,7 @@ if answer == 'y':
     gad_stats_df = pd.DataFrame(columns=columns, index=index)
     for visit in visits:
         for intervention in interventions:
-            vals = gad_df[(gad_df['visit'] == visit) & (gad_df['intervention'] == intervention)]['gad'].tolist()
+            vals = pd.to_numeric(gad_df[(gad_df['visit'] == visit) & (gad_df['intervention'] == intervention)]['gad'], errors='coerce').dropna().tolist()
             mean = np.mean(vals)
             std_error = np.std(vals) / np.sqrt(len(vals))
             _, shap_p = stats.shapiro(vals)
@@ -1586,7 +1586,7 @@ if answer == 'y':
     panas_pos_stats_df = pd.DataFrame(columns=columns, index=index)
     for visit in visits:
         for intervention in interventions:
-            vals = panas_pos_df[(panas_pos_df['visit'] == visit) & (panas_pos_df['intervention'] == intervention)]['panas_pos'].tolist()
+            vals = pd.to_numeric(panas_pos_df[(panas_pos_df['visit'] == visit) & (panas_pos_df['intervention'] == intervention)]['panas_pos'], errors='coerce').dropna().tolist()
             mean = np.mean(vals)
             std_error = np.std(vals) / np.sqrt(len(vals))
             _, shap_p = stats.shapiro(vals)
@@ -1661,7 +1661,7 @@ if answer == 'y':
     panas_neg_stats_df = pd.DataFrame(columns=columns, index=index)
     for visit in visits:
         for intervention in interventions:
-            vals = panas_neg_df[(panas_neg_df['visit'] == visit) & (panas_neg_df['intervention'] == intervention)]['panas_neg'].tolist()
+            vals = pd.to_numeric(panas_neg_df[(panas_neg_df['visit'] == visit) & (panas_neg_df['intervention'] == intervention)]['panas_neg'], errors='coerce').dropna().tolist()
             mean = np.mean(vals)
             std_error = np.std(vals) / np.sqrt(len(vals))
             _, shap_p = stats.shapiro(vals)

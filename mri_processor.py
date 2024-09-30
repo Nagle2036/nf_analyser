@@ -465,6 +465,7 @@ if answer == 'y':
     therm_df['intervention'] = intervention_column
     therm_df['therm_lvl'] = therm_lvl_column
     therm_df['therm_val'] = therm_val_column
+    therm_df['intervention'] = therm_df['intervention'].astype('category')
     print("Data formatted.")
 
     # Step 5: Perform LMM of thermometer levels.

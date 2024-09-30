@@ -252,7 +252,7 @@ if answer == 'y':
 answer = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer == 'y':
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    restart = input("Would you like to start the thermometer analysis from scratch for the selected participant(s)? This will delete the entire analysis/thermometer_analysis folder. (y/n)\n")
+    restart = input("Would you like to start the thermometer analysis from scratch? This will delete the entire analysis/thermometer_analysis folder. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
@@ -1039,7 +1039,7 @@ answer = input("Would you like to execute clinical analysis? (y/n)\n")
 if answer == 'y':
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("Would you like to start the clinical analysis from scratch for the selected participant(s)? This will remove all files from the analysis/clinical_analysis folder. (y/n)\n")
+    restart = input("Would you like to start the clinical analysis from scratch? This will remove all files from the analysis/clinical_analysis folder. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
@@ -2180,76 +2180,42 @@ answer = input("Would you like to perform fMRI preparation and preprocessing? (y
 if answer == 'y':
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    code_folder = 'code'
-    bids_folder = os.path.join(os.getcwd(), 'bids')
-    restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
+    restart = input("Would you like to start the fMRI preparation and preprocessing from scratch? This will remove all files from the 'data/bids', 'data/fmriprep_derivatives' and 'data/fully_preproc' folders. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
-            for p_id in participants:
-                preproc_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc')
-                if os.path.exists(preproc_folder):
-                    print(f"Deleting {p_id} preproc folder...")
-                    shutil.rmtree(preproc_folder)
-                    print(f"{p_id} preproc folder successfully deleted.")
-                else:
-                    print(f"{p_id} preproc folder does not exist.")
-            group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
-            if os.path.exists(group_preproc_folder):
-                print(f"Deleting group/preproc folder...")
-                shutil.rmtree(group_preproc_folder)
-                print(f"group/preproc folder successfully deleted.")
-            else:
-                print(f"{p_id} group/preproc folder does not exist.")
-            if p_id.startswith('P'):
-                p_id_stripped = p_id.replace('P', '')
-                p_id_stripped_bids_folder = os.path.join(os.getcwd(), 'bids', f'sub-{p_id_stripped}')
-                shutil.rmtree(p_id_stripped_bids_folder)
-            else:
-                for item in os.listdir(bids_folder):
-                    item_path = os.path.join(bids_folder, item)
-                    if item != code_folder:
-                        if os.path.exists(item_path):
-                            print(f"Deleting bids/{item} folder...")
-                            shutil.rmtree(item_path)
-                            print(f"bids/{item} folder successfully deleted.")
-                        else: 
-                            print(f"bids/{item} folder does not exist.")
+            bids_folder = 'data/bids'
+            print(f"Deleting data/bids folder...")
+            shutil.rmtree(bids_folder)
+            fmriprep_derivatives_folder = 'data/fmriprep_derivatives'
+            print(f"Deleting data/fmriprep_derivatives folder...")
+            shutil.rmtree(fmriprep_derivatives_folder)
+            fully_preproc_folder = 'data/fully_preproc'
+            print(f"Deleting data/fully_preproc folder...")
+            shutil.rmtree(fully_preproc_folder)
         else:
             sys.exit()
-    
+
     # Step 1: Create Directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
-    for p_id in participants_to_iterate:
+    bids_folder = 'data/bids'
+    os.makedirs(bids_folder, exist_ok=True)
+    fmriprep_derivatives_folder = 'data/fmriprep_derivatives'
+    os.makedirs(fmriprep_derivatives_folder, exist_ok=True)
+    fully_preproc_folder = 'data/fully_preproc'
+    os.makedirs(fully_preproc_folder, exist_ok=True)
+    derivatives_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives'
+    os.makedirs(derivatives_folder, exist_ok=True)
+    scratch_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch'
+    os.makedirs(scratch_folder, exist_ok=True)
+    logs_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs'
+    os.makedirs(logs_folder, exist_ok=True)
+    for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
-        p_id_folder = os.path.join(os.getcwd(), p_id)
-        os.makedirs(p_id_folder, exist_ok=True)
-        analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
-        os.makedirs(analysis_folder, exist_ok=True)
-        preproc_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc')
-        os.makedirs(preproc_folder, exist_ok=True)
-        group_folder = os.path.join(os.getcwd(), 'group')
-        os.makedirs(group_folder, exist_ok=True)
-        group_preproc_folder = os.path.join(os.getcwd(), 'group', 'preproc')
-        os.makedirs(group_preproc_folder, exist_ok=True)
-        bids_folder = os.path.join(os.getcwd(), 'bids')
-        os.makedirs(bids_folder, exist_ok=True)
-        raw_data_folder = os.path.join(os.getcwd(), 'bids', 'raw_data')
-        os.makedirs(raw_data_folder, exist_ok=True)     
-        fmriprep_derivatives_folder = os.path.join(os.getcwd(), 'bids', 'fmriprep_derivatives')
-        os.makedirs(fmriprep_derivatives_folder, exist_ok=True)
-        fully_preproc_folder = os.path.join(os.getcwd(), 'bids', 'fully_preproc')
-        os.makedirs(fully_preproc_folder, exist_ok=True)
-        fully_preproc_p_id_folder = os.path.join(os.getcwd(), 'bids', 'fully_preproc', f'sub-{p_id_stripped}')
-        os.makedirs(fully_preproc_p_id_folder, exist_ok=True)
-        fully_preproc_func_folder = os.path.join(os.getcwd(), 'bids', 'fully_preproc', f'sub-{p_id_stripped}', 'func')
+        fully_preproc_sub_folder = f'data/fully_preproc/{p_id_stripped}'
+        os.makedirs(fully_preproc_sub_folder, exist_ok=True)
+        fully_preproc_func_folder = f'data/fully_preproc/{p_id_stripped}/func'
         os.makedirs(fully_preproc_func_folder, exist_ok=True)
-        derivatives_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives'
-        os.makedirs(derivatives_folder, exist_ok=True)
-        scratch_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch'
-        os.makedirs(scratch_folder, exist_ok=True)
-        logs_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/logs'
-        os.makedirs(logs_folder, exist_ok=True)
     print("Directories created.")
         
     # Step 2: Convert DICOMS to BIDS Format.

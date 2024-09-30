@@ -1038,11 +1038,11 @@ answer = input("Would you like to execute clinical analysis? (y/n)\n")
 if answer == 'y':
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("Would you like to start the clinical analysis from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/clinical' and 'group' folders associated with them. (y/n)\n")
+    restart = input("Would you like to start the clinical analysis from scratch for the selected participant(s)? This will remove all files from the clinical_analysis folder. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
-            clinical_analysis_folder = 'clinical_analyis'
+            clinical_analysis_folder = 'clinical_analysis'
             print(f"Deleting clinical_analysis folder...")
             shutil.rmtree(clinical_analysis_folder)
         else:
@@ -1050,7 +1050,7 @@ if answer == 'y':
             
     # Step 1: Create directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
-    clinical_analysis_folder = 'clinical_analyis'
+    clinical_analysis_folder = 'clinical_analysis'
     os.makedirs(clinical_analysis_folder, exist_ok=True)
     figs_folder = 'clinical_analysis/figs'
     os.makedirs(figs_folder, exist_ok=True)

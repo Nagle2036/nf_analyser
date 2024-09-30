@@ -2220,8 +2220,8 @@ if answer == 'y':
         
     # Step 2: Convert DICOMS to BIDS Format.
     print("\n###### STEP 2: CONVERT DICOMS TO BIDS FORMAT ######")
-    for p_id in participants_to_iterate:
-        path = os.path.join(os.getcwd(), f'{p_id}', 'data', 'neurofeedback')
+    for p_id in participants:
+        path = f'data/raw_data/{p_id}/data/neurofeedback'
         cisc_folder = None
         for folder_name in os.listdir(path):
             if "CISC" in folder_name:
@@ -2231,9 +2231,9 @@ if answer == 'y':
             print("No 'CISC' folder found in the 'neurofeedback' directory.")
             exit(1)
         p_id_stripped = p_id.replace('P', '')
-        if not os.path.exists(f"bids/raw_data/sub-{p_id_stripped}"):
+        if not os.path.exists(f"data/bids/sub-{p_id_stripped}"):
             print(f"Converting DICOMs to BIDS Nifti format for P{p_id_stripped}...")
-            subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/raw_data/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/raw_data/code/heuristic.py', '-s', f'{p_id_stripped}', '-c', 'dcm2niix', '-b', '--overwrite'])
+            subprocess.run(['heudiconv', '-d', f'/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/raw_data/P{{subject}}/data/neurofeedback/{cisc_folder}/*.dcm', '-o', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/bids/', '-f', '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/bids/code/heuristic.py', '-s', f'{p_id_stripped}', '-c', 'dcm2niix', '-b', '--overwrite'])
         else: 
             print(f"DICOMs already converted to BIDS Nifti format for P{p_id_stripped}. Skipping process.")
     print("BIDS conversion completed.")
@@ -2241,41 +2241,40 @@ if answer == 'y':
     # Step 3: Label Fieldmaps.
     print("\n###### STEP 3: LABEL FIELDMAPS ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    for p_id in participants_to_iterate:
-        if p_id in good_participants:
-            print(f"Labelling fieldmap JSON files for {p_id}...")
-            p_id_stripped = p_id.replace('P', '')
-            func_directory = f"bids/raw_data/sub-{p_id_stripped}/func"
-            func_files = []
-            for file_name in os.listdir(func_directory):
-                if file_name.endswith(".nii.gz"):
-                    file_path = os.path.join("func", file_name)
-                    func_files.append(file_path)
-            ap_fieldmap_json = f"bids/raw_data/sub-{p_id_stripped}/fmap/sub-{p_id_stripped}_dir-AP_epi.json"
-            pa_fieldmap_json = f"bids/raw_data/sub-{p_id_stripped}/fmap/sub-{p_id_stripped}_dir-PA_epi.json"
-            fieldmap_json_files = [ap_fieldmap_json, pa_fieldmap_json]
-            for fieldmap_json in fieldmap_json_files:
-                with open(fieldmap_json, 'r') as file:
-                    json_data = json.load(file)
-                if "IntendedFor" not in json_data:
-                    items = list(json_data.items())
-                    intended_for_item = ("IntendedFor", func_files)
-                    insert_index = next((i for i, (key, _) in enumerate(items) if key > "IntendedFor"), len(items))
-                    items.insert(insert_index, intended_for_item)
-                    json_data = dict(items)
-                    subprocess.run(['chmod', '+w', fieldmap_json], check=True)
-                    with open(fieldmap_json, 'w') as file:
-                        json.dump(json_data, file, indent=2)
-                else:
-                    print(f"{fieldmap_json} already labelled for P{p_id_stripped}. Skipping process.")
+    for p_id in good_participants:
+        print(f"Labelling fieldmap JSON files for {p_id}...")
+        p_id_stripped = p_id.replace('P', '')
+        func_directory = f"data/bids/sub-{p_id_stripped}/func"
+        func_files = []
+        for file_name in os.listdir(func_directory):
+            if file_name.endswith(".nii.gz"):
+                file_path = os.path.join("func", file_name)
+                func_files.append(file_path)
+        ap_fieldmap_json = f"data/bids/sub-{p_id_stripped}/fmap/sub-{p_id_stripped}_dir-AP_epi.json"
+        pa_fieldmap_json = f"data/bids/sub-{p_id_stripped}/fmap/sub-{p_id_stripped}_dir-PA_epi.json"
+        fieldmap_json_files = [ap_fieldmap_json, pa_fieldmap_json]
+        for fieldmap_json in fieldmap_json_files:
+            with open(fieldmap_json, 'r') as file:
+                json_data = json.load(file)
+            if "IntendedFor" not in json_data:
+                items = list(json_data.items())
+                intended_for_item = ("IntendedFor", func_files)
+                insert_index = next((i for i, (key, _) in enumerate(items) if key > "IntendedFor"), len(items))
+                items.insert(insert_index, intended_for_item)
+                json_data = dict(items)
+                subprocess.run(['chmod', '+w', fieldmap_json], check=True)
+                with open(fieldmap_json, 'w') as file:
+                    json.dump(json_data, file, indent=2)
+            else:
+                print(f"{fieldmap_json} already labelled for P{p_id_stripped}. Skipping process.")
 
     # Step 4: Copy BIDS Niftis and Singularity Image to Cluster.
     print("\n###### STEP 4: COPY BIDS NIFTIS AND SINGULARITY IMAGE TO CLUSTER ######")
     answer = input('Would you like to copy BIDS Niftis and singularity image to the cluster? (y/n)\n')
     if answer == 'y':
-        if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data'):
+        if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids'):
             print("Copying BIDS files for all participants to cluster...")
-            shutil.copytree('bids/raw_data', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data')
+            shutil.copytree('data/bids', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids')
         if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg'):
             print("Copying fmriprep singularity image to cluster...")
             shutil.copy('/research/cisc2/shared/fmriprep_singularity/fmriprep_24.0.1.simg', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprep_24.0.1.simg')
@@ -2304,7 +2303,7 @@ if answer == 'y':
 #$ -tc 20 #maximum tasks running simultaneously .
 #$ -jc test.long        # Short=2h, test.default= 8h, test.long=7d 21h, verlong.default=30d
 module add sge
-DATA_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids/raw_data
+DATA_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids
 SCRATCH_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/scratch
 OUT_DIR=/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives
 LICENSE=/research/cisc2/shared/fs_license/license.txt  
@@ -2342,7 +2341,7 @@ exit
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/sub-004'):
         answer = input('Would you like to run fMRIPrep? (y/n)\n')
         if answer == 'y':
-            subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/bids/fmriprep_cluster.sh'])
+            subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/fmriprep_cluster.sh'])
             print('Running fMRIPrep on cluster server...')
         else:
             print('Skipping fMRIPrep.')
@@ -2352,10 +2351,10 @@ exit
     if os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/desc-aseg_dseg.tsv'):
         # fmriprepcleanup_sim_folder = '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/fmriprepcleanup_sim' # for simulation purposes.
         # os.makedirs(fmriprepcleanup_sim_folder, exist_ok=True)
-        subprocess.run(['python', 'bids/fMRIPrepCleanup.py', '-dir', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', '-method', 'delete'])
+        subprocess.run(['python', 'data/fMRIPrepCleanup.py', '-dir', '/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', '-method', 'delete'])
         if not os.path.exists('bids/fmriprep_derivatives'):
             print("Copying fMRIPrep derivatives from cluster server back to analysis server...")
-            shutil.copytree('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', 'bids/fmriprep_derivatives')
+            shutil.copytree('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives', 'data/fmriprep_derivatives')
         shutil.rmtree(derivatives_folder)
         shutil.rmtree(scratch_folder)
         shutil.rmtree(logs_folder)

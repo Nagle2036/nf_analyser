@@ -1057,7 +1057,7 @@ if answer == 'y':
     print("Directories created.")
 
     # Step 2: Access eCRF document and extract relevant data into dataframe.
-    print("\n###### STEP 2: ACCESS eCRF FILE AND CONVERT TO DATAFRAME ######")
+    print("\n###### STEP 2: EXTRACT eCRF DATA ######")
     warnings.simplefilter("ignore", UserWarning)
     df_row_headers = ['dob', 'gender', 'handedness', 'exercise', 'education', 'work_status', 'panic', 'agoraphobia', 'social_anx', 'ocd', 'ptsd', 'gad', 'comorbid_anx', 'msm', 'psi_sociotropy', 'psi_autonomy', 'raads', 'panas_pos_vis_1', 'panas_neg_vis_1', 'qids_vis_1', 'gad_vis_1', 'rosenberg_vis_1', 'madrs_vis_1', 'pre_memory_intensity_guilt_1', 'pre_memory_intensity_guilt_2', 'pre_memory_intensity_indignation_1', 'pre_memory_intensity_indignation_2', 'intervention', 'techniques_guilt', 'techniques_indignation', 'perceived_success_guilt', 'perceived_success_indignation', 'post_memory_intensity_guilt_1', 'post_memory_intensity_guilt_2', 'post_memory_intensity_indignation_1', 'post_memory_intensity_indignation_2', 'rosenberg_vis_2', 'panas_pos_vis_3', 'panas_neg_vis_3', 'qids_vis_3', 'gad_vis_3', 'rosenberg_vis_3', 'madrs_vis_3', 'qids_vis_4', 'rosenberg_vis_4', 'qids_vis_5', 'rosenberg_vis_5']
     ecrf_df = pd.DataFrame(index = df_row_headers)
@@ -1275,7 +1275,7 @@ if answer == 'y':
     rosenberg_stats_df = pd.DataFrame(columns=columns, index=index)
     for visit in visits:
         for intervention in interventions:
-            vals = rosenberg_df[(rosenberg_df['visit'] == visit) & (rosenberg_df['intervention'] == intervention)]['rosenberg'].tolist()
+            vals = pd.to_numeric(rosenberg_df[(rosenberg_df['visit'] == visit) & (rosenberg_df['intervention'] == intervention)]['rosenberg'], errors='coerce').dropna().tolist()
             mean = np.mean(vals)
             std_error = np.std(vals) / np.sqrt(len(vals))
             _, shap_p = stats.shapiro(vals)

@@ -267,6 +267,8 @@ if answer == 'y':
     for p_id in participants:
         thermometer_analysis_folder = 'thermometer_analysis'
         os.makedirs(thermometer_analysis_folder, exist_ok=True)
+        figs_folder = 'thermometer_analysis/figs'
+        os.makedirs(figs_folder, exist_ok=True)
     print("Directories created.")
 
     # Step 2: Access Run 2 and 3 tbv_script thermometer files and extract relevant data into dataframe.
@@ -457,7 +459,7 @@ if answer == 'y':
             therm_val_column.extend(guilt_vals + indig_vals)
             participant_column += [participant] * (len(guilt_lvls) + len(indig_lvls))
             condition_column += (['guilt'] * len(guilt_lvls)) + (['indig'] * (len(guilt_lvls)))
-            intervention_column += [str(therm_data.loc['intervention', participant])] * (len(guilt_lvls) + len(indig_lvls))
+            intervention_column += therm_data.loc['intervention', participant] * (len(guilt_lvls) + len(indig_lvls))
     columns = ['participant', 'condition','intervention', 'therm_lvl', 'therm_val']
     therm_df = pd.DataFrame(columns=columns)
     therm_df['participant'] = participant_column

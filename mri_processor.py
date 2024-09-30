@@ -457,7 +457,7 @@ if answer == 'y':
             therm_val_column.extend(guilt_vals + indig_vals)
             participant_column += [participant] * (len(guilt_lvls) + len(indig_lvls))
             condition_column += (['guilt'] * len(guilt_lvls)) + (['indig'] * (len(guilt_lvls)))
-            intervention_column += therm_data.loc['intervention', participant] * (len(guilt_lvls) + len(indig_lvls))
+            intervention_column += [str(therm_data.loc['intervention', participant])] * (len(guilt_lvls) + len(indig_lvls))
     columns = ['participant', 'condition','intervention', 'therm_lvl', 'therm_val']
     therm_df = pd.DataFrame(columns=columns)
     therm_df['participant'] = participant_column
@@ -465,7 +465,6 @@ if answer == 'y':
     therm_df['intervention'] = intervention_column
     therm_df['therm_lvl'] = therm_lvl_column
     therm_df['therm_val'] = therm_val_column
-    therm_df['intervention'] = therm_df['intervention'].astype('category')
     print("Data formatted.")
 
     # Step 5: Perform LMM of thermometer levels.

@@ -252,7 +252,7 @@ if answer == 'y':
 answer = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer == 'y':
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    restart = input("Would you like to start the thermometer analysis from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
+    restart = input("Would you like to start the thermometer analysis from scratch for the selected participant(s)? This will delete the entire thermometer_analysis folder. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
@@ -265,7 +265,7 @@ if answer == 'y':
     # Step 1: Create Directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
     for p_id in participants:
-        p_id_stripped = p_id.replace('P', '')
+        thermometer_analysis_folder = 'thermometer_analysis'
         os.makedirs(thermometer_analysis_folder, exist_ok=True)
     print("Directories created.")
 

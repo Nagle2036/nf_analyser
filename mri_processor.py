@@ -2439,59 +2439,53 @@ exit
 
 answer = input("Would you like to perform fMRI analysis? (y/n)\n")
 if answer == 'y':
-    p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    if p_id == 'ALL':
-        participants_to_iterate = participants
-    else:
-        participants_to_iterate = [p_id]
-    restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
+    restart = input("Would you like to start the fMRI analysis from scratch? This will remove all files from the 'analysis/fmri_analysis' folder. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
-            for p_id in participants_to_iterate:
-                pass #temporary placeholder
+            fmri_analysis_folder = 'analysis/fmri_analysis'
+            print(f"Deleting analysis/fmri_analysis folder...")
+            shutil.rmtree(fmri_analysis_folder)
         else:
             sys.exit()
     
     # Step 1: Create Directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
-    for p_id in participants_to_iterate:
-        p_id_stripped = p_id.replace('P', '')
-        fmri_analysis_folder = 'fmri_analysis'
-        os.makedirs(fmri_analysis_folder, exist_ok=True)
-        analysis_1_folder = 'fmri_analysis/analysis_1'
-        os.makedirs(analysis_1_folder, exist_ok=True)
-        analysis_1_group_folder = 'fmri_analysis/analysis_1/group'
-        os.makedirs(analysis_1_group_folder, exist_ok=True)
-        onset_files_folder = 'fmri_analysis/analysis_1/group/onset_files'
-        os.makedirs(onset_files_folder, exist_ok=True)
-        analysis_1_first_level_folder = 'fmri_analysis/analysis_1/first_level'
-        os.makedirs(analysis_1_first_level_folder, exist_ok=True)
-        analysis_1_first_level_participant_folder = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}'
+    fmri_analysis_folder = 'analysis/fmri_analysis'
+    os.makedirs(fmri_analysis_folder, exist_ok=True)
+    analysis_1_folder = 'analysis/fmri_analysis/analysis_1'
+    os.makedirs(analysis_1_folder, exist_ok=True)
+    analysis_1_group_folder = 'analysis/fmri_analysis/analysis_1/group'
+    os.makedirs(analysis_1_group_folder, exist_ok=True)
+    onset_files_folder = 'analysis/fmri_analysis/analysis_1/group/onset_files'
+    os.makedirs(onset_files_folder, exist_ok=True)
+    analysis_1_first_level_folder = 'analysis/fmri_analysis/analysis_1/first_level'
+    os.makedirs(analysis_1_first_level_folder, exist_ok=True)
+    for p_id in participants:
+        analysis_1_first_level_participant_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}'
         os.makedirs(analysis_1_first_level_participant_folder, exist_ok=True)
-
     print("Directories created.")
 
     # Step 2: Extract motion parameters
     print("\n###### STEP 2: EXTRACT MOTION PARAMETERS ######")
-    for p_id in participants_to_iterate:
+    for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
-        confounds_run1_file_path = f'bids/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_desc-confounds_timeseries.tsv'
+        confounds_run1_file_path = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_desc-confounds_timeseries.tsv'
         if os.path.exists(confounds_run1_file_path):
             confounds_run1_file = pd.read_csv(confounds_run1_file_path, sep='\t')
             motion_params_run1 = confounds_run1_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
-            motion_params_run1_file_path = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run1.txt'
+            motion_params_run1_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run1.txt'
             motion_params_run1.to_csv(motion_params_run1_file_path, sep=' ', header=False, index=False)
         else:
             print(f"No Run 1 confounds file found for {p_id}.")
 
-        confounds_run4_file_path = f'bids/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_desc-confounds_timeseries.tsv'
+        confounds_run4_file_path = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_desc-confounds_timeseries.tsv'
         if os.path.exists(confounds_run4_file_path):
             confounds_run4_file = pd.read_csv(confounds_run4_file_path, sep='\t')
             motion_params_run4 = confounds_run4_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
-            motion_params_run4_file_path = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run4.txt'
+            motion_params_run4_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run4.txt'
             motion_params_run4.to_csv(motion_params_run4_file_path, sep=' ', header=False, index=False)
         else:
             print(f"No Run 4 confounds file found for {p_id}.")
@@ -2499,7 +2493,7 @@ if answer == 'y':
 
     # Step 3: Create onset timing files.
     print("\n###### STEP 3: CREATING ONSET TIMING FILES ######")
-    onsetfile_sub = 'fmri_analysis/analysis_1/group/onset_files/onsetfile_sub.txt'
+    onsetfile_sub = 'analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:
         data_rows = [
             ['0', '20', '1'],
@@ -2515,7 +2509,7 @@ if answer == 'y':
         for row in data_rows:
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
-    onsetfile_guilt = 'fmri_analysis/analysis_1/group/onset_files/onsetfile_guilt.txt'
+    onsetfile_guilt = 'analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_guilt.txt'
     with open(onsetfile_guilt, 'w') as file:
         data_rows = [
             ['20', '30', '1'],
@@ -2526,7 +2520,7 @@ if answer == 'y':
         for row in data_rows:
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
-    onsetfile_indig = 'fmri_analysis/analysis_1/group/onset_files/onsetfile_indig.txt'
+    onsetfile_indig = 'analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_indig.txt'
     with open(onsetfile_indig, 'w') as file:
         data_rows = [
             ['70', '30', '1'],
@@ -2538,13 +2532,6 @@ if answer == 'y':
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
     print('Onset timing files created.')
-        
-
-
-
-
-    
-
 
 #endregion
 
@@ -4226,487 +4213,9 @@ if answer == 'y':
     group_voxel_intensity_plot.save('group/susceptibility/fnirt_test/3/group_voxel_intensity_plot.png')
 
     # Step 6: Test quality of alternate distortion correction method (Stage 4).
-    print("\n###### STEP 5: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 4) ######")   
-    bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
-    perc_outside_run01_values = []
-    perc_outside_run04_values = []
-    column_headers = ['p_id', 'perc_outside_run01', 'perc_outside_run04']
-    group_perc_outside_df = pd.DataFrame(columns = column_headers) 
-    for p_id in participants_to_iterate:
-        if p_id in bad_participants:
-            print(f"Preparing Stage 4 files for {p_id}...")
-            run01 = f"{p_id}/analysis/preproc/niftis/run01_nh.nii.gz"
-            run04 = f"{p_id}/analysis/preproc/niftis/run04_nh.nii.gz"
-            averaged_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/averaged_run01.nii.gz"
-            averaged_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/averaged_run04.nii.gz"
-            if not os.path.exists(averaged_run01) or not os.path.exists(averaged_run04):
-                subprocess.run(['fslmaths', run01, '-Tmean', averaged_run01])
-                subprocess.run(['fslmaths', run04, '-Tmean', averaged_run04])
-            
-            # betted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run01.nii.gz"
-            # betted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/betted_run04.nii.gz"
-            # if not os.path.exists(betted_run01) or not os.path.exists(betted_run04):
-            #     subprocess.run(["bet", averaged_run01, betted_run01, "-m", "-R"])
-            #     subprocess.run(["bet", averaged_run04, betted_run04, "-m", "-R"])
-            
-            spm_bet_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "4", "spm_bet")
-            os.makedirs(spm_bet_folder, exist_ok=True)
-            structural_path = f"{p_id}/analysis/preproc/structural/structural.nii"
-            structural_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/structural.nii"
-            if not os.path.exists(structural_spm):
-                shutil.copy(structural_path, structural_spm)
-            structural_brain_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/structural_brain.nii.gz"
-            if not os.path.exists(structural_brain_spm):
-                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', structural_spm])
-            averaged_run01_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run01.nii.gz"
-            averaged_run04_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run04.nii.gz"
-            if not os.path.exists(averaged_run01_spm) or not os.path.exists(averaged_run04_spm):
-                shutil.copy(averaged_run01, averaged_run01_spm)
-                shutil.copy(averaged_run04, averaged_run04_spm)
-            betted_run01_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run01_brain.nii.gz"
-            betted_run04_spm = f"{p_id}/analysis/susceptibility/fnirt_test/4/spm_bet/averaged_run04_brain.nii.gz"
-            if not os.path.exists(betted_run01_spm) or not os.path.exists(betted_run04_spm):
-                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run01_spm])
-                subprocess.run(['/home/bsms1623/scripts_for_alex/spm_brain_extract', averaged_run04_spm])
-            structural_brain_downsampled = f"{p_id}/data/neurofeedback/fnirt_4_structural_downsampled/structural_brain_downsampled.nii.gz"
-            structural_downsampled = f"{p_id}/data/neurofeedback/fnirt_4_structural_downsampled/structural_downsampled.nii"
-            flirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01.nii.gz"
-            flirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run04.nii.gz"
-            flirted_run01_matrix = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run01_matrix.mat"
-            flirted_run04_matrix = f"{p_id}/analysis/susceptibility/fnirt_test/4/flirted_run04_matrix.mat"
-            if not os.path.exists(flirted_run01):
-                subprocess.run(['flirt', '-in', betted_run01_spm, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
-                subprocess.run(['flirt', '-in', betted_run04_spm, '-ref', structural_brain_downsampled, '-out', flirted_run04, '-omat', flirted_run04_matrix, '-dof', '6'])
-            nonlin_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/nonlin_run01.nii.gz"
-            nonlin_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/nonlin_run04.nii.gz"
-            warp_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run01"
-            warp_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/warp_run04"
-            if not os.path.exists(nonlin_run01):
-                subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}'])
-                subprocess.run(['fnirt', f'--in={averaged_run04}', f'--ref={structural_downsampled}', f'--aff={flirted_run04_matrix}', f'--cout={warp_run04}'])
-            fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
-            fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
-            if not os.path.exists(fnirted_run01):
-                subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
-                subprocess.run(['applywarp', f'--in={averaged_run04}', f'--ref={structural_downsampled}', f'--warp={warp_run04}', f'--out={fnirted_run04}'])
-            def read_roi_file(roi_file):
-                voxel_coordinates = []
-                with open(roi_file, 'r') as file:
-                    content = file.read()
-                    matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
-                    for match in matches:
-                        coordinates = match.split()
-                        voxel_coordinates.append(
-                            (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
-                return voxel_coordinates
-            path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
-            cisc_folder = None
-            for folder_name in os.listdir(path):
-                if "CISC" in folder_name:
-                    cisc_folder = folder_name
-                    break
-            if cisc_folder is None:
-                print("No 'CISC' folder found in the 'neurofeedback' directory.")
-                exit(1)
-            roi_file_run01 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi"
-            voxel_coordinates_run01 = read_roi_file(roi_file_run01)
-            run01_template = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_template.nii.gz"
-            if not os.path.exists(run01_template):
-                run = f"{p_id}/analysis/preproc/niftis/run01_nh.nii.gz"
-                subprocess.run(['fslmaths', run, '-Tmean', run01_template])
-            functional_image_info = nib.load(run01_template)
-            functional_dims = functional_image_info.shape
-            binary_volume = np.zeros(functional_dims)
-            for voxel in voxel_coordinates:
-                x, y, z = voxel
-                binary_volume[x, y, z] = 1
-            binary_volume = np.flip(binary_volume, axis=1)
-            functional_affine = functional_image_info.affine
-            binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
-            nib.save(binary_mask, f'{p_id}/analysis/susceptibility/fnirt_test/4/run01_subject_space_ROI.nii.gz')
-            roi_mask_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/4/run01_subject_space_ROI.nii.gz'
-            fnirted_roi_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01.nii.gz'
-            if not os.path.exists(fnirted_roi_run01):
-                subprocess.run(['applywarp', f'--in={roi_mask_run01}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_roi_run01}'], check=True)
-            fnirted_roi_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run01_bin.nii.gz'
-            if not os.path.exists(fnirted_roi_run01_bin):
-                subprocess.run(['fslmaths', fnirted_roi_run01, '-thr', '0.5', '-bin', fnirted_roi_run01_bin])
-            roi_file_run04 = f"{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-4/depnf_run-4.roi"
-            voxel_coordinates_run04 = read_roi_file(roi_file_run04)
-            run04_template = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_template.nii.gz"
-            if not os.path.exists(run04_template):
-                run = f"{p_id}/analysis/preproc/niftis/run04_nh.nii.gz"
-                subprocess.run(['fslmaths', run, '-Tmean', run04_template])
-            functional_image_info = nib.load(run04_template)
-            functional_dims = functional_image_info.shape
-            binary_volume = np.zeros(functional_dims)
-            for voxel in voxel_coordinates:
-                x, y, z = voxel
-                binary_volume[x, y, z] = 1
-            binary_volume = np.flip(binary_volume, axis=1)
-            functional_affine = functional_image_info.affine
-            binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
-            nib.save(binary_mask, f'{p_id}/analysis/susceptibility/fnirt_test/4/run04_subject_space_ROI.nii.gz')
-            roi_mask_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/4/run04_subject_space_ROI.nii.gz'
-            fnirted_roi_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04.nii.gz'
-            if not os.path.exists(fnirted_roi_run04):
-                subprocess.run(['applywarp', f'--in={roi_mask_run04}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run04}', f'--out={fnirted_roi_run04}'], check=True)
-            fnirted_roi_run04_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_roi_run04_bin.nii.gz'
-            if not os.path.exists(fnirted_roi_run04_bin):
-                subprocess.run(['fslmaths', fnirted_roi_run04, '-thr', '0.5', '-bin', fnirted_roi_run04_bin])
-            fnirted_run01_bin = f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_bin.nii.gz'
-            if not os.path.exists(fnirted_run01_bin):
-                subprocess.run(['fslmaths', fnirted_run01, '-thr', '100', '-bin', fnirted_run01_bin])
-            fnirted_run04_bin = os.path.join(f'{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04_bin.nii.gz')
-            if not os.path.exists(fnirted_run04_bin):
-                subprocess.run(['fslmaths', fnirted_run04, '-thr', '100', '-bin', fnirted_run04_bin])
-            run01_bin_inv = f'{p_id}/analysis/susceptibility/fnirt_test/4/run01_bin_inv.nii.gz'
-            if not os.path.exists(run01_bin_inv):
-                subprocess.run(['fslmaths', fnirted_run01_bin, '-sub', '1', '-abs', run01_bin_inv])
-            run04_bin_inv = f'{p_id}/analysis/susceptibility/fnirt_test/4/run04_bin_inv.nii.gz'
-            if not os.path.exists(run04_bin_inv):
-                subprocess.run(['fslmaths', fnirted_run04_bin, '-sub', '1', '-abs', run04_bin_inv])
-            run01_result = subprocess.run(['fslstats', fnirted_roi_run01_bin, '-k', run01_bin_inv, '-V'], capture_output=True, text=True)
-            if run01_result.returncode == 0:
-                run01_result_output = run01_result.stdout.strip()
-            else:
-                print("Error executing fslstats command.")
-            run01_result_output_values = run01_result_output.split()
-            run01_voxels_outside = float(run01_result_output_values[0])
-            run04_result = subprocess.run(['fslstats', fnirted_roi_run04_bin, '-k', run04_bin_inv, '-V'], capture_output=True, text=True)
-            if run04_result.returncode == 0:
-                run04_result_output = run04_result.stdout.strip()
-            else:
-                print("Error executing fslstats command.")
-            run04_result_output_values = run04_result_output.split()
-            run04_voxels_outside = float(run04_result_output_values[0])
-            result1 = subprocess.run(['fslstats', fnirted_roi_run01_bin, '-V'], capture_output=True, text=True)
-            if result1.returncode == 0:
-                result1_output = result1.stdout.strip()
-            else:
-                print("Error executing fslstats command.")
-            result1_output_values = result1_output.split()
-            total_voxels_in_roi_run01 = float(result1_output_values[0])
-            result2 = subprocess.run(['fslstats', fnirted_roi_run04_bin, '-V'], capture_output=True, text=True)
-            if result2.returncode == 0:
-                result2_output = result2.stdout.strip()
-            else:
-                print("Error executing fslstats command.")
-            result2_output_values = result2_output.split()
-            total_voxels_in_roi_run04 = float(result2_output_values[0])
-            perc_outside_run01 = (run01_voxels_outside / total_voxels_in_roi_run01) * 100
-            perc_outside_run01 = round(perc_outside_run01, 2)
-            perc_outside_run01_values.append(perc_outside_run01)
-            perc_outside_run04 = (run04_voxels_outside / total_voxels_in_roi_run04) * 100
-            perc_outside_run04 = round(perc_outside_run04, 2)
-            perc_outside_run04_values.append(perc_outside_run04)
-            perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_run01': [perc_outside_run01], 'perc_outside_run04': [perc_outside_run04]})
-            perc_outside_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/4/perc_outside_df.txt', sep='\t', index=False)
-            group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
-            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_trimmed_roi_mask.nii.gz"
-            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_trimmed_roi_mask.nii.gz"
-            if not os.path.exists(run01_trimmed_roi_mask) or not os.path.exists(run04_trimmed_roi_mask):
-                subprocess.run(['fslmaths', fnirted_roi_run01_bin, '-mul', fnirted_run01_bin, run01_trimmed_roi_mask])
-                subprocess.run(['fslmaths', fnirted_roi_run04_bin, '-mul', fnirted_run04_bin, run04_trimmed_roi_mask])
-    group_perc_outside_df.to_csv('group/susceptibility/fnirt_test/4/group_perc_outside_df.txt', sep='\t', index=False)
-    plot_data = pd.DataFrame({
-        'Participant': bad_participants * 2,
-        'Perc_Outside': perc_outside_run01_values + perc_outside_run04_values,
-        'Sequence': ['run01'] * len(bad_participants) + ['run04'] * len(bad_participants)
-    })
-    perc_outside_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
-        geom_bar(stat='identity', position='dodge') +
-        theme_classic() +
-        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Percentage of SCC Voxels in Signal Dropout') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
-        scale_y_continuous(expand=(0, 0))
-    )
-    perc_outside_plot.save('group/susceptibility/fnirt_test/4/perc_outside_plot.png')
-    perc_outside_run01_overall = np.mean(perc_outside_run01_values)
-    perc_outside_run04_overall = np.mean(perc_outside_run04_values)
-    run01_std_error = np.std(perc_outside_run01_values) / np.sqrt(len(perc_outside_run01_values))
-    run04_std_error = np.std(perc_outside_run04_values) / np.sqrt(len(perc_outside_run04_values))
-    _, perc_outside_run01_overall_shap_p = stats.shapiro(perc_outside_run01_values)
-    _, perc_outside_run04_overall_shap_p = stats.shapiro(perc_outside_run04_values)
-    if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.05:
-        print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(perc_outside_run01_values, perc_outside_run04_values)
-        print(f"T-test p-value: {p_value}")
-    else:
-        print(f'Shapiro-Wilk test failed for perc_outside values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(perc_outside_run01_values, perc_outside_run04_values)
-        print(f"Mann-Whitney U test p-value: {p_value}")
-    plot_data = pd.DataFrame({'Sequence': ['run01', 'run04'], 'Perc_Outside': [perc_outside_run01_overall, perc_outside_run04_overall], 'Std_Error': [run01_std_error, run04_std_error]})
-    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside', fill='Sequence')) + 
-                        geom_bar(stat='identity', position='dodge') +
-                        geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
-                        theme_classic() +
-                        labs(title='Percentage of Voxels in Signal Dropout Regions', y='Percentage of SCC Voxels in Signal Dropout') +
-                        scale_y_continuous(expand=(0, 0)) +
-                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
-                        )
-    if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
-    elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
-    elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")    
-    group_perc_outside_plot.save('group/susceptibility/fnirt_test/4/group_perc_outside_plot.png')
+    print("\n###### STEP 6: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 4) ######")   
     
-    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
-    group_ssim_df = pd.DataFrame(columns = column_headers) 
-    for p_id in participants_to_iterate:
-        if p_id in bad_participants:
-            print(f"Running Stage 4 SSIM analysis for {p_id}...")
-            def calculate_ssim(image1_path, image2_path, ssim_output_path):
-                """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
-                image1_nii = nib.load(image1_path)
-                image2_nii = nib.load(image2_path)
-                image1 = image1_nii.get_fdata()
-                image2 = image2_nii.get_fdata()
-                if image1.shape != image2.shape:
-                    raise ValueError("Input images must have the same dimensions for SSIM calculation.")
-                ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
-                ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
-                nib.save(ssim_map_nifti, ssim_output_path)
-                return ssim_index
-            ssim_output_path = f"{p_id}/analysis/susceptibility/fnirt_test/4/ssim_map.nii.gz"
-            fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
-            fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
-            if not os.path.exists(ssim_output_path):
-                ssim_index = calculate_ssim(fnirted_run01, fnirted_run04, ssim_output_path)
-            ssim_bin = f"{p_id}/analysis/susceptibility/fnirt_test/4/ssim_bin.nii.gz"
-            if not os.path.exists(ssim_bin):
-                subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
-            combined_run01_run04_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/combined_run01_run04_mask.nii.gz"
-            fnirted_run01_bin = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01_bin.nii.gz"
-            fnirted_run04_bin = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04_bin.nii.gz"
-            if not os.path.exists(combined_run01_run04_mask):
-                subprocess.run(['fslmaths', fnirted_run01_bin, '-add', fnirted_run04_bin, combined_run01_run04_mask])
-            bin_run01_run04_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/bin_run01_run04_mask.nii.gz"
-            if not os.path.exists(bin_run01_run04_mask):
-                subprocess.run(['fslmaths', combined_run01_run04_mask, '-bin', bin_run01_run04_mask])
-            ssim_bin_trimmed = f"{p_id}/analysis/susceptibility/fnirt_test/4/ssim_bin_trimmed.nii.gz"
-            if not os.path.exists(ssim_bin_trimmed):
-                subprocess.run(['fslmaths', ssim_bin, '-mul', bin_run01_run04_mask, ssim_bin_trimmed])
-            voxels_in_whole_mask = subprocess.run(["fslstats", ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
-            voxels_in_whole_mask = float(voxels_in_whole_mask)
-            intersection_mask_path_run01 = f'{p_id}/analysis/susceptibility/fnirt_test/4/ssim_roi_intersect_run01.nii.gz'
-            intersection_mask_path_run04 = f'{p_id}/analysis/susceptibility/fnirt_test/4/ssim_roi_intersect_run04.nii.gz'
-            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_trimmed_roi_mask.nii.gz"
-            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_trimmed_roi_mask.nii.gz"
-            if not os.path.exists(intersection_mask_path_run01):
-                subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run01_trimmed_roi_mask, intersection_mask_path_run01])
-                subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run04_trimmed_roi_mask, intersection_mask_path_run04])
-            voxels_in_roi_in_mask_run01 = subprocess.run(["fslstats", intersection_mask_path_run01, "-V"], capture_output=True, text=True).stdout.split()[0]
-            voxels_in_roi_in_mask_run01 = float(voxels_in_roi_in_mask_run01)
-            perc_roi_voxels_in_mask_run01 = (voxels_in_roi_in_mask_run01 / total_voxels_in_roi_run01) * 100
-            voxels_in_roi_in_mask_run04 = subprocess.run(["fslstats", intersection_mask_path_run04, "-V"], capture_output=True, text=True).stdout.split()[0]
-            voxels_in_roi_in_mask_run04 = float(voxels_in_roi_in_mask_run04)
-            perc_roi_voxels_in_mask_run04 = (voxels_in_roi_in_mask_run04 / total_voxels_in_roi_run04) * 100
-            perc_roi_voxels_in_mask_av = (perc_roi_voxels_in_mask_run01 + perc_roi_voxels_in_mask_run04) / 2
-            ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask_av]})
-            ssim_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/4/ssim_df.txt', sep='\t', index=False)
-            group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
-    group_ssim_df.to_csv('group/susceptibility/fnirt_test/4/group_ssim_df.txt', sep='\t', index=False)
-    ssim_indexes = group_ssim_df['ssim_index'].tolist()
-    ssim_mean = np.mean(ssim_indexes)
-    print(f"Mean SSIM index for Stage 4: {ssim_mean}")
-    plot_data = pd.DataFrame({
-        'Participant': bad_participants,
-        'SSIM': ssim_indexes,
-    })
-    ssim_index_plot = (
-        ggplot(plot_data, aes(x='Participant', y='SSIM')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
-        theme_classic() +
-        labs(title='SSIM Indexes', x='Participant', y='SSIM') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
-        scale_y_continuous(expand=(0, 0), limits=[0.8,1])
-    )
-    ssim_index_plot.save('group/susceptibility/fnirt_test/4/ssim_index_plot.png')
-    voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
-    voxels_mean = np.mean(voxels)
-    plot_data = pd.DataFrame({
-        'Participant': bad_participants,
-        'Voxels': voxels,
-    })
-    ssim_voxels_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Voxels')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
-        theme_classic() +
-        labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
-        scale_y_continuous(expand=(0, 0))
-    )
-    ssim_voxels_plot.save('group/susceptibility/fnirt_test/4/ssim_voxels_plot.png')
-    perc_voxels = group_ssim_df['perc_roi_voxels_in_bin_ssim_mask'].tolist()
-    perc_voxels_mean = np.mean(perc_voxels)
-    plot_data = pd.DataFrame({
-        'Participant': bad_participants,
-        'Perc_Voxels': perc_voxels,
-    })
-    ssim_perc_voxels_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
-        theme_classic() +
-        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Percentage of SCC Voxels in SSIM Mask') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
-        scale_y_continuous(expand=(0, 0))
-    )
-    ssim_perc_voxels_plot.save('group/susceptibility/fnirt_test/4/ssim_perc_voxels_plot.png')
 
-    column_headers = ['p_id', 'sequence', 'value']
-    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
-    for p_id in participants_to_iterate:
-        if p_id in bad_participants:
-            print(f'Running Stage 4 voxel signal intensity analysis for {p_id}...')
-            def extract_voxel_intensities(epi_image_path, mask_image_path):
-                epi_img = nib.load(epi_image_path)
-                epi_data = epi_img.get_fdata()
-                mask_img = nib.load(mask_image_path)
-                mask_data = mask_img.get_fdata()
-                mask_data = mask_data > 0
-                roi_voxel_intensities = epi_data[mask_data]
-                voxel_intensity_list = roi_voxel_intensities.tolist()
-                return voxel_intensity_list
-            fnirted_run01 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run01.nii.gz"
-            fnirted_run04 = f"{p_id}/analysis/susceptibility/fnirt_test/4/fnirted_run04.nii.gz"
-            run01_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run01_trimmed_roi_mask.nii.gz"
-            run04_trimmed_roi_mask = f"{p_id}/analysis/susceptibility/fnirt_test/4/run04_trimmed_roi_mask.nii.gz"
-            run01_voxel_intensities = extract_voxel_intensities(fnirted_run01, run01_trimmed_roi_mask)
-            run04_voxel_intensities = extract_voxel_intensities(fnirted_run04, run04_trimmed_roi_mask)
-            values = run01_voxel_intensities + run04_voxel_intensities
-            sequence = ['run01'] * len(run01_voxel_intensities) + ['run04'] * len(run04_voxel_intensities)
-            subject = [f'{p_id}'] * len(run01_voxel_intensities) + [f'{p_id}'] * len(run04_voxel_intensities)
-            voxel_intensity_df = pd.DataFrame({'p_id': subject, 'sequence': sequence, 'value': values})
-            voxel_intensity_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/4/voxel_intensity_df.txt', sep='\t', index=False)
-            group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
-    group_voxel_intensity_df.to_csv('group/susceptibility/fnirt_test/4/group_voxel_intensity_df.txt', sep='\t', index=False)
-    run01_means = []
-    run04_means= []
-    p_values = []
-    run01_std_errors = []
-    run04_std_errors = []
-    for p_id in participants_to_iterate:
-        if p_id in bad_participants:
-            filtered_run01 = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'run01')]
-            mean_value_run01 = filtered_run01['value'].mean()
-            run01_means.append(mean_value_run01)
-            filtered_run04 = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'run04')]
-            mean_value_run04 = filtered_run04['value'].mean()
-            run04_means.append(mean_value_run04)
-            anderson_run01 = stats.anderson(filtered_run01['value'])
-            anderson_run04 = stats.anderson(filtered_run04['value'])
-            significance_level = 0.05
-            is_run01_normal = anderson_run01.statistic < anderson_pa.critical_values[
-                anderson_pa.significance_level.tolist().index(significance_level * 100)]
-            is_run04_normal = anderson_run04.statistic < anderson_rl.critical_values[
-                anderson_rl.significance_level.tolist().index(significance_level * 100)]
-            if is_run01_normal and is_run04_normal:
-                print(f'Anderson-Darling test passed for {p_id} voxel intensity values. Running parametric t-test...')
-                _, p_value = stats.ttest_ind(filtered_run01['value'], filtered_run04['value'], equal_var=False)
-                p_values.append(p_value)
-            else:
-                print(f'Anderson-Darling test failed for {p_id} voxel intensity values. Running non-parametric Mann Whitney U test...')
-                _, p_value = stats.mannwhitneyu(filtered_run01['value'], filtered_run04['value'], alternative='two-sided')
-                p_values.append(p_value)
-            run01_std_error = np.std(filtered_run01['value']) / np.sqrt(len(filtered_run01['value']))
-            run01_std_errors.append(run01_std_error)
-            run04_std_error = np.std(filtered_run04['value']) / np.sqrt(len(filtered_run04['value']))
-            run04_std_errors.append(run04_std_error)
-    plot_data = pd.DataFrame({
-        'Participant': bad_participants * 2,
-        'Mean_Value': run01_means + run04_means,
-        'Sequence': ['RUN01'] * len(bad_participants) + ['RUN04'] * len(bad_participants),
-        'Significance': ['' for _ in range(len(bad_participants) * 2)],
-        'Std_Error': run01_std_errors + run04_std_errors
-    })
-    for idx, p_value in enumerate(p_values):
-        if p_value < 0.001:
-            plot_data.at[idx, 'Significance'] = '***'
-        elif p_value < 0.01:
-            plot_data.at[idx, 'Significance'] = '**'
-        elif p_value < 0.05:
-            plot_data.at[idx, 'Significance'] = '*'
-    voxel_intensity_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
-        theme_classic() +
-        labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean SCC Signal Intensity') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
-        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
-        geom_text(
-            aes(x='Participant', y='Mean_Value', label='Significance'),
-            position=position_dodge(width=0.9),
-            color='black',
-            size=12,
-            ha='center',
-            va='bottom',
-            show_legend=False))
-    voxel_intensity_plot.save('group/susceptibility/fnirt_test/4/voxel_intensity_plot.png')
-    run01_means_overall = np.mean(run01_means)
-    run04_means_overall = np.mean(run04_means)
-    run01_std_error_overall = np.std(run01_means) / np.sqrt(len(run01_means))
-    run04_std_error_overall = np.std(run04_means) / np.sqrt(len(run04_means))
-    _, run01_means_overall_shap_p = stats.shapiro(run01_means)
-    _, run04_means_overall_shap_p = stats.shapiro(run04_means)
-    if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.05:
-        print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_rel(run01_means, run04_means)
-        print(f"T-test p-value: {p_value}")
-    else:
-        print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Wilcoxon test...')
-        _, p_value = stats.wilcoxon(run01_means, run04_means)
-        print(f"Wilcoxon test p-value: {p_value}")
-    plot_data = pd.DataFrame({'p_id': bad_participants, 'run01_values': run01_means, 'run04_values': run04_means})
-    data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['run01_values', 'run04_values'], var_name='sequence', value_name='value')
-    data_long['sequence'] = data_long['sequence'].map({'run01_values': 'RUN01', 'run04_values': 'RUN04'})
-    group_voxel_intensity_ladder_plot = (
-        ggplot(data_long, aes(x='sequence', y='value', group='p_id')) +
-        geom_line(aes(group='p_id'), color='gray', size=1) +
-        geom_point(aes(color='sequence'), size=4) +
-        theme_light() +
-        theme(
-            panel_grid_major=element_blank(), 
-            panel_grid_minor=element_blank(), 
-            panel_border=element_blank(),
-            axis_line_x=element_line(color='black'),  
-            axis_line_y=element_line(color='black'),  
-        ) +
-        labs(title='Ladder Plot of FNIRTed RUN01 and RUN04 Sequences',
-            x='Sequence',
-            y='Mean SCC Signal Intensity') +
-        scale_x_discrete(limits=['RUN01', 'RUN04']) +
-        scale_y_continuous()
-    )
-    group_voxel_intensity_ladder_plot.save('group/susceptibility/fnirt_test/4/group_voxel_intensity_ladder_plot.png')
-    plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
-    group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
-                        geom_bar(stat='identity', position='dodge') +
-                        geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
-                        theme_classic() +
-                        labs(title='Mean of Voxel Intensities Across Participants', y='Mean SCC Signal Intensity') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,350]) +
-                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
-                        )
-    if p_value < 0.001:
-        group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
-    elif p_value < 0.01:
-        group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")
-    elif p_value < 0.05:
-        group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-    group_voxel_intensity_plot.save('group/susceptibility/fnirt_test/4/group_voxel_intensity_plot.png')
+
 
 #endregion

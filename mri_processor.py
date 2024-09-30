@@ -2509,6 +2509,7 @@ if answer == 'y':
     print("Directories created.")
 
     # Step 2: Extract motion parameters
+    print("\n###### STEP 2: EXTRACT MOTION PARAMETERS ######")
     for p_id in participants_to_iterate:
         p_id_stripped = p_id.replace('P', '')
         confounds_run1_file_path = f'bids/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_desc-confounds_timeseries.tsv'
@@ -2522,10 +2523,11 @@ if answer == 'y':
         motion_params_run4 = confounds_run4_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
         motion_params_run4_file_path = f'fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run4.txt'
         motion_params_run4.to_csv(motion_params_run4_file_path, sep=' ', header=False, index=False)
+    print("Motion parameters extracted.")
 
 
-    # Step 2: Create onset timing files.
-    print("\n###### STEP 10: CREATING ONSET TIMING FILES ######")
+    # Step 3: Create onset timing files.
+    print("\n###### STEP 3: CREATING ONSET TIMING FILES ######")
     onsetfile_sub = 'fmri_analysis/analysis_1/group/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:
         data_rows = [
@@ -2564,7 +2566,7 @@ if answer == 'y':
         for row in data_rows:
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
-    print('Onset files created.')
+    print('Onset timing files created.')
         
 
 

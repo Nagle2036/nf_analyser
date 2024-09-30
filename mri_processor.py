@@ -319,7 +319,7 @@ if answer == 'y':
         process_file(run2_path)
         process_file(run3_path)
     therm_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/thermometer_analysis/therm_data.xlsx'
-    df.to_excel(therm_data, index=True)
+    df.to_excel(therm_data_path, index=True)
     print("TBV thermometer data extracted.")
     
     # Step 3: Access eCRF document and extract relevant data into dataframe.
@@ -429,7 +429,7 @@ if answer == 'y':
         for key, values in df_values_dict.items():
             data_df[key] = values
         ecrf_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/thermometer_analysis/ecrf_data.xlsx'
-        data_df.to_excel(ecrf_data, index=True)
+        data_df.to_excel(ecrf_data_path, index=True)
         print(f'{x} data from eCRF.xlsx successfully extracted.')
         workbook.close()
     warnings.resetwarnings()

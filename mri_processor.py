@@ -2363,10 +2363,10 @@ exit
 
     # Step 7: Brain Extract and Smooth Images.
     print("\n###### STEP 7: BRAIN EXTRACT AND SMOOTH IMAGES ######") 
-    for p_id in participants_to_iterate:
+    for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         
-        func_directory = f"bids/fmriprep_derivatives/sub-{p_id_stripped}/func"
+        func_directory = f"data/fmriprep_derivatives/sub-{p_id_stripped}/func"
         func_files = []
         for file_name in os.listdir(func_directory):
             if file_name.endswith("bold.nii.gz"):
@@ -2379,13 +2379,13 @@ exit
                 file_path = os.path.join(func_directory, file_name)
                 mask_files.append(file_path)
         mask_files = sorted(mask_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
-        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_ss.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_ss.nii.gz"]
+        output_files = [f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_ss.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_ss.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_ss.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_ss.nii.gz"]
         if not os.path.exists(output_files[0]):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
                 print(f'Performing brain extraction on {func} with {mask}, output to {outpath}')
                 subprocess.run(['fslmaths', func, '-mul', mask, outpath])
 
-        fully_preproc_func_directory = f"bids/fully_preproc/sub-{p_id_stripped}/func"
+        fully_preproc_func_directory = f"data/fully_preproc/sub-{p_id_stripped}/func"
         func_files = []
         for file_name in os.listdir(fully_preproc_func_directory):
             if file_name.endswith(".nii.gz"):
@@ -2398,7 +2398,7 @@ exit
                 file_path = os.path.join(func_directory, file_name)
                 mask_files.append(file_path)
         mask_files = sorted(mask_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
-        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_ss_smoothed.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_ss_smoothed.nii.gz"]
+        output_files = [f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_ss_smoothed.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_ss_smoothed.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_ss_smoothed.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_ss_smoothed.nii.gz"]
         if not os.path.exists(output_files[0]):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
                 print(f'Performing smoothing on {func} with {mask}, output to {outpath}')
@@ -2420,7 +2420,7 @@ exit
                 file_path = os.path.join(func_directory, file_name)
                 mask_files.append(file_path)
         mask_files = sorted(mask_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
-        output_files = [f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_fully_preproc.nii.gz", f"bids/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_fully_preproc.nii.gz"]
+        output_files = [f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_fully_preproc.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_fully_preproc.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_fully_preproc.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_fully_preproc.nii.gz"]
         if not os.path.exists(output_files[0]):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
                 print(f'Performing brain extraction on {func} with {mask}, output to {outpath}')

@@ -278,7 +278,7 @@ if answer == 'y':
         return second_largest_path, third_largest_path
     df = pd.DataFrame(columns=participants)
     for x in participants:
-        folder_path = os.path.join(os.getcwd(), f'{x}', 'data', 'neurofeedback', 'tbv_script', 'data')
+        folder_path = os.path.join(os.getcwd(), 'raw_nonbids_data', f'{x}', 'data', 'neurofeedback', 'tbv_script', 'data')
         files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
         if len(files) == 4:
             run2_path, run3_path = find_second_and_third_largest(files)

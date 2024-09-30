@@ -1826,7 +1826,6 @@ if answer == 'y':
             + theme_classic()
             + scale_y_continuous(expand=(0, 0), limits=[5,7])
             )
-    print(guilt_mem_intensity_plot)
     guilt_mem_intensity_plot.save('clinical_analysis/figs/guilt_mem_intensity_plot.png')
 
     time = ['pre', 'post']
@@ -1899,7 +1898,6 @@ if answer == 'y':
             + theme_classic()
             + scale_y_continuous(expand=(0, 0), limits=[5,7])
             )
-    print(indignation_mem_intensity_plot)
     indignation_mem_intensity_plot.save('clinical_analysis/figs/indignation_mem_intensity_plot.png')
     print("LMMs run and plots saved.")
 
@@ -2021,10 +2019,10 @@ if answer == 'y':
     raads_column = ecrf_df.loc['raads'].tolist()
     columns = ['participant', 'intervention', 'factor', 'value']
     baseline_factors_df = pd.DataFrame(columns=columns)
-    baseline_factors_df['participant'] = participants * 5
-    baseline_factors_df['intervention'] = intervention_column * 5
+    baseline_factors_df['participant'] = participants * 4
+    baseline_factors_df['intervention'] = intervention_column * 4
     baseline_factors_df['factor'] = ['msm'] * 20 + ['psi_sociotropy'] * 20 + ['psi_autonomy'] * 20 + ['raads'] * 20
-    baseline_factors_df['value'] = msm_column + psi_sociotropy_column + psi_autonomy_column + raads_column + anxiety_column
+    baseline_factors_df['value'] = msm_column + psi_sociotropy_column + psi_autonomy_column + raads_column
     def perform_tests(df, factor):
         factor_data = df[df['factor'] == factor]
         group_a = factor_data[factor_data['intervention'] == 'a']['value']

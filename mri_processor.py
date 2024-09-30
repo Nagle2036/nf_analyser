@@ -252,21 +252,23 @@ if answer == 'y':
 answer = input("Would you like to execute thermometer analysis? (y/n)\n")
 if answer == 'y':
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    restart = input("Would you like to start the thermometer analysis from scratch for the selected participant(s)? This will delete the entire thermometer_analysis folder. (y/n)\n")
+    restart = input("Would you like to start the thermometer analysis from scratch for the selected participant(s)? This will delete the entire analysis/thermometer_analysis folder. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
-            thermometer_analysis_folder = 'thermometer_analysis'
-            print(f"Deleting thermometer_analysis folder...")
+            thermometer_analysis_folder = 'analysis/thermometer_analysis'
+            print(f"Deleting analysis/thermometer_analysis folder...")
             shutil.rmtree(thermometer_analysis_folder)
         else:
             sys.exit()
 
     # Step 1: Create Directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
-    thermometer_analysis_folder = 'thermometer_analysis'
+    analysis_folder = 'analysis'
+    os.makedirs(analysis_folder, exist_ok=True)
+    thermometer_analysis_folder = 'analysis/thermometer_analysis'
     os.makedirs(thermometer_analysis_folder, exist_ok=True)
-    figs_folder = 'thermometer_analysis/figs'
+    figs_folder = 'analysis/thermometer_analysis/figs'
     os.makedirs(figs_folder, exist_ok=True)
     print("Directories created.")
 
@@ -279,7 +281,7 @@ if answer == 'y':
         return second_largest_path, third_largest_path
     df = pd.DataFrame(columns=participants)
     for x in participants:
-        folder_path = os.path.join(os.getcwd(), 'raw_nonbids_data', f'{x}', 'data', 'neurofeedback', 'tbv_script', 'data')
+        folder_path = os.path.join(os.getcwd(), 'data', 'raw_data', f'{x}', 'data', 'neurofeedback', 'tbv_script', 'data')
         files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
         if len(files) == 4:
             run2_path, run3_path = find_second_and_third_largest(files)
@@ -319,7 +321,7 @@ if answer == 'y':
                     df.at[feedback_lvl_header, f'{x}'] = feedback_lvl
         process_file(run2_path)
         process_file(run3_path)
-    therm_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/thermometer_analysis/therm_data.xlsx'
+    therm_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/thermometer_analysis/therm_data.xlsx'
     df.to_excel(therm_data_path, index=True)
     print("TBV thermometer data extracted.")
     
@@ -429,9 +431,8 @@ if answer == 'y':
         df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values
         for key, values in df_values_dict.items():
             data_df[key] = values
-        ecrf_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/thermometer_analysis/ecrf_data.xlsx'
+        ecrf_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/thermometer_analysis/ecrf_data.xlsx'
         data_df.to_excel(ecrf_data_path, index=True)
-        print(f'{x} data from eCRF.xlsx successfully extracted.')
         workbook.close()
     warnings.resetwarnings()
     print("eCRF data extracted.")
@@ -506,7 +507,7 @@ if answer == 'y':
         scale_y_continuous(expand=(0, 0)) + \
         labs(y='Count') + \
         ggtitle('Histogram of Thermometer Levels')
-    therm_lvl_hist.save('thermometer_analysis/figs/therm_lvl_hist.png')
+    therm_lvl_hist.save('analysis/thermometer_analysis/figs/therm_lvl_hist.png')
     print("Histogram of 0-10 thermometer levels plotted.")
 
     # Step 7: Plot mean thermometer levels.
@@ -527,7 +528,7 @@ if answer == 'y':
         labs(title="Mean Thermometer Levels for Guilt and Indignation in Interventions A and B.", x='Intervention', y='Mean Thermometer Level') +
         scale_y_continuous(expand=(0, 0), limits=[0,3.5])
         )
-    mean_lvl_plot.save('thermometer_analysis/figs/mean_lvl_plot.png')
+    mean_lvl_plot.save('analysis/thermometer_analysis/figs/mean_lvl_plot.png')
     print("Mean 0-10 thermometer levels plotted.")
 
     # Step 8: Plot proportion of volumes with thermometer levels greater than 0.
@@ -550,7 +551,7 @@ if answer == 'y':
         labs(title='Proportion Plot', x='Intervention', y='Proportion Volumes with Therm. Level > 0') +
         scale_y_continuous(expand=(0, 0), limits=[0,0.8], breaks=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8])
         )
-    prop_lvl_plot.save('thermometer_analysis/figs/prop_lvl_plot.png')
+    prop_lvl_plot.save('analysis/thermometer_analysis/figs/prop_lvl_plot.png')
     print("Proportion of 0-10 thermometer levels > 0 plotted.")
 
     # Step 9: Calculate expanded thermometer level values and plot histograms.
@@ -591,7 +592,7 @@ if answer == 'y':
                 scale_y_continuous(expand=(0, 0), limits=[0,200], breaks=[0,50,100,150,200]) +
                 scale_x_continuous(expand=(0, 0), limits=[-30,30], breaks=[-30,-20,-10,0,10,20,30])
             )       
-            therm_lvl_exp_hist.save(f'thermometer_analysis/figs/therm_lvl_exp_hist_{condition}_{intervention}.png')
+            therm_lvl_exp_hist.save(f'analysis/thermometer_analysis/figs/therm_lvl_exp_hist_{condition}_{intervention}.png')
     print("Expanded thermometer levels calculated and histograms plotted.")
 
     # Step 10: Correlation of 0-10 and expanded thermometer levels.
@@ -625,7 +626,7 @@ if answer == 'y':
                 )
                 + scale_x_continuous(breaks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
             )
-            correlation_plot.save(f'thermometer_analysis/figs/correlation_plot_{condition}_{intervention}.png')
+            correlation_plot.save(f'analysis/thermometer_analysis/figs/correlation_plot_{condition}_{intervention}.png')
     print("Correlation of 0-10 and expanded thermometer levels completed.")
 
     # Step 11: Perform one-sample t-tests on expanded thermometer level data with prior participant pooling.
@@ -756,7 +757,7 @@ if answer == 'y':
         scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5)
         )
-    mean_lvl_exp_plot.save('thermometer_analysis/figs/mean_lvl_exp_plot.png')
+    mean_lvl_exp_plot.save('analysis/thermometer_analysis/figs/mean_lvl_exp_plot.png')
     print("Mean expanded thermomter levels plotted.")
 
     # Step 15: Plot mean expanded thermometer level for each participant.
@@ -809,7 +810,7 @@ if answer == 'y':
         )
     participant_mean_lvl_exp_plot = participant_mean_lvl_exp_plot + annotate("text", x=5, y=-7, label="Int. A", size=16, color="black") + \
             annotate("text", x=15, y=-7, label="Int. B", size=16, color="black")
-    participant_mean_lvl_exp_plot.save('thermometer_analysis/figs/participant_mean_lvl_exp_plot.png')
+    participant_mean_lvl_exp_plot.save('analysis/thermometer_analysis/figs/participant_mean_lvl_exp_plot.png')
     print("Per participant mean expanded thermometer levels plotted.")
 
     # Step 16: Run t-tests between 1st and 2nd halves of each run.
@@ -875,7 +876,7 @@ if answer == 'y':
         ggtitle('Mean Expanded Thermometer Levels for Run Start vs End') + 
         scale_fill_manual(values=['indianred', 'skyblue']) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    run_startend_means_plot.save('thermometer_analysis/figs/run_startend_means_plot.png')
+    run_startend_means_plot.save('analysis/thermometer_analysis/figs/run_startend_means_plot.png')
     print("Mean expanded thermometer levels for run-start and run-end plotted.")
 
     # Step 18: Calculate proportion of volumes for 1st and 2nd halves of each run where expanded thermometer level > 0, and plot.
@@ -918,7 +919,7 @@ if answer == 'y':
         ggtitle('Mean Expanded Thermometer Levels for Run Start vs End') + 
         scale_fill_manual(values=['indianred', 'skyblue']) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    run_startend_prop_plot.save('thermometer_analysis/figs/run_startend_prop_plot.png')
+    run_startend_prop_plot.save('analysis/thermometer_analysis/figs/run_startend_prop_plot.png')
     print("Proportion of expanded thermometer levels > 0 for run-start and run-end plotted.")
 
     # Step 19: Generate TMS Metric and plot.
@@ -949,7 +950,7 @@ if answer == 'y':
         scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5)
         )
-    tms_plot.save('thermometer_analysis/figs/tms_plot.png')
+    tms_plot.save('analysis/thermometer_analysis/figs/tms_plot.png')
     print("TMS metric generated.")
 
     # Step 20: Perform correlations and Bland-Altman plots of TMS and mean vs. perceived success rating.
@@ -973,7 +974,7 @@ if answer == 'y':
             labs(title=f'Scatter Plot of TMS vs Perceived Success Ratings\nCorrelation: {correlation}', 
                 x='TMS', 
                 y='Perceived Success Rating'))
-    tms_perceived_corr_plot.save('thermometer_analysis/figs/tms_perceived_corr_plot.png')
+    tms_perceived_corr_plot.save('analysis/thermometer_analysis/figs/tms_perceived_corr_plot.png')
     correlation = tms_df['mean_therm_lvl_exp'].corr(tms_df['perceived_success'])
     print(f'Correlation between mean therm_lvl_exp and Perceived Success Ratings: {correlation}')
     mean_perceived_corr_plot = (ggplot(tms_df, aes(x='mean_therm_lvl_exp', y='perceived_success')) +
@@ -983,7 +984,7 @@ if answer == 'y':
             labs(title=f'Scatter Plot of mean therm_lvl_exp vs Perceived Success Ratings\nCorrelation: {correlation}', 
                 x='Mean Expanded Thermometer Level', 
                 y='Perceived Success Rating'))
-    mean_perceived_corr_plot.save('thermometer_analysis/figs/mean_perceived_corr_plot.png')
+    mean_perceived_corr_plot.save('analysis/thermometer_analysis/figs/mean_perceived_corr_plot.png')
     tms_df['perceived_success_norm'] = (tms_df['perceived_success'] - tms_df['perceived_success'].min()) / (tms_df['perceived_success'].max() - tms_df['perceived_success'].min())
     tms_df['mean'] = tms_df[['tms', 'perceived_success_norm']].mean(axis=1)
     tms_df['difference'] = tms_df['tms'] - tms_df['perceived_success_norm']
@@ -1005,7 +1006,7 @@ if answer == 'y':
             y='Difference (TMS - Normalised Perceived Success)'
         )
     )
-    tms_bland_altman_plot.save('thermometer_analysis/figs/tms_bland_altman_plot.png')
+    tms_bland_altman_plot.save('analysis/thermometer_analysis/figs/tms_bland_altman_plot.png')
     tms_df['mean_therm_lvl_exp_norm'] = (tms_df['mean_therm_lvl_exp'] - tms_df['mean_therm_lvl_exp'].min()) / (tms_df['mean_therm_lvl_exp'].max() - tms_df['mean_therm_lvl_exp'].min())
     tms_df['mean'] = tms_df[['mean_therm_lvl_exp_norm', 'perceived_success_norm']].mean(axis=1)
     tms_df['difference'] = tms_df['mean_therm_lvl_exp_norm'] - tms_df['perceived_success_norm']
@@ -1027,7 +1028,7 @@ if answer == 'y':
             y='Difference (Normalised Mean - Normalised Perceived Success)'
         )
     )
-    mean_bland_altman_plot.save('thermometer_analysis/figs/mean_bland_altman_plot.png') 
+    mean_bland_altman_plot.save('analysis/thermometer_analysis/figs/mean_bland_altman_plot.png') 
     print("Correlations of TMS and mean expanded thermometer levels versus perceived success rating completed.")
 
 #endregion
@@ -1038,21 +1039,23 @@ answer = input("Would you like to execute clinical analysis? (y/n)\n")
 if answer == 'y':
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("Would you like to start the clinical analysis from scratch for the selected participant(s)? This will remove all files from the clinical_analysis folder. (y/n)\n")
+    restart = input("Would you like to start the clinical analysis from scratch for the selected participant(s)? This will remove all files from the analysis/clinical_analysis folder. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
-            clinical_analysis_folder = 'clinical_analysis'
-            print(f"Deleting clinical_analysis folder...")
+            clinical_analysis_folder = 'analysis/clinical_analysis'
+            print(f"Deleting analysis/clinical_analysis folder...")
             shutil.rmtree(clinical_analysis_folder)
         else:
             sys.exit()
             
     # Step 1: Create directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
-    clinical_analysis_folder = 'clinical_analysis'
+    analysis_folder = 'analysis'
+    os.makedirs(analysis_folder, exist_ok=True)
+    clinical_analysis_folder = 'analysis/clinical_analysis'
     os.makedirs(clinical_analysis_folder, exist_ok=True)
-    figs_folder = 'clinical_analysis/figs'
+    figs_folder = 'analysis/clinical_analysis/figs'
     os.makedirs(figs_folder, exist_ok=True)
     print("Directories created.")
 
@@ -1206,7 +1209,7 @@ if answer == 'y':
         df_values_dict[f'{x}'] = vis_1_values + vis_2_values + vis_3_values + vis_4_values + vis_5_values
         for key, values in df_values_dict.items():
             ecrf_df[key] = values
-        ecrf_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/clinical_analysis/ecrf_data.xlsx'
+        ecrf_data_path = '/its/home/bsms9pc4/Desktop/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/clinical_analysis/ecrf_data.xlsx'
         ecrf_df.to_excel(ecrf_data_path, index=True)
         workbook.close()
     warnings.resetwarnings()
@@ -1345,7 +1348,7 @@ if answer == 'y':
         annotate("segment", x=1, xend=3, y=max(plot_data['mean']) +2.25, yend=max(plot_data['mean']) + 2.25, color="black") + \
             annotate("text", x=2.5, y=max(plot_data['mean']) + 3.5, label="*", size=16, color="black") + \
                 annotate("segment", x=2, xend=3, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black")
-    rosenberg_plot.save('clinical_analysis/figs/rosenberg_plot.png')
+    rosenberg_plot.save('analysis/clinical_analysis/figs/rosenberg_plot.png')
 
     qids_df = rqmgp_df.dropna(subset=['qids'])
     visits = ['1', '3', '4', '5']
@@ -1428,7 +1431,7 @@ if answer == 'y':
                 annotate("segment", x=1, xend=4, y=max(plot_data['mean']) +3.25, yend=max(plot_data['mean']) + 3.25, color="black") + \
                     annotate("text", x=3, y=max(plot_data['mean']) + 4.5, label="***", size=16, color="black") + \
                         annotate("segment", x=1, xend=5, y=max(plot_data['mean']) +4.25, yend=max(plot_data['mean']) + 4.25, color="black")
-    qids_plot.save('clinical_analysis/figs/qids_plot.png')
+    qids_plot.save('analysis/clinical_analysis/figs/qids_plot.png')
 
     madrs_df = rqmgp_df.dropna(subset=['madrs'])
     visits = ['1', '3']
@@ -1503,7 +1506,7 @@ if answer == 'y':
             )
     madrs_plot = madrs_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="***", size=16, color="black") + \
         annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
-    madrs_plot.save('clinical_analysis/figs/madrs_plot.png')
+    madrs_plot.save('analysis/clinical_analysis/figs/madrs_plot.png')
 
     gad_df = rqmgp_df.dropna(subset=['gad'])
     visits = ['1', '3']
@@ -1576,7 +1579,7 @@ if answer == 'y':
             + theme_classic()
             + scale_y_continuous(expand=(0, 0), limits=[4,12])
             )
-    gad_plot.save('clinical_analysis/figs/gad_plot.png')
+    gad_plot.save('analysis/clinical_analysis/figs/gad_plot.png')
 
     panas_pos_df = rqmgp_df.dropna(subset=['panas_pos'])
     visits = ['1', '3']
@@ -1651,7 +1654,7 @@ if answer == 'y':
             )
     panas_pos_plot = panas_pos_plot + annotate("text", x=1.5, y=max(plot_data['mean']) + 3.25, label="*", size=16, color="black") + \
         annotate("segment", x=1, xend=2, y=max(plot_data['mean']) +3, yend=max(plot_data['mean']) + 3, color="black")
-    panas_pos_plot.save('clinical_analysis/figs/panas_pos_plot.png')
+    panas_pos_plot.save('analysis/clinical_analysis/figs/panas_pos_plot.png')
 
     panas_neg_df = rqmgp_df.dropna(subset=['panas_neg'])
     visits = ['1', '3']
@@ -1724,7 +1727,7 @@ if answer == 'y':
             + theme_classic()
             + scale_y_continuous(expand=(0, 0), limits=[20,30])
             )
-    panas_neg_plot.save('clinical_analysis/figs/panas_neg_plot.png')
+    panas_neg_plot.save('analysis/clinical_analysis/figs/panas_neg_plot.png')
     print("LMMs run and plots saved.")
 
     # Step 4: Run LMMs of Memory Intensity Ratings.
@@ -1826,7 +1829,7 @@ if answer == 'y':
             + theme_classic()
             + scale_y_continuous(expand=(0, 0), limits=[5,7])
             )
-    guilt_mem_intensity_plot.save('clinical_analysis/figs/guilt_mem_intensity_plot.png')
+    guilt_mem_intensity_plot.save('analysis/clinical_analysis/figs/guilt_mem_intensity_plot.png')
 
     time = ['pre', 'post']
     interventions = ['a', 'b']
@@ -1898,7 +1901,7 @@ if answer == 'y':
             + theme_classic()
             + scale_y_continuous(expand=(0, 0), limits=[5,7])
             )
-    indignation_mem_intensity_plot.save('clinical_analysis/figs/indignation_mem_intensity_plot.png')
+    indignation_mem_intensity_plot.save('analysis/clinical_analysis/figs/indignation_mem_intensity_plot.png')
     print("LMMs run and plots saved.")
 
     #%% Step 5: Correlation of Clinical Score Change with Mean Expanded Thermometer Level.
@@ -1967,7 +1970,7 @@ if answer == 'y':
             + geom_smooth(method='lm', color='blue')
             + theme_classic()
             + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='Rosenberg Difference', y='Thermometer Level Exp'))
-        rosenberg_therm_corr_plot.save(f'clinical_analysis/figs/rosenberg_therm_{condition}_{intervention}_corr_plot.png')
+        rosenberg_therm_corr_plot.save(f'analysis/clinical_analysis/figs/rosenberg_therm_{condition}_{intervention}_corr_plot.png')
         corr_value = subset['qids_diff'].corr(subset['therm_lvl_exp'])
         print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
         qids_therm_corr_plot = (ggplot(subset, aes(x='qids_diff', y='therm_lvl_exp'))
@@ -1975,7 +1978,7 @@ if answer == 'y':
             + geom_smooth(method='lm', color='blue')
             + theme_classic()
             + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='QIDS Difference', y='Thermometer Level Exp'))
-        qids_therm_corr_plot.save(f'clinical_analysis/figs/qids_therm_{condition}_{intervention}_corr_plot.png')
+        qids_therm_corr_plot.save(f'analysis/clinical_analysis/figs/qids_therm_{condition}_{intervention}_corr_plot.png')
         corr_value = subset['madrs_diff'].corr(subset['therm_lvl_exp'])
         print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
         madrs_therm_corr_plot = (ggplot(subset, aes(x='madrs_diff', y='therm_lvl_exp'))
@@ -1983,7 +1986,7 @@ if answer == 'y':
             + geom_smooth(method='lm', color='blue')
             + theme_classic()
             + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='MADRS Difference', y='Thermometer Level Exp'))
-        madrs_therm_corr_plot.save(f'clinical_analysis/figs/madrs_therm_{condition}_{intervention}_corr_plot.png')
+        madrs_therm_corr_plot.save(f'analysis/clinical_analysis/figs/madrs_therm_{condition}_{intervention}_corr_plot.png')
         corr_value = subset['gad_diff'].corr(subset['therm_lvl_exp'])
         print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
         gad_therm_corr_plot = (ggplot(subset, aes(x='gad_diff', y='therm_lvl_exp'))
@@ -1991,7 +1994,7 @@ if answer == 'y':
             + geom_smooth(method='lm', color='blue')
             + theme_classic()
             + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='GAD Difference', y='Thermometer Level Exp'))
-        gad_therm_corr_plot.save(f'clinical_analysis/figs/gad_therm_{condition}_{intervention}_corr_plot.png')
+        gad_therm_corr_plot.save(f'analysis/clinical_analysis/figs/gad_therm_{condition}_{intervention}_corr_plot.png')
         corr_value = subset['panas_pos_diff'].corr(subset['therm_lvl_exp'])
         print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
         panas_pos_therm_corr_plot = (ggplot(subset, aes(x='panas_pos_diff', y='therm_lvl_exp'))
@@ -1999,7 +2002,7 @@ if answer == 'y':
             + geom_smooth(method='lm', color='blue')
             + theme_classic()
             + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='PANAS Pos Difference', y='Thermometer Level Exp'))
-        panas_pos_therm_corr_plot.save(f'clinical_analysis/figs/panas_pos_therm_{condition}_{intervention}_corr_plot.png')
+        panas_pos_therm_corr_plot.save(f'analysis/clinical_analysis/figs/panas_pos_therm_{condition}_{intervention}_corr_plot.png')
         corr_value = subset['panas_neg_diff'].corr(subset['therm_lvl_exp'])
         print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
         panas_neg_therm_corr_plot = (ggplot(subset, aes(x='panas_neg_diff', y='therm_lvl_exp'))
@@ -2007,7 +2010,7 @@ if answer == 'y':
             + geom_smooth(method='lm', color='blue')
             + theme_classic()
             + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='PANAS Neg Difference', y='Thermometer Level Exp'))
-        panas_neg_therm_corr_plot.save(f'clinical_analysis/figs/panas_neg_therm_{condition}_{intervention}_corr_plot.png')
+        panas_neg_therm_corr_plot.save(f'analysis/clinical_analysis/figs/panas_neg_therm_{condition}_{intervention}_corr_plot.png')
         print("Correlations completed.")
         
     # Step 6: Analysis of baseline factors.
@@ -2074,7 +2077,7 @@ if answer == 'y':
             max_value = factor_data['mean_value'].max()
             factor_plot = factor_plot + annotate('text', x=1.5, y=max_value + 0.2, label=annotation_text, size=10) + \
                 annotate("segment", x=1, xend=2, y=max_value + 0.1, yend=max_value + 0.1, color="black")
-        factor_plot.save(f'clinical_analysis/figs/{factor}_plot.png')
+        factor_plot.save(f'analysis/clinical_analysis/figs/{factor}_plot.png')
     anxiety_column = ecrf_df.loc['comorbid_anx'].tolist()
     replacement_dict = {'Yes': 'comorbid_anx', 'No': 'anx_depression', 'No Anxiety': 'no_anxiety'}
     anxiety_column = [replacement_dict.get(item, item) for item in anxiety_column]
@@ -2095,7 +2098,7 @@ if answer == 'y':
                                 'anx_depression': 'Anxious Depression',
                                 'no_anxiety': 'No Anxiety'}) +
         scale_fill_manual(name='Intervention', labels=['A', 'B'], values=['indianred', 'skyblue']))
-    anxiety_plot.save('clinical_analysis/figs/anxiety_plot.png')
+    anxiety_plot.save('analysis/clinical_analysis/figs/anxiety_plot.png')
     print("Baseline factors analysis completed.")
 
     # Step 7: Successful participants analysis.
@@ -2152,7 +2155,7 @@ if answer == 'y':
             max_value = factor_data['mean_value'].max()
             factor_plot_successful = factor_plot_successful + annotate('text', x=1.5, y=max_value + 0.2, label=annotation_text, size=10) + \
                 annotate("segment", x=1, xend=2, y=max_value + 0.1, yend=max_value + 0.1, color="black")
-        factor_plot_successful.save(f'clinical_analysis/figs/{factor}_plot_successful.png')
+        factor_plot_successful.save(f'analysis/clinical_analysis/figs/{factor}_plot_successful.png')
     anxiety_df['successful'] = anxiety_df['participant'].apply(lambda x: 'Successful' if x in successful_participants else 'Not Successful')
     anxiety_plot_successful = (
         ggplot(anxiety_df, aes(x='anxiety', fill='successful')) +
@@ -2166,7 +2169,7 @@ if answer == 'y':
                                 'anx_depression': 'Anxious Depression',
                                 'no_anxiety': 'No Anxiety'}) +
         scale_fill_manual(name='Participant Status', values=['indianred', 'skyblue']))
-    anxiety_plot_successful.save('clinical_analysis/figs/anxiety_plot_successful.png')
+    anxiety_plot_successful.save('analysis/clinical_analysis/figs/anxiety_plot_successful.png')
     print("Successful participant analysis completed.")
 
 #endregion
@@ -2175,20 +2178,15 @@ if answer == 'y':
 
 answer = input("Would you like to perform fMRI preparation and preprocessing? (y/n)\n")
 if answer == 'y':
-    p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    if p_id == 'ALL':
-        participants_to_iterate = participants
-    else:
-        participants_to_iterate = [p_id]
     code_folder = 'code'
     bids_folder = os.path.join(os.getcwd(), 'bids')
     restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/preproc' and 'group' folders associated with them. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
-            for p_id in participants_to_iterate:
+            for p_id in participants:
                 preproc_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'preproc')
                 if os.path.exists(preproc_folder):
                     print(f"Deleting {p_id} preproc folder...")

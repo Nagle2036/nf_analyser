@@ -2539,244 +2539,590 @@ if answer == 'y':
 
 answer = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
 if answer == 'y':
-    p_id = input("Enter the participant's ID (e.g. P001). If you want to analyse all participants simultaneously, enter 'ALL'.\n")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    if p_id == 'ALL':
-        participants_to_iterate = participants
-    else:
-        participants_to_iterate = [p_id]
-    restart = input("Would you like to start the preprocessing from scratch for the selected participant(s)? This will remove all files from the 'p_id/analysis/susceptibility' and 'group' folders associated with them. (y/n)\n")
+    restart = input("Would you like to start the susceptibility artifact analysis from scratch? This will remove all files from the 'analysis/susceptibility' folder. (y/n)\n")
     if restart == 'y':
         double_check = input("Are you sure? (y/n)\n")
         if double_check == 'y':
-            for p_id in participants_to_iterate:
-                susceptibility_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility')
-                if os.path.exists(susceptibility_folder):
-                    print(f"Deleting {p_id} susceptibility folder...")
-                    shutil.rmtree(susceptibility_folder)
-                    print(f"{p_id} susceptibility folder successfully deleted.")
-                else:
-                    print(f"{p_id} susceptibility folder does not exist.")
-                group_susceptibility_folder = os.path.join(os.getcwd(), 'group', 'susceptibility')
-            if os.path.exists(group_susceptibility_folder):
-                print(f"Deleting {p_id} group/susceptibility folder...")
-                shutil.rmtree(group_susceptibility_folder)
-                print(f"{p_id} group/susceptibility folder successfully deleted.")
-            else:
-                print(f"{p_id} group/susceptibility folder does not exist.")
+            susceptibility_analysis_folder = 'analysis/susceptibility_analysis'
+            print(f"Deleting analysis/susceptibility_analysis folder...")
+            shutil.rmtree(susceptibility_analysis_folder)
         else:
             sys.exit()
 
     # Step 1: Create directories.
     print("\n###### STEP 1: CREATE DIRECTORIES ######")
-    for p_id in participants_to_iterate:
-        p_id_folder = os.path.join(os.getcwd(), p_id)
-        os.makedirs(p_id_folder, exist_ok=True)
-        analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis')
-        os.makedirs(analysis_folder, exist_ok=True)
-        susceptibility_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility')
-        os.makedirs(susceptibility_folder, exist_ok=True)
-        fnirt_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test")
-        os.makedirs(fnirt_folder, exist_ok=True)
-        susc_scc_folder = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "susc_scc")
-        os.makedirs(susc_scc_folder, exist_ok=True)
-        nifti_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility', 'susc_scc', 'niftis')
-        os.makedirs(nifti_folder, exist_ok=True)
-        fnirt_folder_1 = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "1")
-        os.makedirs(fnirt_folder_1, exist_ok=True)
-        fnirt_folder_2 = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "2")
-        os.makedirs(fnirt_folder_2, exist_ok=True)
-        fnirt_folder_3 = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "3")
-        os.makedirs(fnirt_folder_3, exist_ok=True)
-        fnirt_folder_4 = os.path.join(os.getcwd(), p_id, "analysis", "susceptibility", "fnirt_test", "4")
-        os.makedirs(fnirt_folder_4, exist_ok=True)
-        group_folder = os.path.join(os.getcwd(), "group")
-        os.makedirs(group_folder, exist_ok=True)
-        group_susceptibility_folder = os.path.join(os.getcwd(), "group", "susceptibility")
-        os.makedirs(group_susceptibility_folder, exist_ok=True)
-        group_susc_scc_folder = os.path.join(os.getcwd(), "group", "susceptibility", 'susc_scc')
-        os.makedirs(group_susc_scc_folder, exist_ok=True)
-        group_fnirt_folder = os.path.join(os.getcwd(), "group", "susceptibility", "fnirt_test")
-        os.makedirs(group_fnirt_folder, exist_ok=True)
-        group_fnirt_folder_1 = os.path.join(os.getcwd(), 'group', 'susceptibility', 'fnirt_test', '1')
-        os.makedirs(group_fnirt_folder_1, exist_ok=True)
-        group_fnirt_folder_2 = os.path.join(os.getcwd(), 'group', 'susceptibility', 'fnirt_test', '2')
-        os.makedirs(group_fnirt_folder_2, exist_ok=True)
-        group_fnirt_folder_3 = os.path.join(os.getcwd(), 'group', 'susceptibility', 'fnirt_test', '3')
-        os.makedirs(group_fnirt_folder_3, exist_ok=True)
-        group_fnirt_folder_4 = os.path.join(os.getcwd(), 'group', 'susceptibility', 'fnirt_test', '4')
-        os.makedirs(group_fnirt_folder_4, exist_ok=True)
-    print('Directories created.')
-
+    analysis_folder = 'analysis'
+    os.makedirs(analysis_folder, exist_ok=True)
+    susceptibility_analysis_folder = 'analysis/susceptibility_analysis'
+    os.makedirs(susceptibility_analysis_folder, exist_ok=True)
+    figs_folder = 'analysis/susceptibility_analysis/figs'
+    os.makedirs(figs_folder, exist_ok=True)
+    scc_folder = 'analysis/susceptibility_analysis/scc'
+    os.makedirs(scc_folder, exist_ok=True)
+    data_folder = 'analysis/susceptibility_analysis/data'
+    os.makedirs(data_folder, exist_ok=True)
+    run_comparisons_folder = 'analysis/susceptibility_analysis/run_comparisons'
+    os.makedirs(run_comparisons_folder, exist_ok=True)
+    run_comparison_1_folder = 'analysis/susceptibility_analysis/run_comparisons/1'
+    os.makedirs(run_comparison_1_folder, exist_ok=True)
+    run_comparison_2_folder = 'analysis/susceptibility_analysis/run_comparisons/2'
+    os.makedirs(run_comparison_2_folder, exist_ok=True)
+    run_comparison_3_folder = 'analysis/susceptibility_analysis/run_comparisons/3'
+    os.makedirs(run_comparison_3_folder, exist_ok=True)
+    fnirt_test_folder = 'analysis/susceptibility_analysis/fnirt_test'
+    os.makedirs(fnirt_test_folder, exist_ok=True)
+    fnirt_test_1_folder = 'analysis/susceptibility_analysis/fnirt_test/1'
+    os.makedirs(fnirt_test_1_folder, exist_ok=True)
+    fnirt_test_2_folder = 'analysis/susceptibility_analysis/fnirt_test/2'
+    os.makedirs(fnirt_test_2_folder, exist_ok=True)
+    fnirt_test_3_folder = 'analysis/susceptibility_analysis/fnirt_test/3'
+    os.makedirs(fnirt_test_3_folder, exist_ok=True)
+    fnirt_test_4_folder = 'analysis/susceptibility_analysis/fnirt_test/4'
+    os.makedirs(fnirt_test_4_folder, exist_ok=True)
+    fnirt_test_5_folder = 'analysis/susceptibility_analysis/fnirt_test/5'
+    os.makedirs(fnirt_test_5_folder, exist_ok=True)
+    fnirt_test_6_folder = 'analysis/susceptibility_analysis/fnirt_test/6'
+    os.makedirs(fnirt_test_6_folder, exist_ok=True)
+    for p_id in participants:
+        data_participant_folder = f'analysis/susceptibility_analysis/data/{p_id}'
+        os.makedirs(data_participant_folder, exist_ok=True)
+        dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms'
+        os.makedirs(dicoms_folder, exist_ok=True)
+        dicoms_fieldmaps_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps'
+        os.makedirs(dicoms_fieldmaps_folder, exist_ok=True)
+        dicoms_run1_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run1'
+        os.makedirs(dicoms_run1_folder, exist_ok=True)
+        dicoms_run2_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run2'
+        os.makedirs(dicoms_run2_folder, exist_ok=True)
+        dicoms_run3_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run3'
+        os.makedirs(dicoms_run3_folder, exist_ok=True)
+        dicoms_run4_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run4'
+        os.makedirs(dicoms_run4_folder, exist_ok=True)
+        niftis_folder = f'analysis/susceptibility_analysis/data/{p_id}/niftis'
+        os.makedirs(niftis_folder, exist_ok=True)
+        pngs_folder = f'analysis/susceptibility_analysis/data/{p_id}/pngs'
+        os.makedirs(pngs_folder, exist_ok=True)
+    print("Directories created.")
+    
     # Step 2: Calculate percentage of ROI voxels outside the brain during neurofeedback.
-    print("\n###### STEP 2: CALCULATE PERCENTAGE OF ROI VOXELS OUTSIDE BRAIN DURING NEUROFEEDBACK ######")
-    def get_sequence_numbers(file_name):
-        parts = file_name.split('_')
-        return int(parts[1]), int(parts[2].split('.')[0])
-    def copy_files(src_folder, dest_folder, sequence_number):
-        src_pattern = f'*_{sequence_number:06d}_*.dcm'
-        matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
-        for file in matching_files:
-            src_path = os.path.join(src_folder, file)
-            dest_path = os.path.join(dest_folder, file)
-            shutil.copy(src_path, dest_path)
-    def read_roi_file(roi_file):
-        voxel_coordinates = []
-        with open(roi_file, 'r') as file:
-            content = file.read()
-            matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
-            for match in matches:
-                coordinates = match.split()
-                voxel_coordinates.append((int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
-        return voxel_coordinates
-    def process_participant(p_id, runs):
-        path = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback')
+    # print("\n###### STEP 2: CALCULATE PERCENTAGE OF ROI VOXELS OUTSIDE BRAIN DURING NEUROFEEDBACK ######")
+    # def get_sequence_numbers(file_name):
+    #     parts = file_name.split('_')
+    #     return int(parts[1]), int(parts[2].split('.')[0])
+    # def copy_files(src_folder, dest_folder, sequence_number):
+    #     src_pattern = f'*_{sequence_number:06d}_*.dcm'
+    #     matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
+    #     for file in matching_files:
+    #         src_path = os.path.join(src_folder, file)
+    #         dest_path = os.path.join(dest_folder, file)
+    #         shutil.copy(src_path, dest_path)
+    # def read_roi_file(roi_file):
+    #     voxel_coordinates = []
+    #     with open(roi_file, 'r') as file:
+    #         content = file.read()
+    #         matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
+    #         for match in matches:
+    #             coordinates = match.split()
+    #             voxel_coordinates.append((int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
+    #     return voxel_coordinates
+    # def process_participant(p_id, runs):
+    #     path = f'data/raw_data/{p_id}/data/neurofeedback'
+    #     cisc_folder = None
+    #     for folder_name in os.listdir(path):
+    #         if "CISC" in folder_name:
+    #             cisc_folder = folder_name
+    #             break
+    #     if cisc_folder is None:
+    #         print(f"No 'CISC' folder found in the 'neurofeedback' directory for participant {p_id}.")
+    #         return
+    #     src_folder = os.path.join(path, cisc_folder)
+    #     analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility')
+    #     dicoms_folder = os.path.join(analysis_folder, 'susc_scc', 'dicoms')
+    #     os.makedirs(dicoms_folder, exist_ok=True)
+    #     run_folders = {f"run0{num}_dicoms": os.path.join(dicoms_folder, f"run0{num}_dicoms") for num in range(1, 5)}
+    #     for folder in run_folders.values():
+    #         os.makedirs(folder, exist_ok=True)
+    #     files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
+    #     seq_vol_counts = {}
+    #     for file in files:
+    #         sequence_number, volume_number = get_sequence_numbers(file)
+    #         if sequence_number not in seq_vol_counts:
+    #             seq_vol_counts[sequence_number] = []
+    #         seq_vol_counts[sequence_number].append(volume_number)
+    #     seq_210 = [seq for seq, vols in seq_vol_counts.items() if len(vols) == 210]
+    #     seq_238 = [seq for seq, vols in seq_vol_counts.items() if len(vols) == 238]
+    #     min_210, max_210 = min(seq_210), max(seq_210)
+    #     min_238, max_238 = min(seq_238), max(seq_238)
+    #     if not os.listdir(run_folders["run01_dicoms"]):
+    #         print(f"Copying Run01 dicoms for participant {p_id}...")
+    #         copy_files(src_folder, run_folders["run01_dicoms"], min_210)
+    #     if not os.listdir(run_folders["run02_dicoms"]):
+    #         print(f"Copying Run02 dicoms for participant {p_id}...")
+    #         copy_files(src_folder, run_folders["run02_dicoms"], min_238)
+    #     if not os.listdir(run_folders["run03_dicoms"]):
+    #         print(f"Copying Run03 dicoms for participant {p_id}...")
+    #         copy_files(src_folder, run_folders["run03_dicoms"], max_238)
+    #     if not os.listdir(run_folders["run04_dicoms"]):
+    #         print(f"Copying Run04 dicoms for participant {p_id}...")
+    #         copy_files(src_folder, run_folders["run04_dicoms"], max_210)
+    #     output_folder = os.path.join(analysis_folder, 'susc_scc', 'niftis')
+    #     os.makedirs(output_folder, exist_ok=True)
+    #     for run in runs:
+    #         destination_folder = run_folders[f"{run}_dicoms"]
+    #         output_file = os.path.join(output_folder, f"{run}.nii")
+    #         if not os.path.exists(output_file):
+    #             print(f"Converting {run.upper()} DICOM files to Nifti format for participant {p_id}...")
+    #             subprocess.run(['dcm2niix', '-o', output_folder, '-f', f"{run}", '-b', 'n', destination_folder])
+    #         averaged_file = os.path.join(output_folder, f"{run}_averaged.nii.gz")
+    #         if not os.path.exists(averaged_file):
+    #             subprocess.run(['fslmaths', output_file, '-Tmean', averaged_file])
+    #     run_num = ['1', '2', '3', '4']
+    #     for num in run_num:
+    #         roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', f'target_folder_run-{num}', f'depnf_run-{num}.roi')
+    #         voxel_coordinates = read_roi_file(roi_file)
+    #         functional_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/run0{num}_averaged.nii.gz'
+    #         functional_image_info = nib.load(functional_image)
+    #         functional_dims = functional_image_info.shape
+    #         binary_volume = np.zeros(functional_dims)
+    #         for voxel in voxel_coordinates:
+    #             x, y, z = voxel
+    #             binary_volume[x, y, z] = 1
+    #         binary_volume = np.flip(binary_volume, axis=1)
+    #         functional_affine = functional_image_info.affine
+    #         binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
+    #         nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/susc_scc/niftis/run0{num}_subject_space_ROI.nii.gz')
+    #     for run in runs:
+    #         betted_file = os.path.join(output_folder, f"{run}_averaged_betted.nii.gz")
+    #         if not os.path.exists(betted_file):
+    #             subprocess.run(['bet', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged.nii.gz', betted_file, '-R'])
+    #         functional_image_betted = f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted.nii.gz'
+    #         binary_nifti_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz'
+    #         screenshot_file = f'{p_id}/analysis/susceptibility/susc_scc/ROI_on_{run}_EPI.png'
+    #         binary_img = nib.load(binary_nifti_image)
+    #         binary_data = binary_img.get_fdata()
+    #         indices = np.nonzero(binary_data)
+    #         center_x = int(np.mean(indices[0]))
+    #         center_y = int(np.mean(indices[1]))
+    #         center_z = int(np.mean(indices[2]))
+    #         result = subprocess.run(['fsleyes', 'render', '--scene', 'lightbox', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-hc', '-hl', '-of', screenshot_file, functional_image_betted, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0'], capture_output=True, text=True)
+    #         if result.returncode == 0:
+    #             print(f"Screenshot saved as {screenshot_file}")
+    #         else:
+    #             print(f"Error encountered: {result.stderr}")
+    #     for run in runs:
+    #         bin_file = os.path.join(output_folder, f"{run}_averaged_betted_bin.nii.gz")
+    #         threshold = '100'
+    #         if not os.path.exists(bin_file):
+    #             subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
+    #         inverse_file = os.path.join(output_folder, f"{run}_averaged_betted_bin_inverse.nii.gz")
+    #         if not os.path.exists(inverse_file):
+    #             subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
+    #         result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz', '-k', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
+    #         if result2.returncode == 0:
+    #             result2_output = result2.stdout.strip()
+    #         else:
+    #             print(f"Error executing second fslstats command for {run}.")
+    #             continue
+    #         result2_output_values = result2_output.split()
+    #         voxels_outside = float(result2_output_values[0])
+    #         result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
+    #         if result3.returncode == 0:
+    #             result3_output = result3.stdout.strip()
+    #         else:
+    #             print(f"Error executing first fslstats command for {run}.")
+    #             continue
+    #         result3_output_values = result3_output.split()
+    #         total_voxels_in_roi = float(result3_output_values[0])
+    #         percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
+    #         percentage_outside = round(percentage_outside, 2)
+    #         percentage_file = f"{p_id}/analysis/susceptibility/susc_scc/percentage_outside.txt"
+    #         if not os.path.exists(percentage_file):
+    #             with open(percentage_file, "a") as f:
+    #                 f.write("Percentage of ROI voxels in signal dropout regions of merged EPI images.\n\n")
+    #                 f.write("run threshold percentage_outside\n")
+    #                 f.write(f"{run} {threshold} {percentage_outside}\n")
+    #         else:
+    #             with open(percentage_file, "r") as f:
+    #                 lines = f.readlines()
+    #                 matching_lines = [line for line in lines if line.startswith(f"{run}")]
+    #                 if matching_lines:
+    #                     with open(percentage_file, "w") as f:
+    #                         for index, line in enumerate(lines):
+    #                             if index not in matching_lines:
+    #                                 f.write(line)
+    #                         f.write(f"{run} {threshold} {percentage_outside}\n")
+    #                 else:
+    #                     with open(percentage_file, "a") as f:
+    #                         f.write(f"{run} {threshold} {percentage_outside}\n")
+    #         print(f"Percentage of ROI voxels in dropout regions saved in percentage_outside.txt file for {run}.")
+    # screenshot_file = f'{p_id}/analysis/susceptibility/susc_scc/ROI_on_run01_EPI.png'
+    # if not os.path.exists(screenshot_file):
+    #     if __name__ == "__main__":
+    #         for p_id in participants_to_iterate:
+    #             process_participant(p_id, runs)
+
+    # Step 3: Prepare DICOM and Nifti files.
+    print("\n###### STEP 3: DICOM AND NIFTI FILE PREPARATION ######")
+    for p_id in participants:
+        print(f"Preparing DICOM and Nifti files for {p_id}...")
+        path = f'data/raw_data/{p_id}/data/neurofeedback'
         cisc_folder = None
         for folder_name in os.listdir(path):
             if "CISC" in folder_name:
                 cisc_folder = folder_name
                 break
         if cisc_folder is None:
-            print(f"No 'CISC' folder found in the 'neurofeedback' directory for participant {p_id}.")
-            return
-        src_folder = os.path.join(path, cisc_folder)
-        analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility')
-        dicoms_folder = os.path.join(analysis_folder, 'susc_scc', 'dicoms')
-        os.makedirs(dicoms_folder, exist_ok=True)
-        run_folders = {f"run0{num}_dicoms": os.path.join(dicoms_folder, f"run0{num}_dicoms") for num in range(1, 5)}
-        for folder in run_folders.values():
-            os.makedirs(folder, exist_ok=True)
-        files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
-        seq_vol_counts = {}
-        for file in files:
-            sequence_number, volume_number = get_sequence_numbers(file)
-            if sequence_number not in seq_vol_counts:
-                seq_vol_counts[sequence_number] = []
-            seq_vol_counts[sequence_number].append(volume_number)
-        seq_210 = [seq for seq, vols in seq_vol_counts.items() if len(vols) == 210]
-        seq_238 = [seq for seq, vols in seq_vol_counts.items() if len(vols) == 238]
-        min_210, max_210 = min(seq_210), max(seq_210)
-        min_238, max_238 = min(seq_238), max(seq_238)
-        if not os.listdir(run_folders["run01_dicoms"]):
-            print(f"Copying Run01 dicoms for participant {p_id}...")
-            copy_files(src_folder, run_folders["run01_dicoms"], min_210)
-        if not os.listdir(run_folders["run02_dicoms"]):
-            print(f"Copying Run02 dicoms for participant {p_id}...")
-            copy_files(src_folder, run_folders["run02_dicoms"], min_238)
-        if not os.listdir(run_folders["run03_dicoms"]):
-            print(f"Copying Run03 dicoms for participant {p_id}...")
-            copy_files(src_folder, run_folders["run03_dicoms"], max_238)
-        if not os.listdir(run_folders["run04_dicoms"]):
-            print(f"Copying Run04 dicoms for participant {p_id}...")
-            copy_files(src_folder, run_folders["run04_dicoms"], max_210)
-        output_folder = os.path.join(analysis_folder, 'susc_scc', 'niftis')
-        os.makedirs(output_folder, exist_ok=True)
+            print("No 'CISC' folder found in the 'neurofeedback' directory.")
+            exit(1)
+        def get_sequence_numbers(file_name):
+            parts = file_name.split('_')
+            return int(parts[1]), int(parts[2].split('.')[0])
+        def copy_files(src_folder, dest_folder, sequence_number):
+            src_pattern = f'*_{sequence_number:06d}_*.dcm'
+            matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
+            for file in matching_files:
+                src_path = os.path.join(src_folder, file)
+                dest_path = os.path.join(dest_folder, file)
+                shutil.copy(src_path, dest_path)
+        def main():
+            src_folder = os.path.join(path, cisc_folder)
+            run01_dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run01'
+            run02_dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run02'
+            run03_dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run03'
+            run04_dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run04'
+            os.makedirs(run01_dicoms_folder, exist_ok=True)
+            os.makedirs(run02_dicoms_folder, exist_ok=True)
+            os.makedirs(run03_dicoms_folder, exist_ok=True)
+            os.makedirs(run04_dicoms_folder, exist_ok=True)
+            files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
+            seq_vol_counts = {}
+            for file in files:
+                sequence_number, volume_number = get_sequence_numbers(file)
+                if sequence_number not in seq_vol_counts:
+                    seq_vol_counts[sequence_number] = []
+                seq_vol_counts[sequence_number].append(volume_number)
+            seq_210 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 210]
+            seq_238 = [sequence_number for sequence_number, volume_numbers in seq_vol_counts.items() if len(volume_numbers) == 238]
+            min_210 = min(seq_210)
+            max_210 = max(seq_210)
+            min_238 = min(seq_238)
+            max_238 = max(seq_238)
+            if not os.listdir(run01_dicoms_folder):
+                print(f"Copying Run01 dicoms for {p_id}...")
+                copy_files(src_folder, run01_dicoms_folder, min_210)
+                print(f"{p_id} Run01 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
+            if not os.listdir(run02_dicoms_folder):
+                print(f"Copying Run02 dicoms for {p_id}...")
+                copy_files(src_folder, run02_dicoms_folder, min_238)
+                print(f"{p_id} Run02 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
+            if not os.listdir(run03_dicoms_folder):
+                print(f"Copying Run03 dicoms for {p_id}...")
+                copy_files(src_folder, run03_dicoms_folder, max_238)
+                print(f"{p_id} Run03 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
+            if not os.listdir(run04_dicoms_folder):
+                print(f"Copying Run04 dicoms for {p_id}...")
+                copy_files(src_folder, run04_dicoms_folder, max_210)
+                print(f"{p_id} Run04 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
+        if __name__ == "__main__":
+            main()
         for run in runs:
-            destination_folder = run_folders[f"{run}_dicoms"]
-            output_file = os.path.join(output_folder, f"{run}.nii")
+            destination_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/{run}'
+            output_folder = f'analysis/susceptibility_analysis/data/{p_id}/niftis'
+            output_file = os.path.join(output_folder, f'{run}.nii')
             if not os.path.exists(output_file):
-                print(f"Converting {run.upper()} DICOM files to Nifti format for participant {p_id}...")
-                subprocess.run(['dcm2niix', '-o', output_folder, '-f', f"{run}", '-b', 'n', destination_folder])
-            averaged_file = os.path.join(output_folder, f"{run}_averaged.nii.gz")
-            if not os.path.exists(averaged_file):
-                subprocess.run(['fslmaths', output_file, '-Tmean', averaged_file])
-        run_num = ['1', '2', '3', '4']
-        for num in run_num:
-            roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', f'target_folder_run-{num}', f'depnf_run-{num}.roi')
-            voxel_coordinates = read_roi_file(roi_file)
-            functional_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/run0{num}_averaged.nii.gz'
-            functional_image_info = nib.load(functional_image)
-            functional_dims = functional_image_info.shape
-            binary_volume = np.zeros(functional_dims)
-            for voxel in voxel_coordinates:
-                x, y, z = voxel
-                binary_volume[x, y, z] = 1
-            binary_volume = np.flip(binary_volume, axis=1)
-            functional_affine = functional_image_info.affine
-            binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
-            nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/susc_scc/niftis/run0{num}_subject_space_ROI.nii.gz')
-        for run in runs:
-            betted_file = os.path.join(output_folder, f"{run}_averaged_betted.nii.gz")
-            if not os.path.exists(betted_file):
-                subprocess.run(['bet', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged.nii.gz', betted_file, '-R'])
-            functional_image_betted = f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted.nii.gz'
-            binary_nifti_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz'
-            screenshot_file = f'{p_id}/analysis/susceptibility/susc_scc/ROI_on_{run}_EPI.png'
-            binary_img = nib.load(binary_nifti_image)
-            binary_data = binary_img.get_fdata()
-            indices = np.nonzero(binary_data)
-            center_x = int(np.mean(indices[0]))
-            center_y = int(np.mean(indices[1]))
-            center_z = int(np.mean(indices[2]))
-            result = subprocess.run(['fsleyes', 'render', '--scene', 'lightbox', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-hc', '-hl', '-of', screenshot_file, functional_image_betted, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0'], capture_output=True, text=True)
-            if result.returncode == 0:
-                print(f"Screenshot saved as {screenshot_file}")
+                print(f"Converting {run.upper()} DICOM files to Nifti format for {p_id}...")
+                subprocess.run(['dcm2niix', '-o', output_folder, '-f', run, '-b', 'n', destination_folder])
+                print(f"{p_id} {run.upper()} DICOM files converted to Nifti format.")
             else:
-                print(f"Error encountered: {result.stderr}")
-        for run in runs:
-            bin_file = os.path.join(output_folder, f"{run}_averaged_betted_bin.nii.gz")
-            threshold = '100'
-            if not os.path.exists(bin_file):
-                subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
-            inverse_file = os.path.join(output_folder, f"{run}_averaged_betted_bin_inverse.nii.gz")
-            if not os.path.exists(inverse_file):
-                subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
-            result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz', '-k', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
-            if result2.returncode == 0:
-                result2_output = result2.stdout.strip()
+                print(f"{p_id} {run.upper()} Nifti file already exists. Skipping conversion.")
+            png_path = f'analysis/susceptibility_analysis/data/{p_id}/pngs/{run}.png'
+            nifti_path = f'analysis/susceptibility_analysis/data/{p_id}/niftis/{run}.nii'
+            if not os.path.exists(png_path):
+                print(f"Saving {p_id} {run} Nifti as PNG...")
+                save_png = subprocess.run(['fsleyes', 'render', '--scene', 'ortho', '-of', png_path, nifti_path], capture_output=True, text=True)
+                if save_png.returncode == 0:
+                    print("Screenshot saved as", png_path)
+                else:
+                    print("Error encountered:", save_png.stderr)
             else:
-                print(f"Error executing second fslstats command for {run}.")
-                continue
-            result2_output_values = result2_output.split()
-            voxels_outside = float(result2_output_values[0])
-            result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
-            if result3.returncode == 0:
-                result3_output = result3.stdout.strip()
+                print('PNG files already created. Skipping conversion.')
+        print(f"Check PNG files in analysis/susceptibility_analysis/data/{p_id}/pngs/ to see whether Niftis are in correct orientation. Anterior of brain should be facing right in sagittal view, right and left of brain should be swapped in coronal and transverse views, and anterior of the brain should be facing towards the top of the image in the transverse view. Other aspects should be easily viewable. Incorrect orientations can be corrected for using 'fslreorient2std' or 'fslswapdim' commands.")
+    bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
+    def copy_2_dicoms(source_folder, destination_folder1, destination_folder2, target_volume_count=5):
+                sequences2 = defaultdict(list)
+                last_two_sets = []
+                for filename in os.listdir(source_folder):
+                    if filename.endswith('.dcm'):
+                        file_parts = filename.split('_')
+                        if len(file_parts) == 3:
+                            sequence_number = int(file_parts[1])
+                            volume_number = int(file_parts[2].split('.')[0])
+                            sequences2[sequence_number].append((filename, volume_number))
+                for sequence_number, files_info in sequences2.items():
+                    if len(files_info) == target_volume_count:
+                        last_two_sets.append(files_info)
+                        if len(last_two_sets) > 2:
+                            last_two_sets.pop(0)
+                for idx, files_info in enumerate(last_two_sets):
+                    for filename, _ in files_info:
+                        if idx == 0:
+                            destination_folder = destination_folder1
+                        else:
+                            destination_folder = destination_folder2
+                        source_path = os.path.join(source_folder, filename)
+                        destination_path = os.path.join(destination_folder, filename)
+                        shutil.copy2(source_path, destination_path)
+                        print(f"Copied {filename} to {destination_folder}")
+    for p_id in bad_participants:
+        print(f"Copying {p_id} fieldmap DICOMS to separate folder...")
+        ap_fieldmaps_dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/ap'  
+        pa_fieldmaps_dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/badpa'
+        os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+        os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
+        path = f'data/raw_data/{p_id}/data/neurofeedback'
+        cisc_folder = None
+        for folder_name in os.listdir(path):
+            if "CISC" in folder_name:
+                cisc_folder = folder_name
+                break
+        if cisc_folder is None:
+            print("No 'CISC' folder found in the 'neurofeedback' directory.")
+            exit(1)
+        source_folder = os.path.join(path, cisc_folder)
+        if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder):
+            copy_2_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, target_volume_count=5)
+            print(f"{p_id} fieldmap DICOMS successfully copied.")
+        else:
+            print(f"{p_id} fieldmap DICOMS already copied. Skipping process.")
+        pe_list = ['ap', 'badpa']
+        for pe in pe_list:
+            destination_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/{pe}'
+            output_folder = f'analysis/susceptibility_analysis/data/{p_id}/niftis/fieldmaps'
+            output_file = os.path.join(output_folder, f'{pe}_fieldmaps.nii')
+            if not os.path.exists(output_file):
+                print(f"Converting {p_id} {pe.upper()} fieldmaps DICOM files to Nifti format...")
+                subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
+                print(f"{p_id} {pe.upper()} fieldmaps DICOM files converted to Nifti format.")
             else:
-                print(f"Error executing first fslstats command for {run}.")
-                continue
-            result3_output_values = result3_output.split()
-            total_voxels_in_roi = float(result3_output_values[0])
-            percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
-            percentage_outside = round(percentage_outside, 2)
-            percentage_file = f"{p_id}/analysis/susceptibility/susc_scc/percentage_outside.txt"
-            if not os.path.exists(percentage_file):
-                with open(percentage_file, "a") as f:
-                    f.write("Percentage of ROI voxels in signal dropout regions of merged EPI images.\n\n")
-                    f.write("run threshold percentage_outside\n")
-                    f.write(f"{run} {threshold} {percentage_outside}\n")
+                print(f"{p_id} {pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
+    def copy_3_dicoms(source_folder, destination_folder1, destination_folder2, destination_folder3, target_volume_count=5):
+            sequences3 = defaultdict(list)
+            last_three_sets = [] 
+            for filename in os.listdir(source_folder):
+                if filename.endswith('.dcm'):
+                    file_parts = filename.split('_')
+                    if len(file_parts) == 3:
+                        sequence_number = int(file_parts[1])
+                        volume_number = int(file_parts[2].split('.')[0])
+                        sequences3[sequence_number].append((filename, volume_number))
+            for sequence_number, files_info in sequences3.items():
+                if len(files_info) == target_volume_count:
+                    last_three_sets.append(files_info)
+                    if len(last_three_sets) > 3:
+                        last_three_sets.pop(0)
+            for idx, files_info in enumerate(last_three_sets):
+                if idx == 0:
+                    destination_folder = destination_folder1
+                elif idx == 1:
+                    destination_folder = destination_folder2
+                else:
+                    destination_folder = destination_folder3
+                for filename, _ in files_info:
+                    source_path = os.path.join(source_folder, filename)
+                    destination_path = os.path.join(destination_folder, filename)
+                    shutil.copy2(source_path, destination_path)
+                    print(f"Copied {filename} to {destination_folder}")
+    for p_id in participants:
+        if p_id not in bad_participants:
+            ap_fieldmaps_dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/ap'
+            pa_fieldmaps_dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/pa'
+            rl_fieldmaps_dicoms_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/rl'
+            os.makedirs(ap_fieldmaps_dicoms_folder, exist_ok=True)
+            os.makedirs(pa_fieldmaps_dicoms_folder, exist_ok=True)
+            os.makedirs(rl_fieldmaps_dicoms_folder, exist_ok=True)
+            path = f'data/raw_data/{p_id}/data/neurofeedback'
+            cisc_folder = None
+            for folder_name in os.listdir(path):
+                if "CISC" in folder_name:
+                    cisc_folder = folder_name
+                    break
+            if cisc_folder is None:
+                print("No 'CISC' folder found in the 'neurofeedback' directory.")
+                exit(1)
+            source_folder = os.path.join(path, cisc_folder)
+            if not os.listdir(ap_fieldmaps_dicoms_folder) or not os.listdir(pa_fieldmaps_dicoms_folder) or not os.listdir(rl_fieldmaps_dicoms_folder):
+                copy_3_dicoms(source_folder, ap_fieldmaps_dicoms_folder, pa_fieldmaps_dicoms_folder, rl_fieldmaps_dicoms_folder, target_volume_count=5)
+            pe_list = ['ap', 'pa', 'rl']
+            for pe in pe_list:
+                destination_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/{pe}'
+                output_folder = f'analysis/susceptibility_analysis/data/{p_id}/niftis'
+                output_file = os.path.join(output_folder, f'{pe}_fieldmaps.nii')
+                if not os.path.exists(output_file):
+                    print(f"Converting {pe.upper()} fieldmaps DICOM files to Nifti format...")
+                    subprocess.run(['dcm2niix', '-o', output_folder, '-f', f'{pe}_fieldmaps', '-b', 'n', destination_folder])
+                    print(f"{pe.upper()} fieldmaps DICOM files converted to Nifti format.")
+                else:
+                    print(f"{pe.upper()} fieldmaps Nifti file already exists. Skipping conversion.")
+    
+    # Step 4: Confirm sequence phase encoding directions for stratification of participants.
+    print("\n###### STEP 4: DETERMINING PHASE ENCODING DIRECTIONS ######")
+    for p_id in bad_participants:
+        ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/ap'
+        pa_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/badpa'
+        run01 = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run01'
+        run02 = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run02'
+        run03 = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run03'
+        run04 = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run04'
+        folder_list = [ap_fieldmaps, pa_fieldmaps, run01, run02, run03, run04]
+        pe_file = f'analysis/susceptibility_analysis/data/{p_id}/pe_axes.txt'
+        pe_axes = []
+        for folder in folder_list:
+            dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
+            if len(dicom_files) == 0:
+                print("No DICOM files found in the directory.")
             else:
-                with open(percentage_file, "r") as f:
+                random_file = random.choice(dicom_files)
+                ds = pydicom.dcmread(random_file)
+                pe_axis = ds.InPlanePhaseEncodingDirection
+                pe_axes.append(pe_axis)
+                start_index = folder.rfind('/') + 1  
+                end_index = folder.rfind('_')  
+                if end_index == -1 or end_index < start_index:
+                    folder = folder[start_index:] + "_fieldmaps"
+                else:
+                    folder = folder[start_index:end_index]
+                print(f"Phase Encoding Axis for {folder}: ", pe_axis)
+            if not os.path.exists(pe_file):
+                with open(pe_file, "a") as f:
+                    f.write("sequence pe_axis\n")
+                    f.write(f"{folder} {pe_axis}\n")
+            else: 
+                with open(pe_file, "r") as f:
                     lines = f.readlines()
-                    matching_lines = [line for line in lines if line.startswith(f"{run}")]
+                matching_lines = [line for line in lines if line.startswith(f"{folder}")]
+                if matching_lines:
+                    with open(pe_file, "w") as f:
+                        for index, line in enumerate(lines):
+                            if index not in matching_lines:
+                                f.write(line)
+                        f.write(f"{folder} {pe_axis}\n")
+                else:
+                    with open(pe_file, "a") as f:
+                        f.write(f"{folder} {pe_axis}\n")
+        print("Sequence PE axes saved to pe_axes.txt file.")
+        if pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'COL']:
+            print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, AP) for this participant. Stratification of distortion correction method can now take place.')
+        elif pe_axes == ['COL', 'ROW', 'ROW', 'ROW', 'ROW', 'ROW']:
+            print('Sequence PE directions are incorrect as expected (AP, RL, RL, RL, RL, RL) for this participant. Stratification of distortion correction method can now take place.')
+        else:
+            print('Sequence PE directions are not as expected. Please investigate.')
+            sys.exit()
+    for p_id in participants:
+        if p_id not in bad_participants:
+            ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/ap'
+            pa_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/pa'
+            rl_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/rl'
+            run01 = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run01'
+            run02 = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run02'
+            run03 = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run03'
+            run04 = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run04'
+            folder_list = [ap_fieldmaps, pa_fieldmaps, rl_fieldmaps, run01, run02, run03, run04]
+            pe_file = f'analysis/susceptibility_analysis/data/{p_id}/pe_axes.txt'
+            pe_axes = []
+            for folder in folder_list:
+                dicom_files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.dcm')]
+                if len(dicom_files) == 0:
+                    print("No DICOM files found in the directory.")
+                else:
+                    random_file = random.choice(dicom_files)
+                    ds = pydicom.dcmread(random_file)
+                    pe_axis = ds.InPlanePhaseEncodingDirection
+                    pe_axes.append(pe_axis)
+                    start_index = folder.rfind('/') + 1  
+                    end_index = folder.rfind('_')  
+                    if end_index == -1 or end_index < start_index:
+                        folder = folder[start_index:] + "_fieldmaps"
+                    else:
+                        folder = folder[start_index:end_index]
+                    print(f"Phase Encoding Axis for {folder}: ", pe_axis)
+                if not os.path.exists(pe_file):
+                    with open(pe_file, "a") as f:
+                        f.write("sequence pe_axis\n")
+                        f.write(f"{folder} {pe_axis}\n")
+                else: 
+                    with open(pe_file, "r") as f:
+                        lines = f.readlines()
+                    matching_lines = [line for line in lines if line.startswith(f"{folder}")]
                     if matching_lines:
-                        with open(percentage_file, "w") as f:
+                        with open(pe_file, "w") as f:
                             for index, line in enumerate(lines):
                                 if index not in matching_lines:
                                     f.write(line)
-                            f.write(f"{run} {threshold} {percentage_outside}\n")
+                            f.write(f"{folder} {pe_axis}\n")
                     else:
-                        with open(percentage_file, "a") as f:
-                            f.write(f"{run} {threshold} {percentage_outside}\n")
-            print(f"Percentage of ROI voxels in dropout regions saved in percentage_outside.txt file for {run}.")
-    screenshot_file = f'{p_id}/analysis/susceptibility/susc_scc/ROI_on_run01_EPI.png'
-    if not os.path.exists(screenshot_file):
-        if __name__ == "__main__":
-            for p_id in participants_to_iterate:
-                process_participant(p_id, runs)
+                        with open(pe_file, "a") as f:
+                            f.write(f"{folder} {pe_axis}\n")
+            print("Sequence PE axes saved to pe_axes.txt file.")
+            if pe_axes == ['COL', 'COL', 'ROW', 'COL', 'COL', 'COL', 'COL']:
+                print('Sequence PE directions are correct as expected (AP, PA, RL, PA, PA, PA, PA) for this participant. Stratification of distortion correction method can now take place.')
+            else:
+                print('Sequence PE directions are not as expected. Please investigate.')
+                sys.exit()
 
-    # Step 3: Test quality of alternate distortion correction method (Stage 1).
-    print("\n###### STEP 3: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 1) ######")
+    # Step 5: Calculate and apply fieldmaps for relevant participants.
+    print("\n###### STEP 5: CALCULATING FIELDMAPS ######")
+    for p_id in participants:
+        if p_id not in bad_participants:
+            ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/ap_fieldmaps.nii'
+            pa_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/pa_fieldmaps.nii'
+            output_file = f'analysis/susceptibility_analysis/data/{p_id}/niftis/merged_fieldmaps.nii'
+            if not os.path.exists(output_file):
+                print("Merging fieldmap sequences...")
+                subprocess.run(['fslmerge', '-t', output_file, ap_fieldmaps, pa_fieldmaps])
+                print("Fieldmap sequences merging completed.")
+            else:
+                print("Fieldmap sequences already merged. Skipping process.")
+            fov_phase = 1
+            base_res = 64
+            phase_res = 1
+            echo_spacing = 0.54
+            pe_steps = (fov_phase * base_res * phase_res) - 1
+            readout_time_s = (pe_steps * echo_spacing) / 1000
+            acqparams_file = f'analysis/susceptibility_analysis/data/{p_id}/acqparams.txt'
+            if not os.path.exists(acqparams_file):
+                with open(acqparams_file, "a") as f:
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 -1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}\n")
+                    f.write(f"0 1 0 {readout_time_s}")
+            fieldcoef_output_file = f'analysis/susceptibility_analysis/data/{p_id}/topup_{p_id}_fieldcoef.nii.gz'
+            movpar_output_file = f'analysis/susceptibility_analysis/data/{p_id}/topup_{p_id}_movpar.txt'
+            if not os.path.exists(fieldcoef_output_file) or not os.path.exists(movpar_output_file):
+                print("Calculating fieldmaps...")
+                subprocess.run(["topup", f"--imain=analysis/susceptibility_analysis/data/{p_id}/niftis/merged_fieldmaps.nii", f"--datain=analysis/susceptibility_analysis/data/{p_id}/acqparams.txt", "--config=b02b0.cnf", f"--out=analysis/susceptibility_analysis/data/{p_id}/topup_{p_id}", f"--iout=analysis/susceptibility_analysis/data/{p_id}/topup_{p_id}_unwarped"])
+                print("Fieldmap calculation completed.")
+            else:
+                print("Fieldmaps already calculated. Skipping process.")
+
+    # Step 6: Test quality of alternate distortion correction method (Stage 1).
+    print("\n###### STEP 6: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 1) ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     perc_outside_pa_values = []
     perc_outside_rl_values = []
     column_headers = ['p_id', 'perc_outside_pa', 'perc_outside_rl']
     group_perc_outside_df = pd.DataFrame(columns = column_headers) 
-    for p_id in participants_to_iterate:
+    for p_id in participants:
         if p_id in good_participants:
             print(f"Preparing Stage 1 files for {p_id}...")
-            pa_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"
+            pa_fieldmaps =          f"{p_id}/analysis/preproc/fieldmaps/pa_fieldmaps.nii"
             rl_fieldmaps = f"{p_id}/analysis/preproc/fieldmaps/rl_fieldmaps.nii"
             averaged_pa_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/averaged_pa_fieldmaps.nii.gz"
             averaged_rl_fieldmaps = f"{p_id}/analysis/susceptibility/fnirt_test/1/averaged_rl_fieldmaps.nii.gz"
@@ -3364,8 +3710,8 @@ if answer == 'y':
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
     group_voxel_intensity_plot.save('group/susceptibility/fnirt_test/1/group_voxel_intensity_plot.png')
 
-    # Step 4: Test quality of alternate distortion correction method (Stage 2).
-    print("\n###### STEP 4: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
+    # Step 7: Test quality of alternate distortion correction method (Stage 2).
+    print("\n###### STEP 7: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")
     perc_outside_corrected_values = []
     perc_outside_uncorrected_values = []
     column_headers = ['p_id', 'perc_outside_corrected', 'perc_outside_uncorrected']
@@ -3768,8 +4114,8 @@ if answer == 'y':
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
     group_voxel_intensity_plot.save('group/susceptibility/fnirt_test/2/group_voxel_intensity_plot.png')
 
-    # Step 5: Test quality of alternate distortion correction method (Stage 3).
-    print("\n###### STEP 5: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 3) ######")   
+    # Step 8: Test quality of alternate distortion correction method (Stage 3).
+    print("\n###### STEP 8: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 3) ######")   
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
     perc_outside_run01_values = []
     perc_outside_run04_values = []
@@ -4212,9 +4558,10 @@ if answer == 'y':
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
     group_voxel_intensity_plot.save('group/susceptibility/fnirt_test/3/group_voxel_intensity_plot.png')
 
-    # Step 6: Test quality of alternate distortion correction method (Stage 4).
-    print("\n###### STEP 6: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 4) ######")   
-    
+    # Step 9: Testing FNIRT parameters.
+    print("\n###### STEP 9: TESTING FNIRT PARAMETERS ######")   
+    bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
+    for p_id in bad_participants:
 
 
 

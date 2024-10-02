@@ -2770,6 +2770,10 @@ if answer == 'y':
             dicoms_run2_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run02'
             dicoms_run3_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run03'
             dicoms_run4_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run04'
+            os.makedirs(dicoms_run1_folder, exist_ok=True)
+            os.makedirs(dicoms_run2_folder, exist_ok=True)
+            os.makedirs(dicoms_run3_folder, exist_ok=True)
+            os.makedirs(dicoms_run4_folder, exist_ok=True)
             files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
             seq_vol_counts = {}
             for file in files:

@@ -4600,13 +4600,84 @@ if answer == 'y':
         fnirt_test_6_participant_folder = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}'
         os.makedirs(fnirt_test_6_participant_folder, exist_ok=True)
 
-        averaged_run01 = f"{p_id}/averaged_run01.nii.gz"
-        averaged_run01_brain = f"{p_id}/averaged_run01_brain.nii.gz"
-        structural = f"{p_id}/structural.nii"
-        structural_brain = f"{p_id}/structural_brain.nii.gz"
-        structural_downsampled = f"{p_id}/structural_downsampled.nii.gz"
-        structural_brain_downsampled = f"{p_id}/structural_brain_downsampled.nii.gz"
-        structural_brain_downsampled_mask = f"{p_id}/structural_brain_downsampled_mask.nii.gz"
+        averaged_run01 = f'data/raw_data/{p_id}/data/neurofeedback/fnirt_test_files/averaged_run01.nii.gz'
+        averaged_run01_brain = f'data/raw_data/{p_id}/data/neurofeedback/fnirt_test_files/averaged_run01_brain.nii.gz'
+        structural = f'data/raw_data/{p_id}/data/neurofeedback/fnirt_test_files/structural.nii'
+        structural_brain = f'data/raw_data/{p_id}/data/neurofeedback/fnirt_test_files/structural_brain.nii.gz'
+        structural_downsampled = f'data/raw_data/{p_id}/data/neurofeedback/fnirt_test_files/structural_downsampled.nii.gz'
+        structural_brain_downsampled = f'data/raw_data/{p_id}/data/neurofeedback/fnirt_test_files/structural_brain_downsampled.nii.gz'
+        structural_brain_downsampled_mask = f'data/raw_data/{p_id}/data/neurofeedback/fnirt_test_files/structural_brain_downsampled_mask.nii.gz'
 
+        print(f"Running FLIRT betted, FNIRT unbetted, applywarp unbetted, downsampled, for {p_id}...")
+        flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/1/{p_id}/flirted_run01.nii.gz'
+        flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/1/{p_id}/flirted_run01_matrix.mat'
+        if not os.path.exists(flirted_run01):
+            subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
+        warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/1/{p_id}/warp_run01'
+        if not os.path.exists(warp_run01):
+            subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}'])
+        fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/1/{p_id}/fnirted_run01.nii.gz'
+        if not os.path.exists(fnirted_run01):
+            subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+
+        print(f"Running FLIRT betted, FNIRT betted, applywarp betted, downsampled, for {p_id}...")
+        flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/2/{p_id}/flirted_run01.nii.gz'
+        flirted_run01_matrix = f"{p_id}/2/flirted_run01_matrix.mat"
+        if not os.path.exists(flirted_run01):
+            subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
+        warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/2/{p_id}/warp_run01'
+        if not os.path.exists(warp_run01):
+            subprocess.run(['fnirt', f'--in={averaged_run01_brain}', f'--ref={structural_brain_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}'])
+        fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/2/{p_id}/fnirted_run01.nii.gz'
+        if not os.path.exists(fnirted_run01):
+            subprocess.run(['applywarp', f'--in={averaged_run01_brain}', f'--ref={structural_brain_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+
+        print(f"Running FLIRT betted, FNIRT unbetted, applywarp unbetted, downsampled, with refmask, for {p_id}...")
+        flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/3/{p_id}/flirted_run01.nii.gz'
+        flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/3/{p_id}/flirted_run01_matrix.mat'
+        if not os.path.exists(flirted_run01):
+            subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
+        warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/3/{p_id}/warp_run01'
+        if not os.path.exists(warp_run01):
+            subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--refmask={structural_brain_downsampled_mask}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}'])
+        fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/3/{p_id}/fnirted_run01.nii.gz'
+        if not os.path.exists(fnirted_run01):
+            subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--mask={structural_brain_downsampled_mask}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+
+        print(f"Running FLIRT betted, FNIRT betted, applywarp betted, downsampled, with refmask, for {p_id}...")
+        flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/flirted_run01.nii.gz'
+        flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/flirted_run01_matrix.mat'
+        if not os.path.exists(flirted_run01):
+            subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
+        warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/warp_run01'
+        if not os.path.exists(warp_run01):
+            subprocess.run(['fnirt', f'--in={averaged_run01_brain}', f'--ref={structural_brain_downsampled}', f'--refmask={structural_brain_downsampled_mask}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}'])
+        fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/fnirted_run01.nii.gz'
+        if not os.path.exists(fnirted_run01):
+            subprocess.run(['applywarp', f'--in={averaged_run01_brain}', f'--ref={structural_brain_downsampled}', f'--mask={structural_brain_downsampled_mask}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+
+        print(f"Running FLIRT betted, FNIRT unbetted, applywarp unbetted, downsampled, with lambda configuration 1, for {p_id}...")
+        flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/5/{p_id}/flirted_run01.nii.gz'
+        flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/5/{p_id}/flirted_run01_matrix.mat'
+        if not os.path.exists(flirted_run01):
+            subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
+        warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/5/{p_id}/warp_run01'
+        if not os.path.exists(warp_run01):
+            subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', '--lambda=200,75,40,20'])
+        fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/5/{p_id}/fnirted_run01.nii.gz'
+        if not os.path.exists(fnirted_run01):
+            subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+
+        print(f"Running FLIRT betted, FNIRT unbetted, applywarp unbetted, downsampled, with lambda configuration 2 for {p_id}...")
+        flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/flirted_run01.nii.gz'
+        flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/flirted_run01_matrix.mat'
+        if not os.path.exists(flirted_run01):
+            subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
+        warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/warp_run01'
+        if not os.path.exists(warp_run01):
+            subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', '--lambda=400,200,150,75,60,45'])
+        fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/fnirted_run01.nii.gz'
+        if not os.path.exists(fnirted_run01):
+            subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
 
 #endregion

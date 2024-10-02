@@ -2779,22 +2779,22 @@ if answer == 'y':
             max_210 = max(seq_210)
             min_238 = min(seq_238)
             max_238 = max(seq_238)
-            if not os.listdir(run01_dicoms_folder):
+            if not os.listdir(dicoms_run1_folder):
                 print(f"Copying Run01 dicoms for {p_id}...")
-                copy_files(src_folder, run01_dicoms_folder, min_210)
-                print(f"{p_id} Run01 dicoms copied. Number of files:", str(len(os.listdir(run01_folder))) + ".", "Sequence number:", min_210)
-            if not os.listdir(run02_dicoms_folder):
+                copy_files(src_folder, dicoms_run1_folder, min_210)
+                print(f"{p_id} Run01 dicoms copied. Number of files:", str(len(os.listdir(dicoms_run1_folder))) + ".", "Sequence number:", min_210)
+            if not os.listdir(dicoms_run2_folder):
                 print(f"Copying Run02 dicoms for {p_id}...")
-                copy_files(src_folder, run02_dicoms_folder, min_238)
-                print(f"{p_id} Run02 dicoms copied. Number of files:", str(len(os.listdir(run02_folder))) + ".", "Sequence number:", min_238)
-            if not os.listdir(run03_dicoms_folder):
+                copy_files(src_folder, dicoms_run2_folder, min_238)
+                print(f"{p_id} Run02 dicoms copied. Number of files:", str(len(os.listdir(dicoms_run2_folder))) + ".", "Sequence number:", min_238)
+            if not os.listdir(dicoms_run3_folder):
                 print(f"Copying Run03 dicoms for {p_id}...")
-                copy_files(src_folder, run03_dicoms_folder, max_238)
-                print(f"{p_id} Run03 dicoms copied. Number of files:", str(len(os.listdir(run03_folder))) + ".", "Sequence number:", max_238)
-            if not os.listdir(run04_dicoms_folder):
+                copy_files(src_folder, dicoms_run3_folder, max_238)
+                print(f"{p_id} Run03 dicoms copied. Number of files:", str(len(os.listdir(dicoms_run3_folder))) + ".", "Sequence number:", max_238)
+            if not os.listdir(dicoms_run4_folder):
                 print(f"Copying Run04 dicoms for {p_id}...")
-                copy_files(src_folder, run04_dicoms_folder, max_210)
-                print(f"{p_id} Run04 dicoms copied. Number of files:", str(len(os.listdir(run04_folder))) + ".", "Sequence number:", max_210)
+                copy_files(src_folder, dicoms_run4_folder, max_210)
+                print(f"{p_id} Run04 dicoms copied. Number of files:", str(len(os.listdir(dicoms_run4_folder))) + ".", "Sequence number:", max_210)
         if __name__ == "__main__":
             main()
         for run in runs:

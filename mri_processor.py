@@ -2766,6 +2766,10 @@ if answer == 'y':
                 shutil.copy(src_path, dest_path)
         def main():
             src_folder = os.path.join(path, cisc_folder)
+            dicoms_run1_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run01'
+            dicoms_run2_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run02'
+            dicoms_run3_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run03'
+            dicoms_run4_folder = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/run04'
             files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
             seq_vol_counts = {}
             for file in files:

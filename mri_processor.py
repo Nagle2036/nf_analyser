@@ -4,7 +4,7 @@
 # Add percentage completion metric.
 # Output mri_processor.py Bash terminal outputs / prints into .txt log file.
 
-#region 1) IMPORT PACKAGES.
+#region IMPORT PACKAGES.
 
 import time
 import urllib.parse
@@ -49,20 +49,9 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 #endregion
 
-#region 2) INSTRUCTIONS.
-print("\nWelcome to the MRI analysis processor. Please ensure that the following steps are complete before proceeding:\n")
-print("1. Upload the participant's data to Box.\n")
-print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
+#region 1) DOWNLOAD BOX FILES TO SERVER.
 
-
-
-    sys.exit()
-#endregion
-
-#region 3) BOX FILES DOWNLOAD TO SERVER.
-
-answer = input("Would you like to update your files from Box? (y/n)\n")
-if answer == 'y':
+def download_box_files():
     p_id = input("Enter the participant's ID (e.g. P001).\n")
     working_dir = os.getcwd()
     p_id_folder = os.path.join(os.getcwd(), p_id)
@@ -245,12 +234,12 @@ if answer == 'y':
         print(f"Parent folder '{parent_folder_name}' not found.")
     # Wait for the web server thread to complete
     server_thread.join()
+
 #endregion
 
-#region 4) THERMOMETER ANALYSIS.
+#region 2) THERMOMETER ANALYSIS.
 
-answer = input("Would you like to execute thermometer analysis? (y/n)\n")
-if answer == 'y':
+def thermometer_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     restart = input("Would you like to start the thermometer analysis from scratch? This will delete the entire analysis/thermometer_analysis folder. (y/n)\n")
     if restart == 'y':
@@ -1033,10 +1022,9 @@ if answer == 'y':
 
 #endregion
 
-#region 5) CLINICAL ANALYSIS.
+#region 3) CLINICAL ANALYSIS.
 
-answer = input("Would you like to execute clinical analysis? (y/n)\n")
-if answer == 'y':
+def clinical_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
     restart = input("Would you like to start the clinical analysis from scratch? This will remove all files from the analysis/clinical_analysis folder. (y/n)\n")
@@ -2174,10 +2162,9 @@ if answer == 'y':
 
 #endregion
 
-#region 6) FMRI PREPARATION AND PREPROCESSING.
+#region 4) FMRI PREPARATION AND PREPROCESSING.
 
-answer = input("Would you like to perform fMRI preparation and preprocessing? (y/n)\n")
-if answer == 'y':
+def fmri_prep_and_preproc():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
     restart = input("Would you like to start the fMRI preparation and preprocessing from scratch? This will remove all files from the 'data/bids', 'data/fmriprep_derivatives' and 'data/fully_preproc' folders. (y/n)\n")
@@ -2435,10 +2422,9 @@ exit
 
 #endregion
 
-#region 7) FMRI ANALYSIS.
+#region 5) FMRI ANALYSIS.
 
-answer = input("Would you like to perform fMRI analysis? (y/n)\n")
-if answer == 'y':
+def fmri_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
     restart = input("Would you like to start the fMRI analysis from scratch? This will remove all files from the 'analysis/fmri_analysis' folder. (y/n)\n")
@@ -2535,10 +2521,9 @@ if answer == 'y':
 
 #endregion
 
-#region 8) SUSCEPTIBILITY ANALYSIS.
+#region 6) SUSCEPTIBILITY ANALYSIS.
 
-answer = input("Would you like to execute susceptibility artifact analysis? (y/n)\n")
-if answer == 'y':
+def susceptibility_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
     restart = input("Would you like to start the susceptibility artifact analysis from scratch? This will remove all files from the 'analysis/susceptibility' folder. (y/n)\n")
@@ -4687,5 +4672,47 @@ if answer == 'y':
         fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/fnirted_run01.nii.gz'
         if not os.path.exists(fnirted_run01):
             subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+#endregion
 
+#region INSTRUCTIONS.
+
+print("\nWelcome to the MRI analysis processor. Please ensure that the following steps are complete before proceeding:\n")
+print("1. Upload the participant's data to Box.\n")
+print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
+
+def main_menu():
+    while True:
+        print("\n##### MAIN MENU #####")
+        print("1. DOWNLOAD BOX FILES TO SERVER")
+        print("2. THERMOMETER ANALYSIS")
+        print("3. CLINICAL ANALYSIS")
+        print("4. FMRI PREPARATION AND PREPROCESSING")
+        print("5. FMRI ANALYSIS")
+        print("6. SUSCEPTIBILITY ANALYSIS")
+        print("7. EXIT")
+
+        choice = input("Please choose an option (1-7): ")
+
+        if choice == '1':
+            section1()
+        elif choice == '2':
+            section2()
+        elif choice == '3':
+            section3()
+        elif choice == '4':
+            section4()
+        elif choice == '5':
+            section5()
+        elif choice == '6':
+            section6()
+        elif choice == '7':
+            print("Exiting... Goodbye!")
+            sys.exit()
+        else:
+            print("Invalid choice. Please select a number between 1 and 7.")
+
+if __name__ == "__main__":
+    print("Welcome to the script!")
+    main_menu()
+        
 #endregion

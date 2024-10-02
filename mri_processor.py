@@ -50,12 +50,12 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 #endregion
 
 #region 2) INSTRUCTIONS.
-print("\nWelcome to the MRI analysis processor. Please complete the following before proceeding:\n")
+print("\nWelcome to the MRI analysis processor. Please ensure that the following steps are complete before proceeding:\n")
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
-answer = input("Have the above steps been completed? (y/n)\n")
-if answer != 'y':
-    print('Error: please complete prerequisite steps before proceeding.\n')
+
+
+
     sys.exit()
 #endregion
 

@@ -42,6 +42,7 @@ from statsmodels.stats.multitest import multipletests
 from pingouin import rm_anova
 import json
 import textwrap
+from nilearn.interfaces.fmriprep import load_confounds_strategy
 # import rpy2.robjects as ro
 # from rpy2.robjects import pandas2ri
 # from rpy2.robjects.packages import importr
@@ -2455,33 +2456,10 @@ def fmri_analysis():
         os.makedirs(analysis_1_first_level_participant_folder, exist_ok=True)
     print("Directories created.")
 
-    # Step 2: Extract motion parameters.
-    print("\n###### STEP 2: EXTRACT MOTION PARAMETERS ######")
+    # Step 2: Extract confound regressors.
+    print("\n###### STEP 2: EXTRACT CONFOUND REGRESSORS ######")
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
-        confounds_run1_file_path = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_desc-confounds_timeseries.tsv'
-        if os.path.exists(confounds_run1_file_path):
-            confounds_run1_file = pd.read_csv(confounds_run1_file_path, sep='\t')
-            motion_params_run1 = confounds_run1_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
-            motion_params_run1_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run01.txt'
-            motion_params_run1.to_csv(motion_params_run1_file_path, sep=' ', header=False, index=False)
-        else:
-            print(f"No Run 1 confounds file found for {p_id}.")
-
-        confounds_run4_file_path = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_desc-confounds_timeseries.tsv'
-        if os.path.exists(confounds_run4_file_path):
-            confounds_run4_file = pd.read_csv(confounds_run4_file_path, sep='\t')
-            motion_params_run4 = confounds_run4_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
-            motion_params_run4_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run04.txt'
-            motion_params_run4.to_csv(motion_params_run4_file_path, sep=' ', header=False, index=False)
-        else:
-            print(f"No Run 4 confounds file found for {p_id}.")
-    print("Motion parameters extracted.")
-
-
-    for p_id in participants:
-        p_id_stripped = p_id.replace('P', '')
-        from nilearn.interfaces.fmriprep import load_confounds_strategy
         confound_dfs = {}
         run01_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
         run04_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
@@ -2500,8 +2478,7 @@ def fmri_analysis():
             confounds_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_run{run}.txt'
             confound_df.to_csv(confounds_file_path, header=False, index=False, sep='\t')
             print(f"Saved confounds for {key} to {confounds_file_path}")
-
-
+    print("Confound regressors extracted.")
 
     # Step 3: Create onset timing files.
     print("\n###### STEP 3: CREATING ONSET TIMING FILES ######")

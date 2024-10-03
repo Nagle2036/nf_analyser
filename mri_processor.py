@@ -241,9 +241,9 @@ def download_box_files():
 
 def thermometer_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    restart = input("Would you like to start the thermometer analysis from scratch? This will delete the entire analysis/thermometer_analysis folder. (y/n)\n")
+    restart = input("\nWould you like to start the thermometer analysis from scratch? This will delete the entire analysis/thermometer_analysis folder. (y/n)\n")
     if restart == 'y':
-        double_check = input("Are you sure? (y/n)\n")
+        double_check = input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             thermometer_analysis_folder = 'analysis/thermometer_analysis'
             print(f"Deleting analysis/thermometer_analysis folder...")
@@ -1027,9 +1027,9 @@ def thermometer_analysis():
 def clinical_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("Would you like to start the clinical analysis from scratch? This will remove all files from the analysis/clinical_analysis folder. (y/n)\n")
+    restart = input("\nWould you like to start the clinical analysis from scratch? This will remove all files from the analysis/clinical_analysis folder. (y/n)\n")
     if restart == 'y':
-        double_check = input("Are you sure? (y/n)\n")
+        double_check = input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             clinical_analysis_folder = 'analysis/clinical_analysis'
             print(f"Deleting analysis/clinical_analysis folder...")
@@ -2167,9 +2167,9 @@ def clinical_analysis():
 def fmri_prep_and_preproc():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("Would you like to start the fMRI preparation and preprocessing from scratch? This will remove all files from the 'data/bids', 'data/fmriprep_derivatives' and 'data/fully_preproc' folders. (y/n)\n")
+    restart = input("\nWould you like to start the fMRI preparation and preprocessing from scratch? This will remove all files from the 'data/bids', 'data/fmriprep_derivatives' and 'data/fully_preproc' folders. (y/n)\n")
     if restart == 'y':
-        double_check = input("Are you sure? (y/n)\n")
+        double_check = input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             bids_folder = 'data/bids'
             print(f"Deleting data/bids folder...")
@@ -2427,9 +2427,9 @@ exit
 def fmri_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("Would you like to start the fMRI analysis from scratch? This will remove all files from the 'analysis/fmri_analysis' folder. (y/n)\n")
+    restart = input("\nWould you like to start the fMRI analysis from scratch? This will remove all files from the 'analysis/fmri_analysis' folder. (y/n)\n")
     if restart == 'y':
-        double_check = input("Are you sure? (y/n)\n")
+        double_check = input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             fmri_analysis_folder = 'analysis/fmri_analysis'
             print(f"Deleting analysis/fmri_analysis folder...")
@@ -2450,6 +2450,7 @@ def fmri_analysis():
     analysis_1_first_level_folder = 'analysis/fmri_analysis/analysis_1/first_level'
     os.makedirs(analysis_1_first_level_folder, exist_ok=True)
     for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
         analysis_1_first_level_participant_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}'
         os.makedirs(analysis_1_first_level_participant_folder, exist_ok=True)
     print("Directories created.")
@@ -2526,9 +2527,9 @@ def fmri_analysis():
 def susceptibility_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("Would you like to start the susceptibility artifact analysis from scratch? This will remove all files from the 'analysis/susceptibility' folder. (y/n)\n")
+    restart = input("\nWould you like to start the susceptibility artifact analysis from scratch? This will remove all files from the 'analysis/susceptibility' folder. (y/n)\n")
     if restart == 'y':
-        double_check = input("Are you sure? (y/n)\n")
+        double_check = input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             susceptibility_analysis_folder = 'analysis/susceptibility_analysis'
             print(f"Deleting analysis/susceptibility_analysis folder...")

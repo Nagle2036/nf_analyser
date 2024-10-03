@@ -4691,20 +4691,20 @@ def main_menu():
         print("6. SUSCEPTIBILITY ANALYSIS")
         print("7. EXIT")
 
-        choice = input("Please choose an option (1-7): ")
+        choice = input("\nPlease choose an option (1-7): ")
 
         if choice == '1':
-            section1()
+            download_box_files()
         elif choice == '2':
-            section2()
+            thermometer_analysis()
         elif choice == '3':
-            section3()
+            clinical_analysis()
         elif choice == '4':
-            section4()
+            fmri_prep_and_preproc()
         elif choice == '5':
-            section5()
+            fmri_analysis()
         elif choice == '6':
-            section6()
+            susceptibility_analysis()
         elif choice == '7':
             print("Exiting... Goodbye!")
             sys.exit()

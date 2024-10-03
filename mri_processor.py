@@ -2455,7 +2455,7 @@ def fmri_analysis():
         os.makedirs(analysis_1_first_level_participant_folder, exist_ok=True)
     print("Directories created.")
 
-    # Step 2: Extract motion parameters
+    # Step 2: Extract motion parameters.
     print("\n###### STEP 2: EXTRACT MOTION PARAMETERS ######")
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
@@ -2463,7 +2463,7 @@ def fmri_analysis():
         if os.path.exists(confounds_run1_file_path):
             confounds_run1_file = pd.read_csv(confounds_run1_file_path, sep='\t')
             motion_params_run1 = confounds_run1_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
-            motion_params_run1_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run1.txt'
+            motion_params_run1_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run01.txt'
             motion_params_run1.to_csv(motion_params_run1_file_path, sep=' ', header=False, index=False)
         else:
             print(f"No Run 1 confounds file found for {p_id}.")
@@ -2472,11 +2472,35 @@ def fmri_analysis():
         if os.path.exists(confounds_run4_file_path):
             confounds_run4_file = pd.read_csv(confounds_run4_file_path, sep='\t')
             motion_params_run4 = confounds_run4_file[['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']]
-            motion_params_run4_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run4.txt'
+            motion_params_run4_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/motion_params_run04.txt'
             motion_params_run4.to_csv(motion_params_run4_file_path, sep=' ', header=False, index=False)
         else:
             print(f"No Run 4 confounds file found for {p_id}.")
     print("Motion parameters extracted.")
+
+
+
+    from nilearn.interfaces.fmriprep import load_confounds_strategy
+    confound_dfs = {}
+    run01_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+    run04_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+    nifti_files = [run01_fmriprep_file, run04_fmriprep_file]
+    for file in nifti_files:
+        try:
+            confound_df = load_confounds_strategy(file, denoise_strategy='compcor', n_compcor=6)[0]
+            confound_df = confound_df.filter(regex='^(?!.*derivative).*$', axis=1)
+            run_number = file.split('_run-')[1].split('_')[0]
+            confound_dfs[f"{p_id_stripped}_run-{run_number}"] = confound_df
+            print(f"Extracted columns for sub-{p_id_stripped}, run-{run_number}: {confound_df.columns.tolist()}") 
+        except ValueError as e:
+            print(f"Error processing sub-{p_id_stripped}, file {file}: {e}")
+    for key, confound_df in confound_dfs.items():
+        p_id_stripped, run = key.split('_run-')
+        confounds_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_run{run}.txt'
+        confound_df.iloc[5:].to_csv(confounds_file_path, header=False, index=False, sep='\t')
+        print(f"Saved confounds for {key} to {confounds_file_path}")
+
+
 
     # Step 3: Create onset timing files.
     print("\n###### STEP 3: CREATING ONSET TIMING FILES ######")

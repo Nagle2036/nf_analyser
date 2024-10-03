@@ -2498,7 +2498,7 @@ def fmri_analysis():
         for key, confound_df in confound_dfs.items():
             p_id_stripped, run = key.split('_run-')
             confounds_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_run{run}.txt'
-            confound_df.iloc[5:].to_csv(confounds_file_path, header=False, index=False, sep='\t')
+            confound_df.to_csv(confounds_file_path, header=False, index=False, sep='\t')
             print(f"Saved confounds for {key} to {confounds_file_path}")
 
 

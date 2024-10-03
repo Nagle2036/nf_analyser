@@ -2479,26 +2479,27 @@ def fmri_analysis():
     print("Motion parameters extracted.")
 
 
-
-    from nilearn.interfaces.fmriprep import load_confounds_strategy
-    confound_dfs = {}
-    run01_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
-    run04_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
-    nifti_files = [run01_fmriprep_file, run04_fmriprep_file]
-    for file in nifti_files:
-        try:
-            confound_df = load_confounds_strategy(file, denoise_strategy='compcor', n_compcor=6)[0]
-            confound_df = confound_df.filter(regex='^(?!.*derivative).*$', axis=1)
-            run_number = file.split('_run-')[1].split('_')[0]
-            confound_dfs[f"{p_id_stripped}_run-{run_number}"] = confound_df
-            print(f"Extracted columns for sub-{p_id_stripped}, run-{run_number}: {confound_df.columns.tolist()}") 
-        except ValueError as e:
-            print(f"Error processing sub-{p_id_stripped}, file {file}: {e}")
-    for key, confound_df in confound_dfs.items():
-        p_id_stripped, run = key.split('_run-')
-        confounds_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_run{run}.txt'
-        confound_df.iloc[5:].to_csv(confounds_file_path, header=False, index=False, sep='\t')
-        print(f"Saved confounds for {key} to {confounds_file_path}")
+    for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
+        from nilearn.interfaces.fmriprep import load_confounds_strategy
+        confound_dfs = {}
+        run01_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+        run04_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+        nifti_files = [run01_fmriprep_file, run04_fmriprep_file]
+        for file in nifti_files:
+            try:
+                confound_df = load_confounds_strategy(file, denoise_strategy='compcor', n_compcor=6)[0]
+                confound_df = confound_df.filter(regex='^(?!.*derivative).*$', axis=1)
+                run_number = file.split('_run-')[1].split('_')[0]
+                confound_dfs[f"{p_id_stripped}_run-{run_number}"] = confound_df
+                print(f"Extracted columns for sub-{p_id_stripped}, run-{run_number}: {confound_df.columns.tolist()}") 
+            except ValueError as e:
+                print(f"Error processing sub-{p_id_stripped}, file {file}: {e}")
+        for key, confound_df in confound_dfs.items():
+            p_id_stripped, run = key.split('_run-')
+            confounds_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_run{run}.txt'
+            confound_df.iloc[5:].to_csv(confounds_file_path, header=False, index=False, sep='\t')
+            print(f"Saved confounds for {key} to {confounds_file_path}")
 
 
 

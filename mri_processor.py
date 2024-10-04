@@ -2387,7 +2387,7 @@ exit
                 mask_files.append(file_path)
         mask_files = sorted(mask_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
         output_files = [f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_ss.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_ss.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_ss.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_ss.nii.gz"]
-        if not os.path.exists(output_files[0]):
+        if not os.path.exists(f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_fully_preproc.nii.gz"):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
                 print(f'Performing brain extraction (round 1) on {func} with {mask}, output to {outpath}')
                 subprocess.run(['fslmaths', func, '-mul', mask, outpath])
@@ -2406,7 +2406,7 @@ exit
                 mask_files.append(file_path)
         mask_files = sorted(mask_files, key=lambda x: int(x.split('_run-')[1].split('_')[0]))
         output_files = [f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_ss_smoothed.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_ss_smoothed.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_ss_smoothed.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_ss_smoothed.nii.gz"]
-        if not os.path.exists(output_files[0]):
+        if not os.path.exists(f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_fully_preproc.nii.gz"):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
                 print(f'Performing smoothing on {func} with {mask}, output to {outpath}')
                 median = subprocess.check_output(['fslstats', func, '-k', mask, '-p', '50'])

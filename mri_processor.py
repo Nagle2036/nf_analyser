@@ -2545,6 +2545,11 @@ def fmri_analysis():
     print("\n###### STEP 4: TRIM SIGNAL DROPOUT SECTIONS OF ROIS [ANALYSIS 1] ######") 
     runs = ['run-01', 'run-02', 'run-03', 'run-04']
     roi_file = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
+    flirted_roi_file = 'data/roi/SCCsphere8_bin_2mm_flirted.nii.gz'
+    example_reference_file = 'data/fmriprep_derivatives/sub-004/func/sub-004_task-nf_run-01_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
+
+    flirted_roi_file = subprocess.run(['flirt', '-in', roi_file, '-ref', example_reference_file, '-out', flirted_roi_file, '-applyxfm', '-usesqform'])
+    
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         for run in runs:

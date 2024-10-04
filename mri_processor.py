@@ -2553,7 +2553,7 @@ def fmri_analysis():
             subprocess.run(['flirt', '-in', roi_file, '-ref', mask_file, '-out', flirted_roi_file, '-applyxfm', '-usesqform'])
             trimmed_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/trimmed_mni_roi_{run}.nii.gz'
             try:
-                subprocess.run(['fslmaths', flirted_roi_file, '-mul', mask_file, trimmed_roi_file])
+                subprocess.run(['fslmaths', flirted_roi_file, '-mul', mask_file, '-bin', trimmed_roi_file])
                 total_voxels_output = subprocess.run(['fslstats', flirted_roi_file, '-V'], capture_output=True, text=True)
                 total_voxels = int(total_voxels_output.stdout.split()[0])
                 trimmed_voxels_output = subprocess.run(['fslstats', trimmed_roi_file, '-V'], capture_output=True, text=True)

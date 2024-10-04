@@ -2349,7 +2349,27 @@ exit
     else:
         print("fMRIPrep directory already clean. Skipping process.")
 
-    # Step 7: Brain Extract and Smooth Images.
+    # Step 7: Assess run integrity with motion outliers.
+    runs = ['run-01', 'run-02', 'run-03', 'run-04']
+    volumes_per_run = {'run-01': 210, 'run-02': 238, 'run-03': 238, 'run-04': 210}
+    for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
+        for run in runs:
+            confounds_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_{run}_desc-confounds_timeseries.tsv'
+            try:
+                confounds_df = pd.read_csv(confounds_file, sep='\t')
+                motion_outlier_columns = [col for col in confounds_df.columns if 'motion_outlier' in col]
+                num_motion_outliers = len(motion_outlier_columns)
+                total_volumes = volumes_per_run[run]
+                percentage_motion_outliers = (num_motion_outliers / total_volumes) * 100
+                if percentage_motion_outliers < 15:
+                    print(f"Sub-{p_id_stripped}, {run}: {num_motion_outliers} motion outliers, {percentage_motion_outliers:.2f}% of total volumes. Run passes integrity check.")
+                else:
+                    print(f"Sub-{p_id_stripped}, {run}: {num_motion_outliers} motion outliers, {percentage_motion_outliers:.2f}% of total volumes. RUN FAILS INTEGRITY CHECK. CONSIDER DISQUALIFYING RUN FROM ANALYSIS.")
+            except FileNotFoundError:
+                print(f"Confounds file for sub-{p_id_stripped}, {run} not found.")
+
+    # Step 8: Brain Extract and Smooth Images.
     print("\n###### STEP 7: BRAIN EXTRACT AND SMOOTH IMAGES ######") 
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
@@ -2480,7 +2500,7 @@ def fmri_analysis():
             print(f"Saved confounds for {key} to {confounds_file_path}")
     print("Confound regressors extracted.")
 
-    # Step 3: Create onset timing files.
+    # Step 4: Create onset timing files.
     print("\n###### STEP 3: CREATING ONSET TIMING FILES ######")
     onsetfile_sub = 'analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:

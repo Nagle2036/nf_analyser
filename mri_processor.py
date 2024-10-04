@@ -4148,7 +4148,7 @@ def susceptibility_analysis():
         print(f"Preparing Stage 3 files for {p_id}...")
         run_comparison_3_folder = 'analysis/susceptibility_analysis/run_comparisons/3'
         os.makedirs(run_comparison_3_folder, exist_ok=True)
-        run_comparison_3_participant_folder = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}'
+        run_comparison_3_participant_folder = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}'
         os.makedirs(run_comparison_3_participant_folder, exist_ok=True)
         run_comparison_3_group_folder = 'analysis/susceptibility_analysis/run_comparisons/3/group'
         os.makedirs(run_comparison_3_group_folder, exist_ok=True)

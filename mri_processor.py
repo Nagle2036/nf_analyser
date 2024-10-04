@@ -2543,7 +2543,7 @@ def fmri_analysis():
 
     # Step 4: Trim signal dropout sections of ROIs [ANALYSIS 1].
     print("\n###### STEP 4: TRIM SIGNAL DROPOUT SECTIONS OF ROIS [ANALYSIS 1] ######") 
-    runs = ['run-01', 'run-02', 'run-03', 'run-04']
+    runs = ['run-01', 'run-04']
     roi_file = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')

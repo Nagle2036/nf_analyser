@@ -2324,7 +2324,7 @@ singularity run --cleanenv \
 echo Done
 exit
 """
-    with open('bids/fmriprep_cluster.sh', 'w') as f:
+    with open('data/fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/sub-004'):
         answer = input('Would you like to run fMRIPrep? (y/n)\n')

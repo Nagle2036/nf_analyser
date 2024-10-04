@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 ### TO DO ###
-# Add percentage completion metric.
 # Output mri_processor.py Bash terminal outputs / prints into .txt log file.
 
 #region IMPORT PACKAGES.
@@ -2200,9 +2199,9 @@ def fmri_prep_and_preproc():
     os.makedirs(logs_folder, exist_ok=True)
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
-        fully_preproc_sub_folder = f'data/fully_preproc/{p_id_stripped}'
+        fully_preproc_sub_folder = f'data/fully_preproc/sub-{p_id_stripped}'
         os.makedirs(fully_preproc_sub_folder, exist_ok=True)
-        fully_preproc_func_folder = f'data/fully_preproc/{p_id_stripped}/func'
+        fully_preproc_func_folder = f'data/fully_preproc/sub-{p_id_stripped}/func'
         os.makedirs(fully_preproc_func_folder, exist_ok=True)
     print("Directories created.")
         
@@ -4703,6 +4702,16 @@ print("\nWelcome to the MRI analysis processor. Please ensure that the following
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
 
+class Tee:
+    def __init__(self, log_file_path):
+        self.terminal = sys.stdout
+        self.log = open(log_file_path, "a")
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+    def flush(self):
+        pass
+
 def main_menu():
     while True:
         print("\n##### MAIN MENU #####")
@@ -4735,7 +4744,12 @@ def main_menu():
             print("Invalid choice. Please select a number between 1 and 7.")
 
 if __name__ == "__main__":
+    log_dir = os.getcwd()
+    log_file_name = "mri_processor_log.txt"
+    log_file_path = os.path.join(log_dir, log_file_name)
+    sys.stdout = Tee(log_file_path)
     print("Welcome to the script!")
     main_menu()
+    sys.stdout.log.close()
         
 #endregion

@@ -2389,7 +2389,7 @@ exit
         output_files = [f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_ss.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_ss.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_ss.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_ss.nii.gz"]
         if not os.path.exists(output_files[0]):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
-                print(f'Performing brain extraction on {func} with {mask}, output to {outpath}')
+                print(f'Performing brain extraction (round 1) on {func} with {mask}, output to {outpath}')
                 subprocess.run(['fslmaths', func, '-mul', mask, outpath])
 
         fully_preproc_func_directory = f"data/fully_preproc/sub-{p_id_stripped}/func"
@@ -2430,7 +2430,7 @@ exit
         output_files = [f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-01_MNI152_func_fully_preproc.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-02_MNI152_func_fully_preproc.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-03_MNI152_func_fully_preproc.nii.gz", f"data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_run-04_MNI152_func_fully_preproc.nii.gz"]
         if not os.path.exists(output_files[0]):
             for func, mask, outpath in zip(func_files, mask_files, output_files):
-                print(f'Performing brain extraction on {func} with {mask}, output to {outpath}')
+                print(f'Performing brain extraction (round 2) on {func} with {mask}, output to {outpath}')
                 subprocess.run(['fslmaths', func, '-mul', mask, outpath])
 
         for file_name in os.listdir(fully_preproc_func_directory):

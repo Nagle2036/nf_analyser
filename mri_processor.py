@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 ### TO DO ###
+# Fix section 1 - Box file download to server
 # Change script name.
 
-#region IMPORT PACKAGES.
+#region 0) IMPORT PACKAGES.
 
 import time
 import urllib.parse
@@ -2445,6 +2446,7 @@ exit
 #region 5) FMRI ANALYSIS.
 
 def fmri_analysis():
+    print("\n====================\nF M R I   A N A L Y S I S\n====================")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
     restart = input("\nWould you like to start the fMRI analysis from scratch? This will remove all files from the 'analysis/fmri_analysis' folder. (y/n)\n")
@@ -4738,7 +4740,7 @@ class Tee:
 def main_menu():
     while True:
         print("\n##### MAIN MENU #####")
-        print("1. DOWNLOAD BOX FILES TO SERVER")
+        print("1. DOWNLOAD BOX FILES TO SERVER (needs updating)")
         print("2. THERMOMETER ANALYSIS")
         print("3. CLINICAL ANALYSIS")
         print("4. FMRI PREPARATION AND PREPROCESSING")

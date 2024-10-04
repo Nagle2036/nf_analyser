@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ### TO DO ###
-# Output mri_processor.py Bash terminal outputs / prints into .txt log file.
+# Change script name.
 
 #region IMPORT PACKAGES.
 
@@ -2369,7 +2369,7 @@ exit
                 print(f"Confounds file for sub-{p_id_stripped}, {run} not found.")
 
     # Step 8: Brain Extract and Smooth Images.
-    print("\n###### STEP 7: BRAIN EXTRACT AND SMOOTH IMAGES ######") 
+    print("\n###### STEP 8: BRAIN EXTRACT AND SMOOTH IMAGES ######") 
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         
@@ -2438,7 +2438,7 @@ exit
             if not file_name.endswith("preproc.nii.gz"):
                 if os.path.isfile(file_path):
                     os.remove(file_path)
-    print("Skull-stripping and smoothing completed. Brain images are fully preprocessed.")
+    print("Skull-stripping and smoothing completed. Brain images are fully preprocessed.")     
 
 #endregion
 
@@ -2475,8 +2475,8 @@ def fmri_analysis():
         os.makedirs(analysis_1_first_level_participant_folder, exist_ok=True)
     print("Directories created.")
 
-    # Step 2: Extract confound regressors.
-    print("\n###### STEP 2: EXTRACT CONFOUND REGRESSORS ######")
+    # Step 2: Extract confound regressors [ANALYSIS 1] .
+    print("\n###### STEP 2: EXTRACT CONFOUND REGRESSORS [ANALYSIS 1] ######")
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         confound_dfs = {}
@@ -2499,8 +2499,8 @@ def fmri_analysis():
             print(f"Saved confounds for {key} to {confounds_file_path}")
     print("Confound regressors extracted.")
 
-    # Step 4: Create onset timing files.
-    print("\n###### STEP 3: CREATING ONSET TIMING FILES ######")
+    # Step 3: Create onset timing files [ANALYSIS 1].
+    print("\n###### STEP 3: CREATING ONSET TIMING FILES [ANALYSIS 1] ######")
     onsetfile_sub = 'analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:
         data_rows = [
@@ -2540,6 +2540,26 @@ def fmri_analysis():
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
     print('Onset timing files created.')
+
+    # Step 4: Trim signal dropout sections of ROIs [ANALYSIS 1].
+    print("\n###### STEP 4: TRIM SIGNAL DROPOUT SECTIONS OF ROIS [ANALYSIS 1] ######") 
+    runs = ['run-01', 'run-02', 'run-03', 'run-04']
+    roi_file = 'SCCsphere8_bin.nii.gz'
+    for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
+        for run in runs:
+            mask_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_{run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
+            trimmed_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/trimmed_mni_roi_{run}.nii.gz'
+            try:
+                subprocess.run(['fslmaths', roi_file, '-mul', mask_file, trimmed_roi_file], check=True)
+                total_voxels_output = subprocess.run(['fslstats', roi_file, '-V'], shell=True, capture_output=True, text=True)
+                total_voxels = int(total_voxels_output.stdout.split()[0])
+                trimmed_voxels_output = subprocess.run(['fslstats', trimmed_roi_file, '-V'], capture_output=True, text=True)
+                trimmed_voxels = int(trimmed_voxels_output.stdout.split()[0])
+                trimmed_percentage = ((total_voxels - trimmed_voxels) / total_voxels) * 100
+                print(f"Percentage of ROI voxels trimmed for subject {p_id_stripped}, {run}: {trimmed_percentage:.2f}%")
+            except subprocess.CalledProcessError as e:
+                print(f"Error occurred while processing {p_id_stripped} for {run}: {e}")
 
 #endregion
 

@@ -2551,8 +2551,8 @@ def fmri_analysis():
             mask_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_{run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
             trimmed_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/trimmed_mni_roi_{run}.nii.gz'
             try:
-                subprocess.run(['fslmaths', roi_file, '-mul', mask_file, trimmed_roi_file], check=True)
-                total_voxels_output = subprocess.run(['fslstats', roi_file, '-V'], shell=True, capture_output=True, text=True)
+                subprocess.run(['fslmaths', roi_file, '-mul', mask_file, trimmed_roi_file])
+                total_voxels_output = subprocess.run(['fslstats', roi_file, '-V'], capture_output=True, text=True)
                 total_voxels = int(total_voxels_output.stdout.split()[0])
                 trimmed_voxels_output = subprocess.run(['fslstats', trimmed_roi_file, '-V'], capture_output=True, text=True)
                 trimmed_voxels = int(trimmed_voxels_output.stdout.split()[0])

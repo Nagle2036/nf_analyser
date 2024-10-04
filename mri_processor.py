@@ -2546,8 +2546,9 @@ def fmri_analysis():
     runs = ['run-01', 'run-02', 'run-03', 'run-04']
     roi_file = 'data/roi/SCCsphere8_bin_1mm.nii.gz'
     resampled_roi_file = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
+    example_reference_file = 'data/fmriprep_derivatives/sub-004/func/sub-004_task-nf_run-01_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
     
-    subprocess.run(['flirt', '-in', roi_file, '-out', resampled_roi_file, '-applyisoxfm', '2'], check=True)
+    subprocess.run(['flirt', '-in', roi_file, '-ref', example_reference_file, '-out', resampled_roi_file, '-applyisoxfm', '2'], check=True)
     
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')

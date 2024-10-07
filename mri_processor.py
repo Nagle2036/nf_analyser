@@ -3189,7 +3189,7 @@ set fmri(overwrite_yn) 0
                 elif "set confoundev_files(1)" in line:
                     fsf_data[i] = f'set confoundev_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_{run}.txt"\n'
             
-            first_level_fsf = f'analysis/fmri_analysis/analysis_1/sub-{p_id_stripped}/first_level/first_level_fsf_{run}.fsf'
+            first_level_fsf = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/first_level_fsf_{run}.fsf'
             first_level_fsfs.append(first_level_fsf)
             with open(first_level_fsf, 'w') as file:
                 file.writelines(fsf_data)

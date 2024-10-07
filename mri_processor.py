@@ -3193,12 +3193,17 @@ set fmri(overwrite_yn) 0
             first_level_fsfs.append(first_level_fsf)
             with open(first_level_fsf, 'w') as file:
                 file.writelines(fsf_data)
+    print('fsf files for first-level GLM generated.')
     
     # Step 6: Run first-level GLM [ANALYSIS 1].
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######") 
     for fsf in first_level_fsfs:
+        match = re.search(r'sub-(\d{3}).*run-(\d{2})', fsf)
+        participant_number = match.group(1)
+        run_number = match.group(2)
+        print(f'Running first-level GLM of sub-{participant_number} for run{run_number}...')
         subprocess.run(['feat', fsf])
-            
+
 #endregion
 
 #region 6) SUSCEPTIBILITY ANALYSIS.

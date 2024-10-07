@@ -3194,8 +3194,10 @@ set fmri(overwrite_yn) 0
             with open(first_level_fsf, 'w') as file:
                 file.writelines(fsf_data)
     
-    # for fsf in first_level_fsfs:
-    #     subprocess.run(['feat', fsf])
+    # Step 6: Run first-level GLM [ANALYSIS 1].
+    print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######") 
+    for fsf in first_level_fsfs:
+        subprocess.run(['feat', fsf])
             
 #endregion
 

@@ -43,6 +43,8 @@ from statsmodels.stats.multitest import multipletests
 from pingouin import rm_anova
 import json
 import glob
+from PIL import Image
+import hashlib
 from nilearn.interfaces.fmriprep import load_confounds_strategy
 # import rpy2.robjects as ro
 # from rpy2.robjects import pandas2ri
@@ -2448,7 +2450,7 @@ exit
 #region 5) FMRI ANALYSIS.
 
 def fmri_analysis():
-    print("\n====================\nF M R I   A N A L Y S I S\n====================")
+    print("\n=========================\nF M R I   A N A L Y S I S\n=========================")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
     restart = input("\nWould you like to start the fMRI analysis from scratch? This will remove all files from the 'analysis/fmri_analysis' folder. (y/n)\n")
@@ -2473,10 +2475,14 @@ def fmri_analysis():
     os.makedirs(onset_files_folder, exist_ok=True)
     analysis_1_first_level_folder = 'analysis/fmri_analysis/analysis_1/first_level'
     os.makedirs(analysis_1_first_level_folder, exist_ok=True)
+    analysis_1_second_level_folder = 'analysis/fmri_analysis/analysis_1/second_level'
+    os.makedirs(analysis_1_second_level_folder, exist_ok=True)
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         analysis_1_first_level_participant_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}'
         os.makedirs(analysis_1_first_level_participant_folder, exist_ok=True)
+        analysis_1_second_level_participant_folder = f'analysis/fmri_analysis/analysis_1/second_level/sub-{p_id_stripped}'
+        os.makedirs(analysis_1_second_level_participant_folder, exist_ok=True)
     print("Directories created.")
 
     # Step 2: Extract confound regressors [ANALYSIS 1] .
@@ -3168,15 +3174,12 @@ set fmri(overwrite_yn) 0
     first_level_fsf_template_path = 'analysis/fmri_analysis/analysis_1/group/first_level_fsf_template.fsf'
     with open(first_level_fsf_template_path, 'w') as f:
         f.write(first_level_fsf_template)
-    
     first_level_fsfs = []
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         for run in runs:
-    
             with open(first_level_fsf_template_path, 'r') as file:
                 fsf_data = file.readlines()
-            
             func_file = f'data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_{run}_MNI152_func_fully_preproc.nii.gz'
             fslinfo_output = subprocess.run(["fslinfo", func_file], capture_output=True, text=True)
             lines = fslinfo_output.stdout.splitlines()
@@ -3185,7 +3188,6 @@ set fmri(overwrite_yn) 0
             dim3 = int([line.split()[1] for line in lines if "dim3" in line][0])
             npts = int([line.split()[1] for line in lines if "dim4" in line][0])
             total_voxels = dim1 * dim2 * dim3 * npts
-
             for i, line in enumerate(fsf_data):
                 if "set fmri(outputdir)" in line:
                     fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}"\n'
@@ -3195,7 +3197,6 @@ set fmri(overwrite_yn) 0
                     fsf_data[i] = f'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_{run}_MNI152_func_fully_preproc"\n'
                 elif "set confoundev_files(1)" in line:
                     fsf_data[i] = f'set confoundev_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_{run}.txt"\n'
-            
             first_level_fsf = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/first_level_fsf_{run}.fsf'
             first_level_fsfs.append(first_level_fsf)
             with open(first_level_fsf, 'w') as file:
@@ -3204,42 +3205,45 @@ set fmri(overwrite_yn) 0
     
     # Step 6: Run first-level GLM [ANALYSIS 1].
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######") 
-    # if not os.path.isdir('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat')
-    design_png_paths = []
-    for fsf in first_level_fsfs:
-        match = re.search(r'sub-(\d{3}).*run-(\d{2})', fsf)
-        participant_number = match.group(1)
-        run_number = match.group(2)
-        print(f'Running first-level GLM of sub-{participant_number} for run{run_number}...')
-        # subprocess.run(['feat', fsf])
-        report_log_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/report_log.html'
-        with open(report_log_path, 'r') as file:
-            content = file.read()
-        if re.search('error', content, re.IGNORECASE):
-            print(f"Error found in report_log.html. Investigation required.")
-        zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/stats/*zstat*')
-        if len(zstat_files) != 3:
-            print("There are not 3 zstat files in the stats folder. Investigation required.")
-        design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/design.png')
+    if not os.path.isdir('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat'):
+        design_png_paths = []
+        for fsf in first_level_fsfs:
+            match = re.search(r'sub-(\d{3}).*run-(\d{2})', fsf)
+            participant_number = match.group(1)
+            run_number = match.group(2)
+            print(f'Running first-level GLM of sub-{participant_number} for run{run_number}...')
+            subprocess.run(['feat', fsf])
+            report_log_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/report_log.html'
+            with open(report_log_path, 'r') as file:
+                content = file.read()
+            if re.search('error', content, re.IGNORECASE):
+                print(f"Error found in report_log.html. Investigation required.")
+            zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/stats/*zstat*')
+            if len(zstat_files) != 3:
+                print("There are not 3 zstat files in the stats folder. Investigation required.")
+            design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/design.png')
+        def hash_image(image_path):
+            with Image.open(image_path) as img:
+                img_bytes = img.tobytes()
+                img_hash = hashlib.sha256(img_bytes).hexdigest()
+            return img_hash
+        def compare_images(image_paths):
+            first_image_hash = hash_image(image_paths[0])
+            for image_path in image_paths[1:]:
+                if hash_image(image_path) != first_image_hash:
+                    print(f"design.png images are not identical: {image_paths[0]} and {image_path}. Investigation required.")
+                    return
+        compare_images(design_png_paths)
+    else:
+        print('First-level GLM already run. Skipping process.')
+    
+    # Step 7: Generate second-level fsf file [ANALYSIS 1].
+    print("\n###### STEP 7: SECOND FIRST-LEVEL FSF FILE [ANALYSIS 1] ######")
+    #first_level_fsf_template = r"""
 
-    from PIL import Image
-    import hashlib
-    def hash_image(image_path):
-        """Generate a hash for an image."""
-        with Image.open(image_path) as img:
-            img_bytes = img.tobytes()
-            img_hash = hashlib.sha256(img_bytes).hexdigest()
-        return img_hash
-    def compare_images(image_paths):
-        """Compare multiple images to see if they are identical."""           
-        first_image_hash = hash_image(image_paths[0])
-        for image_path in image_paths[1:]:
-            if hash_image(image_path) != first_image_hash:
-                print(f"Images are not identical: {image_paths[0]} and {image_path}")
-                return
-        print("All images are identical.")
-    compare_images(design_png_paths)
 
+    # Step 7: Run second-level GLM [ANALYSIS 1].
+    print("\n###### STEP 7: RUN SECOND-LEVEL GLM [ANALYSIS 1] ######") 
 
 
 

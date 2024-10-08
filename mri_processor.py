@@ -42,13 +42,14 @@ from scipy import stats
 from statsmodels.stats.multitest import multipletests
 from pingouin import rm_anova
 import json
-import textwrap
+import glob
 from nilearn.interfaces.fmriprep import load_confounds_strategy
 # import rpy2.robjects as ro
 # from rpy2.robjects import pandas2ri
 # from rpy2.robjects.packages import importr
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 #endregion
 
 #region 1) DOWNLOAD BOX FILES TO SERVER.
@@ -3196,13 +3197,44 @@ set fmri(overwrite_yn) 0
     print('fsf files for first-level GLM generated.')
     
     # Step 6: Run first-level GLM [ANALYSIS 1].
+    design_png_paths = []
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######") 
     for fsf in first_level_fsfs:
         match = re.search(r'sub-(\d{3}).*run-(\d{2})', fsf)
         participant_number = match.group(1)
         run_number = match.group(2)
         print(f'Running first-level GLM of sub-{participant_number} for run{run_number}...')
-        subprocess.run(['feat', fsf])
+        # subprocess.run(['feat', fsf])
+        report_log_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/{run_number}.feat/report_log.html'
+        with open(report_log_path, 'r') as file:
+            content = file.read()
+        if re.search('error', content, re.IGNORECASE):
+            print(f"Error found in report_log.html. Investigation required.")
+        zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/{run_number}.feat/stats', '*zstat*')
+        if len(zstat_files) != 3:
+            print("There are not 3 zstat files in the stats folder. Investigation required.")
+        design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/{run_number}.feat/design.png)
+
+    from PIL import Image
+    import hashlib
+    def hash_image(image_path):
+        """Generate a hash for an image."""
+        with Image.open(image_path) as img:
+            img_bytes = img.tobytes()
+            img_hash = hashlib.sha256(img_bytes).hexdigest()
+        return img_hash
+    def compare_images(image_paths):
+        """Compare multiple images to see if they are identical."""           
+        first_image_hash = hash_image(image_paths[0])
+        for image_path in image_paths[1:]:
+            if hash_image(image_path) != first_image_hash:
+                print(f"Images are not identical: {image_paths[0]} and {image_path}")
+                return
+        print("All images are identical.")
+    compare_images(design_png_paths)
+
+
+
 
 #endregion
 

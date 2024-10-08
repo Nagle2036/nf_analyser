@@ -2565,18 +2565,18 @@ def fmri_analysis():
             p_id_stripped = p_id.replace('P', '')
             for run in runs:
                 mask_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_{run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
-                # flirted_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/SCCsphere8_bin_2mm_flirted.nii.gz'
-                # subprocess.run(['flirt', '-in', roi_file, '-ref', mask_file, '-out', flirted_roi_file, '-applyxfm', '-usesqform'])
+                flirted_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/SCCsphere8_bin_2mm_flirted.nii.gz'
+                subprocess.run(['flirt', '-in', roi_file, '-ref', mask_file, '-out', flirted_roi_file, '-applyxfm', '-usesqform'])
                 trimmed_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/trimmed_mni_roi_{run}.nii.gz'
                 try:
-                    subprocess.run(['fslmaths', roi_file, '-mul', mask_file, '-bin', trimmed_roi_file])
-                    total_voxels_output = subprocess.run(['fslstats', roi_file, '-V'], capture_output=True, text=True)
+                    subprocess.run(['fslmaths', flirted_roi_file, '-mul', mask_file, '-bin', trimmed_roi_file])
+                    total_voxels_output = subprocess.run(['fslstats', flirted_roi_file, '-V'], capture_output=True, text=True)
                     total_voxels = int(total_voxels_output.stdout.split()[0])
                     trimmed_voxels_output = subprocess.run(['fslstats', trimmed_roi_file, '-V'], capture_output=True, text=True)
                     trimmed_voxels = int(trimmed_voxels_output.stdout.split()[0])
                     trimmed_percentage = ((total_voxels - trimmed_voxels) / total_voxels) * 100
                     print(f"Percentage of ROI voxels trimmed for subject {p_id_stripped}, {run}: {trimmed_percentage:.2f}%")
-                    # os.remove(flirted_roi_file)
+                    os.remove(flirted_roi_file)
                 except subprocess.CalledProcessError as e:
                     print(f"Error occurred while processing {p_id_stripped} for {run}: {e}")
     else:

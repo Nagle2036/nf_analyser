@@ -3208,19 +3208,21 @@ set fmri(overwrite_yn) 0
     # Step 6: Run first-level GLM [ANALYSIS 1].
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######") 
 
-    header1 = subprocess.run(['fslhd', 'analysis/fmri_analysis/analysis_1/first_level/sub-004/trimmed_mni_roi_run-01.nii.gz'], stdout=subprocess.PIPE, text=True)
-    print(header1.stdout)
-    header2 = subprocess.run(['fslhd', 'data/roi/SCCsphere8_bin_2mm.nii.gz'], stdout=subprocess.PIPE, text=True)
-    print(header2.stdout)
-    # import nibabel as nib
-    # img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
-    # img.header['pixdim0'][1] = '1'
-    # img.header['qto_xyz:1'][1] = '2'
-    # img.header['qto_xyz:1'][4] = '-90'
-    # img.header['qform_xorient'][1] = 'Left-to-Right'
-    # img.header['sto_xyz:1'][1] = '2'
-    # img.header['sto_xyz:1'][4] = '-90'
-    # img.header['sform_xorient'][1] = 'Left-to-Right'
+    # header1 = subprocess.run(['fslhd', 'analysis/fmri_analysis/analysis_1/first_level/sub-004/trimmed_mni_roi_run-01.nii.gz'], stdout=subprocess.PIPE, text=True)
+    # print(header1.stdout)
+    # header2 = subprocess.run(['fslhd', 'data/roi/SCCsphere8_bin_2mm.nii.gz'], stdout=subprocess.PIPE, text=True)
+    # print(header2.stdout)
+    import nibabel as nib
+    img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
+    img.header['pixdim0'][1] = '1'
+    img.header['qto_xyz:1'][1] = '2'
+    img.header['qto_xyz:1'][1] = '0'
+    img.header['qto_xyz:1'][4] = '-90'
+    img.header['qto_xyz:2'][3] = '0'
+    img.header['qform_xorient'][1] = 'Left-to-Right'
+    img.header['sto_xyz:1'][1] = '2'
+    img.header['sto_xyz:1'][4] = '-90'
+    img.header['sform_xorient'][1] = 'Left-to-Right'
 
     if not os.path.isdir('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat'):
         design_png_paths = []

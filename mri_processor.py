@@ -5867,6 +5867,21 @@ print("\nWelcome to the neurofeedback analysis processor. Please ensure that the
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
 
+subprocess.run(['fslhd', 'analysis/fmri_analysis/analysis_1/first_level/sub-004/trimmed_mni_roi_run-01.nii.gz'])
+subprocess.run(['fslhd', 'data/roi/SCCsphere8_bin_2mm.nii.gz'])
+# import nibabel as nib
+# img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
+# img.header['pixdim0'][1] = '1'
+# img.header['qto_xyz:1'][1] = '2'
+# img.header['qto_xyz:1'][4] = '-90'
+# img.header['qform_xorient'][1] = 'Left-to-Right'
+# img.header['sto_xyz:1'][1] = '2'
+# img.header['sto_xyz:1'][4] = '-90'
+# img.header['sform_xorient'][1] = 'Left-to-Right'
+
+
+
+
 class Tee:
     def __init__(self, log_file_path):
         self.terminal = sys.stdout

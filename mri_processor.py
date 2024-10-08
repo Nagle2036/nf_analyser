@@ -2469,14 +2469,16 @@ def fmri_analysis():
     os.makedirs(fmri_analysis_folder, exist_ok=True)
     analysis_1_folder = 'analysis/fmri_analysis/analysis_1'
     os.makedirs(analysis_1_folder, exist_ok=True)
-    analysis_1_group_folder = 'analysis/fmri_analysis/analysis_1/group'
-    os.makedirs(analysis_1_group_folder, exist_ok=True)
-    onset_files_folder = 'analysis/fmri_analysis/analysis_1/group/onset_files'
-    os.makedirs(onset_files_folder, exist_ok=True)
     analysis_1_first_level_folder = 'analysis/fmri_analysis/analysis_1/first_level'
     os.makedirs(analysis_1_first_level_folder, exist_ok=True)
+    analysis_1_first_level_shared_folder = 'analysis/fmri_analysis/analysis_1/first_level/shared'
+    os.makedirs(analysis_1_first_level_shared_folder, exist_ok=True)
+    analysis_1_onset_files_folder = 'analysis/fmri_analysis/analysis_1/first_level/onset_files'
+    os.makedirs(analysis_1_onset_files_folder, exist_ok=True)
     analysis_1_second_level_folder = 'analysis/fmri_analysis/analysis_1/second_level'
     os.makedirs(analysis_1_second_level_folder, exist_ok=True)
+    analysis_1_second_level_shared_folder = 'analysis/fmri_analysis/analysis_1/second_level/shared'
+    os.makedirs(analysis_1_second_level_shared_folder, exist_ok=True)
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         analysis_1_first_level_participant_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}'
@@ -2514,7 +2516,7 @@ def fmri_analysis():
 
     # Step 3: Create onset timing files [ANALYSIS 1].
     print("\n###### STEP 3: CREATING ONSET TIMING FILES [ANALYSIS 1] ######")
-    onsetfile_sub = 'analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_sub.txt'
+    onsetfile_sub = 'analysis/fmri_analysis/analysis_1/first_level/shared/onset_files/onsetfile_sub.txt'
     with open(onsetfile_sub, 'w') as file:
         data_rows = [
             ['0', '20', '1'],
@@ -2530,7 +2532,7 @@ def fmri_analysis():
         for row in data_rows:
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
-    onsetfile_guilt = 'analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_guilt.txt'
+    onsetfile_guilt = 'analysis/fmri_analysis/analysis_1/first_level/shared/onset_files/onsetfile_guilt.txt'
     with open(onsetfile_guilt, 'w') as file:
         data_rows = [
             ['20', '30', '1'],
@@ -2541,7 +2543,7 @@ def fmri_analysis():
         for row in data_rows:
             formatted_row = "\t".join(row) + "\n"
             file.write(formatted_row)
-    onsetfile_indig = 'analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_indig.txt'
+    onsetfile_indig = 'analysis/fmri_analysis/analysis_1/first_level/shared/onset_files/onsetfile_indig.txt'
     with open(onsetfile_indig, 'w') as file:
         data_rows = [
             ['70', '30', '1'],
@@ -2753,7 +2755,7 @@ set fmri(nftests_real) 0
 set fmri(constcol) 0
 
 # Carry out post-stats steps?
-set fmri(poststats_yn) 0
+set fmri(poststats_yn) 1
 
 # Pre-threshold masking?
 set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm.nii.gz"
@@ -2763,7 +2765,7 @@ set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/partici
 # 1 : Uncorrected
 # 2 : Voxel
 # 3 : Cluster
-set fmri(thresh) 0
+set fmri(thresh) 3
 
 # P threshold
 set fmri(prob_thresh) 0.05
@@ -2898,7 +2900,7 @@ set fmri(tempfilt_yn1) 1
 set fmri(deriv_yn1) 1
 
 # Custom EV file (EV 1)
-set fmri(custom1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_guilt.txt"
+set fmri(custom1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/shared/onset_files/onsetfile_guilt.txt"
 
 # Orthogonalise EV 1 wrt EV 0
 set fmri(ortho1.0) 0
@@ -2945,7 +2947,7 @@ set fmri(tempfilt_yn2) 1
 set fmri(deriv_yn2) 1
 
 # Custom EV file (EV 2)
-set fmri(custom2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_indig.txt"
+set fmri(custom2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/shared/onset_files/onsetfile_indig.txt"
 
 # Orthogonalise EV 2 wrt EV 0
 set fmri(ortho2.0) 0
@@ -2992,7 +2994,7 @@ set fmri(tempfilt_yn3) 1
 set fmri(deriv_yn3) 1
 
 # Custom EV file (EV 3)
-set fmri(custom3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/group/onset_files/onsetfile_sub.txt"
+set fmri(custom3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/shared/onset_files/onsetfile_sub.txt"
 
 # Orthogonalise EV 3 wrt EV 0
 set fmri(ortho3.0) 0
@@ -3171,7 +3173,7 @@ set fmri(init_standard) ""
 # For full FEAT analysis: overwrite existing .feat output dir?
 set fmri(overwrite_yn) 0
 """
-    first_level_fsf_template_path = 'analysis/fmri_analysis/analysis_1/group/first_level_fsf_template.fsf'
+    first_level_fsf_template_path = 'analysis/fmri_analysis/analysis_1/first_level/shared/first_level_fsf_template.fsf'
     with open(first_level_fsf_template_path, 'w') as f:
         f.write(first_level_fsf_template)
     first_level_fsfs = []
@@ -3238,9 +3240,466 @@ set fmri(overwrite_yn) 0
         print('First-level GLM already run. Skipping process.')
     
     # Step 7: Generate second-level fsf file [ANALYSIS 1].
-    print("\n###### STEP 7: SECOND FIRST-LEVEL FSF FILE [ANALYSIS 1] ######")
-    #first_level_fsf_template = r"""
+    print("\n###### STEP 7: GENERATE SECOND-LEVEL FSF FILE [ANALYSIS 1] ######")
+    second_level_fsf_template = r"""
+# FEAT version number
+set fmri(version) 6.00
 
+# Are we in MELODIC?
+set fmri(inmelodic) 0
+
+# Analysis level
+# 1 : First-level analysis
+# 2 : Higher-level analysis
+set fmri(level) 2
+
+# Which stages to run
+# 0 : No first-level analysis (registration and/or group stats only)
+# 7 : Full first-level analysis
+# 1 : Pre-processing
+# 2 : Statistics
+set fmri(analysis) 2
+
+# Use relative filenames
+set fmri(relative_yn) 0
+
+# Balloon help
+set fmri(help_yn) 1
+
+# Run Featwatcher
+set fmri(featwatcher_yn) 1
+
+# Cleanup first-level standard-space images
+set fmri(sscleanup_yn) 0
+
+# Output directory
+set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-[insert_participant]/crossrun"
+
+# TR(s)
+set fmri(tr) 2
+
+# Total volumes
+set fmri(npts) 2
+
+# Delete volumes
+set fmri(ndelete) 0
+
+# Perfusion tag/control order
+set fmri(tagfirst) 1
+
+# Number of first-level analyses
+set fmri(multiple) 2
+
+# Higher-level input type
+# 1 : Inputs are lower-level FEAT directories
+# 2 : Inputs are cope images from FEAT directories
+set fmri(inputtype) 1
+
+# Carry out pre-stats processing?
+set fmri(filtering_yn) 0
+
+# Brain/background threshold, %
+set fmri(brain_thresh) 10
+
+# Critical z for design efficiency calculation
+set fmri(critical_z) 5.3
+
+# Noise level
+set fmri(noise) 0.66
+
+# Noise AR(1)
+set fmri(noisear) 0.34
+
+# Motion correction
+# 0 : None
+# 1 : MCFLIRT
+set fmri(mc) 1
+
+# Spin-history (currently obsolete)
+set fmri(sh_yn) 0
+
+# B0 fieldmap unwarping?
+set fmri(regunwarp_yn) 0
+
+# GDC Test
+set fmri(gdc) ""
+
+# EPI dwell time (ms)
+set fmri(dwell) 0.0
+
+# EPI TE (ms)
+set fmri(te) 0.0
+
+# % Signal loss threshold
+set fmri(signallossthresh) 10
+
+# Unwarp direction
+set fmri(unwarp_dir) y-
+
+# Slice timing correction
+# 0 : None
+# 1 : Regular up (0, 1, 2, 3, ...)
+# 2 : Regular down
+# 3 : Use slice order file
+# 4 : Use slice timings file
+# 5 : Interleaved (0, 2, 4 ... 1, 3, 5 ... )
+set fmri(st) 0
+
+# Slice timings file
+set fmri(st_file) ""
+
+# BET brain extraction
+set fmri(bet_yn) 1
+
+# Spatial smoothing FWHM (mm)
+set fmri(smooth) 5
+
+# Intensity normalization
+set fmri(norm_yn) 0
+
+# Perfusion subtraction
+set fmri(perfsub_yn) 0
+
+# Highpass temporal filtering
+set fmri(temphp_yn) 1
+
+# Lowpass temporal filtering
+set fmri(templp_yn) 0
+
+# MELODIC ICA data exploration
+set fmri(melodic_yn) 0
+
+# Carry out main stats?
+set fmri(stats_yn) 1
+
+# Carry out prewhitening?
+set fmri(prewhiten_yn) 1
+
+# Add motion parameters to model
+# 0 : No
+# 1 : Yes
+set fmri(motionevs) 0
+set fmri(motionevsbeta) ""
+set fmri(scriptevsbeta) ""
+
+# Robust outlier detection in FLAME?
+set fmri(robust_yn) 0
+
+# Higher-level modelling
+# 3 : Fixed effects
+# 0 : Mixed Effects: Simple OLS
+# 2 : Mixed Effects: FLAME 1
+# 1 : Mixed Effects: FLAME 1+2
+set fmri(mixed_yn) 3
+
+# Higher-level permutations
+set fmri(randomisePermutations) 5000
+
+# Number of EVs
+set fmri(evs_orig) 2
+set fmri(evs_real) 2
+set fmri(evs_vox) 0
+
+# Number of contrasts
+set fmri(ncon_orig) 1
+set fmri(ncon_real) 1
+
+# Number of F-tests
+set fmri(nftests_orig) 0
+set fmri(nftests_real) 0
+
+# Add constant column to design matrix? (obsolete)
+set fmri(constcol) 0
+
+# Carry out post-stats steps?
+set fmri(poststats_yn) 1
+
+# Pre-threshold masking?
+set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm.nii.gz"
+
+# Thresholding
+# 0 : None
+# 1 : Uncorrected
+# 2 : Voxel
+# 3 : Cluster
+set fmri(thresh) 3
+
+# P threshold
+set fmri(prob_thresh) 0.05
+
+# Z threshold
+set fmri(z_thresh) 3.1
+
+# Z min/max for colour rendering
+# 0 : Use actual Z min/max
+# 1 : Use preset Z min/max
+set fmri(zdisplay) 0
+
+# Z min in colour rendering
+set fmri(zmin) 2
+
+# Z max in colour rendering
+set fmri(zmax) 8
+
+# Colour rendering type
+# 0 : Solid blobs
+# 1 : Transparent blobs
+set fmri(rendertype) 1
+
+# Background image for higher-level stats overlays
+# 1 : Mean highres
+# 2 : First highres
+# 3 : Mean functional
+# 4 : First functional
+# 5 : Standard space template
+set fmri(bgimage) 1
+
+# Create time series plots
+set fmri(tsplot_yn) 1
+
+# Registration to initial structural
+set fmri(reginitial_highres_yn) 0
+
+# Search space for registration to initial structural
+# 0   : No search
+# 90  : Normal search
+# 180 : Full search
+set fmri(reginitial_highres_search) 90
+
+# Degrees of Freedom for registration to initial structural
+set fmri(reginitial_highres_dof) 3
+
+# Registration to main structural
+set fmri(reghighres_yn) 0
+
+# Search space for registration to main structural
+# 0   : No search
+# 90  : Normal search
+# 180 : Full search
+set fmri(reghighres_search) 90
+
+# Degrees of Freedom for registration to main structural
+set fmri(reghighres_dof) BBR
+
+# Registration to standard image?
+set fmri(regstandard_yn) 1
+
+# Use alternate reference images?
+set fmri(alternateReference_yn) 0
+
+# Standard image
+set fmri(regstandard) "/usr/local/fsl/data/standard/MNI152_T1_2mm_brain"
+
+# Search space for registration to standard space
+# 0   : No search
+# 90  : Normal search
+# 180 : Full search
+set fmri(regstandard_search) 90
+
+# Degrees of Freedom for registration to standard space
+set fmri(regstandard_dof) 12
+
+# Do nonlinear registration from structural to standard space?
+set fmri(regstandard_nonlinear_yn) 0
+
+# Control nonlinear warp field resolution
+set fmri(regstandard_nonlinear_warpres) 10
+
+# High pass filter cutoff
+set fmri(paradigm_hp) 100
+
+# Number of lower-level copes feeding into higher-level analysis
+set fmri(ncopeinputs) 3
+
+# Use lower-level cope 1 for higher-level analysis
+set fmri(copeinput.1) 1
+
+# Use lower-level cope 2 for higher-level analysis
+set fmri(copeinput.2) 1
+
+# Use lower-level cope 3 for higher-level analysis
+set fmri(copeinput.3) 1
+
+# 4D AVW data or FEAT directory (1)
+set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-[insert_participant]/[insert_run].feat"
+
+# 4D AVW data or FEAT directory (2)
+set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-[insert_participant]/[insert_run].feat"
+
+# Add confound EVs text file
+set fmri(confoundevs) 0
+
+# EV 1 title
+set fmri(evtitle1) "run01"
+
+# Basic waveform shape (EV 1)
+# 0 : Square
+# 1 : Sinusoid
+# 2 : Custom (1 entry per volume)
+# 3 : Custom (3 column format)
+# 4 : Interaction
+# 10 : Empty (all zeros)
+set fmri(shape1) 2
+
+# Convolution (EV 1)
+# 0 : None
+# 1 : Gaussian
+# 2 : Gamma
+# 3 : Double-Gamma HRF
+# 4 : Gamma basis functions
+# 5 : Sine basis functions
+# 6 : FIR basis functions
+# 8 : Alternate Double-Gamma
+set fmri(convolve1) 0
+
+# Convolve phase (EV 1)
+set fmri(convolve_phase1) 0
+
+# Apply temporal filtering (EV 1)
+set fmri(tempfilt_yn1) 0
+
+# Add temporal derivative (EV 1)
+set fmri(deriv_yn1) 0
+
+# Custom EV file (EV 1)
+set fmri(custom1) "dummy"
+
+# Orthogonalise EV 1 wrt EV 0
+set fmri(ortho1.0) 0
+
+# Orthogonalise EV 1 wrt EV 1
+set fmri(ortho1.1) 0
+
+# Orthogonalise EV 1 wrt EV 2
+set fmri(ortho1.2) 0
+
+# Higher-level EV value for EV 1 and input 1
+set fmri(evg1.1) 1
+
+# Higher-level EV value for EV 1 and input 2
+set fmri(evg2.1) 0.0
+
+# EV 2 title
+set fmri(evtitle2) "run04"
+
+# Basic waveform shape (EV 2)
+# 0 : Square
+# 1 : Sinusoid
+# 2 : Custom (1 entry per volume)
+# 3 : Custom (3 column format)
+# 4 : Interaction
+# 10 : Empty (all zeros)
+set fmri(shape2) 2
+
+# Convolution (EV 2)
+# 0 : None
+# 1 : Gaussian
+# 2 : Gamma
+# 3 : Double-Gamma HRF
+# 4 : Gamma basis functions
+# 5 : Sine basis functions
+# 6 : FIR basis functions
+# 8 : Alternate Double-Gamma
+set fmri(convolve2) 0
+
+# Convolve phase (EV 2)
+set fmri(convolve_phase2) 0
+
+# Apply temporal filtering (EV 2)
+set fmri(tempfilt_yn2) 0
+
+# Add temporal derivative (EV 2)
+set fmri(deriv_yn2) 0
+
+# Custom EV file (EV 2)
+set fmri(custom2) "dummy"
+
+# Orthogonalise EV 2 wrt EV 0
+set fmri(ortho2.0) 0
+
+# Orthogonalise EV 2 wrt EV 1
+set fmri(ortho2.1) 0
+
+# Orthogonalise EV 2 wrt EV 2
+set fmri(ortho2.2) 0
+
+# Higher-level EV value for EV 2 and input 1
+set fmri(evg1.2) 0.0
+
+# Higher-level EV value for EV 2 and input 2
+set fmri(evg2.2) 1.0
+
+# Setup Orthogonalisation at higher level?
+set fmri(level2orth) 0
+
+# Group membership for input 1
+set fmri(groupmem.1) 1
+
+# Group membership for input 2
+set fmri(groupmem.2) 1
+
+# Contrast & F-tests mode
+# real : control real EVs
+# orig : control original EVs
+set fmri(con_mode_old) real
+set fmri(con_mode) real
+
+# Display images for contrast_real 1
+set fmri(conpic_real.1) 1
+
+# Title for contrast_real 1
+set fmri(conname_real.1) "run01-run04"
+
+# Real contrast_real vector 1 element 1
+set fmri(con_real1.1) 1
+
+# Real contrast_real vector 1 element 2
+set fmri(con_real1.2) -1
+
+# Contrast masking - use >0 instead of thresholding?
+set fmri(conmask_zerothresh_yn) 0
+
+# Do contrast masking at all?
+set fmri(conmask1_1) 0
+
+##########################################################
+# Now options that don't appear in the GUI
+
+# Alternative (to BETting) mask image
+set fmri(alternative_mask) ""
+
+# Initial structural space registration initialisation transform
+set fmri(init_initial_highres) ""
+
+# Structural space registration initialisation transform
+set fmri(init_highres) ""
+
+# Standard space registration initialisation transform
+set fmri(init_standard) ""
+
+# For full FEAT analysis: overwrite existing .feat output dir?
+set fmri(overwrite_yn) 0
+"""
+    second_level_fsf_template_path = 'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template.fsf'
+    with open(second_level_fsf_template_path, 'w') as f:
+        f.write(second_level_fsf_template)
+    second_level_fsfs = []
+    for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
+        with open(second_level_fsf_template_path, 'r') as file:
+            fsf_data = file.readlines()
+        for i, line in enumerate(fsf_data):
+            if "set fmri(outputdir)" in line:
+                fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-{p_id_stripped}/crossrun"\n'
+            elif "set feat_files(1)" in line:
+                fsf_data[i] = f'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/run-01.feat"\n'
+            elif "set feat_files(2)" in line:
+                fsf_data[i] = f'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/run-04.feat"\n'
+        second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/sub-{p_id_stripped}/second_level_fsf.fsf'
+        second_level_fsfs.append(second_level_fsf)
+        with open(second_level_fsf, 'w') as file:
+            file.writelines(fsf_data)
+    print('fsf files for second-level GLM generated.')
 
     # Step 7: Run second-level GLM [ANALYSIS 1].
     print("\n###### STEP 7: RUN SECOND-LEVEL GLM [ANALYSIS 1] ######") 

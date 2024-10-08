@@ -2473,7 +2473,7 @@ def fmri_analysis():
     os.makedirs(analysis_1_first_level_folder, exist_ok=True)
     analysis_1_first_level_shared_folder = 'analysis/fmri_analysis/analysis_1/first_level/shared'
     os.makedirs(analysis_1_first_level_shared_folder, exist_ok=True)
-    analysis_1_onset_files_folder = 'analysis/fmri_analysis/analysis_1/first_level/onset_files'
+    analysis_1_onset_files_folder = 'analysis/fmri_analysis/analysis_1/first_level/shared/onset_files'
     os.makedirs(analysis_1_onset_files_folder, exist_ok=True)
     analysis_1_second_level_folder = 'analysis/fmri_analysis/analysis_1/second_level'
     os.makedirs(analysis_1_second_level_folder, exist_ok=True)

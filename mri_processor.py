@@ -3213,7 +3213,7 @@ set fmri(overwrite_yn) 0
         zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/{run_number}.feat/stats', '*zstat*')
         if len(zstat_files) != 3:
             print("There are not 3 zstat files in the stats folder. Investigation required.")
-        design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/{run_number}.feat/design.png)
+        design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/{run_number}.feat/design.png')
 
     from PIL import Image
     import hashlib

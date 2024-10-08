@@ -2481,7 +2481,7 @@ def fmri_analysis():
 
     # Step 2: Extract confound regressors [ANALYSIS 1] .
     print("\n###### STEP 2: EXTRACT CONFOUND REGRESSORS [ANALYSIS 1] ######")
-    if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/confounds_run-01.txt'):
+    if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/confounds_run01.txt'):
         for p_id in participants:
             p_id_stripped = p_id.replace('P', '')
             confound_dfs = {}
@@ -3217,7 +3217,7 @@ set fmri(overwrite_yn) 0
             content = file.read()
         if re.search('error', content, re.IGNORECASE):
             print(f"Error found in report_log.html. Investigation required.")
-        zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/stats', '*zstat*')
+        zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/stats/*zstat*')
         if len(zstat_files) != 3:
             print("There are not 3 zstat files in the stats folder. Investigation required.")
         design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/design.png')

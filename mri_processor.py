@@ -2481,27 +2481,30 @@ def fmri_analysis():
 
     # Step 2: Extract confound regressors [ANALYSIS 1] .
     print("\n###### STEP 2: EXTRACT CONFOUND REGRESSORS [ANALYSIS 1] ######")
-    for p_id in participants:
-        p_id_stripped = p_id.replace('P', '')
-        confound_dfs = {}
-        run01_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
-        run04_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
-        nifti_files = [run01_fmriprep_file, run04_fmriprep_file]
-        for file in nifti_files:
-            try:
-                confound_df = load_confounds_strategy(file, denoise_strategy='compcor', n_compcor=6)[0]
-                confound_df = confound_df.filter(regex='^(?!.*derivative).*$', axis=1)
-                run_number = file.split('_run-')[1].split('_')[0]
-                confound_dfs[f"{p_id_stripped}_run-{run_number}"] = confound_df
-                print(f"Extracted columns for sub-{p_id_stripped}, run-{run_number}: {confound_df.columns.tolist()}") 
-            except ValueError as e:
-                print(f"Error processing sub-{p_id_stripped}, file {file}: {e}")
-        for key, confound_df in confound_dfs.items():
-            p_id_stripped, run = key.split('_run-')
-            confounds_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_run{run}.txt'
-            confound_df.to_csv(confounds_file_path, header=False, index=False, sep='\t')
-            print(f"Saved confounds for {key} to {confounds_file_path}")
-    print("Confound regressors extracted.")
+    if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/confounds_run-01.txt')
+        for p_id in participants:
+            p_id_stripped = p_id.replace('P', '')
+            confound_dfs = {}
+            run01_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-01_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+            run04_fmriprep_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_run-04_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+            nifti_files = [run01_fmriprep_file, run04_fmriprep_file]
+            for file in nifti_files:
+                try:
+                    confound_df = load_confounds_strategy(file, denoise_strategy='compcor', n_compcor=6)[0]
+                    confound_df = confound_df.filter(regex='^(?!.*derivative).*$', axis=1)
+                    run_number = file.split('_run-')[1].split('_')[0]
+                    confound_dfs[f"{p_id_stripped}_run-{run_number}"] = confound_df
+                    print(f"Extracted columns for sub-{p_id_stripped}, run-{run_number}: {confound_df.columns.tolist()}") 
+                except ValueError as e:
+                    print(f"Error processing sub-{p_id_stripped}, file {file}: {e}")
+            for key, confound_df in confound_dfs.items():
+                p_id_stripped, run = key.split('_run-')
+                confounds_file_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_run{run}.txt'
+                confound_df.to_csv(confounds_file_path, header=False, index=False, sep='\t')
+                print(f"Saved confounds for {key} to {confounds_file_path}")
+        print("Confound regressors extracted.")
+    else:
+        print("Confound regressors already extracted. Skipping process.")
 
     # Step 3: Create onset timing files [ANALYSIS 1].
     print("\n###### STEP 3: CREATING ONSET TIMING FILES [ANALYSIS 1] ######")
@@ -2548,25 +2551,28 @@ def fmri_analysis():
     # Step 4: Trim signal dropout sections of ROIs [ANALYSIS 1].
     print("\n###### STEP 4: TRIM SIGNAL DROPOUT SECTIONS OF ROIS [ANALYSIS 1] ######") 
     runs = ['run-01', 'run-04']
-    roi_file = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
-    for p_id in participants:
-        p_id_stripped = p_id.replace('P', '')
-        for run in runs:
-            mask_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_{run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
-            flirted_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/SCCsphere8_bin_2mm_flirted.nii.gz'
-            subprocess.run(['flirt', '-in', roi_file, '-ref', mask_file, '-out', flirted_roi_file, '-applyxfm', '-usesqform'])
-            trimmed_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/trimmed_mni_roi_{run}.nii.gz'
-            try:
-                subprocess.run(['fslmaths', flirted_roi_file, '-mul', mask_file, '-bin', trimmed_roi_file])
-                total_voxels_output = subprocess.run(['fslstats', flirted_roi_file, '-V'], capture_output=True, text=True)
-                total_voxels = int(total_voxels_output.stdout.split()[0])
-                trimmed_voxels_output = subprocess.run(['fslstats', trimmed_roi_file, '-V'], capture_output=True, text=True)
-                trimmed_voxels = int(trimmed_voxels_output.stdout.split()[0])
-                trimmed_percentage = ((total_voxels - trimmed_voxels) / total_voxels) * 100
-                print(f"Percentage of ROI voxels trimmed for subject {p_id_stripped}, {run}: {trimmed_percentage:.2f}%")
-                os.remove(flirted_roi_file)
-            except subprocess.CalledProcessError as e:
-                print(f"Error occurred while processing {p_id_stripped} for {run}: {e}")
+    if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/trimmed_mni_roi_run-01.nii.gz')
+        roi_file = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
+        for p_id in participants:
+            p_id_stripped = p_id.replace('P', '')
+            for run in runs:
+                mask_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_{run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
+                flirted_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/SCCsphere8_bin_2mm_flirted.nii.gz'
+                subprocess.run(['flirt', '-in', roi_file, '-ref', mask_file, '-out', flirted_roi_file, '-applyxfm', '-usesqform'])
+                trimmed_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/trimmed_mni_roi_{run}.nii.gz'
+                try:
+                    subprocess.run(['fslmaths', flirted_roi_file, '-mul', mask_file, '-bin', trimmed_roi_file])
+                    total_voxels_output = subprocess.run(['fslstats', flirted_roi_file, '-V'], capture_output=True, text=True)
+                    total_voxels = int(total_voxels_output.stdout.split()[0])
+                    trimmed_voxels_output = subprocess.run(['fslstats', trimmed_roi_file, '-V'], capture_output=True, text=True)
+                    trimmed_voxels = int(trimmed_voxels_output.stdout.split()[0])
+                    trimmed_percentage = ((total_voxels - trimmed_voxels) / total_voxels) * 100
+                    print(f"Percentage of ROI voxels trimmed for subject {p_id_stripped}, {run}: {trimmed_percentage:.2f}%")
+                    os.remove(flirted_roi_file)
+                except subprocess.CalledProcessError as e:
+                    print(f"Error occurred while processing {p_id_stripped} for {run}: {e}")
+    else:
+        print("ROIs already trimmed. Skipping process.")
     
 # Step 5: Generate first-level fsf file [ANALYSIS 1].
     print("\n###### STEP 5: GENERATE FIRST-LEVEL FSF FILE [ANALYSIS 1] ######")
@@ -3197,23 +3203,24 @@ set fmri(overwrite_yn) 0
     print('fsf files for first-level GLM generated.')
     
     # Step 6: Run first-level GLM [ANALYSIS 1].
-    design_png_paths = []
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######") 
+    # if not os.path.isdir('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat')
+    design_png_paths = []
     for fsf in first_level_fsfs:
         match = re.search(r'sub-(\d{3}).*run-(\d{2})', fsf)
         participant_number = match.group(1)
         run_number = match.group(2)
         print(f'Running first-level GLM of sub-{participant_number} for run{run_number}...')
         # subprocess.run(['feat', fsf])
-        report_log_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/{run_number}.feat/report_log.html'
+        report_log_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/report_log.html'
         with open(report_log_path, 'r') as file:
             content = file.read()
         if re.search('error', content, re.IGNORECASE):
             print(f"Error found in report_log.html. Investigation required.")
-        zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/{run_number}.feat/stats', '*zstat*')
+        zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/stats', '*zstat*')
         if len(zstat_files) != 3:
             print("There are not 3 zstat files in the stats folder. Investigation required.")
-        design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/{run_number}.feat/design.png')
+        design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/design.png')
 
     from PIL import Image
     import hashlib

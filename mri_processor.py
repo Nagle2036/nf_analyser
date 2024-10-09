@@ -3221,7 +3221,7 @@ set fmri(overwrite_yn) 0
     target_shape = new_shape
     resampled_img = resample_from_to(img, (target_shape, target_affine))
     nib.save(resampled_img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
-    subprocess.run('fslmaths', 'data/roi/SCCsphere8_bin_2mm_LR_resampled.nii.gz', '-thr', '0.00000047', '-bin', 'data/roi/SCCsphere8_bin_2mm_LR_resampled_bin.nii.gz'])
+    subprocess.run(['fslmaths', 'data/roi/SCCsphere8_bin_2mm_LR_resampled.nii.gz', '-thr', '0.00000047', '-bin', 'data/roi/SCCsphere8_bin_2mm_LR_resampled_bin.nii.gz'])
     print("Final header information:")
     print(resampled_img.header)
     

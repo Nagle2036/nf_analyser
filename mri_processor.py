@@ -3214,11 +3214,10 @@ set fmri(overwrite_yn) 0
     # print(header2.stdout)
     import nibabel as nib
     img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
-    new_dim = img.header['dim'].copy()  # Make a copy of the original dim array
-    new_dim[1] = 97  # Set dim1
-    new_dim[2] = 115  # Set dim2
-    new_dim[3] = 97   # Set dim3
-    img.header['dim'] = new_dim
+    data = img.get_fdata()
+    new_shape = (3, 97, 115, 97)  # Define your new shape
+    reshaped_data = data.reshape(new_shape)  # Reshape the data
+    img.header['dim'][1:5] = new_shape  # Update dimensions in header
     print("Updated dimensions:", img.header['dim'])
     img.header['pixdim'][0] = '1'
     qto_xyz = img.header.get_qform()  # Get the qform matrix
@@ -3232,9 +3231,10 @@ set fmri(overwrite_yn) 0
     sto_xyz[0, 3] = -90.0  # Modify the fourth element of the first column
     img.set_sform(sto_xyz)  # Set the modified sto_xyz matrix back
     img.header['sform_code'] = 4
-    nib.save(img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
+    new_img = nib.Nifti1Image(reshaped_data, img.affine, img.header)
+    nib.save(new_img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
     print("Final header information:")
-    print(img.header)
+    print(new_img.header)
 
 
     # img = nib.load('data/roi/SCCsphere8_bin_2mm.nii.gz')

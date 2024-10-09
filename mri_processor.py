@@ -3208,10 +3208,6 @@ set fmri(overwrite_yn) 0
     # Step 6: Run first-level GLM [ANALYSIS 1].
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######") 
 
-    # header1 = subprocess.run(['fslhd', 'analysis/fmri_analysis/analysis_1/first_level/sub-004/trimmed_mni_roi_run-01.nii.gz'], stdout=subprocess.PIPE, text=True)
-    # print(header1.stdout)
-    # header2 = subprocess.run(['fslhd', 'data/roi/SCCsphere8_bin_2mm.nii.gz'], stdout=subprocess.PIPE, text=True)
-    # print(header2.stdout)
     import nibabel as nib
     from nibabel.processing import resample_from_to
     img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
@@ -3219,41 +3215,16 @@ set fmri(overwrite_yn) 0
     original_affine = img.affine
     new_shape = (97, 115, 97)
     target_affine = np.copy(original_affine)
-    target_affine[0, 0] = 2.0  # Voxel size along x-axis
-    target_affine[1, 1] = 2.0  # Voxel size along y-axis
-    target_affine[2, 2] = 2.0  # Voxel size along z-axis
+    target_affine[0, 0] = 2.0
+    target_affine[1, 1] = 2.0
+    target_affine[2, 2] = 2.0
     target_shape = new_shape
     resampled_img = resample_from_to(img, (target_shape, target_affine))
     nib.save(resampled_img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
+    subprocess.run('fslmaths', 'data/roi/SCCsphere8_bin_2mm_LR_resampled.nii.gz', '-thr', '0.00000047', '-bin', 'data/roi/SCCsphere8_bin_2mm_LR_resampled_bin.nii.gz'])
     print("Final header information:")
     print(resampled_img.header)
     
-    # img = nib.load('data/roi/SCCsphere8_bin_2mm_LR_resampled.nii.gz')
-    # img.header['pixdim'][0] = '1'
-    # qto_xyz = img.header.get_qform()  # Get the qform matrix
-    # qto_xyz[0, 0] = 2.0   # qto_xyz[0, 0] (first row, first column)
-    # qto_xyz[1, 0] = 0.0   # qto_xyz[1, 0] (second row, first column)
-    # qto_xyz[0, 3] = -90.0  # Modify the fourth element of the first column
-    # qto_xyz[2, 3] = 0.0    # Modify the fourth element of the second column
-    # sto_xyz = img.header.get_sform()  # Get the sform matrix
-    # sto_xyz[0, 0] = 2.0   # sto_xyz[0, 0] (first row, first column)
-    # sto_xyz[0, 3] = -90.0  # Modify the fourth element of the first column
-    # img.set_sform(sto_xyz)  # Set the modified sto_xyz matrix back
-    # new_img = nib.Nifti1Image(reshaped_data, img.affine, img.header)
-    # nib.save(new_img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
-    # print("Final header information:")
-    # print(new_img.header)
-
-
-    # img = nib.load('data/roi/SCCsphere8_bin_2mm.nii.gz')
-    # header = img.header
-    # affine = img.affine
-    # affine[0, 0] = 2  # Left-to-Right (positive 2mm in the x-axis)
-    # affine[0, 3] = -90  # Adjust x-offset (translation term)
-    # header.set_qform(affine, code=1)  # Set qform matrix with affine
-    # header.set_sform(affine, code=1)  # Set sform matrix with affine
-    # new_img = nib.Nifti1Image(img.get_fdata(), affine, header)
-    # nib.save(new_img, 'data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
 
     if not os.path.isdir('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat'):
         design_png_paths = []

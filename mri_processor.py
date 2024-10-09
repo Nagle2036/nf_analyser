@@ -2561,8 +2561,18 @@ def fmri_analysis():
     # Step 4: Trim signal dropout sections of ROIs [ANALYSIS 1].
     print("\n###### STEP 4: TRIM SIGNAL DROPOUT SECTIONS OF ROIS [ANALYSIS 1] ######") 
     raw_roi_path = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
-    modified_roi_path = 'data/roi/SCCsphere8_bin_2mm_modified.nii.gz'
+    reshaped_roi_path = 'data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz'
+    
     img = nib.load(raw_roi_path)
+    qto_xyz = img.header.get_qform()
+    qto_xyz[0, 3] = -90.0 
+    img.set_qform(qto_xyz)
+    img.header['qform_code'] = 1
+    sto_xyz = img.header.get_sform()
+    sto_xyz[0, 3] = -90.0
+    img.set_sform(sto_xyz)
+    img.header['sform_code'] = 1
+
     original_shape = img.shape
     original_affine = img.affine
     new_shape = (97, 115, 97)
@@ -2572,9 +2582,8 @@ def fmri_analysis():
     target_affine[2, 2] = 2.0
     target_shape = new_shape
     resampled_img = resample_from_to(img, (target_shape, target_affine))
-    nib.save(resampled_img, modified_roi_path)
-    reshaped_roi_path = 'data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz'
-    subprocess.run(['fslmaths', modified_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
+    nib.save(resampled_img, reshaped_roi_path)
+    subprocess.run(['fslmaths', reshaped_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
 
 
     runs = ['run-01', 'run-04']

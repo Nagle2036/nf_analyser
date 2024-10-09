@@ -3215,8 +3215,8 @@ set fmri(overwrite_yn) 0
     import nibabel as nib
     img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
     data = img.get_fdata()
-    new_shape = (3, 97, 115, 97)  # Define your new shape
-    reshaped_data = data.reshape(new_shape)  # Reshape the data
+    new_shape = (3, 97, 115, 97)
+    reshaped_data = np.resize(data, new_shape)
     img.header['dim'][1:5] = new_shape  # Update dimensions in header
     print("Updated dimensions:", img.header['dim'])
     img.header['pixdim'][0] = '1'

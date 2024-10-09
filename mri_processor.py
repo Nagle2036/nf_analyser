@@ -3215,9 +3215,11 @@ set fmri(overwrite_yn) 0
     import nibabel as nib
     img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
     data = img.get_fdata()
-    new_shape = (3, 97, 115, 97)
+    new_shape = (97, 115, 97)
     reshaped_data = np.resize(data, new_shape)
-    img.header['dim'][1:5] = new_shape  # Update dimensions in header
+    img.header['dim'][1] = 97  # dim1
+    img.header['dim'][2] = 115  # dim2
+    img.header['dim'][3] = 97 
     print("Updated dimensions:", img.header['dim'])
     img.header['pixdim'][0] = '1'
     qto_xyz = img.header.get_qform()  # Get the qform matrix

@@ -3218,14 +3218,19 @@ set fmri(overwrite_yn) 0
     img.header['dim'][2] = '115'
     img.header['dim'][3] = '97'
     img.header['pixdim'][0] = '1'
-    img.header['qto_xyz:1'][1] = '2'
-    img.header['qto_xyz:1'][1] = '0'
-    img.header['qto_xyz:1'][4] = '-90'
-    img.header['qto_xyz:2'][3] = '0'
-    img.header['qform_xorient'][1] = 'Left-to-Right'
-    img.header['sto_xyz:1'][1] = '2'
-    img.header['sto_xyz:1'][4] = '-90'
-    img.header['sform_xorient'][1] = 'Left-to-Right'
+    qto_xyz = img.header.get_qform()  # Get the qform matrix
+    qto_xyz[0, 0] = 2.0   # qto_xyz[0, 0] (first row, first column)
+    qto_xyz[1, 0] = 0.0   # qto_xyz[1, 0] (second row, first column)
+    qto_xyz[0, 3] = -90.0  # Modify the fourth element of the first column
+    qto_xyz[2, 3] = 0.0    # Modify the fourth element of the second column
+    img.set_qform(qto_xyz)
+    sto_xyz = img.header.get_sform()  # Get the sform matrix
+    sto_xyz[0, 0] = 2.0   # sto_xyz[0, 0] (first row, first column)
+    sto_xyz[0, 3] = -90.0  # Modify the fourth element of the first column
+    img.set_sform(sto_xyz)  # Set the modified sto_xyz matrix back
+    img.header['sform_xorient'] = 'Left-to-Right'
+    nib.save(img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
+
 
     # img = nib.load('data/roi/SCCsphere8_bin_2mm.nii.gz')
     # header = img.header

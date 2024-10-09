@@ -3227,12 +3227,12 @@ set fmri(overwrite_yn) 0
     qto_xyz[1, 0] = 0.0   # qto_xyz[1, 0] (second row, first column)
     qto_xyz[0, 3] = -90.0  # Modify the fourth element of the first column
     qto_xyz[2, 3] = 0.0    # Modify the fourth element of the second column
-    img.header['qform_code'] = 4
+    # img.header['qform_code'] = 4
     sto_xyz = img.header.get_sform()  # Get the sform matrix
     sto_xyz[0, 0] = 2.0   # sto_xyz[0, 0] (first row, first column)
     sto_xyz[0, 3] = -90.0  # Modify the fourth element of the first column
     img.set_sform(sto_xyz)  # Set the modified sto_xyz matrix back
-    img.header['sform_code'] = 4
+    # img.header['sform_code'] = 4
     new_img = nib.Nifti1Image(reshaped_data, img.affine, img.header)
     nib.save(new_img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
     print("Final header information:")

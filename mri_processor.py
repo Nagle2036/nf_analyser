@@ -3214,9 +3214,9 @@ set fmri(overwrite_yn) 0
     # print(header2.stdout)
     import nibabel as nib
     img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
-    img.header['dim1'][0] = '97'
-    img.header['dim2'][0] = '115'
-    img.header['dim3'][0] = '97'
+    img.header['dim1'][1] = '97'
+    img.header['dim2'][1] = '115'
+    img.header['dim3'][1] = '97'
     img.header['pixdim0'][1] = '1'
     img.header['qto_xyz:1'][1] = '2'
     img.header['qto_xyz:1'][1] = '0'

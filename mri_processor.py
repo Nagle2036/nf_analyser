@@ -3217,7 +3217,7 @@ set fmri(overwrite_yn) 0
     img.header['dim'][1] = '97'
     img.header['dim'][2] = '115'
     img.header['dim'][3] = '97'
-    img.header['pixdim0'][1] = '1'
+    img.header['pixdim'][0] = '1'
     img.header['qto_xyz:1'][1] = '2'
     img.header['qto_xyz:1'][1] = '0'
     img.header['qto_xyz:1'][4] = '-90'

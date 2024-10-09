@@ -2758,7 +2758,7 @@ set fmri(constcol) 0
 set fmri(poststats_yn) 1
 
 # Pre-threshold masking?
-set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_LR.nii.gz"
+set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz"
 
 # Thresholding
 # 0 : None
@@ -3217,6 +3217,7 @@ set fmri(overwrite_yn) 0
     img.header['dim'][1] = '97'
     img.header['dim'][2] = '115'
     img.header['dim'][3] = '97'
+    print("Updated dimensions:", img.header['dim'])
     img.header['pixdim'][0] = '1'
     qto_xyz = img.header.get_qform()  # Get the qform matrix
     qto_xyz[0, 0] = 2.0   # qto_xyz[0, 0] (first row, first column)
@@ -3230,6 +3231,8 @@ set fmri(overwrite_yn) 0
     img.set_sform(sto_xyz)  # Set the modified sto_xyz matrix back
     img.header['sform_code'] = 4
     nib.save(img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
+    print("Final header information:")
+    print(img.header)
 
 
     # img = nib.load('data/roi/SCCsphere8_bin_2mm.nii.gz')

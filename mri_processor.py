@@ -2561,7 +2561,7 @@ def fmri_analysis():
     # Step 4: Trim signal dropout sections of ROIs [ANALYSIS 1].
     print("\n###### STEP 4: TRIM SIGNAL DROPOUT SECTIONS OF ROIS [ANALYSIS 1] ######") 
     raw_roi_path = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
-    reshaped_roi_path = 'data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz'
+    modified_roi_path = 'data/roi/SCCsphere8_bin_2mm_modified.nii.gz'
     img = nib.load(raw_roi_path)
     original_shape = img.shape
     original_affine = img.affine
@@ -2572,8 +2572,11 @@ def fmri_analysis():
     target_affine[2, 2] = 2.0
     target_shape = new_shape
     resampled_img = resample_from_to(img, (target_shape, target_affine))
-    nib.save(resampled_img, reshaped_roi_path)
-    subprocess.run(['fslmaths', reshaped_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
+    nib.save(resampled_img, modified_roi_path)
+    reshaped_roi_path = 'data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz'
+    subprocess.run(['fslmaths', modified_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
+
+
     runs = ['run-01', 'run-04']
     if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/trimmed_mni_roi_run-01.nii.gz'):
         roi_file = 'data/roi/SCCsphere8_bin_2mm.nii.gz'

@@ -2760,7 +2760,7 @@ set fmri(constcol) 0
 set fmri(poststats_yn) 1
 
 # Pre-threshold masking?
-set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_LR_modified_bin.nii.gz"
+set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz"
 
 # Thresholding
 # 0 : None
@@ -3209,10 +3209,8 @@ set fmri(overwrite_yn) 0
     
     # Step 6: Run first-level GLM [ANALYSIS 1].
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######")   
-    
     raw_roi_path = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
     reshaped_roi_path = 'data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz'  
-    
     img = nib.load(raw_roi_path)
     original_affine = img.affine
     new_shape = (97, 115, 97)
@@ -3224,20 +3222,7 @@ set fmri(overwrite_yn) 0
     resampled_img = resample_from_to(img, (new_shape, target_affine))
     nib.save(resampled_img, reshaped_roi_path)
     subprocess.run(['fslmaths', reshaped_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
-
-    # img = nib.load(reshaped_roi_path)
-    # img.header['qform_code'] = 4
-    # qto_xyz = img.header.get_qform()
-    # qto_xyz[0, 3] = -90.0
-    # img.set_qform(qto_xyz)
-    # img.header['sform_code'] = 4
-    # sto_xyz = img.header.get_sform()
-    # sto_xyz[0, 3] = -90.0
-    # img.set_sform(sto_xyz)
-    # nib.save(img, 'data/roi/SCCsphere8_bin_2mm_reshaped_final.nii.gz')
     
-
-
     if not os.path.isdir('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat'):
         design_png_paths = []
         for fsf in first_level_fsfs:
@@ -3446,7 +3431,7 @@ set fmri(constcol) 0
 set fmri(poststats_yn) 1
 
 # Pre-threshold masking?
-set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_LR_modified_bin.nii.gz"
+set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz"
 
 # Thresholding
 # 0 : None

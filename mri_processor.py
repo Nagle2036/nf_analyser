@@ -3214,6 +3214,18 @@ set fmri(overwrite_yn) 0
     reshaped_roi_path = 'data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz'  
     
     img = nib.load(raw_roi_path)
+    img.header['qform_code'] = 4
+    qto_xyz = img.header.get_qform()
+    qto_xyz[0, 3] = -90.0
+    img.set_qform(qto_xyz)
+    img.header['sform_code'] = 4
+    sto_xyz = img.header.get_sform()
+    sto_xyz[0, 3] = -90.0
+    img.set_sform(sto_xyz)
+    nib.save(img, 'data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz')
+
+
+    img = nib.load(reshaped_roi_path)
     original_shape = img.shape
     original_affine = img.affine
     new_shape = (97, 115, 97)
@@ -3223,19 +3235,10 @@ set fmri(overwrite_yn) 0
     target_affine[2, 2] = 2.0
     target_shape = new_shape
     resampled_img = resample_from_to(img, (target_shape, target_affine))
-    nib.save(resampled_img, reshaped_roi_path)
-    subprocess.run(['fslmaths', reshaped_roi_path, '-bin', reshaped_roi_path])
+    nib.save(resampled_img, 'data/roi/SCCsphere8_bin_2mm_reshaped_final.nii.gz')
+    subprocess.run(['fslmaths', 'data/roi/SCCsphere8_bin_2mm_reshaped_final.nii.gz', '-thr', '0.00000047', '-bin', 'data/roi/SCCsphere8_bin_2mm_reshaped_final.nii.gz'])
 
-    img = nib.load(reshaped_roi_path)
-    img.header['qform_code'] = 4
-    qto_xyz = img.header.get_qform()
-    qto_xyz[0, 3] = -90.0
-    img.set_qform(qto_xyz)
-    img.header['sform_code'] = 4
-    sto_xyz = img.header.get_sform()
-    sto_xyz[0, 3] = -90.0
-    img.set_sform(sto_xyz)
-    nib.save(img, 'data/roi/SCCsphere8_bin_2mm_reshaped_final.nii.gz')
+    
     
 
 

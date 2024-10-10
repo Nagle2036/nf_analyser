@@ -2580,8 +2580,6 @@ def fmri_analysis():
     resampled_img.header['sform_code'] = 4
     nib.save(img, reshaped_roi_path)
 
-
-
     runs = ['run-01', 'run-04']
     if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/trimmed_mni_roi_run-01.nii.gz'):
         roi_file = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
@@ -2589,18 +2587,15 @@ def fmri_analysis():
             p_id_stripped = p_id.replace('P', '')
             for run in runs:
                 mask_file = f'data/fmriprep_derivatives/sub-{p_id_stripped}/func/sub-{p_id_stripped}_task-nf_{run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
-                averaged_mask_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/averaged_mask_{run}.nii.gz'
-                subprocess.run(['fslmaths', mask_file, '-Tmean', averaged_mask_file])
                 trimmed_roi_file = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/trimmed_mni_roi_{run}.nii.gz'
                 try:
-                    subprocess.run(['fslmaths', reshaped_roi_path, '-mul', averaged_mask_file, '-bin', trimmed_roi_file])
+                    subprocess.run(['fslmaths', reshaped_roi_path, '-mul', mask_file, '-bin', trimmed_roi_file])
                     total_voxels_output = subprocess.run(['fslstats', reshaped_roi_path, '-V'], capture_output=True, text=True)
                     total_voxels = int(total_voxels_output.stdout.split()[0])
                     trimmed_voxels_output = subprocess.run(['fslstats', trimmed_roi_file, '-V'], capture_output=True, text=True)
                     trimmed_voxels = int(trimmed_voxels_output.stdout.split()[0])
                     trimmed_percentage = ((total_voxels - trimmed_voxels) / total_voxels) * 100
                     print(f"Percentage of ROI voxels trimmed for subject {p_id_stripped}, {run}: {trimmed_percentage:.2f}%")
-                    os.remove(averaged_mask_file)
                 except subprocess.CalledProcessError as e:
                     print(f"Error occurred while processing {p_id_stripped} for {run}: {e}")
     else:

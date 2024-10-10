@@ -3224,7 +3224,7 @@ set fmri(overwrite_yn) 0
     target_shape = new_shape
     resampled_img = resample_from_to(img, (target_shape, target_affine))
     nib.save(resampled_img, reshaped_roi_path)
-    subprocess.run(['fslmaths', reshaped_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
+    subprocess.run(['fslmaths', reshaped_roi_path, '-bin', reshaped_roi_path])
 
     img = nib.load(reshaped_roi_path)
     img.header['qform_code'] = 4

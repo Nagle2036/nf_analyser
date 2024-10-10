@@ -3227,17 +3227,14 @@ set fmri(overwrite_yn) 0
     subprocess.run(['fslmaths', reshaped_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
 
     img = nib.load(reshaped_roi_path)
-    img.header['qform_name'] = 'MNI_152'
     img.header['qform_code'] = 4
     qto_xyz = img.header.get_qform()
     qto_xyz[0, 3] = -90.0
     img.set_qform(qto_xyz)
-    img.header['sform_name'] = 'MNI_152'
     img.header['sform_code'] = 4
     sto_xyz = img.header.get_sform()
     sto_xyz[0, 3] = -90.0
     img.set_sform(sto_xyz)
-    img.header['sform_code'] = 4
     nib.save(img, 'data/roi/SCCsphere8_bin_2mm_reshaped_final.nii.gz')
     
 

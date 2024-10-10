@@ -2574,11 +2574,6 @@ def fmri_analysis():
     resampled_img = resample_from_to(img, (new_shape, target_affine))
     nib.save(resampled_img, reshaped_roi_path)
     subprocess.run(['fslmaths', reshaped_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
-    
-    img = nib.load(reshaped_roi_path)
-    resampled_img.header['qform_code'] = 4
-    resampled_img.header['sform_code'] = 4
-    nib.save(img, reshaped_roi_path)
 
     runs = ['run-01', 'run-04']
     if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/trimmed_mni_roi_run-01.nii.gz'):

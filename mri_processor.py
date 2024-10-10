@@ -2560,33 +2560,22 @@ def fmri_analysis():
 
     # Step 4: Trim signal dropout sections of ROIs [ANALYSIS 1].
     print("\n###### STEP 4: TRIM SIGNAL DROPOUT SECTIONS OF ROIS [ANALYSIS 1] ######") 
-    raw_roi_path = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
-    reshaped_roi_path = 'data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz'
-
-    img = nib.load(raw_roi_path)
     
-    original_shape = img.shape
-    original_affine = img.affine
-    new_shape = (97, 115, 97)
-    target_affine = np.copy(original_affine)
-    target_affine[0, 0] = 2.0
-    target_affine[1, 1] = 2.0
-    target_affine[2, 2] = 2.0
-    target_shape = new_shape
-    resampled_img = resample_from_to(img, (target_shape, target_affine))
+    # raw_roi_path = 'data/roi/SCCsphere8_bin_2mm.nii.gz'
+    # reshaped_roi_path = 'data/roi/SCCsphere8_bin_2mm_reshaped.nii.gz'
+    # img = nib.load(raw_roi_path)
+    # original_shape = img.shape
+    # original_affine = img.affine
+    # new_shape = (97, 115, 97)
+    # target_affine = np.copy(original_affine)
+    # target_affine[0, 0] = 2.0
+    # target_affine[1, 1] = 2.0
+    # target_affine[2, 2] = 2.0
+    # target_shape = new_shape
+    # resampled_img = resample_from_to(img, (target_shape, target_affine))
+    # nib.save(resampled_img, reshaped_roi_path)
+    # subprocess.run(['fslmaths', reshaped_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
 
-    qto_xyz = resampled_img.header.get_qform()
-    qto_xyz[0, 3] = -90.0 
-    resampled_img.set_qform(qto_xyz)
-    resampled_img.header['qform_code'] = 1
-
-    sto_xyz = resampled_img.header.get_sform()
-    sto_xyz[0, 3] = -90.0
-    resampled_img.set_sform(sto_xyz)
-    resampled_img.header['sform_code'] = 1
-
-    nib.save(resampled_img, reshaped_roi_path)
-    subprocess.run(['fslmaths', reshaped_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
 
 
     runs = ['run-01', 'run-04']
@@ -3235,6 +3224,22 @@ set fmri(overwrite_yn) 0
     
     # Step 6: Run first-level GLM [ANALYSIS 1].
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######")   
+    
+    img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
+    original_affine = img.affine
+    new_shape = (97, 115, 97)
+    target_affine = np.copy(original_affine)
+    target_affine[0, 0] = 2.0
+    target_affine[1, 1] = 2.0
+    target_affine[2, 2] = 2.0
+    target_shape = new_shape
+    resampled_img = resample_from_to(img, (target_shape, target_affine))
+    nib.save(resampled_img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
+    subprocess.run('fslmaths', 'data/roi/SCCsphere8_bin_2mm_LR_resampled.nii.gz', '-thr', '0.00000047', '-bin', 'data/roi/SCCsphere8_bin_2mm_LR_resampled_bin.nii.gz'])
+
+
+    
+    
     if not os.path.isdir('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat'):
         design_png_paths = []
         for fsf in first_level_fsfs:

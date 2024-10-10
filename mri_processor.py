@@ -3226,6 +3226,7 @@ set fmri(overwrite_yn) 0
     # subprocess.run(['fslmaths', reshaped_roi_path, '-thr', '0.00000047', '-bin', reshaped_roi_path])
 
     img = nib.load('data/roi/SCCsphere8_bin_2mm_LR.nii.gz')
+    original_shape = img.shape
     original_affine = img.affine
     new_shape = (97, 115, 97)
     target_affine = np.copy(original_affine)
@@ -3235,8 +3236,9 @@ set fmri(overwrite_yn) 0
     target_shape = new_shape
     resampled_img = resample_from_to(img, (target_shape, target_affine))
     nib.save(resampled_img, 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz')
-    subprocess.run(['fslmaths', 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz', '-thr', '0.00000047', '-bin', 'data/roi/SCCsphere8_bin_2mm_LR_modified_bin.nii.gz'])
-
+    # subprocess.run(['fslmaths', 'data/roi/SCCsphere8_bin_2mm_LR_modified.nii.gz', '-thr', '0.00000047', '-bin', 'data/roi/SCCsphere8_bin_2mm_LR_modified_bin.nii.gz'])
+    print("Final header information:")
+    print(resampled_img.header)
 
     
     if not os.path.isdir('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat'):

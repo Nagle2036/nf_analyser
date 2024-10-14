@@ -3910,17 +3910,17 @@ set fmri(overwrite_yn) 0
     # Step 7: Run second-level GLM [ANALYSIS 1].
     print("\n###### STEP 7: RUN SECOND-LEVEL GLM [ANALYSIS 1] ######") 
     if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat/reg/example_func2standard.mat'):
-    for p_id in participants:
-        p_id_stripped = p_id.replace('P', '')
-        for run in runs:
-            reg_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg'
-            os.makedirs(reg_folder, exist_ok=True)
-            init_mat_path = '/usr/local/fsl/etc/flirtsch/ident.mat'
-            example_func2standard_mat_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/example_func2standard.mat'
-            shutil.copy(init_mat_path, example_func2standard_mat_path)
-            mean_func_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/mean_func.nii.gz'
-            standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/standard.nii.gz'
-            shutil.copy(mean_func_path, standard_path)
+        for p_id in participants:
+            p_id_stripped = p_id.replace('P', '')
+            for run in runs:
+                reg_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg'
+                os.makedirs(reg_folder, exist_ok=True)
+                init_mat_path = '/usr/local/fsl/etc/flirtsch/ident.mat'
+                example_func2standard_mat_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/example_func2standard.mat'
+                shutil.copy(init_mat_path, example_func2standard_mat_path)
+                mean_func_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/mean_func.nii.gz'
+                standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/standard.nii.gz'
+                shutil.copy(mean_func_path, standard_path)
     if not os.path.isdir('analysis.fmri_analysis/analysis_1/first_level/sub-004/crossrun.gfeat'):
         design_png_paths = []
         for fsf in second_level_fsfs:

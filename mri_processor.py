@@ -2770,7 +2770,7 @@ set fmri(thresh) 3
 set fmri(prob_thresh) 0.05
 
 # Z threshold
-set fmri(z_thresh) 3.1
+set fmri(z_thresh) 2.3
 
 # Z min/max for colour rendering
 # 0 : Use actual Z min/max
@@ -3017,7 +3017,7 @@ set fmri(con_mode) orig
 set fmri(conpic_real.1) 1
 
 # Title for contrast_real 1
-set fmri(conname_real.1) "guilt"
+set fmri(conname_real.1) "guilt-indig"
 
 # Real contrast_real vector 1 element 1
 set fmri(con_real1.1) 1
@@ -3026,7 +3026,7 @@ set fmri(con_real1.1) 1
 set fmri(con_real1.2) 0
 
 # Real contrast_real vector 1 element 3
-set fmri(con_real1.3) 0
+set fmri(con_real1.3) -1.0
 
 # Real contrast_real vector 1 element 4
 set fmri(con_real1.4) 0
@@ -3041,10 +3041,10 @@ set fmri(con_real1.6) 0
 set fmri(conpic_real.2) 1
 
 # Title for contrast_real 2
-set fmri(conname_real.2) "indig"
+set fmri(conname_real.2) "indig-guilt"
 
 # Real contrast_real vector 2 element 1
-set fmri(con_real2.1) 0
+set fmri(con_real2.1) -1.0
 
 # Real contrast_real vector 2 element 2
 set fmri(con_real2.2) 0
@@ -3065,7 +3065,7 @@ set fmri(con_real2.6) 0
 set fmri(conpic_real.3) 1
 
 # Title for contrast_real 3
-set fmri(conname_real.3) "guilt-indig"
+set fmri(conname_real.3) "guilt-sub"
 
 # Real contrast_real vector 3 element 1
 set fmri(con_real3.1) 1.0
@@ -3074,28 +3074,100 @@ set fmri(con_real3.1) 1.0
 set fmri(con_real3.2) 0
 
 # Real contrast_real vector 3 element 3
-set fmri(con_real3.3) -1.0
+set fmri(con_real3.3) 0.0
 
 # Real contrast_real vector 3 element 4
 set fmri(con_real3.4) 0
 
 # Real contrast_real vector 3 element 5
-set fmri(con_real3.5) 0
+set fmri(con_real3.5) -1.0
 
 # Real contrast_real vector 3 element 6
 set fmri(con_real3.6) 0
+
+# Display images for contrast_real 4
+set fmri(conpic_real.4) 1
+
+# Title for contrast_real 4
+set fmri(conname_real.4) "sub-guilt"
+
+# Real contrast_real vector 4 element 1
+set fmri(con_real4.1) -1.0
+
+# Real contrast_real vector 4 element 2
+set fmri(con_real4.2) 0
+
+# Real contrast_real vector 4 element 3
+set fmri(con_real4.3) 0
+
+# Real contrast_real vector 4 element 4
+set fmri(con_real4.4) 0
+
+# Real contrast_real vector 4 element 5
+set fmri(con_real4.5) 1.0
+
+# Real contrast_real vector 4 element 6
+set fmri(con_real4.6) 0
+
+# Display images for contrast_real 5
+set fmri(conpic_real.5) 1
+
+# Title for contrast_real 5
+set fmri(conname_real.5) "indig-sub"
+
+# Real contrast_real vector 5 element 1
+set fmri(con_real5.1) 0
+
+# Real contrast_real vector 5 element 2
+set fmri(con_real5.2) 0
+
+# Real contrast_real vector 5 element 3
+set fmri(con_real5.3) 1.0
+
+# Real contrast_real vector 5 element 4
+set fmri(con_real5.4) 0
+
+# Real contrast_real vector 5 element 5
+set fmri(con_real5.5) -1.0
+
+# Real contrast_real vector 5 element 6
+set fmri(con_real5.6) 0
+
+# Display images for contrast_real 6
+set fmri(conpic_real.6) 1
+
+# Title for contrast_real 6
+set fmri(conname_real.6) "sub-indig"
+
+# Real contrast_real vector 6 element 1
+set fmri(con_real6.1) 0
+
+# Real contrast_real vector 6 element 2
+set fmri(con_real6.2) 0
+
+# Real contrast_real vector 6 element 3
+set fmri(con_real6.3) -1.0
+
+# Real contrast_real vector 6 element 4
+set fmri(con_real6.4) 0
+
+# Real contrast_real vector 6 element 5
+set fmri(con_real6.5) 1.0
+
+# Real contrast_real vector 6 element 6
+set fmri(con_real6.6) 0
 
 # Display images for contrast_orig 1
 set fmri(conpic_orig.1) 1
 
 # Title for contrast_orig 1
-set fmri(conname_orig.1) "guilt"
+set fmri(conname_orig.1) "guilt-indig"
 
 # Real contrast_orig vector 1 element 1
 set fmri(con_orig1.1) 1
 
 # Real contrast_orig vector 1 element 2
-set fmri(con_orig1.2) 0
+set fmri(con_orig1.2) -1.0
 
 # Real contrast_orig vector 1 element 3
 set fmri(con_orig1.3) 0
@@ -3104,10 +3176,10 @@ set fmri(con_orig1.3) 0
 set fmri(conpic_orig.2) 1
 
 # Title for contrast_orig 2
-set fmri(conname_orig.2) "indig"
+set fmri(conname_orig.2) "indig-guilt"
 
 # Real contrast_orig vector 2 element 1
-set fmri(con_orig2.1) 0
+set fmri(con_orig2.1) -1.0
 
 # Real contrast_orig vector 2 element 2
 set fmri(con_orig2.2) 1.0
@@ -3119,16 +3191,61 @@ set fmri(con_orig2.3) 0
 set fmri(conpic_orig.3) 1
 
 # Title for contrast_orig 3
-set fmri(conname_orig.3) "guilt-indig"
+set fmri(conname_orig.3) "guilt-sub"
 
 # Real contrast_orig vector 3 element 1
 set fmri(con_orig3.1) 1.0
 
 # Real contrast_orig vector 3 element 2
-set fmri(con_orig3.2) -1.0
+set fmri(con_orig3.2) 0.0
 
 # Real contrast_orig vector 3 element 3
-set fmri(con_orig3.3) 0
+set fmri(con_orig3.3) -1.0
+
+# Display images for contrast_orig 4
+set fmri(conpic_orig.4) 1
+
+# Title for contrast_orig 4
+set fmri(conname_orig.4) "sub-guilt"
+
+# Real contrast_orig vector 4 element 1
+set fmri(con_orig4.1) -1.0
+
+# Real contrast_orig vector 4 element 2
+set fmri(con_orig4.2) 0
+
+# Real contrast_orig vector 4 element 3
+set fmri(con_orig4.3) 1.0
+
+# Display images for contrast_orig 5
+set fmri(conpic_orig.5) 1
+
+# Title for contrast_orig 5
+set fmri(conname_orig.5) "indig-sub"
+
+# Real contrast_orig vector 5 element 1
+set fmri(con_orig5.1) 0
+
+# Real contrast_orig vector 5 element 2
+set fmri(con_orig5.2) 1.0
+
+# Real contrast_orig vector 5 element 3
+set fmri(con_orig5.3) -1.0
+
+# Display images for contrast_orig 6
+set fmri(conpic_orig.6) 1
+
+# Title for contrast_orig 6
+set fmri(conname_orig.6) "sub-indig"
+
+# Real contrast_orig vector 6 element 1
+set fmri(con_orig6.1) 0
+
+# Real contrast_orig vector 6 element 2
+set fmri(con_orig6.2) -1.0
+
+# Real contrast_orig vector 6 element 3
+set fmri(con_orig6.3) 1.0
 
 # Contrast masking - use >0 instead of thresholding?
 set fmri(conmask_zerothresh_yn) 0
@@ -3139,17 +3256,89 @@ set fmri(conmask1_2) 0
 # Mask real contrast/F-test 1 with real contrast/F-test 3?
 set fmri(conmask1_3) 0
 
+# Mask real contrast/F-test 1 with real contrast/F-test 4?
+set fmri(conmask1_4) 0
+
+# Mask real contrast/F-test 1 with real contrast/F-test 5?
+set fmri(conmask1_5) 0
+
+# Mask real contrast/F-test 1 with real contrast/F-test 6?
+set fmri(conmask1_6) 0
+
 # Mask real contrast/F-test 2 with real contrast/F-test 1?
 set fmri(conmask2_1) 0
 
 # Mask real contrast/F-test 2 with real contrast/F-test 3?
 set fmri(conmask2_3) 0
 
+# Mask real contrast/F-test 2 with real contrast/F-test 4?
+set fmri(conmask2_4) 0
+
+# Mask real contrast/F-test 2 with real contrast/F-test 5?
+set fmri(conmask2_5) 0
+
+# Mask real contrast/F-test 2 with real contrast/F-test 6?
+set fmri(conmask2_6) 0
+
 # Mask real contrast/F-test 3 with real contrast/F-test 1?
 set fmri(conmask3_1) 0
 
 # Mask real contrast/F-test 3 with real contrast/F-test 2?
 set fmri(conmask3_2) 0
+
+# Mask real contrast/F-test 3 with real contrast/F-test 4?
+set fmri(conmask3_4) 0
+
+# Mask real contrast/F-test 3 with real contrast/F-test 5?
+set fmri(conmask3_5) 0
+
+# Mask real contrast/F-test 3 with real contrast/F-test 6?
+set fmri(conmask3_6) 0
+
+# Mask real contrast/F-test 4 with real contrast/F-test 1?
+set fmri(conmask4_1) 0
+
+# Mask real contrast/F-test 4 with real contrast/F-test 2?
+set fmri(conmask4_2) 0
+
+# Mask real contrast/F-test 4 with real contrast/F-test 3?
+set fmri(conmask4_3) 0
+
+# Mask real contrast/F-test 4 with real contrast/F-test 5?
+set fmri(conmask4_5) 0
+
+# Mask real contrast/F-test 4 with real contrast/F-test 6?
+set fmri(conmask4_6) 0
+
+# Mask real contrast/F-test 5 with real contrast/F-test 1?
+set fmri(conmask5_1) 0
+
+# Mask real contrast/F-test 5 with real contrast/F-test 2?
+set fmri(conmask5_2) 0
+
+# Mask real contrast/F-test 5 with real contrast/F-test 3?
+set fmri(conmask5_3) 0
+
+# Mask real contrast/F-test 5 with real contrast/F-test 4?
+set fmri(conmask5_4) 0
+
+# Mask real contrast/F-test 5 with real contrast/F-test 6?
+set fmri(conmask5_6) 0
+
+# Mask real contrast/F-test 6 with real contrast/F-test 1?
+set fmri(conmask6_1) 0
+
+# Mask real contrast/F-test 6 with real contrast/F-test 2?
+set fmri(conmask6_2) 0
+
+# Mask real contrast/F-test 6 with real contrast/F-test 3?
+set fmri(conmask6_3) 0
+
+# Mask real contrast/F-test 6 with real contrast/F-test 4?
+set fmri(conmask6_4) 0
+
+# Mask real contrast/F-test 6 with real contrast/F-test 5?
+set fmri(conmask6_5) 0
 
 # Do contrast masking at all?
 set fmri(conmask1_1) 0
@@ -3427,7 +3616,7 @@ set fmri(thresh) 3
 set fmri(prob_thresh) 0.05
 
 # Z threshold
-set fmri(z_thresh) 3.1
+set fmri(z_thresh) 2.3
 
 # Z min/max for colour rendering
 # 0 : Use actual Z min/max
@@ -3655,8 +3844,26 @@ set fmri(con_real1.1) 1
 # Real contrast_real vector 1 element 2
 set fmri(con_real1.2) -1
 
+# Display images for contrast_real 2
+set fmri(conpic_real.2) 1
+
+# Title for contrast_real 2
+set fmri(conname_real.2) "run04-run01"
+
+# Real contrast_real vector 2 element 1
+set fmri(con_real2.1) -1
+
+# Real contrast_real vector 2 element 2
+set fmri(con_real2.2) 1
+
 # Contrast masking - use >0 instead of thresholding?
 set fmri(conmask_zerothresh_yn) 0
+
+# Mask real contrast/F-test 1 with real contrast/F-test 2?
+set fmri(conmask1_2) 0
+
+# Mask real contrast/F-test 2 with real contrast/F-test 1?
+set fmri(conmask2_1) 0
 
 # Do contrast masking at all?
 set fmri(conmask1_1) 0
@@ -3702,6 +3909,18 @@ set fmri(overwrite_yn) 0
 
     # Step 7: Run second-level GLM [ANALYSIS 1].
     print("\n###### STEP 7: RUN SECOND-LEVEL GLM [ANALYSIS 1] ######") 
+    if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat/reg/example_func2standard.mat'):
+    for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
+        for run in runs:
+            reg_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg'
+            os.makedirs(reg_folder, exist_ok=True)
+            init_mat_path = '/usr/local/fsl/etc/flirtsch/ident.mat'
+            example_func2standard_mat_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/example_func2standard.mat'
+            shutil.copy(init_mat_path, example_func2standard_mat_path)
+            mean_func_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/mean_func.nii.gz'
+            standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/standard.nii.gz'
+            shutil.copy(mean_func_path, standard_path)
     if not os.path.isdir('analysis.fmri_analysis/analysis_1/first_level/sub-004/crossrun.gfeat'):
         design_png_paths = []
         for fsf in second_level_fsfs:

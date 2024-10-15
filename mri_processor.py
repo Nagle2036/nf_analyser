@@ -2743,8 +2743,8 @@ set fmri(evs_real) 6
 set fmri(evs_vox) 0
 
 # Number of contrasts
-set fmri(ncon_orig) 3
-set fmri(ncon_real) 3
+set fmri(ncon_orig) 6
+set fmri(ncon_real) 6
 
 # Number of F-tests
 set fmri(nftests_orig) 0
@@ -2764,7 +2764,7 @@ set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/partici
 # 1 : Uncorrected
 # 2 : Voxel
 # 3 : Cluster
-set fmri(thresh) 3
+set fmri(thresh) 0
 
 # P threshold
 set fmri(prob_thresh) 0.05
@@ -2797,7 +2797,7 @@ set fmri(rendertype) 1
 set fmri(bgimage) 1
 
 # Create time series plots
-set fmri(tsplot_yn) 1
+set fmri(tsplot_yn) 0
 
 # Registration to initial structural
 set fmri(reginitial_highres_yn) 0
@@ -3589,8 +3589,8 @@ set fmri(evs_real) 2
 set fmri(evs_vox) 0
 
 # Number of contrasts
-set fmri(ncon_orig) 1
-set fmri(ncon_real) 1
+set fmri(ncon_orig) 2
+set fmri(ncon_real) 2
 
 # Number of F-tests
 set fmri(nftests_orig) 0
@@ -3610,7 +3610,7 @@ set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/partici
 # 1 : Uncorrected
 # 2 : Voxel
 # 3 : Cluster
-set fmri(thresh) 3
+set fmri(thresh) 0
 
 # P threshold
 set fmri(prob_thresh) 0.05
@@ -3643,7 +3643,7 @@ set fmri(rendertype) 1
 set fmri(bgimage) 1
 
 # Create time series plots
-set fmri(tsplot_yn) 1
+set fmri(tsplot_yn) 0
 
 # Registration to initial structural
 set fmri(reginitial_highres_yn) 0
@@ -3922,7 +3922,6 @@ set fmri(overwrite_yn) 0
                 standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/standard.nii.gz'
                 shutil.copy(mean_func_path, standard_path)
     if not os.path.isdir('analysis.fmri_analysis/analysis_1/first_level/sub-004/crossrun.gfeat'):
-        design_png_paths = []
         for fsf in second_level_fsfs:
             match = re.search(r'sub-(\d{3})', fsf)
             participant_number = match.group(1)
@@ -3933,22 +3932,9 @@ set fmri(overwrite_yn) 0
                 content = file.read()
             if re.search('error', content, re.IGNORECASE):
                 print(f"Error found in report_log.html. Investigation required.")
-            # zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/second_level/sub-{participant_number}/crossrun.gfeat/stats/*zstat*')
-            # if len(zstat_files) != 3:
-            #     print("There are not 3 zstat files in the stats folder. Investigation required.")
-            design_png_paths.append(f'analysis/fmri_analysis/analysis_1/second_level/sub-{participant_number}/crossrun.gfeat/design.png')
-        def hash_image(image_path):
-            with Image.open(image_path) as img:
-                img_bytes = img.tobytes()
-                img_hash = hashlib.sha256(img_bytes).hexdigest()
-            return img_hash
-        def compare_images(image_paths):
-            first_image_hash = hash_image(image_paths[0])
-            for image_path in image_paths[1:]:
-                if hash_image(image_path) != first_image_hash:
-                    print(f"design.png images are not identical: {image_paths[0]} and {image_path}. Investigation required.")
-                    return
-        compare_images(design_png_paths)
+            cope_folders = glob.glob(f'analysis/fmri_analysis/analysis_1/second_level/sub-{participant_number}/crossrun.gfeat/*cope*')
+            if len(cope_folders) != 3:
+                print("There are not 3 cope folders in the crossrun.gfeat folder. Investigation required.")
     else:
         print('Second-level GLMs already run. Skipping process.')
 

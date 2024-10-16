@@ -3706,11 +3706,9 @@ set fmri(overwrite_yn) 0
             second_level_fsfs.append(second_level_fsf)
             with open(second_level_fsf, 'w') as file:
                 file.writelines(fsf_data)
-        print('fsf files for second-level GLM generated.')
+        print(f'fsf file for second-level GLM generated.\nPre-threshold masking: {pre_thresh_masking}\nLiberal thresholding: {liberal_thresholding}\nCluster-corrected thresholding: {cluster_thresholding}\nGroup analysis: {group_diffs}')
     else:
         subject_fixed_effects = input("Include subjects as fixed effects in the second-level model (as opposed to random effects)? (y/n)")
-
-
 
 
     # Step 7: Run second-level GLM [ANALYSIS 1].

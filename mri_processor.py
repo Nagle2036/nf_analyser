@@ -2738,13 +2738,13 @@ set fmri(mixed_yn) 2
 set fmri(randomisePermutations) 5000
 
 # Number of EVs
-set fmri(evs_orig) 3
-set fmri(evs_real) 6
+set fmri(evs_orig) 2
+set fmri(evs_real) 4
 set fmri(evs_vox) 0
 
 # Number of contrasts
-set fmri(ncon_orig) 6
-set fmri(ncon_real) 6
+set fmri(ncon_orig) 4
+set fmri(ncon_real) 4
 
 # Number of F-tests
 set fmri(nftests_orig) 0
@@ -2757,7 +2757,7 @@ set fmri(constcol) 0
 set fmri(poststats_yn) 1
 
 # Pre-threshold masking?
-set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_func.nii.gz"
+set fmri(threshmask) ""
 
 # Thresholding
 # 0 : None
@@ -2957,56 +2957,6 @@ set fmri(ortho2.1) 0
 # Orthogonalise EV 2 wrt EV 2
 set fmri(ortho2.2) 0
 
-# Orthogonalise EV 2 wrt EV 3
-set fmri(ortho2.3) 0
-
-# EV 3 title
-set fmri(evtitle3) "sub"
-
-# Basic waveform shape (EV 3)
-# 0 : Square
-# 1 : Sinusoid
-# 2 : Custom (1 entry per volume)
-# 3 : Custom (3 column format)
-# 4 : Interaction
-# 10 : Empty (all zeros)
-set fmri(shape3) 3
-
-# Convolution (EV 3)
-# 0 : None
-# 1 : Gaussian
-# 2 : Gamma
-# 3 : Double-Gamma HRF
-# 4 : Gamma basis functions
-# 5 : Sine basis functions
-# 6 : FIR basis functions
-# 8 : Alternate Double-Gamma
-set fmri(convolve3) 3
-
-# Convolve phase (EV 3)
-set fmri(convolve_phase3) 0
-
-# Apply temporal filtering (EV 3)
-set fmri(tempfilt_yn3) 1
-
-# Add temporal derivative (EV 3)
-set fmri(deriv_yn3) 1
-
-# Custom EV file (EV 3)
-set fmri(custom3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/shared/onset_files/onsetfile_sub.txt"
-
-# Orthogonalise EV 3 wrt EV 0
-set fmri(ortho3.0) 0
-
-# Orthogonalise EV 3 wrt EV 1
-set fmri(ortho3.1) 0
-
-# Orthogonalise EV 3 wrt EV 2
-set fmri(ortho3.2) 0
-
-# Orthogonalise EV 3 wrt EV 3
-set fmri(ortho3.3) 0
-
 # Contrast & F-tests mode
 # real : control real EVs
 # orig : control original EVs
@@ -3017,34 +2967,28 @@ set fmri(con_mode) orig
 set fmri(conpic_real.1) 1
 
 # Title for contrast_real 1
-set fmri(conname_real.1) "guilt-indig"
+set fmri(conname_real.1) "guilt"
 
 # Real contrast_real vector 1 element 1
-set fmri(con_real1.1) 1
+set fmri(con_real1.1) 1.0
 
 # Real contrast_real vector 1 element 2
 set fmri(con_real1.2) 0
 
 # Real contrast_real vector 1 element 3
-set fmri(con_real1.3) -1.0
+set fmri(con_real1.3) 0.0
 
 # Real contrast_real vector 1 element 4
 set fmri(con_real1.4) 0
-
-# Real contrast_real vector 1 element 5
-set fmri(con_real1.5) 0
-
-# Real contrast_real vector 1 element 6
-set fmri(con_real1.6) 0
 
 # Display images for contrast_real 2
 set fmri(conpic_real.2) 1
 
 # Title for contrast_real 2
-set fmri(conname_real.2) "indig-guilt"
+set fmri(conname_real.2) "indig"
 
 # Real contrast_real vector 2 element 1
-set fmri(con_real2.1) -1.0
+set fmri(con_real2.1) 0.0
 
 # Real contrast_real vector 2 element 2
 set fmri(con_real2.2) 0
@@ -3055,17 +2999,11 @@ set fmri(con_real2.3) 1.0
 # Real contrast_real vector 2 element 4
 set fmri(con_real2.4) 0
 
-# Real contrast_real vector 2 element 5
-set fmri(con_real2.5) 0
-
-# Real contrast_real vector 2 element 6
-set fmri(con_real2.6) 0
-
 # Display images for contrast_real 3
 set fmri(conpic_real.3) 1
 
 # Title for contrast_real 3
-set fmri(conname_real.3) "guilt-sub"
+set fmri(conname_real.3) "guilt-indig"
 
 # Real contrast_real vector 3 element 1
 set fmri(con_real3.1) 1.0
@@ -3074,22 +3012,16 @@ set fmri(con_real3.1) 1.0
 set fmri(con_real3.2) 0
 
 # Real contrast_real vector 3 element 3
-set fmri(con_real3.3) 0.0
+set fmri(con_real3.3) -1.0
 
 # Real contrast_real vector 3 element 4
 set fmri(con_real3.4) 0
-
-# Real contrast_real vector 3 element 5
-set fmri(con_real3.5) -1.0
-
-# Real contrast_real vector 3 element 6
-set fmri(con_real3.6) 0
 
 # Display images for contrast_real 4
 set fmri(conpic_real.4) 1
 
 # Title for contrast_real 4
-set fmri(conname_real.4) "sub-guilt"
+set fmri(conname_real.4) "indig-guilt"
 
 # Real contrast_real vector 4 element 1
 set fmri(con_real4.1) -1.0
@@ -3098,154 +3030,58 @@ set fmri(con_real4.1) -1.0
 set fmri(con_real4.2) 0
 
 # Real contrast_real vector 4 element 3
-set fmri(con_real4.3) 0
+set fmri(con_real4.3) 1.0
 
 # Real contrast_real vector 4 element 4
 set fmri(con_real4.4) 0
-
-# Real contrast_real vector 4 element 5
-set fmri(con_real4.5) 1.0
-
-# Real contrast_real vector 4 element 6
-set fmri(con_real4.6) 0
-
-# Display images for contrast_real 5
-set fmri(conpic_real.5) 1
-
-# Title for contrast_real 5
-set fmri(conname_real.5) "indig-sub"
-
-# Real contrast_real vector 5 element 1
-set fmri(con_real5.1) 0
-
-# Real contrast_real vector 5 element 2
-set fmri(con_real5.2) 0
-
-# Real contrast_real vector 5 element 3
-set fmri(con_real5.3) 1.0
-
-# Real contrast_real vector 5 element 4
-set fmri(con_real5.4) 0
-
-# Real contrast_real vector 5 element 5
-set fmri(con_real5.5) -1.0
-
-# Real contrast_real vector 5 element 6
-set fmri(con_real5.6) 0
-
-# Display images for contrast_real 6
-set fmri(conpic_real.6) 1
-
-# Title for contrast_real 6
-set fmri(conname_real.6) "sub-indig"
-
-# Real contrast_real vector 6 element 1
-set fmri(con_real6.1) 0
-
-# Real contrast_real vector 6 element 2
-set fmri(con_real6.2) 0
-
-# Real contrast_real vector 6 element 3
-set fmri(con_real6.3) -1.0
-
-# Real contrast_real vector 6 element 4
-set fmri(con_real6.4) 0
-
-# Real contrast_real vector 6 element 5
-set fmri(con_real6.5) 1.0
-
-# Real contrast_real vector 6 element 6
-set fmri(con_real6.6) 0
 
 # Display images for contrast_orig 1
 set fmri(conpic_orig.1) 1
 
 # Title for contrast_orig 1
-set fmri(conname_orig.1) "guilt-indig"
+set fmri(conname_orig.1) "guilt"
 
 # Real contrast_orig vector 1 element 1
-set fmri(con_orig1.1) 1
+set fmri(con_orig1.1) 1.0
 
 # Real contrast_orig vector 1 element 2
-set fmri(con_orig1.2) -1.0
-
-# Real contrast_orig vector 1 element 3
-set fmri(con_orig1.3) 0
+set fmri(con_orig1.2) 0.0
 
 # Display images for contrast_orig 2
 set fmri(conpic_orig.2) 1
 
 # Title for contrast_orig 2
-set fmri(conname_orig.2) "indig-guilt"
+set fmri(conname_orig.2) "indig"
 
 # Real contrast_orig vector 2 element 1
-set fmri(con_orig2.1) -1.0
+set fmri(con_orig2.1) 0.0
 
 # Real contrast_orig vector 2 element 2
 set fmri(con_orig2.2) 1.0
-
-# Real contrast_orig vector 2 element 3
-set fmri(con_orig2.3) 0
 
 # Display images for contrast_orig 3
 set fmri(conpic_orig.3) 1
 
 # Title for contrast_orig 3
-set fmri(conname_orig.3) "guilt-sub"
+set fmri(conname_orig.3) "guilt-indig"
 
 # Real contrast_orig vector 3 element 1
 set fmri(con_orig3.1) 1.0
 
 # Real contrast_orig vector 3 element 2
-set fmri(con_orig3.2) 0.0
-
-# Real contrast_orig vector 3 element 3
-set fmri(con_orig3.3) -1.0
+set fmri(con_orig3.2) -1.0
 
 # Display images for contrast_orig 4
 set fmri(conpic_orig.4) 1
 
 # Title for contrast_orig 4
-set fmri(conname_orig.4) "sub-guilt"
+set fmri(conname_orig.4) "indig-guilt"
 
 # Real contrast_orig vector 4 element 1
 set fmri(con_orig4.1) -1.0
 
 # Real contrast_orig vector 4 element 2
-set fmri(con_orig4.2) 0
-
-# Real contrast_orig vector 4 element 3
-set fmri(con_orig4.3) 1.0
-
-# Display images for contrast_orig 5
-set fmri(conpic_orig.5) 1
-
-# Title for contrast_orig 5
-set fmri(conname_orig.5) "indig-sub"
-
-# Real contrast_orig vector 5 element 1
-set fmri(con_orig5.1) 0
-
-# Real contrast_orig vector 5 element 2
-set fmri(con_orig5.2) 1.0
-
-# Real contrast_orig vector 5 element 3
-set fmri(con_orig5.3) -1.0
-
-# Display images for contrast_orig 6
-set fmri(conpic_orig.6) 1
-
-# Title for contrast_orig 6
-set fmri(conname_orig.6) "sub-indig"
-
-# Real contrast_orig vector 6 element 1
-set fmri(con_orig6.1) 0
-
-# Real contrast_orig vector 6 element 2
-set fmri(con_orig6.2) -1.0
-
-# Real contrast_orig vector 6 element 3
-set fmri(con_orig6.3) 1.0
+set fmri(con_orig4.2) 1.0
 
 # Contrast masking - use >0 instead of thresholding?
 set fmri(conmask_zerothresh_yn) 0
@@ -3259,12 +3095,6 @@ set fmri(conmask1_3) 0
 # Mask real contrast/F-test 1 with real contrast/F-test 4?
 set fmri(conmask1_4) 0
 
-# Mask real contrast/F-test 1 with real contrast/F-test 5?
-set fmri(conmask1_5) 0
-
-# Mask real contrast/F-test 1 with real contrast/F-test 6?
-set fmri(conmask1_6) 0
-
 # Mask real contrast/F-test 2 with real contrast/F-test 1?
 set fmri(conmask2_1) 0
 
@@ -3273,12 +3103,6 @@ set fmri(conmask2_3) 0
 
 # Mask real contrast/F-test 2 with real contrast/F-test 4?
 set fmri(conmask2_4) 0
-
-# Mask real contrast/F-test 2 with real contrast/F-test 5?
-set fmri(conmask2_5) 0
-
-# Mask real contrast/F-test 2 with real contrast/F-test 6?
-set fmri(conmask2_6) 0
 
 # Mask real contrast/F-test 3 with real contrast/F-test 1?
 set fmri(conmask3_1) 0
@@ -3289,12 +3113,6 @@ set fmri(conmask3_2) 0
 # Mask real contrast/F-test 3 with real contrast/F-test 4?
 set fmri(conmask3_4) 0
 
-# Mask real contrast/F-test 3 with real contrast/F-test 5?
-set fmri(conmask3_5) 0
-
-# Mask real contrast/F-test 3 with real contrast/F-test 6?
-set fmri(conmask3_6) 0
-
 # Mask real contrast/F-test 4 with real contrast/F-test 1?
 set fmri(conmask4_1) 0
 
@@ -3303,42 +3121,6 @@ set fmri(conmask4_2) 0
 
 # Mask real contrast/F-test 4 with real contrast/F-test 3?
 set fmri(conmask4_3) 0
-
-# Mask real contrast/F-test 4 with real contrast/F-test 5?
-set fmri(conmask4_5) 0
-
-# Mask real contrast/F-test 4 with real contrast/F-test 6?
-set fmri(conmask4_6) 0
-
-# Mask real contrast/F-test 5 with real contrast/F-test 1?
-set fmri(conmask5_1) 0
-
-# Mask real contrast/F-test 5 with real contrast/F-test 2?
-set fmri(conmask5_2) 0
-
-# Mask real contrast/F-test 5 with real contrast/F-test 3?
-set fmri(conmask5_3) 0
-
-# Mask real contrast/F-test 5 with real contrast/F-test 4?
-set fmri(conmask5_4) 0
-
-# Mask real contrast/F-test 5 with real contrast/F-test 6?
-set fmri(conmask5_6) 0
-
-# Mask real contrast/F-test 6 with real contrast/F-test 1?
-set fmri(conmask6_1) 0
-
-# Mask real contrast/F-test 6 with real contrast/F-test 2?
-set fmri(conmask6_2) 0
-
-# Mask real contrast/F-test 6 with real contrast/F-test 3?
-set fmri(conmask6_3) 0
-
-# Mask real contrast/F-test 6 with real contrast/F-test 4?
-set fmri(conmask6_4) 0
-
-# Mask real contrast/F-test 6 with real contrast/F-test 5?
-set fmri(conmask6_5) 0
 
 # Do contrast masking at all?
 set fmri(conmask1_1) 0
@@ -3408,9 +3190,9 @@ set fmri(overwrite_yn) 0
                 content = file.read()
             if re.search('error', content, re.IGNORECASE):
                 print(f"Error found in report_log.html. Investigation required.")
-            zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/stats/*zstat*')
-            if len(zstat_files) != 3:
-                print("There are not 3 zstat files in the stats folder. Investigation required.")
+            cope_files = glob.glob(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/stats/cope*')
+            if len(cope_files) != 4:
+                print("There are not 4 cope files in the stats folder. Investigation required.")
             design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/design.png')
         def hash_image(image_path):
             with Image.open(image_path) as img:
@@ -3603,14 +3385,14 @@ set fmri(constcol) 0
 set fmri(poststats_yn) 1
 
 # Pre-threshold masking?
-set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_func.nii.gz"
+set fmri(threshmask) ""
 
 # Thresholding
 # 0 : None
 # 1 : Uncorrected
 # 2 : Voxel
 # 3 : Cluster
-set fmri(thresh) 0
+set fmri(thresh) 1
 
 # P threshold
 set fmri(prob_thresh) 0.05
@@ -3886,26 +3668,50 @@ set fmri(init_standard) ""
 # For full FEAT analysis: overwrite existing .feat output dir?
 set fmri(overwrite_yn) 0
 """
-    second_level_fsf_template_path = 'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template.fsf'
-    with open(second_level_fsf_template_path, 'w') as f:
-        f.write(second_level_fsf_template)
-    second_level_fsfs = []
-    for p_id in participants:
-        p_id_stripped = p_id.replace('P', '')
-        with open(second_level_fsf_template_path, 'r') as file:
-            fsf_data = file.readlines()
-        for i, line in enumerate(fsf_data):
-            if "set fmri(outputdir)" in line:
-                fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-{p_id_stripped}/crossrun"\n'
-            elif "set feat_files(1)" in line:
-                fsf_data[i] = f'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/run-01.feat"\n'
-            elif "set feat_files(2)" in line:
-                fsf_data[i] = f'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/run-04.feat"\n'
-        second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/sub-{p_id_stripped}/second_level_fsf.fsf'
-        second_level_fsfs.append(second_level_fsf)
-        with open(second_level_fsf, 'w') as file:
-            file.writelines(fsf_data)
-    print('fsf files for second-level GLM generated.')
+    
+    second_level_fsf_template_group = r"""
+    """
+
+    pre_thresh_masking = input("Use pre-threshold masking for second-level (as opposed to whole-brain)? (y/n)")
+    liberal_thresholding = input("Use liberal thresholding (p<0.01) for second-level (as opposed to standard p<0.05)? (y/n)")
+    cluster_thresholding = input("Use cluster-corrected thresholding for second-level (as opposed to no correction)? (y/n)")
+    group_diffs = input("Include group differences in the second-level? (y/n)")
+    
+    if group_diffs == 'n':
+        second_level_fsf_template_path = 'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template.fsf'
+        with open(second_level_fsf_template_path, 'w') as f:
+            f.write(second_level_fsf_template)
+        second_level_fsfs = []
+        for p_id in participants:
+            p_id_stripped = p_id.replace('P', '')
+            with open(second_level_fsf_template_path, 'r') as file:
+                fsf_data = file.readlines()
+            for i, line in enumerate(fsf_data):
+                if "set fmri(outputdir)" in line:
+                    fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-{p_id_stripped}/crossrun"\n'
+                elif "set feat_files(1)" in line:
+                    fsf_data[i] = f'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/run-01.feat"\n'
+                elif "set feat_files(2)" in line:
+                    fsf_data[i] = f'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/run-04.feat"\n'
+                elif "set fmri(threshmask)" in line:
+                    if pre_thresh_masking == 'y':
+                        fsf_data[i] = 'set fmri(threshmask) "data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
+                elif "set fmri(thresh)" in line:
+                    if cluster_thresholding == 'y':
+                        fsf_data[i] = 'set fmri(thresh) 3\n'
+                elif "set fmri(prob_thresh)" in line:
+                    if liberal_thresholding == 'y':
+                        fsf_data[i] = 'set fmri(prob_thresh) 0.1'
+            second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/sub-{p_id_stripped}/second_level_fsf.fsf'
+            second_level_fsfs.append(second_level_fsf)
+            with open(second_level_fsf, 'w') as file:
+                file.writelines(fsf_data)
+        print('fsf files for second-level GLM generated.')
+    else:
+        subject_fixed_effects = input("Include subjects as fixed effects in the second-level model (as opposed to random effects)? (y/n)")
+
+
+
 
     # Step 7: Run second-level GLM [ANALYSIS 1].
     print("\n###### STEP 7: RUN SECOND-LEVEL GLM [ANALYSIS 1] ######") 

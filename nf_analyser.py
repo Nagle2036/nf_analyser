@@ -3237,7 +3237,7 @@ set fmri(relative_yn) 0
 set fmri(help_yn) 1
 
 # Run Featwatcher
-set fmri(featwatcher_yn) 0
+set fmri(featwatcher_yn) 1
 
 # Cleanup first-level standard-space images
 set fmri(sscleanup_yn) 0
@@ -4208,7 +4208,7 @@ set fmri(relative_yn) 0
 set fmri(help_yn) 1
 
 # Run Featwatcher
-set fmri(featwatcher_yn) 0
+set fmri(featwatcher_yn) 1
 
 # Cleanup first-level standard-space images
 set fmri(sscleanup_yn) 0

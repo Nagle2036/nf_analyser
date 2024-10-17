@@ -7674,15 +7674,15 @@ print("\nWelcome to the neurofeedback analysis processor. Please ensure that the
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
 
-class Tee:
-    def __init__(self, log_file_path):
-        self.terminal = sys.stdout
-        self.log = open(log_file_path, "a")
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
-    def flush(self):
-        pass
+# class Tee:
+#     def __init__(self, log_file_path):
+#         self.terminal = sys.stdout
+#         self.log = open(log_file_path, "a")
+#     def write(self, message):
+#         self.terminal.write(message)
+#         self.log.write(message)
+#     def flush(self):
+#         pass
 
 def main_menu():
     while True:
@@ -7716,11 +7716,11 @@ def main_menu():
             print("Invalid choice. Please select a number between 1 and 7.")
 
 if __name__ == "__main__":
-    log_dir = os.getcwd()
-    log_file_name = "mri_processor_log.txt"
-    log_file_path = os.path.join(log_dir, log_file_name)
-    sys.stdout = Tee(log_file_path)
+    # log_dir = os.getcwd()
+    # log_file_name = "mri_processor_log.txt"
+    # log_file_path = os.path.join(log_dir, log_file_name)
+    # sys.stdout = Tee(log_file_path)
     main_menu()
-    sys.stdout.log.close()
+    # sys.stdout.log.close()
         
 #endregion

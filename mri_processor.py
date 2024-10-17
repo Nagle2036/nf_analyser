@@ -7688,23 +7688,26 @@ class StreamToLogger:
     def flush(self):
         pass
 
-# Set up logging to both file and console
+# Set up logging with different formats for file and console
 def setup_logging(log_file_path):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    # File handler for logging to a file
+    # File handler for logging to a file (with full format)
     file_handler = logging.FileHandler(log_file_path)
     file_handler.setLevel(logging.DEBUG)
 
-    # Console handler for logging to the console
+    # Console handler for logging to the console (simple format)
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.DEBUG)
 
-    # Create a formatter and set it for both handlers
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
+    # Create formatters
+    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    console_formatter = logging.Formatter('%(message)s')  # Simple format for console
+
+    # Apply formatters to handlers
+    file_handler.setFormatter(file_formatter)
+    console_handler.setFormatter(console_formatter)
 
     # Add handlers to the logger
     logger.addHandler(file_handler)

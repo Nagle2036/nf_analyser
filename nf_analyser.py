@@ -5405,10 +5405,10 @@ set fmri(overwrite_yn) 0
     
     if group_diffs == '2':
         group_diffs_fsf_label = 'nogroup'
-        second_level_fsf_template_path = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
-        with open(second_level_fsf_template_path, 'w') as f:
-            f.write(second_level_fsf_template_path)
-        with open(second_level_fsf_template_path, 'r') as file:
+        second_level_fsf_template_path_nogroup = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
+        with open(second_level_fsf_template_path_nogroup, 'w') as f:
+            f.write(second_level_fsf_template_path_nogroup)
+        with open(second_level_fsf_template_path_nogroup, 'r') as file:
             fsf_data = file.readlines()
         for i, line in enumerate(fsf_data):
             if "set fmri(outputdir)" in line:
@@ -5426,7 +5426,7 @@ set fmri(overwrite_yn) 0
         second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
         with open(second_level_fsf, 'w') as file:
             file.writelines(fsf_data)
-        os.remove(second_level_fsf_template_path)
+        os.remove(second_level_fsf_template_path_nogroup)
         print(f'fsf file for second-level GLM generated and saved to second_level/shared folder.\nGLM details: {pre_thresh_masking_fsf_label}, {liberal_thresholding_fsf_label}, {cluster_thresholding_fsf_label}, {group_diffs_fsf_label}')
     
     elif group_diffs == '1':

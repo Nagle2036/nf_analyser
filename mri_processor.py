@@ -7693,12 +7693,14 @@ class StreamToLogger:
 def rotate_logs(log_file_path):
     if os.path.exists(log_file_path):
         with open(log_file_path, "r") as f:
-            logs = f.read().split("\n##### NEW SESSION #####\n")
-        
-        # Keep the last MAX_LOGS number of logs
+            logs = f.read().strip().split("\n##### NEW SESSION #####\n")
+
+        # Ensure we only retain the last MAX_LOGS
         if len(logs) > MAX_LOGS:
+            # Retain only the last MAX_LOGS instances
             with open(log_file_path, "w") as f:
                 f.write("\n##### NEW SESSION #####\n".join(logs[-MAX_LOGS:]))
+                f.write("\n##### NEW SESSION #####\n")
 
 def setup_logging(log_file_path):
     rotate_logs(log_file_path)  # Rotate the logs to keep the recent ones

@@ -7747,7 +7747,7 @@ def main_menu():
 
 if __name__ == "__main__":
     log_dir = os.getcwd()
-    log_file_name = "mri_processor_log.txt"
+    log_file_name = "nf_analyser_log.txt"
     log_file_path = os.path.join(log_dir, log_file_name)
     setup_logging(log_file_path)
     main_menu()

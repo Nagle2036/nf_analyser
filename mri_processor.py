@@ -3,7 +3,7 @@
 ### TO DO ###
 # Change output log text file so that it overwrites itself each time
 # Fix section 1 - Box file download to server
-# Change script name.
+# Change script name to nf_analyser.
 
 #region 0) IMPORT PACKAGES.
 
@@ -60,7 +60,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 #region 1) DOWNLOAD BOX FILES TO SERVER.
 
 def download_box_files():
-    p_id = input("Enter the participant's ID (e.g. P001).\n")
+    p_id = logged_input("Enter the participant's ID (e.g. P001).\n")
     working_dir = os.getcwd()
     p_id_folder = os.path.join(os.getcwd(), p_id)
     if not os.path.exists(p_id_folder):
@@ -136,7 +136,7 @@ def download_box_files():
     webbrowser.open(auth_url)
     # Wait for the user to complete the authorization flow
     print("Waiting for authorisation...")
-    input("Press Enter to continue once authorised...")
+    logged_input("Press Enter to continue once authorised...")
     # Shut down the local web server
     server.shutdown()
     # Create the Box client using the access token
@@ -249,9 +249,9 @@ def download_box_files():
 
 def thermometer_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
-    restart = input("\nWould you like to start the thermometer analysis from scratch? This will delete the entire analysis/thermometer_analysis folder. (y/n)\n")
+    restart = logged_input("\nWould you like to start the thermometer analysis from scratch? This will delete the entire analysis/thermometer_analysis folder. (y/n)\n")
     if restart == 'y':
-        double_check = input("\nAre you sure? (y/n)\n")
+        double_check = logged_input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             thermometer_analysis_folder = 'analysis/thermometer_analysis'
             print(f"Deleting analysis/thermometer_analysis folder...")
@@ -1035,9 +1035,9 @@ def thermometer_analysis():
 def clinical_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("\nWould you like to start the clinical analysis from scratch? This will remove all files from the analysis/clinical_analysis folder. (y/n)\n")
+    restart = logged_input("\nWould you like to start the clinical analysis from scratch? This will remove all files from the analysis/clinical_analysis folder. (y/n)\n")
     if restart == 'y':
-        double_check = input("\nAre you sure? (y/n)\n")
+        double_check = logged_input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             clinical_analysis_folder = 'analysis/clinical_analysis'
             print(f"Deleting analysis/clinical_analysis folder...")
@@ -2175,9 +2175,9 @@ def clinical_analysis():
 def fmri_prep_and_preproc():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("\nWould you like to start the fMRI preparation and preprocessing from scratch? This will remove all files from the 'data/bids', 'data/fmriprep_derivatives' and 'data/fully_preproc' folders. (y/n)\n")
+    restart = logged_input("\nWould you like to start the fMRI preparation and preprocessing from scratch? This will remove all files from the 'data/bids', 'data/fmriprep_derivatives' and 'data/fully_preproc' folders. (y/n)\n")
     if restart == 'y':
-        double_check = input("\nAre you sure? (y/n)\n")
+        double_check = logged_input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             bids_folder = 'data/bids'
             print(f"Deleting data/bids folder...")
@@ -2265,7 +2265,7 @@ def fmri_prep_and_preproc():
 
     # Step 4: Copy BIDS Niftis and Singularity Image to Cluster.
     print("\n###### STEP 4: COPY BIDS NIFTIS AND SINGULARITY IMAGE TO CLUSTER ######")
-    answer = input('Would you like to copy BIDS Niftis and singularity image to the cluster? (y/n)\n')
+    answer = logged_input('Would you like to copy BIDS Niftis and singularity image to the cluster? (y/n)\n')
     if answer == 'y':
         if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/bids'):
             print("Copying BIDS files for all participants to cluster...")
@@ -2334,7 +2334,7 @@ exit
     with open('data/fmriprep_cluster.sh', 'w') as f:
         f.write(fmriprep_cluster_script)
     if not os.path.exists('/mnt/lustre/scratch/bsms/bsms9pc4/stone_depnf/fmriprep/derivatives/sub-004'):
-        answer = input('Would you like to run fMRIPrep? (y/n)\n')
+        answer = logged_input('Would you like to run fMRIPrep? (y/n)\n')
         if answer == 'y':
             subprocess.run(['ssh', '-Y', 'bsms9pc4@apollo2.hpc.susx.ac.uk', 'source /etc/profile; source ~/.bash_profile; qsub /research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/fmriprep_cluster.sh'])
             print('Running fMRIPrep on cluster server...')
@@ -2456,9 +2456,9 @@ def fmri_analysis():
     print("\n=========================\nF M R I   A N A L Y S I S\n=========================")
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("\nWould you like to start the fMRI analysis from scratch? This will remove all files from the 'analysis/fmri_analysis' folder. (y/n)\n")
+    restart = logged_input("\nWould you like to start the fMRI analysis from scratch? This will remove all files from the 'analysis/fmri_analysis' folder. (y/n)\n")
     if restart == 'y':
-        double_check = input("\nAre you sure? (y/n)\n")
+        double_check = logged_input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             fmri_analysis_folder = 'analysis/fmri_analysis'
             print(f"Deleting analysis/fmri_analysis folder...")
@@ -5378,7 +5378,7 @@ set fmri(init_standard) ""
 set fmri(overwrite_yn) 0
 """
 
-    pre_thresh_masking = input("Select pre-threshold masking [1] or whole-brain analysis [2] for second-level: ")
+    pre_thresh_masking = logged_input("Select pre-threshold masking [1] or whole-brain analysis [2] for second-level: ")
     if pre_thresh_masking == '1':
         pre_thresh_masking_fsf_label = 'scc'
     elif pre_thresh_masking == '2':
@@ -5386,7 +5386,7 @@ set fmri(overwrite_yn) 0
     else:
         print('Invalid response. Please start again.')
         sys.exit()
-    liberal_thresholding = input("Select liberal thresholding (0.1) [1] or standard thresholding (0.05) [2] for second-level: ")
+    liberal_thresholding = logged_input("Select liberal thresholding (0.1) [1] or standard thresholding (0.05) [2] for second-level: ")
     if liberal_thresholding == '1':
         liberal_thresholding_fsf_label = 'liberal'
     elif liberal_thresholding == '2':
@@ -5394,7 +5394,7 @@ set fmri(overwrite_yn) 0
     else:
         print('Invalid response. Please start again.')
         sys.exit()
-    cluster_thresholding = input("Select cluster-corrected thresholding [1] or no correction [2] for second-level: ")
+    cluster_thresholding = logged_input("Select cluster-corrected thresholding [1] or no correction [2] for second-level: ")
     if cluster_thresholding == '1':
         cluster_thresholding_fsf_label = 'cluster'
     elif cluster_thresholding == '2':
@@ -5402,7 +5402,7 @@ set fmri(overwrite_yn) 0
     else: 
         print('Invalid response. Please start again.')
         sys.exit()
-    group_diffs = input("Select group comparison [1] or no group comparison [2] in the second-level: ")
+    group_diffs = logged_input("Select group comparison [1] or no group comparison [2] in the second-level: ")
     
     if group_diffs == '2':
         group_diffs_fsf_label = 'nogroup'
@@ -5432,10 +5432,10 @@ set fmri(overwrite_yn) 0
     
     elif group_diffs == '1':
         group_diffs_fsf_label = 'group'
-        subject_fixed_effects = input("Select subjects to be enter as fixed effects in the second-level [1] or random effects in the third-level [2]: ")
+        subject_fixed_effects = logged_input("Select subjects to be enter as fixed effects in the second-level [1] or random effects in the third-level [2]: ")
         if subject_fixed_effects == '1':
             subject_fixed_effects_fsf_label = 'subjectfixedfx'
-            interaction_effect = input("Select inclusion [1] or exclusion [2] of group:run interaction effect: ")
+            interaction_effect = logged_input("Select inclusion [1] or exclusion [2] of group:run interaction effect: ")
             if interaction_effect == '2':
                 interaction_effect_fsf_label = 'nointeraction'
                 second_level_fsf_template_path_group_fixedfx_noint = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_label}_{interaction_effect_label}.fsf'
@@ -5521,9 +5521,9 @@ set fmri(overwrite_yn) 0
 def susceptibility_analysis():
     participants = ['P004', 'P006', 'P020', 'P030', 'P059', 'P078', 'P093', 'P094', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     runs = ['run01', 'run02', 'run03', 'run04']
-    restart = input("\nWould you like to start the susceptibility artifact analysis from scratch? This will remove all files from the 'analysis/susceptibility' folder. (y/n)\n")
+    restart = logged_input("\nWould you like to start the susceptibility artifact analysis from scratch? This will remove all files from the 'analysis/susceptibility' folder. (y/n)\n")
     if restart == 'y':
-        double_check = input("\nAre you sure? (y/n)\n")
+        double_check = logged_input("\nAre you sure? (y/n)\n")
         if double_check == 'y':
             susceptibility_analysis_folder = 'analysis/susceptibility_analysis'
             print(f"Deleting analysis/susceptibility_analysis folder...")
@@ -7671,9 +7671,13 @@ def susceptibility_analysis():
 
 #region MAIN MENU.
 
-print("\nWelcome to the neurofeedback analysis processor. Please ensure that the following steps are complete before proceeding:\n")
+print("\nWelcome to the neurofeedback analyser script. Please ensure that the following steps are complete before proceeding:\n")
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
+
+from datetime import datetime
+
+MAX_LOGS = 5  # Number of log sessions to keep
 
 class StreamToLogger:
     def __init__(self, logger, log_level=logging.INFO):
@@ -7685,21 +7689,46 @@ class StreamToLogger:
             self.logger.log(self.log_level, line)
     def flush(self):
         pass
+
+def rotate_logs(log_file_path):
+    if os.path.exists(log_file_path):
+        with open(log_file_path, "r") as f:
+            logs = f.read().split("\n##### NEW SESSION #####\n")
+        
+        # Keep the last MAX_LOGS number of logs
+        if len(logs) > MAX_LOGS:
+            with open(log_file_path, "w") as f:
+                f.write("\n##### NEW SESSION #####\n".join(logs[-MAX_LOGS:]))
+
 def setup_logging(log_file_path):
+    rotate_logs(log_file_path)  # Rotate the logs to keep the recent ones
+
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
+
     file_handler = logging.FileHandler(log_file_path)
     file_handler.setLevel(logging.DEBUG)
+
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.DEBUG)
+
     file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     console_formatter = logging.Formatter('%(message)s')
+
     file_handler.setFormatter(file_formatter)
     console_handler.setFormatter(console_formatter)
+
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+
+    # Redirect stdout and stderr to logger
     sys.stdout = StreamToLogger(logger, logging.INFO)
     sys.stderr = StreamToLogger(logger, logging.ERROR)
+
+    # Append new session log to the log file
+    with open(log_file_path, "a") as log_file:
+        log_file.write("\n##### NEW SESSION #####\n")
+        log_file.write(f"Script started on: {datetime.now()}\n")
 def logged_input(prompt=""):
     user_input = input(prompt)
     logging.info(f"User input: {user_input}")

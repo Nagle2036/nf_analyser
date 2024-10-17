@@ -3211,7 +3211,7 @@ set fmri(overwrite_yn) 0
     
     # Step 7: Generate second-level fsf file [ANALYSIS 1].
     print("\n###### STEP 7: GENERATE SECOND-LEVEL FSF FILE [ANALYSIS 1] ######")   
-    second_level_fsf_template_path_nogroup = r"""
+    second_level_fsf_template_nogroup = r"""
 # FEAT version number
 set fmri(version) 6.00
 
@@ -4182,7 +4182,7 @@ set fmri(init_standard) ""
 set fmri(overwrite_yn) 0
 """
     
-    second_level_fsf_template_path_group_fixedfx_noint = r"""
+    second_level_fsf_template_group_fixedfx_noint = r"""
 # FEAT version number
 set fmri(version) 6.00
 
@@ -5407,7 +5407,7 @@ set fmri(overwrite_yn) 0
         group_diffs_fsf_label = 'nogroup'
         second_level_fsf_template_path_nogroup = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
         with open(second_level_fsf_template_path_nogroup, 'w') as f:
-            f.write(second_level_fsf_template_path_nogroup)
+            f.write(second_level_fsf_template_nogroup)
         with open(second_level_fsf_template_path_nogroup, 'r') as file:
             fsf_data = file.readlines()
         for i, line in enumerate(fsf_data):
@@ -5439,7 +5439,7 @@ set fmri(overwrite_yn) 0
                 interaction_effect_fsf_label = 'nointeraction'
                 second_level_fsf_template_path_group_fixedfx_noint = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_label}_{interaction_effect_label}.fsf'
                 with open(second_level_fsf_template_path_group_fixedfx_noint, 'w') as f:
-                    f.write(second_level_fsf_template_path_group_fixedfx_noint)
+                    f.write(second_level_fsf_template_group_fixedfx_noint)
                 with open(second_level_fsf_template_path_group_fixedfx_noint, 'r') as file:
                     fsf_data = file.readlines()
                 for i, line in enumerate(fsf_data):

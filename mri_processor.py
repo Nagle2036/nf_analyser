@@ -7675,31 +7675,44 @@ print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
 
 import logging
-# Set up logging
-log_dir = os.getcwd()  # You can modify the log directory if needed
-log_file_name = "mri_processor_log.txt"
-log_file_path = os.path.join(log_dir, log_file_name)
+class StreamToLogger:
+    def __init__(self, logger, log_level=logging.INFO):
+        self.logger = logger
+        self.log_level = log_level
+        self.linebuf = ''
 
-# Create a logger
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+    def write(self, buf):
+        for line in buf.rstrip().splitlines():
+            self.logger.log(self.log_level, line)
 
-# Create file handler for logging to a file
-file_handler = logging.FileHandler(log_file_path)
-file_handler.setLevel(logging.DEBUG)
+    def flush(self):
+        pass
 
-# Create console handler for logging to the console
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.DEBUG)
+# Set up logging to both file and console
+def setup_logging(log_file_path):
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
 
-# Create a formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
-console_handler.setFormatter(formatter)
+    # File handler for logging to a file
+    file_handler = logging.FileHandler(log_file_path)
+    file_handler.setLevel(logging.DEBUG)
 
-# Add the handlers to the logger
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
+    # Console handler for logging to the console
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.DEBUG)
+
+    # Create a formatter and set it for both handlers
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+
+    # Add handlers to the logger
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    # Redirect stdout and stderr to the logger
+    sys.stdout = StreamToLogger(logger, logging.INFO)
+    sys.stderr = StreamToLogger(logger, logging.ERROR)
 
 def main_menu():
     while True:
@@ -7733,11 +7746,10 @@ def main_menu():
             print("Invalid choice. Please select a number between 1 and 7.")
 
 if __name__ == "__main__":
-    # log_dir = os.getcwd()
-    # log_file_name = "mri_processor_log.txt"
-    # log_file_path = os.path.join(log_dir, log_file_name)
-    # sys.stdout = Tee(log_file_path)
+    log_dir = os.getcwd()
+    log_file_name = "mri_processor_log.txt"
+    log_file_path = os.path.join(log_dir, log_file_name)
+    setup_logging(log_file_path)
     main_menu()
-    # sys.stdout.log.close()
         
 #endregion

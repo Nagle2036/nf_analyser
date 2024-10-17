@@ -7674,15 +7674,32 @@ print("\nWelcome to the neurofeedback analysis processor. Please ensure that the
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
 
-# class Tee:
-#     def __init__(self, log_file_path):
-#         self.terminal = sys.stdout
-#         self.log = open(log_file_path, "a")
-#     def write(self, message):
-#         self.terminal.write(message)
-#         self.log.write(message)
-#     def flush(self):
-#         pass
+import logging
+# Set up logging
+log_dir = os.getcwd()  # You can modify the log directory if needed
+log_file_name = "mri_processor_log.txt"
+log_file_path = os.path.join(log_dir, log_file_name)
+
+# Create a logger
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+# Create file handler for logging to a file
+file_handler = logging.FileHandler(log_file_path)
+file_handler.setLevel(logging.DEBUG)
+
+# Create console handler for logging to the console
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.DEBUG)
+
+# Create a formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+
+# Add the handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 def main_menu():
     while True:

@@ -5494,8 +5494,7 @@ set fmri(overwrite_yn) 0
                 mean_func_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/mean_func.nii.gz'
                 standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/standard.nii.gz'
                 shutil.copy(mean_func_path, standard_path)
-    
-    if subject_fixed_effects == '1':
+    if group_diffs == '2' or subject_fixed_effects == '1':
         if not os.path.isdir(f'analysis.fmri_analysis/analysis_1/second_level/shared/{feat_folder}'):
             print('Running second-level GLM with above parameters...')
             subprocess.run(['feat', second_level_fsf])

@@ -2,7 +2,6 @@
 
 ### TO DO ###
 # Fix section 1 - Box file download to server
-# Change script name to nf_analyser.
 
 #region 0) IMPORT PACKAGES.
 
@@ -7670,7 +7669,6 @@ def susceptibility_analysis():
 #endregion
 
 #region MAIN MENU.
-
 print("\nWelcome to the neurofeedback analyser script. Please ensure that the following steps are complete before proceeding:\n")
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")

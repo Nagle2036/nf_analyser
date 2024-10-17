@@ -7,6 +7,7 @@
 
 #region 0) IMPORT PACKAGES.
 
+import logging
 import time
 import urllib.parse
 import webbrowser
@@ -7668,58 +7669,45 @@ def susceptibility_analysis():
             subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
 #endregion
 
-#region INSTRUCTIONS.
+#region MAIN MENU.
 
 print("\nWelcome to the neurofeedback analysis processor. Please ensure that the following steps are complete before proceeding:\n")
 print("1. Upload the participant's data to Box.\n")
 print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
 
-import logging
 class StreamToLogger:
     def __init__(self, logger, log_level=logging.INFO):
         self.logger = logger
         self.log_level = log_level
         self.linebuf = ''
-
     def write(self, buf):
         for line in buf.rstrip().splitlines():
             self.logger.log(self.log_level, line)
-
     def flush(self):
         pass
-
-# Set up logging with different formats for file and console
 def setup_logging(log_file_path):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-
-    # File handler for logging to a file (with full format)
     file_handler = logging.FileHandler(log_file_path)
     file_handler.setLevel(logging.DEBUG)
-
-    # Console handler for logging to the console (simple format)
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.DEBUG)
-
-    # Create formatters
     file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    console_formatter = logging.Formatter('%(message)s')  # Simple format for console
-
-    # Apply formatters to handlers
+    console_formatter = logging.Formatter('%(message)s')
     file_handler.setFormatter(file_formatter)
     console_handler.setFormatter(console_formatter)
-
-    # Add handlers to the logger
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
-
-    # Redirect stdout and stderr to the logger
     sys.stdout = StreamToLogger(logger, logging.INFO)
     sys.stderr = StreamToLogger(logger, logging.ERROR)
+def logged_input(prompt=""):
+    user_input = input(prompt)
+    logging.info(f"User input: {user_input}")
+    return user_input
 
 def main_menu():
     while True:
-        print("\n##### MAIN MENU #####")
+        print("##### MAIN MENU #####")
         print("1. DOWNLOAD BOX FILES TO SERVER (needs updating)")
         print("2. THERMOMETER ANALYSIS")
         print("3. CLINICAL ANALYSIS")
@@ -7728,7 +7716,7 @@ def main_menu():
         print("6. SUSCEPTIBILITY ANALYSIS")
         print("7. EXIT")
 
-        choice = input("\nPlease choose an option (1-7): ")
+        choice = logged_input("\nPlease choose an option (1-7): ")
 
         if choice == '1':
             download_box_files()

@@ -5437,15 +5437,15 @@ set fmri(overwrite_yn) 0
             interaction_effect = logged_input("Select inclusion [1] or exclusion [2] of group:run interaction effect: ")
             if interaction_effect == '2':
                 interaction_effect_fsf_label = 'nointeraction'
-                second_level_fsf_template_path_group_fixedfx_noint = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_label}_{interaction_effect_label}.fsf'
+                second_level_fsf_template_path_group_fixedfx_noint = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.fsf'
                 with open(second_level_fsf_template_path_group_fixedfx_noint, 'w') as f:
                     f.write(second_level_fsf_template_group_fixedfx_noint)
                 with open(second_level_fsf_template_path_group_fixedfx_noint, 'r') as file:
                     fsf_data = file.readlines()
                 for i, line in enumerate(fsf_data):
                     if "set fmri(outputdir)" in line:
-                        feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_label}_{interaction_effect_label}.gfeat'
-                        fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_label}_{interaction_effect_label}"\n'
+                        feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.gfeat'
+                        fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}"\n'
                     elif "set fmri(threshmask)" in line:
                         if pre_thresh_masking == '1':
                             fsf_data[i] = 'set fmri(threshmask) "data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'

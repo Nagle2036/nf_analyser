@@ -5481,18 +5481,19 @@ set fmri(overwrite_yn) 0
         sys.exit()
 
     # Step 7: Run second-level GLM [ANALYSIS 1].
-    print("\n###### STEP 7: RUN SECOND-LEVEL GLM [ANALYSIS 1] ######") 
-    if not os.path.exists('analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat/reg/example_func2standard.mat'):
-        for p_id in participants:
-            p_id_stripped = p_id.replace('P', '')
-            for run in runs:
-                reg_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg'
-                os.makedirs(reg_folder, exist_ok=True)
-                init_mat_path = '/usr/local/fsl/etc/flirtsch/ident.mat'
-                example_func2standard_mat_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/example_func2standard.mat'
+    print("\n###### STEP 7: RUN SECOND-LEVEL GLM [ANALYSIS 1] ######")
+    for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
+        for run in runs:
+            reg_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg'
+            os.makedirs(reg_folder, exist_ok=True)
+            init_mat_path = '/usr/local/fsl/etc/flirtsch/ident.mat'
+            example_func2standard_mat_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/example_func2standard.mat'
+            if not os.path.exists(example_func2standard_mat_path):
                 shutil.copy(init_mat_path, example_func2standard_mat_path)
-                mean_func_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/mean_func.nii.gz'
-                standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/standard.nii.gz'
+            mean_func_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/mean_func.nii.gz'
+            standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/standard.nii.gz'
+            if not os.path.exists(standard_path):
                 shutil.copy(mean_func_path, standard_path)
     if group_diffs == '2' or subject_fixed_effects == '1':
         if not os.path.isdir(f'analysis.fmri_analysis/analysis_1/second_level/shared/{feat_folder}'):

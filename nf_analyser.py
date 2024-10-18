@@ -7710,17 +7710,10 @@ def setup_logging(log_file_path):
     with open(log_file_path, "a") as log_file:
         log_file.write("\n##### NEW SESSION #####\n")
         log_file.write(f"Script started on: {datetime.now()}\n")
-    return console_handler
-def disable_console_logging(logger):
-    logger.removeHandler(logger.console_handler)
-def enable_console_logging(logger):
-    logger.addHandler(logger.console_handler)
 def logged_input(prompt=""):
     logger = logging.getLogger()
     user_input = input(prompt)
-    disable_console_logging(logger)
     logging.info(f"User input: {user_input}")
-    enable_console_logging(logger)
     return user_input
 
 def main_menu():

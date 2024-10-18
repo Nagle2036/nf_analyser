@@ -4116,10 +4116,10 @@ set fmri(conpic_real.4) 1
 set fmri(conname_real.4) "run04-run01"
 
 # Real contrast_real vector 4 element 1
-set fmri(con_real4.1) 1.0
+set fmri(con_real4.1) -1.0
 
 # Real contrast_real vector 4 element 2
-set fmri(con_real4.2) -1.0
+set fmri(con_real4.2) 1.0
 
 # Contrast masking - use >0 instead of thresholding?
 set fmri(conmask_zerothresh_yn) 0
@@ -5269,10 +5269,10 @@ set fmri(conpic_real.4) 1
 set fmri(conname_real.4) "run04-run01"
 
 # Real contrast_real vector 4 element 1
-set fmri(con_real4.1) 1.0
+set fmri(con_real4.1) -1.0
 
 # Real contrast_real vector 4 element 2
-set fmri(con_real4.2) -1.0
+set fmri(con_real4.2) 1.0
 
 # Real contrast_real vector 4 element 3
 set fmri(con_real4.3) 0.0
@@ -5415,13 +5415,13 @@ set fmri(overwrite_yn) 0
                 feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.gfeat'
                 fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}"\n'
             elif "set fmri(threshmask)" in line:
-                if pre_thresh_masking == 'y':
+                if pre_thresh_masking == '1':
                     fsf_data[i] = 'set fmri(threshmask) "data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
             elif "set fmri(thresh)" in line:
-                if cluster_thresholding == 'y':
+                if cluster_thresholding == '1':
                     fsf_data[i] = 'set fmri(thresh) 3\n'
             elif "set fmri(prob_thresh)" in line:
-                if liberal_thresholding == 'y':
+                if liberal_thresholding == '1':
                     fsf_data[i] = 'set fmri(prob_thresh) 0.1\n'
         second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
         with open(second_level_fsf, 'w') as file:
@@ -5447,13 +5447,13 @@ set fmri(overwrite_yn) 0
                         feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_label}_{interaction_effect_label}.gfeat'
                         fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_label}_{interaction_effect_label}"\n'
                     elif "set fmri(threshmask)" in line:
-                        if pre_thresh_masking == 'y':
+                        if pre_thresh_masking == '1':
                             fsf_data[i] = 'set fmri(threshmask) "data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
                     elif "set fmri(thresh)" in line:
-                        if cluster_thresholding == 'y':
+                        if cluster_thresholding == '1':
                             fsf_data[i] = 'set fmri(thresh) 3\n'
                     elif "set fmri(prob_thresh)" in line:
-                        if liberal_thresholding == 'y':
+                        if liberal_thresholding == '1':
                             fsf_data[i] = 'set fmri(prob_thresh) 0.1\n'
                 second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.fsf'
                 with open(second_level_fsf, 'w') as file:
@@ -5499,6 +5499,7 @@ set fmri(overwrite_yn) 0
         if not os.path.isdir(f'analysis.fmri_analysis/analysis_1/second_level/shared/{feat_folder}'):
             print('Running second-level GLM with above parameters...')
             subprocess.run(['feat', second_level_fsf])
+            print("Second-level completed. If this is the last analysis level, look at mask.nii.gz overlayed onto bg_image.nii.gz and look at filtered_func_data.nii.gz for QA.")
             report_log_path = f'analysis/fmri_analysis/analysis_1/second_level/shared/{feat_folder}/report_log.html'
             with open(report_log_path, 'r') as file:
                 content = file.read()
@@ -7671,7 +7672,7 @@ def susceptibility_analysis():
 #region MAIN MENU.
 print("\nWelcome to the neurofeedback analyser script. Please ensure that the following steps are complete before proceeding:\n")
 print("1. Upload the participant's data to Box.\n")
-print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.\n")
+print("2. In the Bash terminal, change the working directory to the participant_data folder within the cisc2 drive.")
 
 MAX_LOGS = 5  
 class StreamToLogger:
@@ -7718,7 +7719,7 @@ def logged_input(prompt=""):
 
 def main_menu():
     while True:
-        print("##### MAIN MENU #####")
+        print("\n##### MAIN MENU #####")
         print("1. DOWNLOAD BOX FILES TO SERVER (needs updating)")
         print("2. THERMOMETER ANALYSIS")
         print("3. CLINICAL ANALYSIS")

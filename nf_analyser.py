@@ -5644,14 +5644,14 @@ set fmri(overwrite_yn) 0
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         for run in runs:
-            reg_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg'
+            reg_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}_{pre_thresh_masking_fsf_label}.feat/reg'
             os.makedirs(reg_folder, exist_ok=True)
             init_mat_path = '/usr/local/fsl/etc/flirtsch/ident.mat'
-            example_func2standard_mat_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/example_func2standard.mat'
+            example_func2standard_mat_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}_{pre_thresh_masking_fsf_label}.feat/reg/example_func2standard.mat'
             if not os.path.exists(example_func2standard_mat_path):
                 shutil.copy(init_mat_path, example_func2standard_mat_path)
-            mean_func_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/mean_func.nii.gz'
-            standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/standard.nii.gz'
+            mean_func_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}_{pre_thresh_masking_fsf_label}.feat/mean_func.nii.gz'
+            standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}_{pre_thresh_masking_fsf_label}.feat/reg/standard.nii.gz'
             if not os.path.exists(standard_path):
                 shutil.copy(mean_func_path, standard_path)
     if group_diffs == '2' or subject_fixed_effects == '1':
@@ -5673,6 +5673,14 @@ set fmri(overwrite_yn) 0
     else:
         print("SUBJECT RANDOM EFFECTS GLM NOT FINALISED.")
         sys.exit()
+
+    # Step 8: Perform ANOVA on SCC BOLD Data [Analysis 1].
+    print("\n###### STEP 8: PERFORM ANOVA ON SCC BOLD DATA [ANALYSIS 1] ######")
+    for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
+        for run in runs:
+            pass
+
 
 #endregion
 
@@ -7859,7 +7867,7 @@ def setup_logging(log_file_path):
     file_handler = logging.FileHandler(log_file_path)
     file_handler.setLevel(logging.DEBUG)
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.DEBUG)
+    console_handler.setLevel(logging.INFO)
     file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     console_formatter = logging.Formatter('%(message)s')
     file_handler.setFormatter(file_formatter)

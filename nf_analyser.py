@@ -2615,7 +2615,7 @@ set fmri(featwatcher_yn) 1
 set fmri(sscleanup_yn) 0
 
 # Output directory
-set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmri_analysis/analysis_1/first_level/sub-[insert_participant]/run1"
+set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/fmri_analysis/analysis_1/first_level/sub-[insert_participant]/[insert_folder_name]"
 
 # TR(s)
 set fmri(tr) 2.000000 
@@ -2738,8 +2738,8 @@ set fmri(mixed_yn) 2
 set fmri(randomisePermutations) 5000
 
 # Number of EVs
-set fmri(evs_orig) 3
-set fmri(evs_real) 3
+set fmri(evs_orig) 2
+set fmri(evs_real) 4
 set fmri(evs_vox) 0
 
 # Number of contrasts

@@ -3143,7 +3143,16 @@ set fmri(init_standard) ""
 # For full FEAT analysis: overwrite existing .feat output dir?
 set fmri(overwrite_yn) 0
 """
-    first_level_fsf_template_path = 'analysis/fmri_analysis/analysis_1/first_level/shared/first_level_fsf_template.fsf'
+    pre_thresh_masking = logged_input("Select pre-threshold masking [1] or whole-brain analysis [2] for first-level: ")
+    if pre_thresh_masking == '1':
+        pre_thresh_masking_fsf_label = 'scc'
+    elif pre_thresh_masking == '2':
+        pre_thresh_masking_fsf_label = 'wholebrain'
+    else:
+        print('Invalid response. Please start again.')
+        sys.exit()
+    
+    first_level_fsf_template_path = f'analysis/fmri_analysis/analysis_1/first_level/shared/first_level_fsf_template_{pre_thresh_masking_fsf_label}.fsf'
     with open(first_level_fsf_template_path, 'w') as f:
         f.write(first_level_fsf_template)
     first_level_fsfs = []
@@ -3162,18 +3171,21 @@ set fmri(overwrite_yn) 0
             total_voxels = dim1 * dim2 * dim3 * npts
             for i, line in enumerate(fsf_data):
                 if "set fmri(outputdir)" in line:
-                    fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}"\n'
+                    fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}_{pre_thresh_masking_fsf_label}"\n'
                 elif "set fmri(totalVoxels)" in line:
                     fsf_data[i] = f"set fmri(totalVoxels) {total_voxels}\n"
                 elif "set feat_files(1)" in line:
                     fsf_data[i] = f'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/fully_preproc/sub-{p_id_stripped}/func/sub-{p_id_stripped}_{run}_MNI152_func_fully_preproc"\n'
                 elif "set confoundev_files(1)" in line:
                     fsf_data[i] = f'set confoundev_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_{run}.txt"\n'
-            first_level_fsf = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/first_level_fsf_{run}.fsf'
+                elif "set fmri(threshmask)" in line:
+                    if pre_thresh_masking == '1':
+                        fsf_data[i] = f'set fmri(threshmask) "data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
+            first_level_fsf = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/first_level_fsf_{run}_{pre_thresh_masking_fsf_label}.fsf'
             first_level_fsfs.append(first_level_fsf)
             with open(first_level_fsf, 'w') as file:
                 file.writelines(fsf_data)
-    print('fsf files for first-level GLM generated.')
+    print(f'fsf files for first-level GLM ({pre_thresh_masking_fsf_label}) generated.')
     
     # Step 6: Run first-level GLM [ANALYSIS 1].
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######")   
@@ -3183,7 +3195,7 @@ set fmri(overwrite_yn) 0
             match = re.search(r'sub-(\d{3}).*run-(\d{2})', fsf)
             participant_number = match.group(1)
             run_number = match.group(2)
-            print(f'Running first-level GLM of sub-{participant_number} for run{run_number}...')
+            print(f'Running first-level {pre_thresh_masking_fsf_label} GLM of sub-{participant_number} for run{run_number}...')
             subprocess.run(['feat', fsf])
             report_log_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/report_log.html'
             with open(report_log_path, 'r') as file:
@@ -3494,124 +3506,124 @@ set fmri(copeinput.3) 1
 set fmri(copeinput.4) 1
 
 # 4D AVW data or FEAT directory (1)
-set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat"
+set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (2)
-set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-04.feat"
+set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (3)
-set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-01.feat"
+set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (4)
-set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-04.feat"
+set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (5)
-set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-01.feat"
+set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (6)
-set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-04.feat"
+set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (7)
-set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-01.feat"
+set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (8)
-set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-04.feat"
+set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (9)
-set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-01.feat"
+set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (10)
-set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-04.feat"
+set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (11)
-set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-01.feat"
+set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (12)
-set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-04.feat"
+set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (13)
-set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-01.feat"
+set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (14)
-set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-04.feat"
+set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (15)
-set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-01.feat"
+set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (16)
-set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-04.feat"
+set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (17)
-set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-01.feat"
+set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (18)
-set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-04.feat"
+set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (19)
-set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-01.feat"
+set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (20)
-set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-04.feat"
+set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (21)
-set feat_files(21) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-01.feat"
+set feat_files(21) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (22)
-set feat_files(22) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-04.feat"
+set feat_files(22) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (23)
-set feat_files(23) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-01.feat"
+set feat_files(23) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (24)
-set feat_files(24) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-04.feat"
+set feat_files(24) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (25)
-set feat_files(25) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-01.feat"
+set feat_files(25) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (26)
-set feat_files(26) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-04.feat"
+set feat_files(26) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (27)
-set feat_files(27) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-01.feat"
+set feat_files(27) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (28)
-set feat_files(28) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-04.feat"
+set feat_files(28) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (29)
-set feat_files(29) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-01.feat"
+set feat_files(29) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (30)
-set feat_files(30) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-04.feat"
+set feat_files(30) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (31)
-set feat_files(31) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-01.feat"
+set feat_files(31) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (32)
-set feat_files(32) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-04.feat"
+set feat_files(32) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (33)
-set feat_files(33) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-01.feat"
+set feat_files(33) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (34)
-set feat_files(34) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-04.feat"
+set feat_files(34) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (35)
-set feat_files(35) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-01.feat"
+set feat_files(35) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (36)
-set feat_files(36) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-04.feat"
+set feat_files(36) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (37)
-set feat_files(37) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-01.feat"
+set feat_files(37) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (38)
-set feat_files(38) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-04.feat"
+set feat_files(38) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (39)
-set feat_files(39) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-01.feat"
+set feat_files(39) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (40)
-set feat_files(40) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-04.feat"
+set feat_files(40) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # Add confound EVs text file
 set fmri(confoundevs) 0
@@ -4465,124 +4477,124 @@ set fmri(copeinput.3) 1
 set fmri(copeinput.4) 1
 
 # 4D AVW data or FEAT directory (1)
-set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat"
+set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (2)
-set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-04.feat"
+set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (3)
-set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-01.feat"
+set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (4)
-set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-04.feat"
+set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (5)
-set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-01.feat"
+set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (6)
-set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-04.feat"
+set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (7)
-set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-01.feat"
+set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (8)
-set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-04.feat"
+set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (9)
-set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-01.feat"
+set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (10)
-set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-04.feat"
+set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (11)
-set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-01.feat"
+set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (12)
-set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-04.feat"
+set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (13)
-set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-01.feat"
+set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (14)
-set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-04.feat"
+set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (15)
-set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-01.feat"
+set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (16)
-set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-04.feat"
+set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (17)
-set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-01.feat"
+set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (18)
-set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-04.feat"
+set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (19)
-set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-01.feat"
+set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (20)
-set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-04.feat"
+set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (21)
-set feat_files(21) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-01.feat"
+set feat_files(21) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (22)
-set feat_files(22) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-04.feat"
+set feat_files(22) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (23)
-set feat_files(23) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-01.feat"
+set feat_files(23) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (24)
-set feat_files(24) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-04.feat"
+set feat_files(24) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (25)
-set feat_files(25) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-01.feat"
+set feat_files(25) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (26)
-set feat_files(26) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-04.feat"
+set feat_files(26) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (27)
-set feat_files(27) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-01.feat"
+set feat_files(27) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (28)
-set feat_files(28) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-04.feat"
+set feat_files(28) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (29)
-set feat_files(29) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-01.feat"
+set feat_files(29) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (30)
-set feat_files(30) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-04.feat"
+set feat_files(30) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (31)
-set feat_files(31) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-01.feat"
+set feat_files(31) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (32)
-set feat_files(32) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-04.feat"
+set feat_files(32) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (33)
-set feat_files(33) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-01.feat"
+set feat_files(33) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (34)
-set feat_files(34) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-04.feat"
+set feat_files(34) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (35)
-set feat_files(35) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-01.feat"
+set feat_files(35) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (36)
-set feat_files(36) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-04.feat"
+set feat_files(36) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (37)
-set feat_files(37) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-01.feat"
+set feat_files(37) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (38)
-set feat_files(38) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-04.feat"
+set feat_files(38) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (39)
-set feat_files(39) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-01.feat"
+set feat_files(39) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-01_[insert_pre_thresh_masking_fsf_label].feat"
 
 # 4D AVW data or FEAT directory (40)
-set feat_files(40) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-04.feat"
+set feat_files(40) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-04_[insert_pre_thresh_masking_fsf_label].feat"
 
 # Add confound EVs text file
 set fmri(confoundevs) 0
@@ -5423,6 +5435,8 @@ set fmri(overwrite_yn) 0
             elif "set fmri(prob_thresh)" in line:
                 if liberal_thresholding == '1':
                     fsf_data[i] = 'set fmri(prob_thresh) 0.1\n'
+            elif "set feat_files" in line:
+                line.replace('[insert_pre_thresh_masking_fsf_label]', pre_thresh_masking_fsf_label)
         second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
         with open(second_level_fsf, 'w') as file:
             file.writelines(fsf_data)
@@ -5455,6 +5469,8 @@ set fmri(overwrite_yn) 0
                     elif "set fmri(prob_thresh)" in line:
                         if liberal_thresholding == '1':
                             fsf_data[i] = 'set fmri(prob_thresh) 0.1\n'
+                    elif "set feat_files" in line:
+                        line.replace('[insert_pre_thresh_masking_fsf_label]', pre_thresh_masking_fsf_label)
                 second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.fsf'
                 with open(second_level_fsf, 'w') as file:
                     file.writelines(fsf_data)
@@ -5499,6 +5515,7 @@ set fmri(overwrite_yn) 0
         if not os.path.isdir(f'analysis.fmri_analysis/analysis_1/second_level/shared/{feat_folder}'):
             print('Running second-level GLM with above parameters...')
             subprocess.run(['feat', second_level_fsf])
+            os.remove(second_level_fsf)
             print("Second-level completed. If this is the last analysis level, look at mask.nii.gz overlayed onto bg_image.nii.gz and look at filtered_func_data.nii.gz for QA.")
             report_log_path = f'analysis/fmri_analysis/analysis_1/second_level/shared/{feat_folder}/report_log.html'
             with open(report_log_path, 'r') as file:

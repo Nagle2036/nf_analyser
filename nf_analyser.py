@@ -2910,9 +2910,6 @@ set fmri(ortho1.1) 0
 # Orthogonalise EV 1 wrt EV 2
 set fmri(ortho1.2) 0
 
-# Orthogonalise EV 1 wrt EV 3
-set fmri(ortho1.3) 0
-
 # EV 2 title
 set fmri(evtitle2) "indig"
 

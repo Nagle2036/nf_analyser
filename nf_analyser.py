@@ -5579,7 +5579,7 @@ set fmri(overwrite_yn) 0
                 if liberal_thresholding == '1':
                     fsf_data[i] = 'set fmri(prob_thresh) 0.1\n'
             elif "set feat_files" in line:
-                line.replace('[insert_pre_thresh_masking_fsf_label]', pre_thresh_masking_fsf_label)
+                fsf_data[i] = line.replace('[insert_pre_thresh_masking_fsf_label]', pre_thresh_masking_fsf_label)
         second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
         with open(second_level_fsf, 'w') as file:
             file.writelines(fsf_data)
@@ -5613,7 +5613,7 @@ set fmri(overwrite_yn) 0
                         if liberal_thresholding == '1':
                             fsf_data[i] = 'set fmri(prob_thresh) 0.1\n'
                     elif "set feat_files" in line:
-                        line.replace('[insert_pre_thresh_masking_fsf_label]', pre_thresh_masking_fsf_label)
+                        fsf_data[i] = line.replace('[insert_pre_thresh_masking_fsf_label]', pre_thresh_masking_fsf_label)
                 second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.fsf'
                 with open(second_level_fsf, 'w') as file:
                     file.writelines(fsf_data)

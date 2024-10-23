@@ -2471,6 +2471,8 @@ def fmri_analysis():
     os.makedirs(fmri_analysis_folder, exist_ok=True)
     analysis_1_folder = 'analysis/fmri_analysis/analysis_1'
     os.makedirs(analysis_1_folder, exist_ok=True)
+    plots_folder = 'analysis/fmri_analysis/analysis_1/plots'
+    os.makedirs(plots_folder, exist_ok=True)
     analysis_1_first_level_folder = 'analysis/fmri_analysis/analysis_1/first_level'
     os.makedirs(analysis_1_first_level_folder, exist_ok=True)
     analysis_1_first_level_shared_folder = 'analysis/fmri_analysis/analysis_1/first_level/shared'
@@ -5658,12 +5660,33 @@ set fmri(overwrite_yn) 0
 
     # Step 8: Perform ANOVA on SCC BOLD Data [Analysis 1].
     print("\n###### STEP 8: PERFORM ANOVA ON SCC BOLD DATA [ANALYSIS 1] ######")
+    contrasts = ['1', '2', '3', '4']
+    participant_column = []
+    run_column = []
+    contrast_column = []
+    roi_mean_column = []
+
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         for run in runs:
-            pass
+            for contrast in contrasts:
+                participant_column.append(f'sub-{p_id_stripped}')
+                run_column.append(run)
+                contrast_column.append(contrast)
+                cope_image_path = f'analysis/fmri_analysis/analysis_1/first-level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
+                result = subprocess.run(['fslmeants', '-i', cope_image_path, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz'], capture_output=True, text=True)
+                roi_mean = result.stdout
+                roi_mean_column.append(roi_mean)
 
-            # subprocess.run(['fslmeants', '-i', cope_image, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz', '-o', 'mean_signal.txt', 't'])
+    columns = ['participant', 'run', 'contrast', 'roi_mean']
+    roi_mean_df = pd.DataFrame(columns=columns)
+    roi_mean_df['participant'] = participant_column
+    roi_mean_df['run'] = run_column
+    roi_mean_df['contrast'] = contrast_column
+    roi_mean_df['roi_mean'] = roi_mean_column
+
+    roi_mean_df_path = 'analysis/fmri_analysis/analysis_1/plots/roi_mean_df.xlsx'
+    roi_mean_df.to_excel(roi_mean_df_path, index=False)
 
 
 #endregion

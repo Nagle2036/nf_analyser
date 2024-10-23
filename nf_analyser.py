@@ -2732,7 +2732,7 @@ set fmri(robust_yn) 0
 # 0 : Mixed Effects: Simple OLS
 # 2 : Mixed Effects: FLAME 1
 # 1 : Mixed Effects: FLAME 1+2
-set fmri(mixed_yn) 2
+set fmri(mixed_yn) 3
 
 # Higher-level permutations
 set fmri(randomisePermutations) 5000
@@ -3177,7 +3177,7 @@ set fmri(overwrite_yn) 0
                     fsf_data[i] = f'set confoundev_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/confounds_{run}.txt"\n'
                 elif "set fmri(threshmask)" in line:
                     if pre_thresh_masking == '1':
-                        fsf_data[i] = f'set fmri(threshmask) "data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
+                        fsf_data[i] = f'set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
             first_level_fsf = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/first_level_fsf_{run}_{pre_thresh_masking_fsf_label}.fsf'
             first_level_fsfs.append(first_level_fsf)
             with open(first_level_fsf, 'w') as file:
@@ -5571,7 +5571,7 @@ set fmri(overwrite_yn) 0
                 fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}"\n'
             elif "set fmri(threshmask)" in line:
                 if pre_thresh_masking == '1':
-                    fsf_data[i] = 'set fmri(threshmask) "data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
+                    fsf_data[i] = 'set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
             elif "set fmri(thresh)" in line:
                 if cluster_thresholding == '1':
                     fsf_data[i] = 'set fmri(thresh) 3\n'
@@ -5605,7 +5605,7 @@ set fmri(overwrite_yn) 0
                         fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}"\n'
                     elif "set fmri(threshmask)" in line:
                         if pre_thresh_masking == '1':
-                            fsf_data[i] = 'set fmri(threshmask) "data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
+                            fsf_data[i] = 'set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
                     elif "set fmri(thresh)" in line:
                         if cluster_thresholding == '1':
                             fsf_data[i] = 'set fmri(thresh) 3\n'
@@ -5665,9 +5665,6 @@ set fmri(overwrite_yn) 0
                 content = file.read()
             if re.search('error', content, re.IGNORECASE):
                 print(f"Error found in report_log.html. Investigation required.")
-            # zstat_files = glob.glob(f'analysis/fmri_analysis/analysis_1/second_level/shared/')
-            # if len(zstat_files) != 'X':
-            #     print(f"There are not X zstat files in the {feat_folder} folder. Investigation required.")
         else:
             print('Second-level already run. Skipping process.')
     else:
@@ -5680,6 +5677,8 @@ set fmri(overwrite_yn) 0
         p_id_stripped = p_id.replace('P', '')
         for run in runs:
             pass
+
+            # subprocess.run(['fslmeants', '-i', cope_image, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz', '-o', 'mean_signal.txt', 't'])
 
 
 #endregion

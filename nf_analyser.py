@@ -2582,37 +2582,6 @@ def fmri_analysis():
                     print(f"Error occurred while processing {p_id_stripped} for {run}: {e}")
     else:
         print("ROIs already trimmed. Skipping process.")
-
-
-    participant_column = []
-    run_column = []
-    contrast_column = []
-    roi_mean_column = []
-    contrasts = ['1', '2', '3', '4']
-    for p_id in participants:
-        p_id_stripped = p_id.replace('P', '')
-        for run in runs:
-            for contrast in contrasts:
-                participant_column.append(f'sub-{p_id_stripped}')
-                run_column.append(run)
-                contrast_column.append(contrast)
-                cope_image_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
-                result = subprocess.run(['fslmeants', '-i', cope_image_path, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz'], capture_output=True, text=True)
-                roi_mean = float(result.stdout.strip())
-                roi_mean_column.append(roi_mean)
-    a_participants = ['sub-004', 'sub-006', 'sub-100', 'sub-128', 'sub-122', 'sub-125', 'sub-136', 'sub-145', 'sub-215', 'sub-216']
-    b_participants = ['sub-020', 'sub-030', 'sub-059', 'sub-078', 'sub-093', 'sub-094', 'sub-107', 'sub-127', 'sub-155', 'sub-199']
-    columns = ['participant', 'intervention', 'run', 'contrast', 'roi_mean']
-    roi_mean_df = pd.DataFrame(columns=columns)
-    roi_mean_df['participant'] = participant_column
-    roi_mean_df['intervention'] = roi_mean_df['participant'].apply(lambda x: 'a' if x in a_participants else ('b' if x in b_participants else 'unknown'))
-    roi_mean_df['run'] = run_column
-    roi_mean_df['contrast'] = contrast_column
-    roi_mean_df['roi_mean'] = roi_mean_column
-    roi_mean_df_path = 'analysis/fmri_analysis/analysis_1/plots/roi_mean_df.xlsx'
-    roi_mean_df.to_excel(roi_mean_df_path, index=False)
-
-
     
 # Step 5: Generate first-level fsf file [ANALYSIS 1].
     print("\n###### STEP 5: GENERATE FIRST-LEVEL FSF FILE [ANALYSIS 1] ######")

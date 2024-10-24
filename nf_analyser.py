@@ -4820,6 +4820,9 @@ set fmri(ortho1.2) 0
 # Orthogonalise EV 1 wrt EV 3
 set fmri(ortho1.3) 0
 
+# Orthogonalise EV 1 wrt EV 4
+set fmri(ortho1.4) 0
+
 # Higher-level EV value for EV 1 and input 1
 set fmri(evg1.1) 1
 

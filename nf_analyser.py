@@ -5642,7 +5642,7 @@ set fmri(overwrite_yn) 0
             if not os.path.exists(standard_path):
                 shutil.copy(mean_func_path, standard_path)
     if group_diffs == '2' or subject_fixed_effects == '1':
-        if not os.path.isdir(f'analysis.fmri_analysis/analysis_1/second_level/shared/{feat_folder}'):
+        if not os.path.isdir(f'analysis/fmri_analysis/analysis_1/second_level/shared/{feat_folder}'):
             print('Running second-level GLM with above parameters...')
             subprocess.run(['feat', second_level_fsf])
             os.remove(second_level_fsf)
@@ -5673,7 +5673,7 @@ set fmri(overwrite_yn) 0
                 participant_column.append(f'sub-{p_id_stripped}')
                 run_column.append(run)
                 contrast_column.append(contrast)
-                cope_image_path = f'analysis/fmri_analysis/analysis_1/first-level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
+                cope_image_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
                 result = subprocess.run(['fslmeants', '-i', cope_image_path, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz'], capture_output=True, text=True)
                 roi_mean = float(result.stdout.strip())
                 roi_mean_column.append(roi_mean)

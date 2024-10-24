@@ -4523,8 +4523,8 @@ set fmri(mixed_yn) 3
 set fmri(randomisePermutations) 5000
 
 # Number of EVs
-set fmri(evs_orig) 3
-set fmri(evs_real) 3
+set fmri(evs_orig) 4
+set fmri(evs_real) 4
 set fmri(evs_vox) 0
 
 # Number of contrasts
@@ -5274,6 +5274,176 @@ set fmri(evg39.3) 1.0
 # Higher-level EV value for EV 3 and input 40
 set fmri(evg40.3) 1.0
 
+# EV 4 title
+set fmri(evtitle4) "groupa"
+
+# Basic waveform shape (EV 4)
+# 0 : Square
+# 1 : Sinusoid
+# 2 : Custom (1 entry per volume)
+# 3 : Custom (3 column format)
+# 4 : Interaction
+# 10 : Empty (all zeros)
+set fmri(shape4) 2
+
+# Convolution (EV 4)
+# 0 : None
+# 1 : Gaussian
+# 2 : Gamma
+# 3 : Double-Gamma HRF
+# 4 : Gamma basis functions
+# 5 : Sine basis functions
+# 6 : FIR basis functions
+# 8 : Alternate Double-Gamma
+set fmri(convolve4) 0
+
+# Convolve phase (EV 4)
+set fmri(convolve_phase4) 0
+
+# Apply temporal filtering (EV 4)
+set fmri(tempfilt_yn4) 0
+
+# Add temporal derivative (EV 4)
+set fmri(deriv_yn4) 0
+
+# Custom EV file (EV 4)
+set fmri(custom4) "dummy"
+
+# Orthogonalise EV 4 wrt EV 0
+set fmri(ortho4.0) 0
+
+# Orthogonalise EV 4 wrt EV 1
+set fmri(ortho4.1) 0
+
+# Orthogonalise EV 4 wrt EV 2
+set fmri(ortho4.2) 0
+
+# Orthogonalise EV 4 wrt EV 3
+set fmri(ortho4.3) 0
+
+# Orthogonalise EV 4 wrt EV 4
+set fmri(ortho4.4) 0
+
+# Higher-level EV value for EV 4 and input 1
+set fmri(evg1.4) 1.0
+
+# Higher-level EV value for EV 4 and input 2
+set fmri(evg2.4) 1.0
+
+# Higher-level EV value for EV 4 and input 3
+set fmri(evg3.4) 1.0
+
+# Higher-level EV value for EV 4 and input 4
+set fmri(evg4.4) 1.0
+
+# Higher-level EV value for EV 4 and input 5
+set fmri(evg5.4) -1.0
+
+# Higher-level EV value for EV 4 and input 6
+set fmri(evg6.4) -1.0
+
+# Higher-level EV value for EV 4 and input 7
+set fmri(evg7.4) -1.0
+
+# Higher-level EV value for EV 4 and input 8
+set fmri(evg8.4) -1.0
+
+# Higher-level EV value for EV 4 and input 9
+set fmri(evg9.4) -1.0
+
+# Higher-level EV value for EV 4 and input 10
+set fmri(evg10.4) -1.0
+
+# Higher-level EV value for EV 4 and input 11
+set fmri(evg11.4) -1.0
+
+# Higher-level EV value for EV 4 and input 12
+set fmri(evg12.4) -1.0
+
+# Higher-level EV value for EV 4 and input 13
+set fmri(evg13.4) -1.0
+
+# Higher-level EV value for EV 4 and input 14
+set fmri(evg14.4) -1.0
+
+# Higher-level EV value for EV 4 and input 15
+set fmri(evg15.4) -1.0
+
+# Higher-level EV value for EV 4 and input 16
+set fmri(evg16.4) -1.0
+
+# Higher-level EV value for EV 4 and input 17
+set fmri(evg17.4) 1.0
+
+# Higher-level EV value for EV 4 and input 18
+set fmri(evg18.4) 1.0
+
+# Higher-level EV value for EV 4 and input 19
+set fmri(evg19.4) -1.0
+
+# Higher-level EV value for EV 4 and input 20
+set fmri(evg20.4) -1.0
+
+# Higher-level EV value for EV 4 and input 21
+set fmri(evg21.4) 1.0
+
+# Higher-level EV value for EV 4 and input 22
+set fmri(evg22.4) 1.0
+
+# Higher-level EV value for EV 4 and input 23
+set fmri(evg23.4) 1.0
+
+# Higher-level EV value for EV 4 and input 24
+set fmri(evg24.4) 1.0
+
+# Higher-level EV value for EV 4 and input 25
+set fmri(evg25.4) -1.0
+
+# Higher-level EV value for EV 4 and input 26
+set fmri(evg26.4) -1.0
+
+# Higher-level EV value for EV 4 and input 27
+set fmri(evg27.4) 1.0
+
+# Higher-level EV value for EV 4 and input 28
+set fmri(evg28.4) 1.0
+
+# Higher-level EV value for EV 4 and input 29
+set fmri(evg29.4) 1.0
+
+# Higher-level EV value for EV 4 and input 30
+set fmri(evg30.4) 1.0
+
+# Higher-level EV value for EV 4 and input 31
+set fmri(evg31.4) 1.0
+
+# Higher-level EV value for EV 4 and input 32
+set fmri(evg32.4) 1.0
+
+# Higher-level EV value for EV 4 and input 33
+set fmri(evg33.4) -1.0
+
+# Higher-level EV value for EV 4 and input 34
+set fmri(evg34.4) -1.0
+
+# Higher-level EV value for EV 4 and input 35
+set fmri(evg35.4) -1.0
+
+# Higher-level EV value for EV 4 and input 36
+set fmri(evg36.4) -1.0
+
+# Higher-level EV value for EV 4 and input 37
+set fmri(evg37.4) 1.0
+
+# Higher-level EV value for EV 4 and input 38
+set fmri(evg38.4) 1.0
+
+# Higher-level EV value for EV 4 and input 39
+set fmri(evg39.4) 1.0
+
+# Higher-level EV value for EV 4 and input 40
+set fmri(evg40.4) 1.0
+
 # Setup Orthogonalisation at higher level?
 set fmri(level2orth) 0
 
@@ -5418,6 +5588,9 @@ set fmri(con_real1.2) 0.0
 # Real contrast_real vector 1 element 3
 set fmri(con_real1.3) 0.0
 
+# Real contrast_real vector 1 element 4
+set fmri(con_real1.4) 0
+
 # Display images for contrast_real 2
 set fmri(conpic_real.2) 1
 
@@ -5432,6 +5605,9 @@ set fmri(con_real2.2) 1.0
 
 # Real contrast_real vector 2 element 3
 set fmri(con_real2.3) 0.0
+
+# Real contrast_real vector 2 element 4
+set fmri(con_real2.4) 0
 
 # Display images for contrast_real 3
 set fmri(conpic_real.3) 1
@@ -5448,6 +5624,9 @@ set fmri(con_real3.2) -1.0
 # Real contrast_real vector 3 element 3
 set fmri(con_real3.3) 0.0
 
+# Real contrast_real vector 3 element 4
+set fmri(con_real3.4) 0
+
 # Display images for contrast_real 4
 set fmri(conpic_real.4) 1
 
@@ -5463,6 +5642,27 @@ set fmri(con_real4.2) 1.0
 # Real contrast_real vector 4 element 3
 set fmri(con_real4.3) 0.0
 
+# Real contrast_real vector 4 element 4
+set fmri(con_real4.4) 0
+
+# Display images for contrast_real 5
+set fmri(conpic_real.5) 1
+
+# Title for contrast_real 5
+set fmri(conname_real.5) "groupa-groupb"
+
+# Real contrast_real vector 5 element 1
+set fmri(con_real5.1) 0
+
+# Real contrast_real vector 5 element 2
+set fmri(con_real5.2) 0
+
+# Real contrast_real vector 5 element 3
+set fmri(con_real5.3) 0
+
+# Real contrast_real vector 5 element 4
+set fmri(con_real5.4) 1.0
+
 # Contrast masking - use >0 instead of thresholding?
 set fmri(conmask_zerothresh_yn) 0
 
@@ -5475,6 +5675,9 @@ set fmri(conmask1_3) 0
 # Mask real contrast/F-test 1 with real contrast/F-test 4?
 set fmri(conmask1_4) 0
 
+# Mask real contrast/F-test 1 with real contrast/F-test 5?
+set fmri(conmask1_5) 0
+
 # Mask real contrast/F-test 2 with real contrast/F-test 1?
 set fmri(conmask2_1) 0
 
@@ -5483,6 +5686,9 @@ set fmri(conmask2_3) 0
 
 # Mask real contrast/F-test 2 with real contrast/F-test 4?
 set fmri(conmask2_4) 0
+
+# Mask real contrast/F-test 2 with real contrast/F-test 5?
+set fmri(conmask2_5) 0
 
 # Mask real contrast/F-test 3 with real contrast/F-test 1?
 set fmri(conmask3_1) 0
@@ -5493,6 +5699,9 @@ set fmri(conmask3_2) 0
 # Mask real contrast/F-test 3 with real contrast/F-test 4?
 set fmri(conmask3_4) 0
 
+# Mask real contrast/F-test 3 with real contrast/F-test 5?
+set fmri(conmask3_5) 0
+
 # Mask real contrast/F-test 4 with real contrast/F-test 1?
 set fmri(conmask4_1) 0
 
@@ -5501,6 +5710,21 @@ set fmri(conmask4_2) 0
 
 # Mask real contrast/F-test 4 with real contrast/F-test 3?
 set fmri(conmask4_3) 0
+
+# Mask real contrast/F-test 4 with real contrast/F-test 5?
+set fmri(conmask4_5) 0
+
+# Mask real contrast/F-test 5 with real contrast/F-test 1?
+set fmri(conmask5_1) 0
+
+# Mask real contrast/F-test 5 with real contrast/F-test 2?
+set fmri(conmask5_2) 0
+
+# Mask real contrast/F-test 5 with real contrast/F-test 3?
+set fmri(conmask5_3) 0
+
+# Mask real contrast/F-test 5 with real contrast/F-test 4?
+set fmri(conmask5_4) 0
 
 # Do contrast masking at all?
 set fmri(conmask1_1) 0
@@ -5662,8 +5886,6 @@ set fmri(overwrite_yn) 0
     # Step 8: Perform ANOVA on SCC BOLD Data [Analysis 1].
     print("\n###### STEP 8: PERFORM LMMs ON SCC BOLD DATA [ANALYSIS 1] ######")
     print("Note: The LMMs themselves cannot be performed on server due to complex R interfacing requirements. Please run code instead on local Spyder software.")
-    import matplotlib
-    matplotlib.use('Agg')
     participant_column = []
     run_column = []
     contrast_column = []

@@ -2,6 +2,7 @@
 
 ### TO DO ###
 # Fix section 1 - Box file download to server
+# Make subsection headings
 
 #region 0) IMPORT PACKAGES.
 
@@ -5687,6 +5688,7 @@ set fmri(overwrite_yn) 0
     roi_mean_df['contrast'] = contrast_column
     roi_mean_df['roi_mean'] = roi_mean_column
     roi_mean_df_path = 'analysis/fmri_analysis/analysis_1/plots/roi_mean_df.xlsx'
+    roi_mean_df.to_excel(roi_mean_df_path)
     
     roi_mean_df_1 = roi_mean_df.loc[roi_mean_df['contrast'] == 1]
     # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
@@ -5761,7 +5763,6 @@ set fmri(overwrite_yn) 0
         scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
         scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    print(contrast_1_plot)
     contrast_1_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_1_plot.png')
 
     roi_mean_df_2 = roi_mean_df.loc[roi_mean_df['contrast'] == 2]
@@ -5811,7 +5812,6 @@ set fmri(overwrite_yn) 0
         scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
         scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    print(contrast_2_plot)
     contrast_2_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_2_plot.png')
 
     roi_mean_df_3 = roi_mean_df.loc[roi_mean_df['contrast'] == 3]
@@ -5886,7 +5886,6 @@ set fmri(overwrite_yn) 0
         scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
         scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    print(contrast_3_plot)
     contrast_3_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_3_plot.png')
 
     roi_mean_df_4 = roi_mean_df.loc[roi_mean_df['contrast'] == 4]
@@ -5961,7 +5960,6 @@ set fmri(overwrite_yn) 0
         scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
         scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
         geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    print(contrast_4_plot)
     contrast_4_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_4_plot.png')
 
 #endregion

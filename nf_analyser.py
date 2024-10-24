@@ -5662,6 +5662,8 @@ set fmri(overwrite_yn) 0
     # Step 8: Perform ANOVA on SCC BOLD Data [Analysis 1].
     print("\n###### STEP 8: PERFORM LMMs ON SCC BOLD DATA [ANALYSIS 1] ######")
     print("Note: The LMMs themselves cannot be performed on server due to complex R interfacing requirements. Please run code instead on local Spyder software.")
+    import matplotlib
+    matplotlib.use('Agg')
     participant_column = []
     run_column = []
     contrast_column = []

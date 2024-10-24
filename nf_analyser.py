@@ -5660,12 +5660,12 @@ set fmri(overwrite_yn) 0
 
     # Step 8: Perform ANOVA on SCC BOLD Data [Analysis 1].
     print("\n###### STEP 8: PERFORM ANOVA ON SCC BOLD DATA [ANALYSIS 1] ######")
-    contrasts = ['1', '2', '3', '4']
+    
     participant_column = []
     run_column = []
     contrast_column = []
     roi_mean_column = []
-
+    contrasts = ['1', '2', '3', '4']
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         for run in runs:
@@ -5678,9 +5678,13 @@ set fmri(overwrite_yn) 0
                 roi_mean = result.stdout
                 roi_mean_column.append(roi_mean)
 
-    columns = ['participant', 'run', 'contrast', 'roi_mean']
+    a_participants = ['sub-004', 'sub-006', 'sub-100', 'sub-128', 'sub-122', 'sub-125', 'sub-136', 'sub-145', 'sub-215', 'sub-216']
+    b_participants = ['sub-020', 'sub-030', 'sub-059', 'sub-078', 'sub-093', 'sub-094', 'sub-107', 'sub-127', 'sub-155', 'sub-199']
+
+    columns = ['participant', 'intervention', 'run', 'contrast', 'roi_mean']
     roi_mean_df = pd.DataFrame(columns=columns)
     roi_mean_df['participant'] = participant_column
+    roi_mean_df['intervention'] = roi_mean_df['participant'].apply(lambda x: 'a' if x in a_participants else ('b' if x in b_participants else 'unknown'))
     roi_mean_df['run'] = run_column
     roi_mean_df['contrast'] = contrast_column
     roi_mean_df['roi_mean'] = roi_mean_column

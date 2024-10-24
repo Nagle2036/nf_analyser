@@ -2596,7 +2596,7 @@ def fmri_analysis():
                 participant_column.append(f'sub-{p_id_stripped}')
                 run_column.append(run)
                 contrast_column.append(contrast)
-                cope_image_path = f'analysis/fmri_analysis/analysis_1/first-level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
+                cope_image_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
                 result = subprocess.run(['fslmeants', '-i', cope_image_path, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz'], capture_output=True, text=True)
                 roi_mean = float(result.stdout.strip())
                 roi_mean_column.append(roi_mean)

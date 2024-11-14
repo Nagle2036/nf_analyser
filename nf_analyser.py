@@ -1028,6 +1028,63 @@ def thermometer_analysis():
     mean_bland_altman_plot.save('analysis/thermometer_analysis/figs/mean_bland_altman_plot.png') 
     print("Correlations of TMS and mean expanded thermometer levels versus perceived success rating completed.")
 
+    # Step 21: Plot timeseries of 0-10 thermometer levels for neurofeedback runs.
+    print("\n###### STEP 21: PLOT NEUROFEEDBACK RUN TIMESERIES OF 0-10 THERMOMETER LEVELS ######")
+    def insert_zero_sections(df):
+        new_data = []
+        for (participant, condition), group in df.groupby(['participant', 'condition']):
+            section_size = len(group) // 4
+            start_zeros = pd.DataFrame({
+                'participant': [participant] * 30,
+                'condition': [condition] * 30,
+                'intervention': group['intervention'].iloc[0],
+                'therm_lvl': [0] * 30,
+                'therm_val': [0] * 30,
+                'therm_lvl_exp': [0] * 30
+                })
+            new_data.append(start_zeros)
+            for i in range(4):
+                start_idx = i * section_size
+                end_idx = (i + 1) * section_size if i < 3 else len(group)
+                section = group.iloc[start_idx:end_idx]
+                new_data.append(section)
+                zeros_section = pd.DataFrame({
+                    'participant': [participant] * 10,
+                    'condition': [condition] * 10,
+                    'intervention': section['intervention'].iloc[0],
+                    'therm_lvl': [0] * 10,
+                    'therm_val': [0] * 10,
+                    'therm_lvl_exp': [0] * 10
+                })
+                new_data.append(zeros_section)
+        return pd.concat(new_data, ignore_index=True)
+    modified_therm_df = insert_zero_sections(therm_df)
+    modified_therm_df['data_point'] = modified_therm_df.groupby(['participant', 'condition', 'intervention']).cumcount() + 1
+    mean_therm_df = (
+        modified_therm_df
+        .groupby(['data_point', 'condition', 'intervention'], as_index=False)
+        .agg(mean_therm_lvl=('therm_lvl', 'mean')))
+    def custom_labeller(value):
+        mapping = {'a': 'Intervention A', 'b': 'Intervention B'}
+        return mapping.get(value, value)
+    therm_timeseries_plot = (
+        ggplot(mean_therm_df, aes(x='data_point', y='mean_therm_lvl', color='condition')) +
+        geom_line(size=0.5) +
+        facet_wrap('~ intervention', labeller=labeller(intervention=custom_labeller)) +
+        labs(
+            title="0-10 Thermometer Level across Participants by Intervention and Condition",
+            x="Volume",
+            y="Thermometer Level",
+            color="Condition",
+            linetype="Intervention"
+        ) +
+        theme_classic() +
+        scale_y_continuous(limits=[0,8], breaks=[0,1,2,3,4,5,6,7,8]) +
+        scale_x_continuous(limits=[0,250], breaks=[0,50,100,150,200,250]) +
+        scale_color_manual(values={'guilt': 'indianred', 'indig': 'skyblue'}, labels={'guilt': 'Guilt', 'indig': 'Indig'}))
+    print(therm_timeseries_plot)
+    therm_timeseries_plot.save('therm_timeseries_plot.png')
+
 #endregion
 
 #region 3) CLINICAL ANALYSIS.
@@ -5921,7 +5978,7 @@ set fmri(overwrite_yn) 0
     roi_mean_df['contrast'] = contrast_column
     roi_mean_df['roi_mean'] = roi_mean_column
     roi_mean_df_path = 'analysis/fmri_analysis/analysis_1/plots/roi_mean_df.xlsx'
-    roi_mean_df.to_excel(roi_mean_df_path)
+    roi_mean_df.to_excel(roi_mean_df_path, index=False)
     
     roi_mean_df_1 = roi_mean_df.loc[roi_mean_df['contrast'] == 1]
     # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
@@ -6060,7 +6117,7 @@ set fmri(overwrite_yn) 0
     # library(lmerTest)
     # library(nortest)
     # library(clubSandwich)
-    # roi_mean_df_1 <- as.data.frame(roi_mean_df_3)
+    # roi_mean_df_3 <- as.data.frame(roi_mean_df_3)
     # model <- lmer(roi_mean~run*intervention + (1|participant), data = roi_mean_df_3)
     # robust_se <- vcovCR(model, type = "CR0")
     # residuals_model <- residuals(model)

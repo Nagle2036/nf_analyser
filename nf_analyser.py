@@ -1083,7 +1083,7 @@ def thermometer_analysis():
         scale_x_continuous(limits=[0,250], breaks=[0,50,100,150,200,250]) +
         scale_color_manual(values={'guilt': 'indianred', 'indig': 'skyblue'}, labels={'guilt': 'Guilt', 'indig': 'Indig'}))
     print(therm_timeseries_plot)
-    therm_timeseries_plot.save('therm_timeseries_plot.png')
+    therm_timeseries_plot.save('therm_timeseries_plot.png', width=14, height=6, dpi=300)
 
 #endregion
 
@@ -8047,59 +8047,58 @@ def susceptibility_analysis():
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
     group_ssim_df = pd.DataFrame(columns = column_headers) 
-    for p_id in participants_to_iterate:
-        if p_id in bad_participants:
-            print(f"Running Stage 3 SSIM analysis for {p_id}...")
-            def calculate_ssim(image1_path, image2_path, ssim_output_path):
-                """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
-                image1_nii = nib.load(image1_path)
-                image2_nii = nib.load(image2_path)
-                image1 = image1_nii.get_fdata()
-                image2 = image2_nii.get_fdata()
-                if image1.shape != image2.shape:
-                    raise ValueError("Input images must have the same dimensions for SSIM calculation.")
-                ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
-                ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
-                nib.save(ssim_map_nifti, ssim_output_path)
-                return ssim_index
-            ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_map.nii.gz'
-            flirted_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run01.nii.gz'
-            flirted_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run04.nii.gz'
-            if not os.path.exists(ssim_output_path):
-                ssim_index = calculate_ssim(flirted_run01, flirted_run04, ssim_output_path)
-            ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_bin.nii.gz'
-            if not os.path.exists(ssim_bin):
-                subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
-            combined_run01_run04_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/combined_run01_run04_mask.nii.gz'
-            flirted_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run01_bin.nii.gz'
-            flirted_run04_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run04_bin.nii.gz'
-            if not os.path.exists(combined_run01_run04_mask):
-                subprocess.run(['fslmaths', flirted_run01_bin, '-add', flirted_run04_bin, combined_run01_run04_mask])
-            bin_run01_run04_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/bin_run01_run04_mask.nii.gz'
-            if not os.path.exists(bin_run01_run04_mask):
-                subprocess.run(['fslmaths', combined_run01_run04_mask, '-bin', bin_run01_run04_mask])
-            ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_bin_trimmed.nii.gz'
-            if not os.path.exists(ssim_bin_trimmed):
-                subprocess.run(['fslmaths', ssim_bin, '-mul', bin_run01_run04_mask, ssim_bin_trimmed])
-            voxels_in_whole_mask = subprocess.run(["fslstats", ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
-            voxels_in_whole_mask = float(voxels_in_whole_mask)
-            intersection_mask_path_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_roi_intersect_run01.nii.gz'
-            intersection_mask_path_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_roi_intersect_run04.nii.gz'
-            run01_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_trimmed_roi_mask.nii.gz'
-            run04_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run04_trimmed_roi_mask.nii.gz'
-            if not os.path.exists(intersection_mask_path_run01):
-                subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run01_trimmed_roi_mask, intersection_mask_path_run01])
-                subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run04_trimmed_roi_mask, intersection_mask_path_run04])
-            voxels_in_roi_in_mask_run01 = subprocess.run(["fslstats", intersection_mask_path_run01, "-V"], capture_output=True, text=True).stdout.split()[0]
-            voxels_in_roi_in_mask_run01 = float(voxels_in_roi_in_mask_run01)
-            perc_roi_voxels_in_mask_run01 = (voxels_in_roi_in_mask_run01 / total_voxels_in_roi_run01) * 100
-            voxels_in_roi_in_mask_run04 = subprocess.run(["fslstats", intersection_mask_path_run04, "-V"], capture_output=True, text=True).stdout.split()[0]
-            voxels_in_roi_in_mask_run04 = float(voxels_in_roi_in_mask_run04)
-            perc_roi_voxels_in_mask_run04 = (voxels_in_roi_in_mask_run04 / total_voxels_in_roi_run04) * 100
-            perc_roi_voxels_in_mask_av = (perc_roi_voxels_in_mask_run01 + perc_roi_voxels_in_mask_run04) / 2
-            ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask_av]})
-            ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_df.txt', sep='\t', index=False)
-            group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
+    for p_id in bad_participants:
+        print(f"Running Stage 3 SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return ssim_index
+        ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_map.nii.gz'
+        flirted_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run01.nii.gz'
+        flirted_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run04.nii.gz'
+        if not os.path.exists(ssim_output_path):
+            ssim_index = calculate_ssim(flirted_run01, flirted_run04, ssim_output_path)
+        ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_bin.nii.gz'
+        if not os.path.exists(ssim_bin):
+            subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
+        combined_run01_run04_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/combined_run01_run04_mask.nii.gz'
+        flirted_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run01_bin.nii.gz'
+        flirted_run04_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run04_bin.nii.gz'
+        if not os.path.exists(combined_run01_run04_mask):
+            subprocess.run(['fslmaths', flirted_run01_bin, '-add', flirted_run04_bin, combined_run01_run04_mask])
+        bin_run01_run04_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/bin_run01_run04_mask.nii.gz'
+        if not os.path.exists(bin_run01_run04_mask):
+            subprocess.run(['fslmaths', combined_run01_run04_mask, '-bin', bin_run01_run04_mask])
+        ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(ssim_bin_trimmed):
+            subprocess.run(['fslmaths', ssim_bin, '-mul', bin_run01_run04_mask, ssim_bin_trimmed])
+        voxels_in_whole_mask = subprocess.run(["fslstats", ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_mask = float(voxels_in_whole_mask)
+        intersection_mask_path_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_roi_intersect_run01.nii.gz'
+        intersection_mask_path_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_roi_intersect_run04.nii.gz'
+        run01_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_trimmed_roi_mask.nii.gz'
+        run04_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run04_trimmed_roi_mask.nii.gz'
+        if not os.path.exists(intersection_mask_path_run01):
+            subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run01_trimmed_roi_mask, intersection_mask_path_run01])
+            subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run04_trimmed_roi_mask, intersection_mask_path_run04])
+        voxels_in_roi_in_mask_run01 = subprocess.run(["fslstats", intersection_mask_path_run01, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_mask_run01 = float(voxels_in_roi_in_mask_run01)
+        perc_roi_voxels_in_mask_run01 = (voxels_in_roi_in_mask_run01 / total_voxels_in_roi_run01) * 100
+        voxels_in_roi_in_mask_run04 = subprocess.run(["fslstats", intersection_mask_path_run04, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_mask_run04 = float(voxels_in_roi_in_mask_run04)
+        perc_roi_voxels_in_mask_run04 = (voxels_in_roi_in_mask_run04 / total_voxels_in_roi_run04) * 100
+        perc_roi_voxels_in_mask_av = (perc_roi_voxels_in_mask_run01 + perc_roi_voxels_in_mask_run04) / 2
+        ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask_av]})
+        ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_df.txt', sep='\t', index=False)
+        group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
     group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/3/group/group_ssim_df.txt', sep='\t', index=False)
     ssim_indexes = group_ssim_df['ssim_index'].tolist()
     ssim_mean = np.mean(ssim_indexes)

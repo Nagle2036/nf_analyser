@@ -2562,6 +2562,10 @@ def fmri_analysis():
     os.makedirs(analysis_1_second_level_folder, exist_ok=True)
     analysis_1_second_level_shared_folder = 'analysis/fmri_analysis/analysis_1/second_level/shared'
     os.makedirs(analysis_1_second_level_shared_folder, exist_ok=True)
+    analysis_1_third_level_folder = 'analysis/fmri_analysis/analysis_1/third_level'
+    os.makedirs(analysis_1_third_level_folder, exist_ok=True)
+    analysis_1_third_level_shared_folder = 'analysis/fmri_analysis/analysis_1/third_level/shared'
+    os.makedirs(analysis_1_third_level_shared_folder, exist_ok=True)
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
         analysis_1_first_level_participant_folder = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}'
@@ -4967,34 +4971,34 @@ set fmri(init_standard) ""
 set fmri(overwrite_yn) 0
 """
 
-    pre_thresh_masking = logged_input("Select pre-threshold masking [1] or whole-brain analysis [2] for second-level: ")
-    if pre_thresh_masking == '1':
-        pre_thresh_masking_fsf_label = 'scc'
-    elif pre_thresh_masking == '2':
-        pre_thresh_masking_fsf_label = 'wholebrain'
-    else:
-        print('Invalid response. Please start again.')
-        sys.exit()
-    liberal_thresholding = logged_input("Select liberal thresholding (0.1) [1] or standard thresholding (0.05) [2] for second-level: ")
-    if liberal_thresholding == '1':
-        liberal_thresholding_fsf_label = 'liberal'
-    elif liberal_thresholding == '2':
-        liberal_thresholding_fsf_label = 'stringent'
-    else:
-        print('Invalid response. Please start again.')
-        sys.exit()
-    cluster_thresholding = logged_input("Select cluster-corrected thresholding [1] or no correction [2] for second-level: ")
-    if cluster_thresholding == '1':
-        cluster_thresholding_fsf_label = 'cluster'
-    elif cluster_thresholding == '2':
-        cluster_thresholding_fsf_label = 'uncorrected'
-    else: 
-        print('Invalid response. Please start again.')
-        sys.exit()
-    group_diffs = logged_input("Select group comparison [1] or no group comparison [2] in the second-level: ")
     
+    group_diffs = logged_input("Select group comparison [1] or no group comparison [2] in the second-level: ")
     if group_diffs == '2':
         group_diffs_fsf_label = 'nogroup'
+        pre_thresh_masking = logged_input("Select pre-threshold masking [1] or whole-brain analysis [2] for second-level: ")
+        if pre_thresh_masking == '1':
+            pre_thresh_masking_fsf_label = 'scc'
+        elif pre_thresh_masking == '2':
+            pre_thresh_masking_fsf_label = 'wholebrain'
+        else:
+            print('Invalid response. Please start again.')
+            sys.exit()
+        liberal_thresholding = logged_input("Select liberal thresholding (0.1) [1] or standard thresholding (0.05) [2] for second-level: ")
+        if liberal_thresholding == '1':
+            liberal_thresholding_fsf_label = 'liberal'
+        elif liberal_thresholding == '2':
+            liberal_thresholding_fsf_label = 'stringent'
+        else:
+            print('Invalid response. Please start again.')
+            sys.exit()
+        cluster_thresholding = logged_input("Select cluster-corrected thresholding [1] or no correction [2] for second-level: ")
+        if cluster_thresholding == '1':
+            cluster_thresholding_fsf_label = 'cluster'
+        elif cluster_thresholding == '2':
+            cluster_thresholding_fsf_label = 'uncorrected'
+        else: 
+            print('Invalid response. Please start again.')
+            sys.exit()
         second_level_fsf_template_path_nogroup = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
         with open(second_level_fsf_template_path_nogroup, 'w') as f:
             f.write(second_level_fsf_template_nogroup)
@@ -5086,29 +5090,48 @@ set fmri(overwrite_yn) 0
             else:
                 ('Second-level group analysis GLMs already run. Skipping process.')
         
-
-
-
-   # Step 9: Generate second-level fsf filea [ANALYSIS 1].
+   # Step 9: Generate third-level fsf files [ANALYSIS 1].
     print("\n###### STEP 9: GENERATE THIRD-LEVEL FSF FILES [ANALYSIS 1] ######")   
     third_level_fsf_template = r"""
     
     """
     
+    if group_diffs == '1':
+        first_level_contrast_of_interest = logged_input("Select first-level contrast to explore at the third-level (guilt [1], indignation [2], guilt-indignation [3], indignation-guilt [4]): ")
+        if first_level_contrast_of_interest == '1':
+            first_level_contrast_label = 'guilt'
+        elif first_level_contrast_of_interest == '2':
+            first_level_contrast_label = 'indig'
+        elif first_level_contrast_of_interest == '3':
+            first_level_contrast_label = 'guilt-indig'
+        elif first_level_contrast_of_interest == '4':
+            first_level_contrast_label = 'indig-guilt'
+        else:
+            print('Invalid response. Please start again.')
+            sys.exit()
 
+        second_level_contrast_of_interest = logged_input("Select second-level contrast to explore at the third-level (run01 [1], run04 [2], run01-run04 [3], run04-run01 [4]): ")
+        if second_level_contrast_of_interest == '1':
+            second_level_contrast_label = 'run01'
+        elif second_level_contrast_of_interest == '2':
+            second_level_contrast_label = 'run04'
+        elif second_level_contrast_of_interest == '3':
+            second_level_contrast_label = 'run01-run04'
+        elif second_level_contrast_of_interest == '4':
+            second_level_contrast_label = 'run04-run01'
+        else:
+            print('Invalid response. Please start again.')
+            sys.exit()    
 
-
-    
-    group_diffs_fsf_label = 'group'
-        second_level_fsf_template_path_group = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
-        with open(second_level_fsf_template_path_group, 'w') as f:
-            f.write(second_level_fsf_template_group)
-        with open(second_level_fsf_template_path_group, 'r') as file:
+        third_level_fsf_template_path = f'analysis/fmri_analysis/analysis_1/second_level/shared/third_level_fsf_template_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
+        with open(third_level_fsf_template_path, 'w') as f:
+            f.write(third_level_fsf_template)
+        with open(third_level_fsf_template_path, 'r') as file:
             fsf_data = file.readlines()
         for i, line in enumerate(fsf_data):
             if "set fmri(outputdir)" in line:
-                feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.gfeat'
-                fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}"\n'
+                feat_folder = f'third_level_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.gfeat'
+                fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/third_level/shared/third_level_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}"\n'
             elif "set fmri(threshmask)" in line:
                 if pre_thresh_masking == '1':
                     fsf_data[i] = 'set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
@@ -5118,11 +5141,11 @@ set fmri(overwrite_yn) 0
             elif "set fmri(prob_thresh)" in line:
                 if liberal_thresholding == '1':
                     fsf_data[i] = 'set fmri(prob_thresh) 0.1\n'
-        second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.fsf'
-        with open(second_level_fsf, 'w') as file:
+        third_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
+        with open(third_level_fsf, 'w') as file:
             file.writelines(fsf_data)
-        os.remove(second_level_fsf_template_path_group_fixedfx_noint)
-        print(f'fsf file for second-level GLM generated and saved to second_level/shared folder.\nGLM details: {pre_thresh_masking_fsf_label}, {liberal_thresholding_fsf_label}, {cluster_thresholding_fsf_label}, {group_diffs_fsf_label}, {subject_fixed_effects_fsf_label}, {interaction_effect_fsf_label}')
+        os.remove(third_level_fsf_template_path)
+        print(f'fsf file for third-level GLM generated and saved to third_level/shared folder.\nGLM details: {first_level_contrast_label}, {second_level_contrast_label}, {pre_thresh_masking_fsf_label}, {liberal_thresholding_fsf_label}, {cluster_thresholding_fsf_label}, {group_diffs_fsf_label}')
         
 
 

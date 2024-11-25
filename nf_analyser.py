@@ -1070,6 +1070,7 @@ def thermometer_analysis():
     therm_timeseries_plot = (
         ggplot(mean_therm_df, aes(x='data_point', y='mean_therm_lvl', color='condition')) +
         geom_line(size=0.5) +
+        geom_smooth(aes(color='condition'), method='lm', se=False, size=0.8, linetype='dashed') +
         facet_wrap('~ intervention', labeller=labeller(intervention=custom_labeller)) +
         labs(
             title="0-10 Thermometer Level across Participants by Intervention and Condition",
@@ -1082,8 +1083,28 @@ def thermometer_analysis():
         scale_y_continuous(limits=[0,8], breaks=[0,1,2,3,4,5,6,7,8]) +
         scale_x_continuous(limits=[0,250], breaks=[0,50,100,150,200,250]) +
         scale_color_manual(values={'guilt': 'indianred', 'indig': 'skyblue'}, labels={'guilt': 'Guilt', 'indig': 'Indig'}))
-    print(therm_timeseries_plot)
     therm_timeseries_plot.save('therm_timeseries_plot.png', width=14, height=6, dpi=300)
+    mean_therm_exp_df = (
+        modified_therm_df
+        .groupby(['data_point', 'condition', 'intervention'], as_index=False)
+        .agg(mean_therm_lvl_exp=('therm_lvl_exp', 'mean')))
+    therm_exp_timeseries_plot = (
+        ggplot(mean_therm_exp_df, aes(x='data_point', y='mean_therm_lvl_exp', color='condition')) +
+        geom_line(size=0.5) +
+        geom_smooth(aes(color='condition'), method='lm', se=False, size=0.8, linetype='dashed') +
+        facet_wrap('~ intervention', labeller=labeller(intervention=custom_labeller)) +
+        labs(
+            title="Expanded Thermometer Level across Participants by Intervention and Condition",
+            x="Volume",
+            y="Expanded Thermometer Level",
+            color="Condition",
+            linetype="Intervention"
+        ) +
+        theme_classic() +
+        scale_y_continuous(limits=[-9,9], breaks=[-8,-6,-4,-2,0,2,4,6,8]) +
+        scale_x_continuous(limits=[0,250], breaks=[0,50,100,150,200,250]) +
+        scale_color_manual(values={'guilt': 'indianred', 'indig': 'skyblue'}, labels={'guilt': 'Guilt', 'indig': 'Indig'}))
+    therm_exp_timeseries_plot.save('therm_exp_timeseries_plot.png', width=14, height=6, dpi=300)
 
 #endregion
 
@@ -3235,12 +3256,12 @@ set fmri(overwrite_yn) 0
     
     # Step 6: Run first-level GLM [ANALYSIS 1].
     print("\n###### STEP 6: RUN FIRST-LEVEL GLM [ANALYSIS 1] ######")   
-    if not os.path.isdir(f'analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat'):
-        design_png_paths = []
-        for fsf in first_level_fsfs:
-            match = re.search(r'sub-(\d{3}).*run-(\d{2})', fsf)
-            participant_number = match.group(1)
-            run_number = match.group(2)
+    design_png_paths = []
+    for fsf in first_level_fsfs:
+        match = re.search(r'sub-(\d{3}).*run-(\d{2})', fsf)
+        participant_number = match.group(1)
+        run_number = match.group(2)
+        if not os.path.exists(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat'):
             print(f'Running first-level GLM of sub-{participant_number} for run{run_number}...')
             subprocess.run(['feat', fsf])
             report_log_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/report_log.html'
@@ -3252,6 +3273,9 @@ set fmri(overwrite_yn) 0
             if len(cope_files) != 4:
                 print("There are not 4 cope files in the stats folder. Investigation required.")
             design_png_paths.append(f'analysis/fmri_analysis/analysis_1/first_level/sub-{participant_number}/run-{run_number}.feat/design.png')
+        else:
+            ('First-level GLMs already run. Skipping process.')
+    if design_png_paths:
         def hash_image(image_path):
             with Image.open(image_path) as img:
                 img_bytes = img.tobytes()
@@ -3264,11 +3288,10 @@ set fmri(overwrite_yn) 0
                     print(f"design.png images are not identical: {image_paths[0]} and {image_path}. Investigation required.")
                     return
         compare_images(design_png_paths)
-    else:
-        print('First-level GLMs already run. Skipping process.')
     
-    # Step 7: Generate second-level fsf file [ANALYSIS 1].
-    print("\n###### STEP 7: GENERATE SECOND-LEVEL FSF FILE [ANALYSIS 1] ######")   
+    
+    # Step 7: Generate second-level fsf filea [ANALYSIS 1].
+    print("\n###### STEP 7: GENERATE SECOND-LEVEL FSF FILES [ANALYSIS 1] ######")   
     second_level_fsf_template_nogroup = r"""
 # FEAT version number
 set fmri(version) 6.00
@@ -4425,7 +4448,7 @@ set fmri(init_standard) ""
 set fmri(overwrite_yn) 0
 """
     
-    second_level_fsf_template_group_fixedfx_noint = r"""
+    second_level_fsf_template_group = r"""
 # FEAT version number
 set fmri(version) 6.00
 
@@ -4457,13 +4480,13 @@ set fmri(featwatcher_yn) 1
 set fmri(sscleanup_yn) 0
 
 # Output directory
-set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/[insert_output_folder]"
+set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/[insert_participant]/[insert_folder_name]"
 
 # TR(s)
 set fmri(tr) 2
 
 # Total volumes
-set fmri(npts) 40
+set fmri(npts) 2
 
 # Delete volumes
 set fmri(ndelete) 0
@@ -4472,7 +4495,7 @@ set fmri(ndelete) 0
 set fmri(tagfirst) 1
 
 # Number of first-level analyses
-set fmri(multiple) 40
+set fmri(multiple) 2
 
 # Higher-level input type
 # 1 : Inputs are lower-level FEAT directories
@@ -4580,13 +4603,13 @@ set fmri(mixed_yn) 3
 set fmri(randomisePermutations) 5000
 
 # Number of EVs
-set fmri(evs_orig) 4
-set fmri(evs_real) 4
+set fmri(evs_orig) 2
+set fmri(evs_real) 2
 set fmri(evs_vox) 0
 
 # Number of contrasts
-set fmri(ncon_orig) 1
-set fmri(ncon_real) 5
+set fmri(ncon_orig) 4
+set fmri(ncon_real) 4
 
 # Number of F-tests
 set fmri(nftests_orig) 0
@@ -4596,7 +4619,7 @@ set fmri(nftests_real) 0
 set fmri(constcol) 0
 
 # Carry out post-stats steps?
-set fmri(poststats_yn) 1
+set fmri(poststats_yn) 0
 
 # Pre-threshold masking?
 set fmri(threshmask) ""
@@ -4639,7 +4662,7 @@ set fmri(rendertype) 1
 set fmri(bgimage) 1
 
 # Create time series plots
-set fmri(tsplot_yn) 1
+set fmri(tsplot_yn) 0
 
 # Registration to initial structural
 set fmri(reginitial_highres_yn) 0
@@ -4666,7 +4689,7 @@ set fmri(reghighres_search) 90
 set fmri(reghighres_dof) BBR
 
 # Registration to standard image?
-set fmri(regstandard_yn) 1
+set fmri(regstandard_yn) 0
 
 # Use alternate reference images?
 set fmri(alternateReference_yn) 0
@@ -4692,6 +4715,10 @@ set fmri(regstandard_nonlinear_warpres) 10
 # High pass filter cutoff
 set fmri(paradigm_hp) 100
 
+# Total voxels
+set fmri(totalVoxels) 227227350
+
+
 # Number of lower-level copes feeding into higher-level analysis
 set fmri(ncopeinputs) 4
 
@@ -4708,124 +4735,10 @@ set fmri(copeinput.3) 1
 set fmri(copeinput.4) 1
 
 # 4D AVW data or FEAT directory (1)
-set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat"
+set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/[insert_participant]/run-01.feat"
 
 # 4D AVW data or FEAT directory (2)
-set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-04.feat"
-
-# 4D AVW data or FEAT directory (3)
-set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-01.feat"
-
-# 4D AVW data or FEAT directory (4)
-set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-04.feat"
-
-# 4D AVW data or FEAT directory (5)
-set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-01.feat"
-
-# 4D AVW data or FEAT directory (6)
-set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-04.feat"
-
-# 4D AVW data or FEAT directory (7)
-set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-01.feat"
-
-# 4D AVW data or FEAT directory (8)
-set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-04.feat"
-
-# 4D AVW data or FEAT directory (9)
-set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-01.feat"
-
-# 4D AVW data or FEAT directory (10)
-set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-04.feat"
-
-# 4D AVW data or FEAT directory (11)
-set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-01.feat"
-
-# 4D AVW data or FEAT directory (12)
-set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-04.feat"
-
-# 4D AVW data or FEAT directory (13)
-set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-01.feat"
-
-# 4D AVW data or FEAT directory (14)
-set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-04.feat"
-
-# 4D AVW data or FEAT directory (15)
-set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-01.feat"
-
-# 4D AVW data or FEAT directory (16)
-set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-04.feat"
-
-# 4D AVW data or FEAT directory (17)
-set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-01.feat"
-
-# 4D AVW data or FEAT directory (18)
-set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-04.feat"
-
-# 4D AVW data or FEAT directory (19)
-set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-01.feat"
-
-# 4D AVW data or FEAT directory (20)
-set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-04.feat"
-
-# 4D AVW data or FEAT directory (21)
-set feat_files(21) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-01.feat"
-
-# 4D AVW data or FEAT directory (22)
-set feat_files(22) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-04.feat"
-
-# 4D AVW data or FEAT directory (23)
-set feat_files(23) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-01.feat"
-
-# 4D AVW data or FEAT directory (24)
-set feat_files(24) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-04.feat"
-
-# 4D AVW data or FEAT directory (25)
-set feat_files(25) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-01.feat"
-
-# 4D AVW data or FEAT directory (26)
-set feat_files(26) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-04.feat"
-
-# 4D AVW data or FEAT directory (27)
-set feat_files(27) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-01.feat"
-
-# 4D AVW data or FEAT directory (28)
-set feat_files(28) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-04.feat"
-
-# 4D AVW data or FEAT directory (29)
-set feat_files(29) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-01.feat"
-
-# 4D AVW data or FEAT directory (30)
-set feat_files(30) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-04.feat"
-
-# 4D AVW data or FEAT directory (31)
-set feat_files(31) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-01.feat"
-
-# 4D AVW data or FEAT directory (32)
-set feat_files(32) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-04.feat"
-
-# 4D AVW data or FEAT directory (33)
-set feat_files(33) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-01.feat"
-
-# 4D AVW data or FEAT directory (34)
-set feat_files(34) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-04.feat"
-
-# 4D AVW data or FEAT directory (35)
-set feat_files(35) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-01.feat"
-
-# 4D AVW data or FEAT directory (36)
-set feat_files(36) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-04.feat"
-
-# 4D AVW data or FEAT directory (37)
-set feat_files(37) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-01.feat"
-
-# 4D AVW data or FEAT directory (38)
-set feat_files(38) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-04.feat"
-
-# 4D AVW data or FEAT directory (39)
-set feat_files(39) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-01.feat"
-
-# 4D AVW data or FEAT directory (40)
-set feat_files(40) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-04.feat"
+set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/[insert_participant]/run-04.feat"
 
 # Add confound EVs text file
 set fmri(confoundevs) 0
@@ -4866,7 +4779,7 @@ set fmri(deriv_yn1) 0
 set fmri(custom1) "dummy"
 
 # Orthogonalise EV 1 wrt EV 0
-set fmri(ortho1.0) 0
+set fmri(ortho1.0) 1
 
 # Orthogonalise EV 1 wrt EV 1
 set fmri(ortho1.1) 0
@@ -4874,131 +4787,11 @@ set fmri(ortho1.1) 0
 # Orthogonalise EV 1 wrt EV 2
 set fmri(ortho1.2) 0
 
-# Orthogonalise EV 1 wrt EV 3
-set fmri(ortho1.3) 0
-
-# Orthogonalise EV 1 wrt EV 4
-set fmri(ortho1.4) 0
-
 # Higher-level EV value for EV 1 and input 1
-set fmri(evg1.1) 1
+set fmri(evg1.1) 1.0
 
 # Higher-level EV value for EV 1 and input 2
-set fmri(evg2.1) 0
-
-# Higher-level EV value for EV 1 and input 3
-set fmri(evg3.1) 1.0
-
-# Higher-level EV value for EV 1 and input 4
-set fmri(evg4.1) 0
-
-# Higher-level EV value for EV 1 and input 5
-set fmri(evg5.1) 1.0
-
-# Higher-level EV value for EV 1 and input 6
-set fmri(evg6.1) 0
-
-# Higher-level EV value for EV 1 and input 7
-set fmri(evg7.1) 1.0
-
-# Higher-level EV value for EV 1 and input 8
-set fmri(evg8.1) 0
-
-# Higher-level EV value for EV 1 and input 9
-set fmri(evg9.1) 1.0
-
-# Higher-level EV value for EV 1 and input 10
-set fmri(evg10.1) 0
-
-# Higher-level EV value for EV 1 and input 11
-set fmri(evg11.1) 1.0
-
-# Higher-level EV value for EV 1 and input 12
-set fmri(evg12.1) 0
-
-# Higher-level EV value for EV 1 and input 13
-set fmri(evg13.1) 1.0
-
-# Higher-level EV value for EV 1 and input 14
-set fmri(evg14.1) 0
-
-# Higher-level EV value for EV 1 and input 15
-set fmri(evg15.1) 1.0
-
-# Higher-level EV value for EV 1 and input 16
-set fmri(evg16.1) 0
-
-# Higher-level EV value for EV 1 and input 17
-set fmri(evg17.1) 1.0
-
-# Higher-level EV value for EV 1 and input 18
-set fmri(evg18.1) 0
-
-# Higher-level EV value for EV 1 and input 19
-set fmri(evg19.1) 1.0
-
-# Higher-level EV value for EV 1 and input 20
-set fmri(evg20.1) 0
-
-# Higher-level EV value for EV 1 and input 21
-set fmri(evg21.1) 1.0
-
-# Higher-level EV value for EV 1 and input 22
-set fmri(evg22.1) 0
-
-# Higher-level EV value for EV 1 and input 23
-set fmri(evg23.1) 1.0
-
-# Higher-level EV value for EV 1 and input 24
-set fmri(evg24.1) 0
-
-# Higher-level EV value for EV 1 and input 25
-set fmri(evg25.1) 1.0
-
-# Higher-level EV value for EV 1 and input 26
-set fmri(evg26.1) 0
-
-# Higher-level EV value for EV 1 and input 27
-set fmri(evg27.1) 1.0
-
-# Higher-level EV value for EV 1 and input 28
-set fmri(evg28.1) 0
-
-# Higher-level EV value for EV 1 and input 29
-set fmri(evg29.1) 1.0
-
-# Higher-level EV value for EV 1 and input 30
-set fmri(evg30.1) 0
-
-# Higher-level EV value for EV 1 and input 31
-set fmri(evg31.1) 1.0
-
-# Higher-level EV value for EV 1 and input 32
-set fmri(evg32.1) 0
-
-# Higher-level EV value for EV 1 and input 33
-set fmri(evg33.1) 1.0
-
-# Higher-level EV value for EV 1 and input 34
-set fmri(evg34.1) 0
-
-# Higher-level EV value for EV 1 and input 35
-set fmri(evg35.1) 1.0
-
-# Higher-level EV value for EV 1 and input 36
-set fmri(evg36.1) 0
-
-# Higher-level EV value for EV 1 and input 37
-set fmri(evg37.1) 1.0
-
-# Higher-level EV value for EV 1 and input 38
-set fmri(evg38.1) 0
-
-# Higher-level EV value for EV 1 and input 39
-set fmri(evg39.1) 1.0
-
-# Higher-level EV value for EV 1 and input 40
-set fmri(evg40.1) 0
+set fmri(evg2.1) 0.0
 
 # EV 2 title
 set fmri(evtitle2) "run04"
@@ -5036,7 +4829,7 @@ set fmri(deriv_yn2) 0
 set fmri(custom2) "dummy"
 
 # Orthogonalise EV 2 wrt EV 0
-set fmri(ortho2.0) 0
+set fmri(ortho2.0) 1
 
 # Orthogonalise EV 2 wrt EV 1
 set fmri(ortho2.1) 0
@@ -5044,594 +4837,20 @@ set fmri(ortho2.1) 0
 # Orthogonalise EV 2 wrt EV 2
 set fmri(ortho2.2) 0
 
-# Orthogonalise EV 2 wrt EV 3
-set fmri(ortho2.3) 0
-
-# Orthogonalise EV 2 wrt EV 4
-set fmri(ortho2.4) 0
-
 # Higher-level EV value for EV 2 and input 1
-set fmri(evg1.2) 0
+set fmri(evg1.2) 0.0
 
 # Higher-level EV value for EV 2 and input 2
 set fmri(evg2.2) 1.0
 
-# Higher-level EV value for EV 2 and input 3
-set fmri(evg3.2) 0
-
-# Higher-level EV value for EV 2 and input 4
-set fmri(evg4.2) 1.0
-
-# Higher-level EV value for EV 2 and input 5
-set fmri(evg5.2) 0
-
-# Higher-level EV value for EV 2 and input 6
-set fmri(evg6.2) 1.0
-
-# Higher-level EV value for EV 2 and input 7
-set fmri(evg7.2) 0
-
-# Higher-level EV value for EV 2 and input 8
-set fmri(evg8.2) 1.0
-
-# Higher-level EV value for EV 2 and input 9
-set fmri(evg9.2) 0
-
-# Higher-level EV value for EV 2 and input 10
-set fmri(evg10.2) 1.0
-
-# Higher-level EV value for EV 2 and input 11
-set fmri(evg11.2) 0
-
-# Higher-level EV value for EV 2 and input 12
-set fmri(evg12.2) 1.0
-
-# Higher-level EV value for EV 2 and input 13
-set fmri(evg13.2) 0
-
-# Higher-level EV value for EV 2 and input 14
-set fmri(evg14.2) 1.0
-
-# Higher-level EV value for EV 2 and input 15
-set fmri(evg15.2) 0
-
-# Higher-level EV value for EV 2 and input 16
-set fmri(evg16.2) 1.0
-
-# Higher-level EV value for EV 2 and input 17
-set fmri(evg17.2) 0
-
-# Higher-level EV value for EV 2 and input 18
-set fmri(evg18.2) 1.0
-
-# Higher-level EV value for EV 2 and input 19
-set fmri(evg19.2) 0
-
-# Higher-level EV value for EV 2 and input 20
-set fmri(evg20.2) 1.0
-
-# Higher-level EV value for EV 2 and input 21
-set fmri(evg21.2) 0
-
-# Higher-level EV value for EV 2 and input 22
-set fmri(evg22.2) 1.0
-
-# Higher-level EV value for EV 2 and input 23
-set fmri(evg23.2) 0
-
-# Higher-level EV value for EV 2 and input 24
-set fmri(evg24.2) 1.0
-
-# Higher-level EV value for EV 2 and input 25
-set fmri(evg25.2) 0
-
-# Higher-level EV value for EV 2 and input 26
-set fmri(evg26.2) 1.0
-
-# Higher-level EV value for EV 2 and input 27
-set fmri(evg27.2) 0
-
-# Higher-level EV value for EV 2 and input 28
-set fmri(evg28.2) 1.0
-
-# Higher-level EV value for EV 2 and input 29
-set fmri(evg29.2) 0
-
-# Higher-level EV value for EV 2 and input 30
-set fmri(evg30.2) 1.0
-
-# Higher-level EV value for EV 2 and input 31
-set fmri(evg31.2) 0
-
-# Higher-level EV value for EV 2 and input 32
-set fmri(evg32.2) 1.0
-
-# Higher-level EV value for EV 2 and input 33
-set fmri(evg33.2) 0
-
-# Higher-level EV value for EV 2 and input 34
-set fmri(evg34.2) 1.0
-
-# Higher-level EV value for EV 2 and input 35
-set fmri(evg35.2) 0
-
-# Higher-level EV value for EV 2 and input 36
-set fmri(evg36.2) 1.0
-
-# Higher-level EV value for EV 2 and input 37
-set fmri(evg37.2) 0
-
-# Higher-level EV value for EV 2 and input 38
-set fmri(evg38.2) 1.0
-
-# Higher-level EV value for EV 2 and input 39
-set fmri(evg39.2) 0
-
-# Higher-level EV value for EV 2 and input 40
-set fmri(evg40.2) 1.0
-
-# EV 3 title
-set fmri(evtitle3) "fieldmaps"
-
-# Basic waveform shape (EV 3)
-# 0 : Square
-# 1 : Sinusoid
-# 2 : Custom (1 entry per volume)
-# 3 : Custom (3 column format)
-# 4 : Interaction
-# 10 : Empty (all zeros)
-set fmri(shape3) 2
-
-# Convolution (EV 3)
-# 0 : None
-# 1 : Gaussian
-# 2 : Gamma
-# 3 : Double-Gamma HRF
-# 4 : Gamma basis functions
-# 5 : Sine basis functions
-# 6 : FIR basis functions
-# 8 : Alternate Double-Gamma
-set fmri(convolve3) 0
-
-# Convolve phase (EV 3)
-set fmri(convolve_phase3) 0
-
-# Apply temporal filtering (EV 3)
-set fmri(tempfilt_yn3) 0
-
-# Add temporal derivative (EV 3)
-set fmri(deriv_yn3) 0
-
-# Custom EV file (EV 3)
-set fmri(custom3) "dummy"
-
-# Orthogonalise EV 3 wrt EV 0
-set fmri(ortho3.0) 0
-
-# Orthogonalise EV 3 wrt EV 1
-set fmri(ortho3.1) 0
-
-# Orthogonalise EV 3 wrt EV 2
-set fmri(ortho3.2) 0
-
-# Orthogonalise EV 3 wrt EV 3
-set fmri(ortho3.3) 0
-
-# Orthogonalise EV 3 wrt EV 4
-set fmri(ortho3.4) 0
-
-# Higher-level EV value for EV 3 and input 1
-set fmri(evg1.3) 0
-
-# Higher-level EV value for EV 3 and input 2
-set fmri(evg2.3) 0
-
-# Higher-level EV value for EV 3 and input 3
-set fmri(evg3.3) 0
-
-# Higher-level EV value for EV 3 and input 4
-set fmri(evg4.3) 0
-
-# Higher-level EV value for EV 3 and input 5
-set fmri(evg5.3) 0
-
-# Higher-level EV value for EV 3 and input 6
-set fmri(evg6.3) 0
-
-# Higher-level EV value for EV 3 and input 7
-set fmri(evg7.3) 0
-
-# Higher-level EV value for EV 3 and input 8
-set fmri(evg8.3) 0
-
-# Higher-level EV value for EV 3 and input 9
-set fmri(evg9.3) 1.0
-
-# Higher-level EV value for EV 3 and input 10
-set fmri(evg10.3) 1.0
-
-# Higher-level EV value for EV 3 and input 11
-set fmri(evg11.3) 0
-
-# Higher-level EV value for EV 3 and input 12
-set fmri(evg12.3) 0
-
-# Higher-level EV value for EV 3 and input 13
-set fmri(evg13.3) 0
-
-# Higher-level EV value for EV 3 and input 14
-set fmri(evg14.3) 0
-
-# Higher-level EV value for EV 3 and input 15
-set fmri(evg15.3) 0
-
-# Higher-level EV value for EV 3 and input 16
-set fmri(evg16.3) 0
-
-# Higher-level EV value for EV 3 and input 17
-set fmri(evg17.3) 1.0
-
-# Higher-level EV value for EV 3 and input 18
-set fmri(evg18.3) 1.0
-
-# Higher-level EV value for EV 3 and input 19
-set fmri(evg19.3) 1.0
-
-# Higher-level EV value for EV 3 and input 20
-set fmri(evg20.3) 1.0
-
-# Higher-level EV value for EV 3 and input 21
-set fmri(evg21.3) 1.0
-
-# Higher-level EV value for EV 3 and input 22
-set fmri(evg22.3) 1.0
-
-# Higher-level EV value for EV 3 and input 23
-set fmri(evg23.3) 1.0
-
-# Higher-level EV value for EV 3 and input 24
-set fmri(evg24.3) 1.0
-
-# Higher-level EV value for EV 3 and input 25
-set fmri(evg25.3) 1.0
-
-# Higher-level EV value for EV 3 and input 26
-set fmri(evg26.3) 1.0
-
-# Higher-level EV value for EV 3 and input 27
-set fmri(evg27.3) 1.0
-
-# Higher-level EV value for EV 3 and input 28
-set fmri(evg28.3) 1.0
-
-# Higher-level EV value for EV 3 and input 29
-set fmri(evg29.3) 1.0
-
-# Higher-level EV value for EV 3 and input 30
-set fmri(evg30.3) 1.0
-
-# Higher-level EV value for EV 3 and input 31
-set fmri(evg31.3) 1.0
-
-# Higher-level EV value for EV 3 and input 32
-set fmri(evg32.3) 1.0
-
-# Higher-level EV value for EV 3 and input 33
-set fmri(evg33.3) 1.0
-
-# Higher-level EV value for EV 3 and input 34
-set fmri(evg34.3) 1.0
-
-# Higher-level EV value for EV 3 and input 35
-set fmri(evg35.3) 1.0
-
-# Higher-level EV value for EV 3 and input 36
-set fmri(evg36.3) 1.0
-
-# Higher-level EV value for EV 3 and input 37
-set fmri(evg37.3) 1.0
-
-# Higher-level EV value for EV 3 and input 38
-set fmri(evg38.3) 1.0
-
-# Higher-level EV value for EV 3 and input 39
-set fmri(evg39.3) 1.0
-
-# Higher-level EV value for EV 3 and input 40
-set fmri(evg40.3) 1.0
-
-# EV 4 title
-set fmri(evtitle4) "groupa"
-
-# Basic waveform shape (EV 4)
-# 0 : Square
-# 1 : Sinusoid
-# 2 : Custom (1 entry per volume)
-# 3 : Custom (3 column format)
-# 4 : Interaction
-# 10 : Empty (all zeros)
-set fmri(shape4) 2
-
-# Convolution (EV 4)
-# 0 : None
-# 1 : Gaussian
-# 2 : Gamma
-# 3 : Double-Gamma HRF
-# 4 : Gamma basis functions
-# 5 : Sine basis functions
-# 6 : FIR basis functions
-# 8 : Alternate Double-Gamma
-set fmri(convolve4) 0
-
-# Convolve phase (EV 4)
-set fmri(convolve_phase4) 0
-
-# Apply temporal filtering (EV 4)
-set fmri(tempfilt_yn4) 0
-
-# Add temporal derivative (EV 4)
-set fmri(deriv_yn4) 0
-
-# Custom EV file (EV 4)
-set fmri(custom4) "dummy"
-
-# Orthogonalise EV 4 wrt EV 0
-set fmri(ortho4.0) 0
-
-# Orthogonalise EV 4 wrt EV 1
-set fmri(ortho4.1) 0
-
-# Orthogonalise EV 4 wrt EV 2
-set fmri(ortho4.2) 0
-
-# Orthogonalise EV 4 wrt EV 3
-set fmri(ortho4.3) 0
-
-# Orthogonalise EV 4 wrt EV 4
-set fmri(ortho4.4) 0
-
-# Higher-level EV value for EV 4 and input 1
-set fmri(evg1.4) 1.0
-
-# Higher-level EV value for EV 4 and input 2
-set fmri(evg2.4) 1.0
-
-# Higher-level EV value for EV 4 and input 3
-set fmri(evg3.4) 1.0
-
-# Higher-level EV value for EV 4 and input 4
-set fmri(evg4.4) 1.0
-
-# Higher-level EV value for EV 4 and input 5
-set fmri(evg5.4) -1.0
-
-# Higher-level EV value for EV 4 and input 6
-set fmri(evg6.4) -1.0
-
-# Higher-level EV value for EV 4 and input 7
-set fmri(evg7.4) -1.0
-
-# Higher-level EV value for EV 4 and input 8
-set fmri(evg8.4) -1.0
-
-# Higher-level EV value for EV 4 and input 9
-set fmri(evg9.4) -1.0
-
-# Higher-level EV value for EV 4 and input 10
-set fmri(evg10.4) -1.0
-
-# Higher-level EV value for EV 4 and input 11
-set fmri(evg11.4) -1.0
-
-# Higher-level EV value for EV 4 and input 12
-set fmri(evg12.4) -1.0
-
-# Higher-level EV value for EV 4 and input 13
-set fmri(evg13.4) -1.0
-
-# Higher-level EV value for EV 4 and input 14
-set fmri(evg14.4) -1.0
-
-# Higher-level EV value for EV 4 and input 15
-set fmri(evg15.4) -1.0
-
-# Higher-level EV value for EV 4 and input 16
-set fmri(evg16.4) -1.0
-
-# Higher-level EV value for EV 4 and input 17
-set fmri(evg17.4) 1.0
-
-# Higher-level EV value for EV 4 and input 18
-set fmri(evg18.4) 1.0
-
-# Higher-level EV value for EV 4 and input 19
-set fmri(evg19.4) -1.0
-
-# Higher-level EV value for EV 4 and input 20
-set fmri(evg20.4) -1.0
-
-# Higher-level EV value for EV 4 and input 21
-set fmri(evg21.4) 1.0
-
-# Higher-level EV value for EV 4 and input 22
-set fmri(evg22.4) 1.0
-
-# Higher-level EV value for EV 4 and input 23
-set fmri(evg23.4) 1.0
-
-# Higher-level EV value for EV 4 and input 24
-set fmri(evg24.4) 1.0
-
-# Higher-level EV value for EV 4 and input 25
-set fmri(evg25.4) -1.0
-
-# Higher-level EV value for EV 4 and input 26
-set fmri(evg26.4) -1.0
-
-# Higher-level EV value for EV 4 and input 27
-set fmri(evg27.4) 1.0
-
-# Higher-level EV value for EV 4 and input 28
-set fmri(evg28.4) 1.0
-
-# Higher-level EV value for EV 4 and input 29
-set fmri(evg29.4) 1.0
-
-# Higher-level EV value for EV 4 and input 30
-set fmri(evg30.4) 1.0
-
-# Higher-level EV value for EV 4 and input 31
-set fmri(evg31.4) 1.0
-
-# Higher-level EV value for EV 4 and input 32
-set fmri(evg32.4) 1.0
-
-# Higher-level EV value for EV 4 and input 33
-set fmri(evg33.4) -1.0
-
-# Higher-level EV value for EV 4 and input 34
-set fmri(evg34.4) -1.0
-
-# Higher-level EV value for EV 4 and input 35
-set fmri(evg35.4) -1.0
-
-# Higher-level EV value for EV 4 and input 36
-set fmri(evg36.4) -1.0
-
-# Higher-level EV value for EV 4 and input 37
-set fmri(evg37.4) 1.0
-
-# Higher-level EV value for EV 4 and input 38
-set fmri(evg38.4) 1.0
-
-# Higher-level EV value for EV 4 and input 39
-set fmri(evg39.4) 1.0
-
-# Higher-level EV value for EV 4 and input 40
-set fmri(evg40.4) 1.0
-
 # Setup Orthogonalisation at higher level?
-set fmri(level2orth) 0
+set fmri(level2orth) 1
 
 # Group membership for input 1
 set fmri(groupmem.1) 1
 
 # Group membership for input 2
 set fmri(groupmem.2) 1
-
-# Group membership for input 3
-set fmri(groupmem.3) 1
-
-# Group membership for input 4
-set fmri(groupmem.4) 1
-
-# Group membership for input 5
-set fmri(groupmem.5) 1
-
-# Group membership for input 6
-set fmri(groupmem.6) 1
-
-# Group membership for input 7
-set fmri(groupmem.7) 1
-
-# Group membership for input 8
-set fmri(groupmem.8) 1
-
-# Group membership for input 9
-set fmri(groupmem.9) 1
-
-# Group membership for input 10
-set fmri(groupmem.10) 1
-
-# Group membership for input 11
-set fmri(groupmem.11) 1
-
-# Group membership for input 12
-set fmri(groupmem.12) 1
-
-# Group membership for input 13
-set fmri(groupmem.13) 1
-
-# Group membership for input 14
-set fmri(groupmem.14) 1
-
-# Group membership for input 15
-set fmri(groupmem.15) 1
-
-# Group membership for input 16
-set fmri(groupmem.16) 1
-
-# Group membership for input 17
-set fmri(groupmem.17) 1
-
-# Group membership for input 18
-set fmri(groupmem.18) 1
-
-# Group membership for input 19
-set fmri(groupmem.19) 1
-
-# Group membership for input 20
-set fmri(groupmem.20) 1
-
-# Group membership for input 21
-set fmri(groupmem.21) 1
-
-# Group membership for input 22
-set fmri(groupmem.22) 1
-
-# Group membership for input 23
-set fmri(groupmem.23) 1
-
-# Group membership for input 24
-set fmri(groupmem.24) 1
-
-# Group membership for input 25
-set fmri(groupmem.25) 1
-
-# Group membership for input 26
-set fmri(groupmem.26) 1
-
-# Group membership for input 27
-set fmri(groupmem.27) 1
-
-# Group membership for input 28
-set fmri(groupmem.28) 1
-
-# Group membership for input 29
-set fmri(groupmem.29) 1
-
-# Group membership for input 30
-set fmri(groupmem.30) 1
-
-# Group membership for input 31
-set fmri(groupmem.31) 1
-
-# Group membership for input 32
-set fmri(groupmem.32) 1
-
-# Group membership for input 33
-set fmri(groupmem.33) 1
-
-# Group membership for input 34
-set fmri(groupmem.34) 1
-
-# Group membership for input 35
-set fmri(groupmem.35) 1
-
-# Group membership for input 36
-set fmri(groupmem.36) 1
-
-# Group membership for input 37
-set fmri(groupmem.37) 1
-
-# Group membership for input 38
-set fmri(groupmem.38) 1
-
-# Group membership for input 39
-set fmri(groupmem.39) 1
-
-# Group membership for input 40
-set fmri(groupmem.40) 1
 
 # Contrast & F-tests mode
 # real : control real EVs
@@ -5646,16 +4865,10 @@ set fmri(conpic_real.1) 1
 set fmri(conname_real.1) "run01"
 
 # Real contrast_real vector 1 element 1
-set fmri(con_real1.1) 1.0
+set fmri(con_real1.1) 1
 
 # Real contrast_real vector 1 element 2
 set fmri(con_real1.2) 0.0
-
-# Real contrast_real vector 1 element 3
-set fmri(con_real1.3) 0.0
-
-# Real contrast_real vector 1 element 4
-set fmri(con_real1.4) 0
 
 # Display images for contrast_real 2
 set fmri(conpic_real.2) 1
@@ -5669,12 +4882,6 @@ set fmri(con_real2.1) 0.0
 # Real contrast_real vector 2 element 2
 set fmri(con_real2.2) 1.0
 
-# Real contrast_real vector 2 element 3
-set fmri(con_real2.3) 0.0
-
-# Real contrast_real vector 2 element 4
-set fmri(con_real2.4) 0
-
 # Display images for contrast_real 3
 set fmri(conpic_real.3) 1
 
@@ -5686,12 +4893,6 @@ set fmri(con_real3.1) 1.0
 
 # Real contrast_real vector 3 element 2
 set fmri(con_real3.2) -1.0
-
-# Real contrast_real vector 3 element 3
-set fmri(con_real3.3) 0.0
-
-# Real contrast_real vector 3 element 4
-set fmri(con_real3.4) 0
 
 # Display images for contrast_real 4
 set fmri(conpic_real.4) 1
@@ -5705,30 +4906,6 @@ set fmri(con_real4.1) -1.0
 # Real contrast_real vector 4 element 2
 set fmri(con_real4.2) 1.0
 
-# Real contrast_real vector 4 element 3
-set fmri(con_real4.3) 0.0
-
-# Real contrast_real vector 4 element 4
-set fmri(con_real4.4) 0
-
-# Display images for contrast_real 5
-set fmri(conpic_real.5) 1
-
-# Title for contrast_real 5
-set fmri(conname_real.5) "groupa-groupb"
-
-# Real contrast_real vector 5 element 1
-set fmri(con_real5.1) 0
-
-# Real contrast_real vector 5 element 2
-set fmri(con_real5.2) 0
-
-# Real contrast_real vector 5 element 3
-set fmri(con_real5.3) 0
-
-# Real contrast_real vector 5 element 4
-set fmri(con_real5.4) 1.0
-
 # Contrast masking - use >0 instead of thresholding?
 set fmri(conmask_zerothresh_yn) 0
 
@@ -5741,9 +4918,6 @@ set fmri(conmask1_3) 0
 # Mask real contrast/F-test 1 with real contrast/F-test 4?
 set fmri(conmask1_4) 0
 
-# Mask real contrast/F-test 1 with real contrast/F-test 5?
-set fmri(conmask1_5) 0
-
 # Mask real contrast/F-test 2 with real contrast/F-test 1?
 set fmri(conmask2_1) 0
 
@@ -5752,9 +4926,6 @@ set fmri(conmask2_3) 0
 
 # Mask real contrast/F-test 2 with real contrast/F-test 4?
 set fmri(conmask2_4) 0
-
-# Mask real contrast/F-test 2 with real contrast/F-test 5?
-set fmri(conmask2_5) 0
 
 # Mask real contrast/F-test 3 with real contrast/F-test 1?
 set fmri(conmask3_1) 0
@@ -5765,9 +4936,6 @@ set fmri(conmask3_2) 0
 # Mask real contrast/F-test 3 with real contrast/F-test 4?
 set fmri(conmask3_4) 0
 
-# Mask real contrast/F-test 3 with real contrast/F-test 5?
-set fmri(conmask3_5) 0
-
 # Mask real contrast/F-test 4 with real contrast/F-test 1?
 set fmri(conmask4_1) 0
 
@@ -5776,21 +4944,6 @@ set fmri(conmask4_2) 0
 
 # Mask real contrast/F-test 4 with real contrast/F-test 3?
 set fmri(conmask4_3) 0
-
-# Mask real contrast/F-test 4 with real contrast/F-test 5?
-set fmri(conmask4_5) 0
-
-# Mask real contrast/F-test 5 with real contrast/F-test 1?
-set fmri(conmask5_1) 0
-
-# Mask real contrast/F-test 5 with real contrast/F-test 2?
-set fmri(conmask5_2) 0
-
-# Mask real contrast/F-test 5 with real contrast/F-test 3?
-set fmri(conmask5_3) 0
-
-# Mask real contrast/F-test 5 with real contrast/F-test 4?
-set fmri(conmask5_4) 0
 
 # Do contrast masking at all?
 set fmri(conmask1_1) 0
@@ -5868,56 +5021,29 @@ set fmri(overwrite_yn) 0
     
     elif group_diffs == '1':
         group_diffs_fsf_label = 'group'
-        subject_fixed_effects = logged_input("Select subjects to be enter as fixed effects in the second-level [1] or random effects in the third-level [2]: ")
-        if subject_fixed_effects == '1':
-            subject_fixed_effects_fsf_label = 'subjectfixedfx'
-            interaction_effect = logged_input("Select inclusion [1] or exclusion [2] of group:run interaction effect: ")
-            if interaction_effect == '2':
-                interaction_effect_fsf_label = 'nointeraction'
-                second_level_fsf_template_path_group_fixedfx_noint = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.fsf'
-                with open(second_level_fsf_template_path_group_fixedfx_noint, 'w') as f:
-                    f.write(second_level_fsf_template_group_fixedfx_noint)
-                with open(second_level_fsf_template_path_group_fixedfx_noint, 'r') as file:
+        second_level_fsf_template_path_group = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{group_diffs_fsf_label}.fsf'
+        with open(second_level_fsf_template_path_group, 'w') as f:
+            f.write(second_level_fsf_template_group)
+        second_level_group_fsfs = []
+        for p_id in participants:
+            p_id_stripped = p_id.replace('P', '')
+            for run in runs: 
+                with open(second_level_fsf_template_path_group, 'r') as file:
                     fsf_data = file.readlines()
                 for i, line in enumerate(fsf_data):
                     if "set fmri(outputdir)" in line:
-                        feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.gfeat'
-                        fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}"\n'
-                    elif "set fmri(threshmask)" in line:
-                        if pre_thresh_masking == '1':
-                            fsf_data[i] = 'set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
-                    elif "set fmri(thresh)" in line:
-                        if cluster_thresholding == '1':
-                            fsf_data[i] = 'set fmri(thresh) 3\n'
-                    elif "set fmri(prob_thresh)" in line:
-                        if liberal_thresholding == '1':
-                            fsf_data[i] = 'set fmri(prob_thresh) 0.1\n'
-                second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.fsf'
-                with open(second_level_fsf, 'w') as file:
+                        fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-{p_id_stripped}/sub-{p_id_stripped}_{group_diffs_fsf_label}"\n'
+                    elif "set feat_files(1)" in line:
+                        fsf_data[i] = f'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/run-01.feat"\n'
+                    elif "set feat_files(2)" in line:
+                        fsf_data[i] = f'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/run-04.feat"\n'
+                second_level_group_fsf = f'analysis/fmri_analysis/analysis_1/second_level/sub-{p_id_stripped}/second_level_{group_diffs_fsf_label}_fsf.fsf'
+                second_level_group_fsfs.append(second_level_group_fsf)
+                with open(second_level_group_fsf, 'w') as file:
                     file.writelines(fsf_data)
-                os.remove(second_level_fsf_template_path_group_fixedfx_noint)
-                print(f'fsf file for second-level GLM generated and saved to second_level/shared folder.\nGLM details: {pre_thresh_masking_fsf_label}, {liberal_thresholding_fsf_label}, {cluster_thresholding_fsf_label}, {group_diffs_fsf_label}, {subject_fixed_effects_fsf_label}, {interaction_effect_fsf_label}')
-        
-            elif interaction_effect == '1':
-                interaction_effect_label = 'interaction'
-                print("INTERACTION EFFECT GLM NOT FINALISED.")
-                sys.exit()
-            else:
-                print('Invalid response. Please start again.')
-                sys.exit()
-        
-        elif subject_fixed_effects == '2':
-            subject_fixed_effects_label = 'subjectrandomfx'
-            print("SUBJECT RANDOM EFFECTS GLM NOT FINALISED.")
-            sys.exit()
-        else:
-            print('Invalid response. Please start again.')
-    
-    else:
-        print('Invalid response. Please start again.')
-        sys.exit()
+        print(f'fsf files for second-level group analysis GLM generated.')
 
-    # Step 7: Run second-level GLM [ANALYSIS 1].
+    # Step 8: Run second-level GLM [ANALYSIS 1].
     print("\n###### STEP 7: RUN SECOND-LEVEL GLM [ANALYSIS 1] ######")
     for p_id in participants:
         p_id_stripped = p_id.replace('P', '')
@@ -5932,12 +5058,12 @@ set fmri(overwrite_yn) 0
             standard_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/reg/standard.nii.gz'
             if not os.path.exists(standard_path):
                 shutil.copy(mean_func_path, standard_path)
-    if group_diffs == '2' or subject_fixed_effects == '1':
+    if group_diffs == '2':
         if not os.path.isdir(f'analysis/fmri_analysis/analysis_1/second_level/shared/{feat_folder}'):
-            print('Running second-level GLM with above parameters...')
+            print('Running second-level GLM (no group comparison) with above parameters...')
             subprocess.run(['feat', second_level_fsf])
             os.remove(second_level_fsf)
-            print("Second-level completed. If this is the last analysis level, look at mask.nii.gz overlayed onto bg_image.nii.gz and look at filtered_func_data.nii.gz for QA.")
+            print("Second-level completed. This is the last analysis level, so look at mask.nii.gz overlayed onto bg_image.nii.gz and look at filtered_func_data.nii.gz for QA.")
             report_log_path = f'analysis/fmri_analysis/analysis_1/second_level/shared/{feat_folder}/report_log.html'
             with open(report_log_path, 'r') as file:
                 content = file.read()
@@ -5945,9 +5071,63 @@ set fmri(overwrite_yn) 0
                 print(f"Error found in report_log.html. Investigation required.")
         else:
             print('Second-level already run. Skipping process.')
-    else:
-        print("SUBJECT RANDOM EFFECTS GLM NOT FINALISED.")
-        sys.exit()
+    elif group_diffs == '1':
+        for fsf in second_level_group_fsfs:
+            match = re.search(r'sub-(\d{3})', fsf)
+            participant_number = match.group(1)
+            if not os.path.exists(f'analysis/fmri_analysis/analysis_1/second_level/sub-{participant_number}/sub-{participant_number}_{group_diffs_fsf_label}.gfeat'):
+                print(f'Running second-level group analysis GLM for sub-{participant_number}...')
+                subprocess.run(['feat', fsf])
+                report_log_path = f'analysis/fmri_analysis/analysis_1/second_level/sub-{participant_number}/sub-{participant_number}_{group_diffs_fsf_label}.gfeat/report_log.html'
+                with open(report_log_path, 'r') as file:
+                    content = file.read()
+                if re.search('error', content, re.IGNORECASE):
+                    print(f"Error found in report_log.html. Investigation required.")
+            else:
+                ('Second-level group analysis GLMs already run. Skipping process.')
+        
+
+
+
+   # Step 9: Generate second-level fsf filea [ANALYSIS 1].
+    print("\n###### STEP 9: GENERATE THIRD-LEVEL FSF FILES [ANALYSIS 1] ######")   
+    third_level_fsf_template = r"""
+    
+    """
+    
+
+
+
+    
+    group_diffs_fsf_label = 'group'
+        second_level_fsf_template_path_group = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_template_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
+        with open(second_level_fsf_template_path_group, 'w') as f:
+            f.write(second_level_fsf_template_group)
+        with open(second_level_fsf_template_path_group, 'r') as file:
+            fsf_data = file.readlines()
+        for i, line in enumerate(fsf_data):
+            if "set fmri(outputdir)" in line:
+                feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.gfeat'
+                fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}"\n'
+            elif "set fmri(threshmask)" in line:
+                if pre_thresh_masking == '1':
+                    fsf_data[i] = 'set fmri(threshmask) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/data/roi/SCCsphere8_bin_2mm_func.nii.gz"\n'
+            elif "set fmri(thresh)" in line:
+                if cluster_thresholding == '1':
+                    fsf_data[i] = 'set fmri(thresh) 3\n'
+            elif "set fmri(prob_thresh)" in line:
+                if liberal_thresholding == '1':
+                    fsf_data[i] = 'set fmri(prob_thresh) 0.1\n'
+        second_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{subject_fixed_effects_fsf_label}_{interaction_effect_fsf_label}.fsf'
+        with open(second_level_fsf, 'w') as file:
+            file.writelines(fsf_data)
+        os.remove(second_level_fsf_template_path_group_fixedfx_noint)
+        print(f'fsf file for second-level GLM generated and saved to second_level/shared folder.\nGLM details: {pre_thresh_masking_fsf_label}, {liberal_thresholding_fsf_label}, {cluster_thresholding_fsf_label}, {group_diffs_fsf_label}, {subject_fixed_effects_fsf_label}, {interaction_effect_fsf_label}')
+        
+
+
+
+
 
     # Step 8: Perform ANOVA on SCC BOLD Data [Analysis 1].
     print("\n###### STEP 8: PERFORM LMMs ON SCC BOLD DATA [ANALYSIS 1] ######")

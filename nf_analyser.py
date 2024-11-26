@@ -5088,7 +5088,7 @@ set fmri(overwrite_yn) 0
                 if re.search('error', content, re.IGNORECASE):
                     print(f"Error found in report_log.html. Investigation required.")
             else:
-                ('Second-level group analysis GLMs already run. Skipping process.')
+                print('Second-level group analysis GLMs already run. Skipping process.')
         
    # Step 9: Generate third-level fsf files [ANALYSIS 1].
     print("\n###### STEP 9: GENERATE THIRD-LEVEL FSF FILES [ANALYSIS 1] ######")   
@@ -5921,631 +5921,631 @@ set fmri(overwrite_yn) 0
                     fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-004/sub-004_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(2)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-006/sub-006_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(3)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-020/sub-020_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(4)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-030/sub-030_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(5)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-059/sub-059_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(6)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-078/sub-078_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(7)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-093/sub-093_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(8)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-094/sub-094_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(9)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-100/sub-100_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(10)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-107/sub-107_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(11)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-122/sub-122_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(12)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-125/sub-125_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(13)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-127/sub-127_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(14)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-128/sub-128_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(15)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-136/sub-136_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(16)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-145/sub-145_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(17)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-155/sub-155_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(18)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-199/sub-199_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(19)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-215/sub-215_group.gfeat/cope4.feat/stats/cope4"\n'
             elif "set feat_files(20)" in line:
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope1.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope1.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope1.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope1.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope1.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope1.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope1.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope1.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope2.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope2.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope2.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope2.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope2.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope2.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope2.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope2.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope3.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope3.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope3.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope3.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope3.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope3.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'guilt-indig' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope3.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope3.feat/stats/cope4"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope4.feat/stats/cope1"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope4.feat/stats/cope1"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope4.feat/stats/cope2"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope4.feat/stats/cope2"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run01-run04':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope4.feat/stats/cope3"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope4.feat/stats/cope3"\n'
                 if first_level_contrast_label == 'indig-guilt' and second_level_contrast_label == 'run04-run01':
-                    fsf_data[i] = 'set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope4.feat/stats/cope4"\n'
+                    fsf_data[i] = 'set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/sub-216/sub-216_group.gfeat/cope4.feat/stats/cope4"\n'
         third_level_fsf = f'analysis/fmri_analysis/analysis_1/second_level/shared/second_level_fsf_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.fsf'
         with open(third_level_fsf, 'w') as file:
             file.writelines(fsf_data)

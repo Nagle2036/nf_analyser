@@ -5816,6 +5816,32 @@ set fmri(overwrite_yn) 0
 """
     
     if group_diffs == '1':
+        
+        pre_thresh_masking = logged_input("Select pre-threshold masking [1] or whole-brain analysis [2] for second-level: ")
+        if pre_thresh_masking == '1':
+            pre_thresh_masking_fsf_label = 'scc'
+        elif pre_thresh_masking == '2':
+            pre_thresh_masking_fsf_label = 'wholebrain'
+        else:
+            print('Invalid response. Please start again.')
+            sys.exit()
+        liberal_thresholding = logged_input("Select liberal thresholding (0.1) [1] or standard thresholding (0.05) [2] for second-level: ")
+        if liberal_thresholding == '1':
+            liberal_thresholding_fsf_label = 'liberal'
+        elif liberal_thresholding == '2':
+            liberal_thresholding_fsf_label = 'stringent'
+        else:
+            print('Invalid response. Please start again.')
+            sys.exit()
+        cluster_thresholding = logged_input("Select cluster-corrected thresholding [1] or no correction [2] for second-level: ")
+        if cluster_thresholding == '1':
+            cluster_thresholding_fsf_label = 'cluster'
+        elif cluster_thresholding == '2':
+            cluster_thresholding_fsf_label = 'uncorrected'
+        else: 
+            print('Invalid response. Please start again.')
+            sys.exit()
+        
         first_level_contrast_of_interest = logged_input("Select first-level contrast to explore at the third-level (guilt [1], indignation [2], guilt-indignation [3], indignation-guilt [4]): ")
         if first_level_contrast_of_interest == '1':
             first_level_contrast_label = 'guilt'

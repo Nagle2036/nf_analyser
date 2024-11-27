@@ -9893,35 +9893,35 @@ set fmri(overwrite_yn) 0
     # Step 8: Perform ANOVA on SCC BOLD Data [Analysis 1].
     print("\n###### STEP 8: PERFORM LMMs ON SCC BOLD DATA [ANALYSIS 1] ######")
     print("Note: The LMMs themselves cannot be performed on server due to complex R interfacing requirements. Please run code instead on local Spyder software.")
-    participant_column = []
-    run_column = []
-    contrast_column = []
-    roi_mean_column = []
-    contrasts = ['1', '2', '3', '4']
-    for p_id in participants:
-        p_id_stripped = p_id.replace('P', '')
-        for run in runs:
-            for contrast in contrasts:
-                participant_column.append(f'sub-{p_id_stripped}')
-                run_column.append(run)
-                contrast_column.append(contrast)
-                cope_image_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
-                result = subprocess.run(['fslmeants', '-i', cope_image_path, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz'], capture_output=True, text=True)
-                roi_mean = float(result.stdout.strip())
-                roi_mean_column.append(roi_mean)
-    a_participants = ['sub-004', 'sub-006', 'sub-100', 'sub-128', 'sub-122', 'sub-125', 'sub-136', 'sub-145', 'sub-215', 'sub-216']
-    b_participants = ['sub-020', 'sub-030', 'sub-059', 'sub-078', 'sub-093', 'sub-094', 'sub-107', 'sub-127', 'sub-155', 'sub-199']
-    columns = ['participant', 'intervention', 'run', 'contrast', 'roi_mean']
-    roi_mean_df = pd.DataFrame(columns=columns)
-    roi_mean_df['participant'] = participant_column
-    roi_mean_df['intervention'] = roi_mean_df['participant'].apply(lambda x: 'a' if x in a_participants else ('b' if x in b_participants else 'unknown'))
-    roi_mean_df['run'] = run_column
-    roi_mean_df['contrast'] = contrast_column
-    roi_mean_df['roi_mean'] = roi_mean_column
-    roi_mean_df_path = 'analysis/fmri_analysis/analysis_1/plots/roi_mean_df.xlsx'
-    roi_mean_df.to_excel(roi_mean_df_path, index=False)
+    # participant_column = []
+    # run_column = []
+    # contrast_column = []
+    # roi_mean_column = []
+    # contrasts = ['1', '2', '3', '4']
+    # for p_id in participants:
+    #     p_id_stripped = p_id.replace('P', '')
+    #     for run in runs:
+    #         for contrast in contrasts:
+    #             participant_column.append(f'sub-{p_id_stripped}')
+    #             run_column.append(run)
+    #             contrast_column.append(contrast)
+    #             cope_image_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
+    #             result = subprocess.run(['fslmeants', '-i', cope_image_path, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz'], capture_output=True, text=True)
+    #             roi_mean = float(result.stdout.strip())
+    #             roi_mean_column.append(roi_mean)
+    # a_participants = ['sub-004', 'sub-006', 'sub-100', 'sub-128', 'sub-122', 'sub-125', 'sub-136', 'sub-145', 'sub-215', 'sub-216']
+    # b_participants = ['sub-020', 'sub-030', 'sub-059', 'sub-078', 'sub-093', 'sub-094', 'sub-107', 'sub-127', 'sub-155', 'sub-199']
+    # columns = ['participant', 'intervention', 'run', 'contrast', 'roi_mean']
+    # roi_mean_df = pd.DataFrame(columns=columns)
+    # roi_mean_df['participant'] = participant_column
+    # roi_mean_df['intervention'] = roi_mean_df['participant'].apply(lambda x: 'a' if x in a_participants else ('b' if x in b_participants else 'unknown'))
+    # roi_mean_df['run'] = run_column
+    # roi_mean_df['contrast'] = contrast_column
+    # roi_mean_df['roi_mean'] = roi_mean_column
+    # roi_mean_df_path = 'analysis/fmri_analysis/analysis_1/plots/roi_mean_df.xlsx'
+    # roi_mean_df.to_excel(roi_mean_df_path, index=False)
     
-    roi_mean_df_1 = roi_mean_df.loc[roi_mean_df['contrast'] == 1]
+    # roi_mean_df_1 = roi_mean_df.loc[roi_mean_df['contrast'] == 1]
     # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
     # pandas2ri.activate()
     # r = ro.r
@@ -9974,29 +9974,29 @@ set fmri(overwrite_yn) 0
     # result = r(r_script)
     # print(result)
 
-    def std_error(x):
-        return np.std(x, ddof=1) / np.sqrt(len(x))
-    summary_df_1 = roi_mean_df_1.groupby(['intervention', 'run']).agg(
-        roi_mean=('roi_mean', 'mean'),
-        std_error=('roi_mean', std_error)).reset_index()
-    run01_a_rse = 0.02414807
-    run04_a_rse = np.sqrt(0.02414807**2 + 0.02991764**2)
-    run01_b_rse = np.sqrt(0.02414807**2 + 0.03718549**2)
-    run04_b_rse = np.sqrt(0.02414807**2 + 0.02991764**2 + 0.03718549**2 + 0.10379910**2)
-    rse_column = [run01_a_rse, run04_a_rse, run01_b_rse, run04_b_rse]
-    summary_df_1['rse'] = rse_column
-    contrast_1_plot = (ggplot(summary_df_1, aes(x='intervention', y='roi_mean', fill='run')) +
-        geom_bar(stat='identity', position='dodge') + 
-        geom_errorbar(aes(ymin='roi_mean - rse', ymax='roi_mean + rse'), position=position_dodge(width=0.9), width=0.2) +
-        theme_classic() +
-        scale_fill_manual(values=['indianred', 'skyblue']) +
-        labs(title="Mean SCC BOLD Values for 'Guilt' Contrast", x='Intervention', y='Mean SCC BOLD Value', fill='Run') +
-        scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
-        scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
-        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    contrast_1_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_1_plot.png')
+    # def std_error(x):
+    #     return np.std(x, ddof=1) / np.sqrt(len(x))
+    # summary_df_1 = roi_mean_df_1.groupby(['intervention', 'run']).agg(
+    #     roi_mean=('roi_mean', 'mean'),
+    #     std_error=('roi_mean', std_error)).reset_index()
+    # run01_a_rse = 0.02414807
+    # run04_a_rse = np.sqrt(0.02414807**2 + 0.02991764**2)
+    # run01_b_rse = np.sqrt(0.02414807**2 + 0.03718549**2)
+    # run04_b_rse = np.sqrt(0.02414807**2 + 0.02991764**2 + 0.03718549**2 + 0.10379910**2)
+    # rse_column = [run01_a_rse, run04_a_rse, run01_b_rse, run04_b_rse]
+    # summary_df_1['rse'] = rse_column
+    # contrast_1_plot = (ggplot(summary_df_1, aes(x='intervention', y='roi_mean', fill='run')) +
+    #     geom_bar(stat='identity', position='dodge') + 
+    #     geom_errorbar(aes(ymin='roi_mean - rse', ymax='roi_mean + rse'), position=position_dodge(width=0.9), width=0.2) +
+    #     theme_classic() +
+    #     scale_fill_manual(values=['indianred', 'skyblue']) +
+    #     labs(title="Mean SCC BOLD Values for 'Guilt' Contrast", x='Intervention', y='Mean SCC BOLD Value', fill='Run') +
+    #     scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
+    #     scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
+    #     geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    # contrast_1_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_1_plot.png')
 
-    roi_mean_df_2 = roi_mean_df.loc[roi_mean_df['contrast'] == 2]
+    # roi_mean_df_2 = roi_mean_df.loc[roi_mean_df['contrast'] == 2]
     # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
     # pandas2ri.activate()
     # r = ro.r
@@ -10029,23 +10029,23 @@ set fmri(overwrite_yn) 0
     # ro.globalenv['roi_mean_df_2'] = pandas2ri.py2rpy(roi_mean_df_2)
     # result = r(r_script)
     # print(result)
-    def std_error(x):
-        return np.std(x, ddof=1) / np.sqrt(len(x))
-    summary_df_2 = roi_mean_df_2.groupby(['intervention', 'run']).agg(
-        roi_mean=('roi_mean', 'mean'),
-        std_error=('roi_mean', std_error)).reset_index()
-    contrast_2_plot = (ggplot(summary_df_2, aes(x='intervention', y='roi_mean', fill='run')) +
-        geom_bar(stat='identity', position='dodge') + 
-        geom_errorbar(aes(ymin='roi_mean - std_error', ymax='roi_mean + std_error'), position=position_dodge(width=0.9), width=0.2) +
-        theme_classic() +
-        scale_fill_manual(values=['indianred', 'skyblue']) +
-        labs(title="Mean SCC BOLD Values for 'Indignation' Contrast", x='Intervention', y='Mean SCC BOLD Value', fill='Run') +
-        scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
-        scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
-        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    contrast_2_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_2_plot.png')
+    # def std_error(x):
+    #     return np.std(x, ddof=1) / np.sqrt(len(x))
+    # summary_df_2 = roi_mean_df_2.groupby(['intervention', 'run']).agg(
+    #     roi_mean=('roi_mean', 'mean'),
+    #     std_error=('roi_mean', std_error)).reset_index()
+    # contrast_2_plot = (ggplot(summary_df_2, aes(x='intervention', y='roi_mean', fill='run')) +
+    #     geom_bar(stat='identity', position='dodge') + 
+    #     geom_errorbar(aes(ymin='roi_mean - std_error', ymax='roi_mean + std_error'), position=position_dodge(width=0.9), width=0.2) +
+    #     theme_classic() +
+    #     scale_fill_manual(values=['indianred', 'skyblue']) +
+    #     labs(title="Mean SCC BOLD Values for 'Indignation' Contrast", x='Intervention', y='Mean SCC BOLD Value', fill='Run') +
+    #     scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
+    #     scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
+    #     geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    # contrast_2_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_2_plot.png')
 
-    roi_mean_df_3 = roi_mean_df.loc[roi_mean_df['contrast'] == 3]
+    # roi_mean_df_3 = roi_mean_df.loc[roi_mean_df['contrast'] == 3]
     # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
     # pandas2ri.activate()
     # r = ro.r
@@ -10097,29 +10097,29 @@ set fmri(overwrite_yn) 0
     # ro.globalenv['roi_mean_df_3'] = pandas2ri.py2rpy(roi_mean_df_3)
     # result = r(r_script)
     # print(result)
-    def std_error(x):
-        return np.std(x, ddof=1) / np.sqrt(len(x))
-    summary_df_3 = roi_mean_df_3.groupby(['intervention', 'run']).agg(
-        roi_mean=('roi_mean', 'mean'),
-        std_error=('roi_mean', std_error)).reset_index()
-    run01_a_rse = 0.03468101
-    run04_a_rse = np.sqrt(0.03468101**2 + 0.05342738**2)
-    run01_b_rse = np.sqrt(0.03468101**2 + 0.03849149**2)
-    run04_b_rse = np.sqrt(0.03468101**2 + 0.05342738**2 + 0.03849149**2 + 0.10126250**2)
-    rse_column = [run01_a_rse, run04_a_rse, run01_b_rse, run04_b_rse]
-    summary_df_3['rse'] = rse_column
-    contrast_3_plot = (ggplot(summary_df_3, aes(x='intervention', y='roi_mean', fill='run')) +
-        geom_bar(stat='identity', position='dodge') + 
-        geom_errorbar(aes(ymin='roi_mean - rse', ymax='roi_mean + rse'), position=position_dodge(width=0.9), width=0.2) +
-        theme_classic() +
-        scale_fill_manual(values=['indianred', 'skyblue']) +
-        labs(title="Mean SCC BOLD Values for 'Guilt-Indig' Contrast", x='Intervention', y='Mean SCC BOLD Value', fill='Run') +
-        scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
-        scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
-        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    contrast_3_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_3_plot.png')
+    # def std_error(x):
+    #     return np.std(x, ddof=1) / np.sqrt(len(x))
+    # summary_df_3 = roi_mean_df_3.groupby(['intervention', 'run']).agg(
+    #     roi_mean=('roi_mean', 'mean'),
+    #     std_error=('roi_mean', std_error)).reset_index()
+    # run01_a_rse = 0.03468101
+    # run04_a_rse = np.sqrt(0.03468101**2 + 0.05342738**2)
+    # run01_b_rse = np.sqrt(0.03468101**2 + 0.03849149**2)
+    # run04_b_rse = np.sqrt(0.03468101**2 + 0.05342738**2 + 0.03849149**2 + 0.10126250**2)
+    # rse_column = [run01_a_rse, run04_a_rse, run01_b_rse, run04_b_rse]
+    # summary_df_3['rse'] = rse_column
+    # contrast_3_plot = (ggplot(summary_df_3, aes(x='intervention', y='roi_mean', fill='run')) +
+    #     geom_bar(stat='identity', position='dodge') + 
+    #     geom_errorbar(aes(ymin='roi_mean - rse', ymax='roi_mean + rse'), position=position_dodge(width=0.9), width=0.2) +
+    #     theme_classic() +
+    #     scale_fill_manual(values=['indianred', 'skyblue']) +
+    #     labs(title="Mean SCC BOLD Values for 'Guilt-Indig' Contrast", x='Intervention', y='Mean SCC BOLD Value', fill='Run') +
+    #     scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
+    #     scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
+    #     geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    # contrast_3_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_3_plot.png')
 
-    roi_mean_df_4 = roi_mean_df.loc[roi_mean_df['contrast'] == 4]
+    # roi_mean_df_4 = roi_mean_df.loc[roi_mean_df['contrast'] == 4]
     # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
     # pandas2ri.activate()
     # r = ro.r
@@ -10171,27 +10171,27 @@ set fmri(overwrite_yn) 0
     # ro.globalenv['roi_mean_df_4'] = pandas2ri.py2rpy(roi_mean_df_4)
     # result = r(r_script)
     # print(result)
-    def std_error(x):
-        return np.std(x, ddof=1) / np.sqrt(len(x))
-    summary_df_4 = roi_mean_df_4.groupby(['intervention', 'run']).agg(
-        roi_mean=('roi_mean', 'mean'),
-        std_error=('roi_mean', std_error)).reset_index()
-    run01_a_rse = 0.03468101
-    run04_a_rse = np.sqrt(0.03468101**2 + 0.05342738**2)
-    run01_b_rse = np.sqrt(0.03468101**2 + 0.03849149**2)
-    run04_b_rse = np.sqrt(0.03468101**2 + 0.05342738**2 + 0.03849149**2 + 0.10126250**2)
-    rse_column = [run01_a_rse, run04_a_rse, run01_b_rse, run04_b_rse]
-    summary_df_4['rse'] = rse_column
-    contrast_4_plot = (ggplot(summary_df_4, aes(x='intervention', y='roi_mean', fill='run')) +
-        geom_bar(stat='identity', position='dodge') + 
-        geom_errorbar(aes(ymin='roi_mean - rse', ymax='roi_mean + rse'), position=position_dodge(width=0.9), width=0.2) +
-        theme_classic() +
-        scale_fill_manual(values=['indianred', 'skyblue']) +
-        labs(title="Mean SCC BOLD Values for 'Indig-Guilt' Contrast", x='Intervention', y='Mean SCC BOLD Value', fill='Run') +
-        scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
-        scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
-        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
-    contrast_4_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_4_plot.png')
+    # def std_error(x):
+    #     return np.std(x, ddof=1) / np.sqrt(len(x))
+    # summary_df_4 = roi_mean_df_4.groupby(['intervention', 'run']).agg(
+    #     roi_mean=('roi_mean', 'mean'),
+    #     std_error=('roi_mean', std_error)).reset_index()
+    # run01_a_rse = 0.03468101
+    # run04_a_rse = np.sqrt(0.03468101**2 + 0.05342738**2)
+    # run01_b_rse = np.sqrt(0.03468101**2 + 0.03849149**2)
+    # run04_b_rse = np.sqrt(0.03468101**2 + 0.05342738**2 + 0.03849149**2 + 0.10126250**2)
+    # rse_column = [run01_a_rse, run04_a_rse, run01_b_rse, run04_b_rse]
+    # summary_df_4['rse'] = rse_column
+    # contrast_4_plot = (ggplot(summary_df_4, aes(x='intervention', y='roi_mean', fill='run')) +
+    #     geom_bar(stat='identity', position='dodge') + 
+    #     geom_errorbar(aes(ymin='roi_mean - rse', ymax='roi_mean + rse'), position=position_dodge(width=0.9), width=0.2) +
+    #     theme_classic() +
+    #     scale_fill_manual(values=['indianred', 'skyblue']) +
+    #     labs(title="Mean SCC BOLD Values for 'Indig-Guilt' Contrast", x='Intervention', y='Mean SCC BOLD Value', fill='Run') +
+    #     scale_y_continuous(expand=(0, 0), limits=[-0.5, 0.5], breaks=[-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5]) +
+    #     scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
+    #     geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    # contrast_4_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_4_plot.png')
 
 #endregion
 

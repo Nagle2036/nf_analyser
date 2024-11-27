@@ -3328,7 +3328,7 @@ set fmri(featwatcher_yn) 1
 set fmri(sscleanup_yn) 0
 
 # Output directory
-set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/[insert_folder_name]"
+set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/[insert_folder_name]"
 
 # TR(s)
 set fmri(tr) 2
@@ -3451,8 +3451,8 @@ set fmri(mixed_yn) 3
 set fmri(randomisePermutations) 5000
 
 # Number of EVs
-set fmri(evs_orig) 3
-set fmri(evs_real) 3
+set fmri(evs_orig) 2
+set fmri(evs_real) 2
 set fmri(evs_vox) 0
 
 # Number of contrasts
@@ -3562,6 +3562,10 @@ set fmri(regstandard_nonlinear_warpres) 10
 
 # High pass filter cutoff
 set fmri(paradigm_hp) 100
+
+# Total voxels
+set fmri(totalVoxels) 1082035
+
 
 # Number of lower-level copes feeding into higher-level analysis
 set fmri(ncopeinputs) 4
@@ -3745,9 +3749,6 @@ set fmri(ortho1.1) 0
 # Orthogonalise EV 1 wrt EV 2
 set fmri(ortho1.2) 0
 
-# Orthogonalise EV 1 wrt EV 3
-set fmri(ortho1.3) 0
-
 # Higher-level EV value for EV 1 and input 1
 set fmri(evg1.1) 1
 
@@ -3912,9 +3913,6 @@ set fmri(ortho2.1) 0
 # Orthogonalise EV 2 wrt EV 2
 set fmri(ortho2.2) 0
 
-# Orthogonalise EV 2 wrt EV 3
-set fmri(ortho2.3) 0
-
 # Higher-level EV value for EV 2 and input 1
 set fmri(evg1.2) 0
 
@@ -4034,173 +4032,6 @@ set fmri(evg39.2) 0
 
 # Higher-level EV value for EV 2 and input 40
 set fmri(evg40.2) 1.0
-
-# EV 3 title
-set fmri(evtitle3) "fieldmaps"
-
-# Basic waveform shape (EV 3)
-# 0 : Square
-# 1 : Sinusoid
-# 2 : Custom (1 entry per volume)
-# 3 : Custom (3 column format)
-# 4 : Interaction
-# 10 : Empty (all zeros)
-set fmri(shape3) 2
-
-# Convolution (EV 3)
-# 0 : None
-# 1 : Gaussian
-# 2 : Gamma
-# 3 : Double-Gamma HRF
-# 4 : Gamma basis functions
-# 5 : Sine basis functions
-# 6 : FIR basis functions
-# 8 : Alternate Double-Gamma
-set fmri(convolve3) 0
-
-# Convolve phase (EV 3)
-set fmri(convolve_phase3) 0
-
-# Apply temporal filtering (EV 3)
-set fmri(tempfilt_yn3) 0
-
-# Add temporal derivative (EV 3)
-set fmri(deriv_yn3) 0
-
-# Custom EV file (EV 3)
-set fmri(custom3) "dummy"
-
-# Orthogonalise EV 3 wrt EV 0
-set fmri(ortho3.0) 0
-
-# Orthogonalise EV 3 wrt EV 1
-set fmri(ortho3.1) 0
-
-# Orthogonalise EV 3 wrt EV 2
-set fmri(ortho3.2) 0
-
-# Orthogonalise EV 3 wrt EV 3
-set fmri(ortho3.3) 0
-
-# Higher-level EV value for EV 3 and input 1
-set fmri(evg1.3) 0
-
-# Higher-level EV value for EV 3 and input 2
-set fmri(evg2.3) 0
-
-# Higher-level EV value for EV 3 and input 3
-set fmri(evg3.3) 0
-
-# Higher-level EV value for EV 3 and input 4
-set fmri(evg4.3) 0
-
-# Higher-level EV value for EV 3 and input 5
-set fmri(evg5.3) 0
-
-# Higher-level EV value for EV 3 and input 6
-set fmri(evg6.3) 0
-
-# Higher-level EV value for EV 3 and input 7
-set fmri(evg7.3) 0
-
-# Higher-level EV value for EV 3 and input 8
-set fmri(evg8.3) 0
-
-# Higher-level EV value for EV 3 and input 9
-set fmri(evg9.3) 1.0
-
-# Higher-level EV value for EV 3 and input 10
-set fmri(evg10.3) 1.0
-
-# Higher-level EV value for EV 3 and input 11
-set fmri(evg11.3) 0
-
-# Higher-level EV value for EV 3 and input 12
-set fmri(evg12.3) 0
-
-# Higher-level EV value for EV 3 and input 13
-set fmri(evg13.3) 0
-
-# Higher-level EV value for EV 3 and input 14
-set fmri(evg14.3) 0
-
-# Higher-level EV value for EV 3 and input 15
-set fmri(evg15.3) 0
-
-# Higher-level EV value for EV 3 and input 16
-set fmri(evg16.3) 0
-
-# Higher-level EV value for EV 3 and input 17
-set fmri(evg17.3) 1.0
-
-# Higher-level EV value for EV 3 and input 18
-set fmri(evg18.3) 1.0
-
-# Higher-level EV value for EV 3 and input 19
-set fmri(evg19.3) 1.0
-
-# Higher-level EV value for EV 3 and input 20
-set fmri(evg20.3) 1.0
-
-# Higher-level EV value for EV 3 and input 21
-set fmri(evg21.3) 1.0
-
-# Higher-level EV value for EV 3 and input 22
-set fmri(evg22.3) 1.0
-
-# Higher-level EV value for EV 3 and input 23
-set fmri(evg23.3) 1.0
-
-# Higher-level EV value for EV 3 and input 24
-set fmri(evg24.3) 1.0
-
-# Higher-level EV value for EV 3 and input 25
-set fmri(evg25.3) 1.0
-
-# Higher-level EV value for EV 3 and input 26
-set fmri(evg26.3) 1.0
-
-# Higher-level EV value for EV 3 and input 27
-set fmri(evg27.3) 1.0
-
-# Higher-level EV value for EV 3 and input 28
-set fmri(evg28.3) 1.0
-
-# Higher-level EV value for EV 3 and input 29
-set fmri(evg29.3) 1.0
-
-# Higher-level EV value for EV 3 and input 30
-set fmri(evg30.3) 1.0
-
-# Higher-level EV value for EV 3 and input 31
-set fmri(evg31.3) 1.0
-
-# Higher-level EV value for EV 3 and input 32
-set fmri(evg32.3) 1.0
-
-# Higher-level EV value for EV 3 and input 33
-set fmri(evg33.3) 1.0
-
-# Higher-level EV value for EV 3 and input 34
-set fmri(evg34.3) 1.0
-
-# Higher-level EV value for EV 3 and input 35
-set fmri(evg35.3) 1.0
-
-# Higher-level EV value for EV 3 and input 36
-set fmri(evg36.3) 1.0
-
-# Higher-level EV value for EV 3 and input 37
-set fmri(evg37.3) 1.0
-
-# Higher-level EV value for EV 3 and input 38
-set fmri(evg38.3) 1.0
-
-# Higher-level EV value for EV 3 and input 39
-set fmri(evg39.3) 1.0
-
-# Higher-level EV value for EV 3 and input 40
-set fmri(evg40.3) 1.0
 
 # Setup Orthogonalisation at higher level?
 set fmri(level2orth) 0
@@ -4343,9 +4174,6 @@ set fmri(con_real1.1) 1.0
 # Real contrast_real vector 1 element 2
 set fmri(con_real1.2) 0.0
 
-# Real contrast_real vector 1 element 3
-set fmri(con_real1.3) 0.0
-
 # Display images for contrast_real 2
 set fmri(conpic_real.2) 1
 
@@ -4357,9 +4185,6 @@ set fmri(con_real2.1) 0.0
 
 # Real contrast_real vector 2 element 2
 set fmri(con_real2.2) 1.0
-
-# Real contrast_real vector 2 element 3
-set fmri(con_real2.3) 0.0
 
 # Display images for contrast_real 3
 set fmri(conpic_real.3) 1
@@ -4373,9 +4198,6 @@ set fmri(con_real3.1) 1.0
 # Real contrast_real vector 3 element 2
 set fmri(con_real3.2) -1.0
 
-# Real contrast_real vector 3 element 3
-set fmri(con_real3.3) 0.0
-
 # Display images for contrast_real 4
 set fmri(conpic_real.4) 1
 
@@ -4387,9 +4209,6 @@ set fmri(con_real4.1) -1.0
 
 # Real contrast_real vector 4 element 2
 set fmri(con_real4.2) 1.0
-
-# Real contrast_real vector 4 element 3
-set fmri(con_real4.3) 0.0
 
 # Contrast masking - use >0 instead of thresholding?
 set fmri(conmask_zerothresh_yn) 0
@@ -5650,7 +5469,7 @@ set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/particip
 set fmri(tr) 2
 
 # Total volumes
-set fmri(npts) 40
+set fmri(npts) 2
 
 # Delete volumes
 set fmri(ndelete) 0
@@ -5659,7 +5478,7 @@ set fmri(ndelete) 0
 set fmri(tagfirst) 1
 
 # Number of first-level analyses
-set fmri(multiple) 40
+set fmri(multiple) 2
 
 # Higher-level input type
 # 1 : Inputs are lower-level FEAT directories
@@ -5793,7 +5612,7 @@ set fmri(threshmask) ""
 # 1 : Uncorrected
 # 2 : Voxel
 # 3 : Cluster
-set fmri(thresh) 0
+set fmri(thresh) 1
 
 # P threshold
 set fmri(prob_thresh) 0.1
@@ -5826,7 +5645,7 @@ set fmri(rendertype) 1
 set fmri(bgimage) 1
 
 # Create time series plots
-set fmri(tsplot_yn) 1
+set fmri(tsplot_yn) 0
 
 # Registration to initial structural
 set fmri(reginitial_highres_yn) 0
@@ -5899,124 +5718,10 @@ set fmri(copeinput.3) 1
 set fmri(copeinput.4) 1
 
 # 4D AVW data or FEAT directory (1)
-set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-01.feat"
+set feat_files(1) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/[insert_participant]/run-01.feat"
 
 # 4D AVW data or FEAT directory (2)
-set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-004/run-04.feat"
-
-# 4D AVW data or FEAT directory (3)
-set feat_files(3) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-01.feat"
-
-# 4D AVW data or FEAT directory (4)
-set feat_files(4) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-006/run-04.feat"
-
-# 4D AVW data or FEAT directory (5)
-set feat_files(5) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-01.feat"
-
-# 4D AVW data or FEAT directory (6)
-set feat_files(6) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-020/run-04.feat"
-
-# 4D AVW data or FEAT directory (7)
-set feat_files(7) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-01.feat"
-
-# 4D AVW data or FEAT directory (8)
-set feat_files(8) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-030/run-04.feat"
-
-# 4D AVW data or FEAT directory (9)
-set feat_files(9) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-01.feat"
-
-# 4D AVW data or FEAT directory (10)
-set feat_files(10) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-059/run-04.feat"
-
-# 4D AVW data or FEAT directory (11)
-set feat_files(11) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-01.feat"
-
-# 4D AVW data or FEAT directory (12)
-set feat_files(12) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-078/run-04.feat"
-
-# 4D AVW data or FEAT directory (13)
-set feat_files(13) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-01.feat"
-
-# 4D AVW data or FEAT directory (14)
-set feat_files(14) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-093/run-04.feat"
-
-# 4D AVW data or FEAT directory (15)
-set feat_files(15) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-01.feat"
-
-# 4D AVW data or FEAT directory (16)
-set feat_files(16) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-094/run-04.feat"
-
-# 4D AVW data or FEAT directory (17)
-set feat_files(17) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-01.feat"
-
-# 4D AVW data or FEAT directory (18)
-set feat_files(18) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-100/run-04.feat"
-
-# 4D AVW data or FEAT directory (19)
-set feat_files(19) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-01.feat"
-
-# 4D AVW data or FEAT directory (20)
-set feat_files(20) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-107/run-04.feat"
-
-# 4D AVW data or FEAT directory (21)
-set feat_files(21) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-01.feat"
-
-# 4D AVW data or FEAT directory (22)
-set feat_files(22) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-122/run-04.feat"
-
-# 4D AVW data or FEAT directory (23)
-set feat_files(23) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-01.feat"
-
-# 4D AVW data or FEAT directory (24)
-set feat_files(24) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-125/run-04.feat"
-
-# 4D AVW data or FEAT directory (25)
-set feat_files(25) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-01.feat"
-
-# 4D AVW data or FEAT directory (26)
-set feat_files(26) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-127/run-04.feat"
-
-# 4D AVW data or FEAT directory (27)
-set feat_files(27) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-01.feat"
-
-# 4D AVW data or FEAT directory (28)
-set feat_files(28) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-128/run-04.feat"
-
-# 4D AVW data or FEAT directory (29)
-set feat_files(29) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-01.feat"
-
-# 4D AVW data or FEAT directory (30)
-set feat_files(30) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-136/run-04.feat"
-
-# 4D AVW data or FEAT directory (31)
-set feat_files(31) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-01.feat"
-
-# 4D AVW data or FEAT directory (32)
-set feat_files(32) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-145/run-04.feat"
-
-# 4D AVW data or FEAT directory (33)
-set feat_files(33) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-01.feat"
-
-# 4D AVW data or FEAT directory (34)
-set feat_files(34) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-155/run-04.feat"
-
-# 4D AVW data or FEAT directory (35)
-set feat_files(35) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-01.feat"
-
-# 4D AVW data or FEAT directory (36)
-set feat_files(36) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-199/run-04.feat"
-
-# 4D AVW data or FEAT directory (37)
-set feat_files(37) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-01.feat"
-
-# 4D AVW data or FEAT directory (38)
-set feat_files(38) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-215/run-04.feat"
-
-# 4D AVW data or FEAT directory (39)
-set feat_files(39) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-01.feat"
-
-# 4D AVW data or FEAT directory (40)
-set feat_files(40) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/sub-216/run-04.feat"
+set feat_files(2) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/first_level/[insert_participant]/run-04.feat"
 
 # Add confound EVs text file
 set fmri(confoundevs) 0
@@ -6071,120 +5776,6 @@ set fmri(evg1.1) 1
 # Higher-level EV value for EV 1 and input 2
 set fmri(evg2.1) 0
 
-# Higher-level EV value for EV 1 and input 3
-set fmri(evg3.1) 1.0
-
-# Higher-level EV value for EV 1 and input 4
-set fmri(evg4.1) 0
-
-# Higher-level EV value for EV 1 and input 5
-set fmri(evg5.1) 1.0
-
-# Higher-level EV value for EV 1 and input 6
-set fmri(evg6.1) 0
-
-# Higher-level EV value for EV 1 and input 7
-set fmri(evg7.1) 1.0
-
-# Higher-level EV value for EV 1 and input 8
-set fmri(evg8.1) 0
-
-# Higher-level EV value for EV 1 and input 9
-set fmri(evg9.1) 1.0
-
-# Higher-level EV value for EV 1 and input 10
-set fmri(evg10.1) 0
-
-# Higher-level EV value for EV 1 and input 11
-set fmri(evg11.1) 1.0
-
-# Higher-level EV value for EV 1 and input 12
-set fmri(evg12.1) 0
-
-# Higher-level EV value for EV 1 and input 13
-set fmri(evg13.1) 1.0
-
-# Higher-level EV value for EV 1 and input 14
-set fmri(evg14.1) 0
-
-# Higher-level EV value for EV 1 and input 15
-set fmri(evg15.1) 1.0
-
-# Higher-level EV value for EV 1 and input 16
-set fmri(evg16.1) 0
-
-# Higher-level EV value for EV 1 and input 17
-set fmri(evg17.1) 1.0
-
-# Higher-level EV value for EV 1 and input 18
-set fmri(evg18.1) 0
-
-# Higher-level EV value for EV 1 and input 19
-set fmri(evg19.1) 1.0
-
-# Higher-level EV value for EV 1 and input 20
-set fmri(evg20.1) 0
-
-# Higher-level EV value for EV 1 and input 21
-set fmri(evg21.1) 1.0
-
-# Higher-level EV value for EV 1 and input 22
-set fmri(evg22.1) 0
-
-# Higher-level EV value for EV 1 and input 23
-set fmri(evg23.1) 1.0
-
-# Higher-level EV value for EV 1 and input 24
-set fmri(evg24.1) 0
-
-# Higher-level EV value for EV 1 and input 25
-set fmri(evg25.1) 1.0
-
-# Higher-level EV value for EV 1 and input 26
-set fmri(evg26.1) 0
-
-# Higher-level EV value for EV 1 and input 27
-set fmri(evg27.1) 1.0
-
-# Higher-level EV value for EV 1 and input 28
-set fmri(evg28.1) 0
-
-# Higher-level EV value for EV 1 and input 29
-set fmri(evg29.1) 1.0
-
-# Higher-level EV value for EV 1 and input 30
-set fmri(evg30.1) 0
-
-# Higher-level EV value for EV 1 and input 31
-set fmri(evg31.1) 1.0
-
-# Higher-level EV value for EV 1 and input 32
-set fmri(evg32.1) 0
-
-# Higher-level EV value for EV 1 and input 33
-set fmri(evg33.1) 1.0
-
-# Higher-level EV value for EV 1 and input 34
-set fmri(evg34.1) 0
-
-# Higher-level EV value for EV 1 and input 35
-set fmri(evg35.1) 1.0
-
-# Higher-level EV value for EV 1 and input 36
-set fmri(evg36.1) 0
-
-# Higher-level EV value for EV 1 and input 37
-set fmri(evg37.1) 1.0
-
-# Higher-level EV value for EV 1 and input 38
-set fmri(evg38.1) 0
-
-# Higher-level EV value for EV 1 and input 39
-set fmri(evg39.1) 1.0
-
-# Higher-level EV value for EV 1 and input 40
-set fmri(evg40.1) 0
-
 # EV 2 title
 set fmri(evtitle2) "run04"
 
@@ -6235,120 +5826,6 @@ set fmri(evg1.2) 0
 # Higher-level EV value for EV 2 and input 2
 set fmri(evg2.2) 1.0
 
-# Higher-level EV value for EV 2 and input 3
-set fmri(evg3.2) 0
-
-# Higher-level EV value for EV 2 and input 4
-set fmri(evg4.2) 1.0
-
-# Higher-level EV value for EV 2 and input 5
-set fmri(evg5.2) 0
-
-# Higher-level EV value for EV 2 and input 6
-set fmri(evg6.2) 1.0
-
-# Higher-level EV value for EV 2 and input 7
-set fmri(evg7.2) 0
-
-# Higher-level EV value for EV 2 and input 8
-set fmri(evg8.2) 1.0
-
-# Higher-level EV value for EV 2 and input 9
-set fmri(evg9.2) 0
-
-# Higher-level EV value for EV 2 and input 10
-set fmri(evg10.2) 1.0
-
-# Higher-level EV value for EV 2 and input 11
-set fmri(evg11.2) 0
-
-# Higher-level EV value for EV 2 and input 12
-set fmri(evg12.2) 1.0
-
-# Higher-level EV value for EV 2 and input 13
-set fmri(evg13.2) 0
-
-# Higher-level EV value for EV 2 and input 14
-set fmri(evg14.2) 1.0
-
-# Higher-level EV value for EV 2 and input 15
-set fmri(evg15.2) 0
-
-# Higher-level EV value for EV 2 and input 16
-set fmri(evg16.2) 1.0
-
-# Higher-level EV value for EV 2 and input 17
-set fmri(evg17.2) 0
-
-# Higher-level EV value for EV 2 and input 18
-set fmri(evg18.2) 1.0
-
-# Higher-level EV value for EV 2 and input 19
-set fmri(evg19.2) 0
-
-# Higher-level EV value for EV 2 and input 20
-set fmri(evg20.2) 1.0
-
-# Higher-level EV value for EV 2 and input 21
-set fmri(evg21.2) 0
-
-# Higher-level EV value for EV 2 and input 22
-set fmri(evg22.2) 1.0
-
-# Higher-level EV value for EV 2 and input 23
-set fmri(evg23.2) 0
-
-# Higher-level EV value for EV 2 and input 24
-set fmri(evg24.2) 1.0
-
-# Higher-level EV value for EV 2 and input 25
-set fmri(evg25.2) 0
-
-# Higher-level EV value for EV 2 and input 26
-set fmri(evg26.2) 1.0
-
-# Higher-level EV value for EV 2 and input 27
-set fmri(evg27.2) 0
-
-# Higher-level EV value for EV 2 and input 28
-set fmri(evg28.2) 1.0
-
-# Higher-level EV value for EV 2 and input 29
-set fmri(evg29.2) 0
-
-# Higher-level EV value for EV 2 and input 30
-set fmri(evg30.2) 1.0
-
-# Higher-level EV value for EV 2 and input 31
-set fmri(evg31.2) 0
-
-# Higher-level EV value for EV 2 and input 32
-set fmri(evg32.2) 1.0
-
-# Higher-level EV value for EV 2 and input 33
-set fmri(evg33.2) 0
-
-# Higher-level EV value for EV 2 and input 34
-set fmri(evg34.2) 1.0
-
-# Higher-level EV value for EV 2 and input 35
-set fmri(evg35.2) 0
-
-# Higher-level EV value for EV 2 and input 36
-set fmri(evg36.2) 1.0
-
-# Higher-level EV value for EV 2 and input 37
-set fmri(evg37.2) 0
-
-# Higher-level EV value for EV 2 and input 38
-set fmri(evg38.2) 1.0
-
-# Higher-level EV value for EV 2 and input 39
-set fmri(evg39.2) 0
-
-# Higher-level EV value for EV 2 and input 40
-set fmri(evg40.2) 1.0
-
 # Setup Orthogonalisation at higher level?
 set fmri(level2orth) 0
 
@@ -6357,120 +5834,6 @@ set fmri(groupmem.1) 1
 
 # Group membership for input 2
 set fmri(groupmem.2) 1
-
-# Group membership for input 3
-set fmri(groupmem.3) 1
-
-# Group membership for input 4
-set fmri(groupmem.4) 1
-
-# Group membership for input 5
-set fmri(groupmem.5) 1
-
-# Group membership for input 6
-set fmri(groupmem.6) 1
-
-# Group membership for input 7
-set fmri(groupmem.7) 1
-
-# Group membership for input 8
-set fmri(groupmem.8) 1
-
-# Group membership for input 9
-set fmri(groupmem.9) 1
-
-# Group membership for input 10
-set fmri(groupmem.10) 1
-
-# Group membership for input 11
-set fmri(groupmem.11) 1
-
-# Group membership for input 12
-set fmri(groupmem.12) 1
-
-# Group membership for input 13
-set fmri(groupmem.13) 1
-
-# Group membership for input 14
-set fmri(groupmem.14) 1
-
-# Group membership for input 15
-set fmri(groupmem.15) 1
-
-# Group membership for input 16
-set fmri(groupmem.16) 1
-
-# Group membership for input 17
-set fmri(groupmem.17) 1
-
-# Group membership for input 18
-set fmri(groupmem.18) 1
-
-# Group membership for input 19
-set fmri(groupmem.19) 1
-
-# Group membership for input 20
-set fmri(groupmem.20) 1
-
-# Group membership for input 21
-set fmri(groupmem.21) 1
-
-# Group membership for input 22
-set fmri(groupmem.22) 1
-
-# Group membership for input 23
-set fmri(groupmem.23) 1
-
-# Group membership for input 24
-set fmri(groupmem.24) 1
-
-# Group membership for input 25
-set fmri(groupmem.25) 1
-
-# Group membership for input 26
-set fmri(groupmem.26) 1
-
-# Group membership for input 27
-set fmri(groupmem.27) 1
-
-# Group membership for input 28
-set fmri(groupmem.28) 1
-
-# Group membership for input 29
-set fmri(groupmem.29) 1
-
-# Group membership for input 30
-set fmri(groupmem.30) 1
-
-# Group membership for input 31
-set fmri(groupmem.31) 1
-
-# Group membership for input 32
-set fmri(groupmem.32) 1
-
-# Group membership for input 33
-set fmri(groupmem.33) 1
-
-# Group membership for input 34
-set fmri(groupmem.34) 1
-
-# Group membership for input 35
-set fmri(groupmem.35) 1
-
-# Group membership for input 36
-set fmri(groupmem.36) 1
-
-# Group membership for input 37
-set fmri(groupmem.37) 1
-
-# Group membership for input 38
-set fmri(groupmem.38) 1
-
-# Group membership for input 39
-set fmri(groupmem.39) 1
-
-# Group membership for input 40
-set fmri(groupmem.40) 1
 
 # Contrast & F-tests mode
 # real : control real EVs

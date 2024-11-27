@@ -6630,7 +6630,7 @@ set fmri(overwrite_yn) 0
                 fsf_data = file.readlines()
             for i, line in enumerate(fsf_data):
                 if "set fmri(outputdir)" in line:
-                    feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.gfeat'
+                    feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{fmap_regressor_label}.gfeat'
                     fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{fmap_regressor_label}"\n'
                 elif "set fmri(threshmask)" in line:
                     if pre_thresh_masking == '1':
@@ -6654,7 +6654,7 @@ set fmri(overwrite_yn) 0
                 fsf_data = file.readlines()
             for i, line in enumerate(fsf_data):
                 if "set fmri(outputdir)" in line:
-                    feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.gfeat'
+                    feat_folder = f'second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{fmap_regressor_label}.gfeat'
                     fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/second_level/shared/second_level_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{fmap_regressor_label}"\n'
                 elif "set fmri(threshmask)" in line:
                     if pre_thresh_masking == '1':
@@ -8508,7 +8508,7 @@ set fmri(overwrite_yn) 0
                 fsf_data = file.readlines()
             for i, line in enumerate(fsf_data):
                 if "set fmri(outputdir)" in line:
-                    feat_folder = f'third_level_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.gfeat'
+                    feat_folder = f'third_level_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{fmap_regressor_label}.gfeat'
                     fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/third_level/shared/third_level_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{fmap_regressor_label}"\n'
                 elif "set fmri(threshmask)" in line:
                     if pre_thresh_masking == '1':
@@ -9193,7 +9193,7 @@ set fmri(overwrite_yn) 0
                 fsf_data = file.readlines()
             for i, line in enumerate(fsf_data):
                 if "set fmri(outputdir)" in line:
-                    feat_folder = f'third_level_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}.gfeat'
+                    feat_folder = f'third_level_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{fmap_regressor_label}.gfeat'
                     fsf_data[i] = f'set fmri(outputdir) "/research/cisc2/projects/stone_depnf/Neurofeedback/participant_data/analysis/fmri_analysis/analysis_1/third_level/shared/third_level_{first_level_contrast_label}_{second_level_contrast_label}_{pre_thresh_masking_fsf_label}_{liberal_thresholding_fsf_label}_{cluster_thresholding_fsf_label}_{group_diffs_fsf_label}_{fmap_regressor_label}"\n'
                 elif "set fmri(threshmask)" in line:
                     if pre_thresh_masking == '1':

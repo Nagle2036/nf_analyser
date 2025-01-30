@@ -9256,33 +9256,33 @@ set fmri(overwrite_yn) 0
     # Step 8: Perform ANOVA on SCC BOLD Data [Analysis 1].
     print("\n###### STEP 8: PERFORM LMMs ON SCC BOLD DATA [ANALYSIS 1] ######")
     print("Note: The LMMs themselves cannot be performed on server due to complex R interfacing requirements. Please run code instead on local Spyder software.")
-    # participant_column = []
-    # run_column = []
-    # contrast_column = []
-    # roi_mean_column = []
-    # contrasts = ['1', '2', '3', '4']
-    # for p_id in participants:
-    #     p_id_stripped = p_id.replace('P', '')
-    #     for run in runs:
-    #         for contrast in contrasts:
-    #             participant_column.append(f'sub-{p_id_stripped}')
-    #             run_column.append(run)
-    #             contrast_column.append(contrast)
-    #             cope_image_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
-    #             result = subprocess.run(['fslmeants', '-i', cope_image_path, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz'], capture_output=True, text=True)
-    #             roi_mean = float(result.stdout.strip())
-    #             roi_mean_column.append(roi_mean)
-    # a_participants = ['sub-004', 'sub-006', 'sub-100', 'sub-128', 'sub-122', 'sub-125', 'sub-136', 'sub-145', 'sub-215', 'sub-216']
-    # b_participants = ['sub-020', 'sub-030', 'sub-059', 'sub-078', 'sub-093', 'sub-094', 'sub-107', 'sub-127', 'sub-155', 'sub-199']
-    # columns = ['participant', 'intervention', 'run', 'contrast', 'roi_mean']
-    # roi_mean_df = pd.DataFrame(columns=columns)
-    # roi_mean_df['participant'] = participant_column
-    # roi_mean_df['intervention'] = roi_mean_df['participant'].apply(lambda x: 'a' if x in a_participants else ('b' if x in b_participants else 'unknown'))
-    # roi_mean_df['run'] = run_column
-    # roi_mean_df['contrast'] = contrast_column
-    # roi_mean_df['roi_mean'] = roi_mean_column
-    # roi_mean_df_path = 'analysis/fmri_analysis/analysis_1/plots/roi_mean_df.xlsx'
-    # roi_mean_df.to_excel(roi_mean_df_path, index=False)
+    participant_column = []
+    run_column = []
+    contrast_column = []
+    roi_mean_column = []
+    contrasts = ['1', '2', '3', '4']
+    for p_id in participants:
+        p_id_stripped = p_id.replace('P', '')
+        for run in runs:
+            for contrast in contrasts:
+                participant_column.append(f'sub-{p_id_stripped}')
+                run_column.append(run)
+                contrast_column.append(contrast)
+                cope_image_path = f'analysis/fmri_analysis/analysis_1/first_level/sub-{p_id_stripped}/{run}.feat/stats/cope{contrast}.nii.gz'
+                result = subprocess.run(['fslmeants', '-i', cope_image_path, '-m', 'data/roi/SCCsphere8_bin_2mm_func.nii.gz'], capture_output=True, text=True)
+                roi_mean = float(result.stdout.strip())
+                roi_mean_column.append(roi_mean)
+    a_participants = ['sub-004', 'sub-006', 'sub-100', 'sub-128', 'sub-122', 'sub-125', 'sub-136', 'sub-145', 'sub-215', 'sub-216']
+    b_participants = ['sub-020', 'sub-030', 'sub-059', 'sub-078', 'sub-093', 'sub-094', 'sub-107', 'sub-127', 'sub-155', 'sub-199']
+    columns = ['participant', 'intervention', 'run', 'contrast', 'roi_mean']
+    roi_mean_df = pd.DataFrame(columns=columns)
+    roi_mean_df['participant'] = participant_column
+    roi_mean_df['intervention'] = roi_mean_df['participant'].apply(lambda x: 'a' if x in a_participants else ('b' if x in b_participants else 'unknown'))
+    roi_mean_df['run'] = run_column
+    roi_mean_df['contrast'] = contrast_column
+    roi_mean_df['roi_mean'] = roi_mean_column
+    roi_mean_df_path = 'analysis/fmri_analysis/analysis_1/plots/roi_mean_df.xlsx'
+    roi_mean_df.to_excel(roi_mean_df_path, index=False)
     
     # roi_mean_df_1 = roi_mean_df.loc[roi_mean_df['contrast'] == 1]
     # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.1'
@@ -9555,6 +9555,277 @@ set fmri(overwrite_yn) 0
     #     scale_x_discrete(labels={'a': 'A', 'b': 'B'}) +
     #     geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
     # contrast_4_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_4_plot.png')
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.2'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # grdevices = importr('grDevices')
+    # clubSandwich = importr('clubSandwich')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(nortest)
+    # library(clubSandwich)
+    # roi_mean_df_1 <- as.data.frame(roi_mean_df_1)
+    # model <- lmer(roi_mean~run*fmaps + (1|participant), data = roi_mean_df_1)
+    # robust_se <- vcovCR(model, type = "CR0")
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # png(filename="analysis/fmri_analysis/analysis_1/plots/lmm_residuals_qqplot_contrast1_fmaps.png")
+    # qqnorm(residuals_model)
+    # qqline(residuals_model, col = 'red')
+    # dev.off()
+    # print("Robust Standard Errors:")
+    # print(robust_se)
+    # t_crit_run <- qt(0.975, df = 34)
+    # t_crit_intervention <- qt(0.975, df = 18)
+    # print(t_crit_run)
+    # print(t_crit_intervention)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("Contrast 1 fmaps LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # print("Model Summary:")
+    # print(summary(model))
+    # print("Parameter Estimates:")
+    # estimates <- fixef(model)
+    # print(estimates)
+    # } else {
+    # print("Contrast 1 fmaps LMM residuals do not meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # print("Model Summary:")
+    # print(summary(model))
+    # print("Parameter Estimates:")
+    # estimates <- fixef(model)
+    # print(estimates)
+    # }
+    # """
+    # ro.globalenv['roi_mean_df_1'] = pandas2ri.py2rpy(roi_mean_df_1)
+    # result = r(r_script)
+    # print(result)
+    # def std_error(x):
+    #     return np.std(x, ddof=1) / np.sqrt(len(x))
+    # summary_df_1 = roi_mean_df_1.groupby(['fmaps', 'run']).agg(
+    #     roi_mean=('roi_mean', 'mean'),
+    #     std_error=('roi_mean', std_error)).reset_index()
+    # run01_a_rse = 0.02408936
+    # run04_a_rse = np.sqrt(0.02408936**2 + 0.13322718**2)
+    # run01_b_rse = np.sqrt(0.02408936**2 + 0.03889582**2)
+    # run04_b_rse = np.sqrt(0.02408936**2 + 0.13322718**2 + 0.03889582**2 + 0.15225129**2)
+    # rse_column = [run01_a_rse, run04_a_rse, run01_b_rse, run04_b_rse]
+    # summary_df_1['rse'] = rse_column
+    # contrast_1_fmaps_plot = (ggplot(summary_df_1, aes(x='fmaps', y='roi_mean', fill='run')) +
+    #     geom_bar(stat='identity', position='dodge') + 
+    #     geom_errorbar(aes(ymin='roi_mean - rse', ymax='roi_mean + rse'), position=position_dodge(width=0.9), width=0.2) +
+    #     theme_classic() +
+    #     scale_fill_manual(values=['#B22222', '#67B7EB']) +
+    #     labs(title="Mean SCC BOLD Values for 'Guilt' Contrast", x='Fieldmaps', y='Mean SCC BOLD Value', fill='Run') +
+    #     scale_y_continuous(expand=(0, 0), limits=[-0.8, 0.8], breaks=[-0.8,-0.6,-0.4,-0.2,0,0.2,0.4,0.6,0.8]) +
+    #     scale_x_discrete(labels={'yes': 'Yes', 'no': 'No'}) +
+    #     geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    # print(contrast_1_fmaps_plot)
+    # contrast_1_fmaps_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_1_fmaps_plot.svg')
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.2'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # grdevices = importr('grDevices')
+    # clubSandwich = importr('clubSandwich')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # roi_mean_df_2 <- as.data.frame(roi_mean_df_2)
+    # model <- lmer(roi_mean~run*fmaps + (1|participant), data = roi_mean_df_2)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # png(filename="analysis/fmri_analysis/analysis_1/plots/lmm_residuals_qqplot_contrast2_fmaps.png")
+    # qqnorm(residuals_model)
+    # qqline(residuals_model, col = 'red')
+    # dev.off()
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("Contrast 2 fmaps LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("Contrast 2 fmaps LMM residuals do not meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # }
+    # """
+    # ro.globalenv['roi_mean_df_2'] = pandas2ri.py2rpy(roi_mean_df_2)
+    # result = r(r_script)
+    # print(result)
+    # def std_error(x):
+    #     return np.std(x, ddof=1) / np.sqrt(len(x))
+    # summary_df_2 = roi_mean_df_2.groupby(['fmaps', 'run']).agg(
+    #     roi_mean=('roi_mean', 'mean'),
+    #     std_error=('roi_mean', std_error)).reset_index()
+    # contrast_2_fmaps_plot = (ggplot(summary_df_2, aes(x='fmaps', y='roi_mean', fill='run')) +
+    #     geom_bar(stat='identity', position='dodge') + 
+    #     geom_errorbar(aes(ymin='roi_mean - std_error', ymax='roi_mean + std_error'), position=position_dodge(width=0.9), width=0.2) +
+    #     theme_classic() +
+    #     scale_fill_manual(values=['#B22222', '#67B7EB']) +
+    #     labs(title="Mean SCC BOLD Values for 'Indignation' Contrast", x='Fieldmaps', y='Mean SCC BOLD Value', fill='Run') +
+    #     scale_y_continuous(expand=(0, 0), limits=[-0.8, 0.8], breaks=[-0.8,-0.6,-0.4,-0.2,0,0.2,0.4,0.6,0.8]) +
+    #     scale_x_discrete(labels={'yes': 'Yes', 'no': 'No'}) +
+    #     geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    # print(contrast_2_fmaps_plot)
+    # contrast_2_fmaps_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_2_fmaps_plot.svg')
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.2'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # grdevices = importr('grDevices')
+    # clubSandwich = importr('clubSandwich')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(nortest)
+    # library(clubSandwich)
+    # roi_mean_df_3 <- as.data.frame(roi_mean_df_3)
+    # model <- lmer(roi_mean~run*fmaps + (1|participant), data = roi_mean_df_3)
+    # robust_se <- vcovCR(model, type = "CR0")
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # png(filename="analysis/fmri_analysis/analysis_1/plots/lmm_residuals_qqplot_contrast3_fmaps.png")
+    # qqnorm(residuals_model)
+    # qqline(residuals_model, col = 'red')
+    # dev.off()
+    # print("Robust Standard Errors:")
+    # print(robust_se)
+    # t_crit_run <- qt(0.975, df = 34)
+    # t_crit_intervention <- qt(0.975, df = 18)
+    # print(t_crit_run)
+    # print(t_crit_intervention)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("Contrast 3 fmaps LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # print("Model Summary:")
+    # print(summary(model))
+    # print("Parameter Estimates:")
+    # estimates <- fixef(model)
+    # print(estimates)
+    # } else {
+    # print("Contrast 3 LMM fmaps residuals do not meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # print("Model Summary:")
+    # print(summary(model))
+    # print("Parameter Estimates:")
+    # estimates <- fixef(model)
+    # print(estimates)
+    # }
+    # """
+    # ro.globalenv['roi_mean_df_3'] = pandas2ri.py2rpy(roi_mean_df_3)
+    # result = r(r_script)
+    # print(result)
+    # def std_error(x):
+    #     return np.std(x, ddof=1) / np.sqrt(len(x))
+    # summary_df_3 = roi_mean_df_3.groupby(['fmaps', 'run']).agg(
+    #     roi_mean=('roi_mean', 'mean'),
+    #     std_error=('roi_mean', std_error)).reset_index()
+    # run01_a_rse = 0.007978096
+    # run04_a_rse = np.sqrt(0.007978096**2 + 0.094019109**2)
+    # run01_b_rse = np.sqrt(0.007978096**2 + 0.026101429**2)
+    # run04_b_rse = np.sqrt(0.007978096**2 + 0.094019109**2 + 0.026101429**2 + 0.124739423**2)
+    # rse_column = [run01_a_rse, run04_a_rse, run01_b_rse, run04_b_rse]
+    # summary_df_3['rse'] = rse_column
+    # contrast_3_fmaps_plot = (ggplot(summary_df_3, aes(x='fmaps', y='roi_mean', fill='run')) +
+    #     geom_bar(stat='identity', position='dodge') + 
+    #     geom_errorbar(aes(ymin='roi_mean - rse', ymax='roi_mean + rse'), position=position_dodge(width=0.9), width=0.2) +
+    #     theme_classic() +
+    #     scale_fill_manual(values=['#B22222', '#67B7EB']) +
+    #     labs(title="Mean SCC BOLD Values for 'Guilt-Indig' Contrast", x='Fieldmaps', y='Mean SCC BOLD Value', fill='Run') +
+    #     scale_y_continuous(expand=(0, 0), limits=[-0.8, 0.8], breaks=[-0.8,-0.6,-0.4,-0.2,0,0.2,0.4,0.6,0.8]) +
+    #     scale_x_discrete(labels={'yes': 'Yes', 'no': 'No'}) +
+    #     geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    # print(contrast_3_fmaps_plot)
+    # contrast_3_fmaps_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_3_fmaps_plot.svg')
+
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.2'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # grdevices = importr('grDevices')
+    # clubSandwich = importr('clubSandwich')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(nortest)
+    # library(clubSandwich)
+    # roi_mean_df_4 <- as.data.frame(roi_mean_df_4)
+    # model <- lmer(roi_mean~run*fmaps + (1|participant), data = roi_mean_df_4)
+    # robust_se <- vcovCR(model, type = "CR0")
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # png(filename="analysis/fmri_analysis/analysis_1/plots/lmm_residuals_qqplot_contrast4_fmaps.png")
+    # qqnorm(residuals_model)
+    # qqline(residuals_model, col = 'red')
+    # dev.off()
+    # print("Robust Standard Errors:")
+    # print(robust_se)
+    # t_crit_run <- qt(0.975, df = 34)
+    # t_crit_intervention <- qt(0.975, df = 18)
+    # print(t_crit_run)
+    # print(t_crit_intervention)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("Contrast 4 fmaps LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # print("Model Summary:")
+    # print(summary(model))
+    # print("Parameter Estimates:")
+    # estimates <- fixef(model)
+    # print(estimates)
+    # } else {
+    # print("Contrast 4 fmaps LMM residuals do not meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # print("Model Summary:")
+    # print(summary(model))
+    # print("Parameter Estimates:")
+    # estimates <- fixef(model)
+    # print(estimates)
+    # }
+    # """
+    # ro.globalenv['roi_mean_df_4'] = pandas2ri.py2rpy(roi_mean_df_4)
+    # result = r(r_script)
+    # print(result)
+    # def std_error(x):
+    #     return np.std(x, ddof=1) / np.sqrt(len(x))
+    # summary_df_4 = roi_mean_df_4.groupby(['fmaps', 'run']).agg(
+    #     roi_mean=('roi_mean', 'mean'),
+    #     std_error=('roi_mean', std_error)).reset_index()
+    # run01_a_rse = 0.007978096
+    # run04_a_rse = np.sqrt(0.007978096**2 + 0.094019109**2)
+    # run01_b_rse = np.sqrt(0.007978096**2 + 0.026101429**2)
+    # run04_b_rse = np.sqrt(0.007978096**2 + 0.094019109**2 + 0.026101429**2 + 0.124739423**2)
+    # rse_column = [run01_a_rse, run04_a_rse, run01_b_rse, run04_b_rse]
+    # summary_df_4['rse'] = rse_column
+    # contrast_4_fmaps_plot = (ggplot(summary_df_4, aes(x='fmaps', y='roi_mean', fill='run')) +
+    #     geom_bar(stat='identity', position='dodge') + 
+    #     geom_errorbar(aes(ymin='roi_mean - rse', ymax='roi_mean + rse'), position=position_dodge(width=0.9), width=0.2) +
+    #     theme_classic() +
+    #     scale_fill_manual(values=['#B22222', '#67B7EB']) +
+    #     labs(title="Mean SCC BOLD Values for 'Indig-Guilt' Contrast", x='Fieldmaps', y='Mean SCC BOLD Value', fill='Run') +
+    #     scale_y_continuous(expand=(0, 0), limits=[-0.8, 0.8], breaks=[-0.8,-0.6,-0.4,-0.2,0,0.2,0.4,0.6,0.8]) +
+    #     scale_x_discrete(labels={'yes': 'Yes', 'no': 'No'}) +
+    #     geom_hline(yintercept=0, linetype='solid', color='black', size=0.5))
+    # print(contrast_4_fmaps_plot)
+    # contrast_4_fmaps_plot.save('analysis/fmri_analysis/analysis_1/plots/contrast_4_fmaps_plot.svg')
 
 #endregion
 
@@ -10106,7 +10377,7 @@ def susceptibility_analysis():
                 print('Sequence PE directions are not as expected. Please investigate.')
                 sys.exit()
 
-    # Step 5: Calculate and apply fieldmaps for relevant participants.
+    # Step 5: Calculate fieldmaps for relevant participants.
     print("\n###### STEP 5: CALCULATING FIELDMAPS ######")
     for p_id in participants:
         if p_id not in bad_participants:
@@ -11477,7 +11748,7 @@ def susceptibility_analysis():
         sequence = ['run01'] * len(run01_voxel_intensities) + ['run04'] * len(run04_voxel_intensities)
         subject = [f'{p_id}'] * len(run01_voxel_intensities) + [f'{p_id}'] * len(run04_voxel_intensities)
         voxel_intensity_df = pd.DataFrame({'p_id': subject, 'sequence': sequence, 'value': values})
-        voxel_intensity_df.to_csv(f'{p_id}/analysis/susceptibility/fnirt_test/3/voxel_intensity_df.txt', sep='\t', index=False)
+        voxel_intensity_df.to_csv(f'analysis/susceptibility/run_comparisons/3/{p_id}/voxel_intensity_df.txt', sep='\t', index=False)
         group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
     group_voxel_intensity_df.to_csv('analysis/susceptibility_analysis/run_comparisons/3/group/group_voxel_intensity_df.txt', sep='\t', index=False)
     run01_means = []

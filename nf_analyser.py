@@ -9873,6 +9873,8 @@ def susceptibility_analysis():
         os.makedirs(dicoms_run4_folder, exist_ok=True)
         niftis_folder = f'analysis/susceptibility_analysis/data/{p_id}/niftis'
         os.makedirs(niftis_folder, exist_ok=True)
+        niftis_fieldmaps_folder = f'analysis/susceptibility_analysis/data/{p_id}/niftis/fieldmaps'
+        os.makedirs(niftis_fieldmaps_folder, exist_ok=True)
         pngs_folder = f'analysis/susceptibility_analysis/data/{p_id}/pngs'
         os.makedirs(pngs_folder, exist_ok=True)
     print("Directories created.")

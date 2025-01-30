@@ -11750,7 +11750,7 @@ def susceptibility_analysis():
         sequence = ['run01'] * len(run01_voxel_intensities) + ['run04'] * len(run04_voxel_intensities)
         subject = [f'{p_id}'] * len(run01_voxel_intensities) + [f'{p_id}'] * len(run04_voxel_intensities)
         voxel_intensity_df = pd.DataFrame({'p_id': subject, 'sequence': sequence, 'value': values})
-        voxel_intensity_df.to_csv(f'analysis/susceptibility/run_comparisons/3/{p_id}/voxel_intensity_df.txt', sep='\t', index=False)
+        voxel_intensity_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/voxel_intensity_df.txt', sep='\t', index=False)
         group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
     group_voxel_intensity_df.to_csv('analysis/susceptibility_analysis/run_comparisons/3/group/group_voxel_intensity_df.txt', sep='\t', index=False)
     run01_means = []

@@ -10553,11 +10553,17 @@ def susceptibility_analysis():
         ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
+        scale_fill_manual(values=['#B22222', '#67B7EB']) +
         labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Percentage of SCC Voxels in Signal Dropout') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12, color='black')) +
-        scale_y_continuous(expand=(0, 0))
+        scale_y_continuous(expand=(0, 0)) +
+        theme(
+        axis_text_x=element_text(rotation=45, hjust=1),
+        axis_title=element_text(size=14),    # Axis titles
+        axis_text=element_text(size=12),     # Tick labels
+        legend_text=element_text(size=12),   # Legend text
+        legend_title=element_text(size=14))  # Legend title
     )
-    perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/perc_outside_plot.png')
+    perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/perc_outside_plot.png', dpi=300)
     perc_outside_pa_overall = np.mean(perc_outside_pa_values)
     perc_outside_rl_overall = np.mean(perc_outside_rl_values)
     pa_std_error = np.std(perc_outside_pa_values) / np.sqrt(len(perc_outside_pa_values))
@@ -10579,7 +10585,13 @@ def susceptibility_analysis():
                         theme_classic() +
                         labs(title='Percentage of Voxels in Signal Dropout Regions', y='Percentage of SCC Voxels in Signal Dropout') +
                         scale_y_continuous(expand=(0, 0), limits=[0,10]) +
-                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
+                        scale_fill_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
+                        theme(
+                            axis_text_x=element_text(rotation=45, hjust=1),
+                            axis_title=element_text(size=14),    # Axis titles
+                            axis_text=element_text(size=12),     # Tick labels
+                            legend_text=element_text(size=12),   # Legend text
+                            legend_title=element_text(size=14))  # Legend title
                         )
     if p_value < 0.001:
         group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
@@ -10590,7 +10602,7 @@ def susceptibility_analysis():
     elif p_value < 0.05:
         group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="*", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")    
-    group_perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_perc_outside_plot.png')
+    group_perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_perc_outside_plot.png', dpi=300)
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
     group_ssim_df = pd.DataFrame(columns = column_headers) 
@@ -10669,14 +10681,19 @@ def susceptibility_analysis():
     })
     ssim_voxels_plot = (
         ggplot(plot_data, aes(x='Participant', y='Voxels')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
+        geom_bar(stat='identity', position='dodge', fill='#67B7EB') +
+        geom_hline(yintercept=voxels_mean, linetype='dashed', color='#B22222') +
         theme_classic() +
         labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
-        scale_y_continuous(expand=(0, 0))
+        scale_y_continuous(expand=(0, 0)) +
+        theme(
+            axis_text_x=element_text(rotation=45, hjust=1),
+            axis_title=element_text(size=14),    # Axis titles
+            axis_text=element_text(size=12),     # Tick labels
+            legend_text=element_text(size=12),   # Legend text
+            legend_title=element_text(size=14))  # Legend title
     )
-    ssim_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_voxels_plot.png')
+    ssim_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_voxels_plot.png', dpi=300)
     perc_voxels = group_ssim_df['perc_roi_voxels_in_bin_ssim_mask'].tolist()
     perc_voxels_mean = np.mean(perc_voxels)
     plot_data = pd.DataFrame({
@@ -10685,14 +10702,19 @@ def susceptibility_analysis():
     })
     ssim_perc_voxels_plot = (
         ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='red') +
+        geom_bar(stat='identity', position='dodge', color='#67B7EB') +
+        geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='#B22222') +
         theme_classic() +
         labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Percentage of SCC Voxels in SSIM Mask') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
-        scale_y_continuous(expand=(0, 0))
+        scale_y_continuous(expand=(0, 0)) +
+        theme(
+            axis_text_x=element_text(rotation=45, hjust=1),
+            axis_title=element_text(size=14),    # Axis titles
+            axis_text=element_text(size=12),     # Tick labels
+            legend_text=element_text(size=12),   # Legend text
+            legend_title=element_text(size=14))  # Legend title
     )
-    ssim_perc_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_perc_voxels_plot.png')
+    ssim_perc_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_perc_voxels_plot.png', dpi=300)
 
     overlap_perc_av_values = []
     column_headers = ['p_id', 'tissue_type', 'overlap_perc']
@@ -10799,11 +10821,15 @@ def susceptibility_analysis():
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
         labs(title='Sequence Tissue Type Overlap', x='Participant', y='Tissue Overlap Percentage', fill='Tissue Type') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1, color='black'), text=element_text(size=12, color='black'), axis_title=element_text(size=12, color='black')) +
         scale_y_continuous(expand=(0, 0), limits=[0,100]) +
-        scale_fill_manual(values={'CSF': '#F9DC5C', 'WM': '#db5f57', 'GM': '#57d3db'})
+        scale_fill_manual(values={'CSF': '#67B7EB', 'WM': '#B22222', 'GM': '#EBE967'}) +
+        theme(
+            axis_title=element_text(size=14),    # Axis titles
+            axis_text=element_text(size=12),     # Tick labels
+            legend_text=element_text(size=12),   # Legend text
+            legend_title=element_text(size=14))  # Legend title
     )
-    overlap_perc_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/overlap_perc_plot.png')
+    overlap_perc_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/overlap_perc_plot.png', dpi=300)
     filtered_csf = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'].tolist()
     mean_csf = np.mean(filtered_csf)
     filtered_wm = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'wm']['overlap_perc'].tolist()
@@ -10844,9 +10870,14 @@ def susceptibility_analysis():
                         theme_classic() +
                         labs(title='Sequence Tissue Type Overlap', x='Tissue Type', y='Tissue Overlap Percentage') +
                         scale_y_continuous(expand=(0, 0), limits=[0,100]) +
-                        scale_fill_manual(values={'CSF': '#F9DC5C', 'WM': '#db5f57', 'GM': '#57d3db'})
+                        scale_fill_manual(values={'CSF': '#67B7EB', 'WM': '#B22222', 'GM': '#EBE967'}) +
+                        theme(
+                            axis_title=element_text(size=14),    # Axis titles
+                            axis_text=element_text(size=12),     # Tick labels
+                            legend_text=element_text(size=12),   # Legend text
+                            legend_title=element_text(size=14))  # Legend title
                         )
-    group_overlap_perc_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_overlap_perc_plot.png')
+    group_overlap_perc_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_overlap_perc_plot.png', dpi=300)
     ssim_values = group_ssim_df.loc[group_ssim_df['p_id'].isin(['P122', 'P136']), 'ssim_index'].tolist()
     plot_data = pd.DataFrame({
         'Participant': ['P122', 'P136'],
@@ -10857,23 +10888,23 @@ def susceptibility_analysis():
     index_sorted = np.arange(len(plot_data_sorted))
     fig, ax1 = plt.subplots()
     bar_width = 0.35
-    bar1 = ax1.bar(index_sorted, plot_data_sorted['SSIM'], bar_width, label='SSIM', color='#db5f57')
-    ax1.set_ylabel('SSIM Index', color='#db5f57')
-    ax1.tick_params(axis='y', labelcolor='#db5f57')
+    bar1 = ax1.bar(index_sorted, plot_data_sorted['SSIM'], bar_width, label='SSIM', color='#67B7EB')
+    ax1.set_ylabel('SSIM Index', color='#67B7EB', fontsize=14)
+    ax1.tick_params(axis='y', labelcolor='#67B7EB', labelsize=12)
     ax1.set_ylim(0.94, 0.98)
     ax2 = ax1.twinx()
-    bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='#57d3db', alpha=1)
-    ax2.set_ylabel(' Tissue Overlap Percentage', color='#57d3db')
-    ax2.tick_params(axis='y', labelcolor='#57d3db')
+    bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='#B22222', alpha=1)
+    ax2.set_ylabel(' Tissue Overlap Percentage', color='#B22222', fontsize=14)
+    ax2.tick_params(axis='y', labelcolor='#B22222', labelsize=12)
     ax2.set_ylim(75, 95)
-    ax1.set_xlabel('Participant')
+    ax1.set_xlabel('Participant', fontsize=14)
     ax1.set_xticks(index_sorted + bar_width / 2)
     ax1.set_xticklabels(plot_data_sorted['Participant'], rotation=45, ha='right')
-    plt.title('SSIM and Tissue Overlap Percentage Plot')
-    fig.legend(loc='upper right', bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes)
+    plt.title('SSIM and Tissue Overlap Percentage Plot', fontsize=14)
+    fig.legend(loc='upper right', bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes, fontsize=12, title_fontsize=14)
     save_path = 'analysis/susceptibility_analysis/run_comparisons/1/group/ssim_overlap_perc_plot.png'
     plt.tight_layout()
-    plt.savefig(save_path, bbox_inches='tight')
+    plt.savefig(save_path, bbox_inches='tight', dpi=300)
 
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
@@ -10950,9 +10981,9 @@ def susceptibility_analysis():
         ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
         geom_bar(stat='identity', position='dodge') +
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
+        scale_fill_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean SCC Signal Intensity') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
@@ -10961,8 +10992,15 @@ def susceptibility_analysis():
             size=12,
             ha='center',
             va='bottom',
-            show_legend=False))
-    voxel_intensity_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/voxel_intensity_plot.png')
+            show_legend=False) +
+        theme(
+            axis_text_x=element_text(rotation=45, hjust=1),
+            axis_title=element_text(size=14),    # Axis titles
+            axis_text=element_text(size=12),     # Tick labels
+            legend_text=element_text(size=12),   # Legend text
+            legend_title=element_text(size=14))  # Legend title
+        )
+    voxel_intensity_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/voxel_intensity_plot.png', dpi=300)
     pa_means_overall = np.mean(pa_means)
     rl_means_overall = np.mean(rl_means)
     pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
@@ -10984,6 +11022,7 @@ def susceptibility_analysis():
         ggplot(data_long, aes(x='sequence', y='value', group='p_id')) +
         geom_line(aes(group='p_id'), color='gray', size=1) +
         geom_point(aes(color='sequence'), size=4) +
+        scale_color_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
         theme_light() +
         theme(
             panel_grid_major=element_blank(), 
@@ -10991,6 +11030,10 @@ def susceptibility_analysis():
             panel_border=element_blank(),
             axis_line_x=element_line(color='black'),  
             axis_line_y=element_line(color='black'),  
+            axis_title=element_text(size=14),    # Axis titles
+            axis_text=element_text(size=12),     # Tick labels
+            legend_text=element_text(size=12),   # Legend text
+            legend_title=element_text(size=14)  # Legend title
         ) +
         labs(title='Ladder Plot of PA and RL Sequences',
             x='Sequence',
@@ -10998,7 +11041,7 @@ def susceptibility_analysis():
         scale_x_discrete(limits=['PA', 'RL']) +
         scale_y_continuous()
     )
-    group_voxel_intensity_ladder_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_voxel_intensity_ladder_plot.png')                          
+    group_voxel_intensity_ladder_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_voxel_intensity_ladder_plot.png', dpi=300)                          
     plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
@@ -11006,7 +11049,12 @@ def susceptibility_analysis():
                         theme_classic() +
                         labs(title='Mean of Voxel Intensities Across Participants', y='Mean SCC Signal Intensity') +
                         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
-                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
+                        scale_fill_manual(values={'PA': '#67B7EB', 'RL': '#B22222'}) +
+                        theme(
+                            axis_title=element_text(size=14),    # Axis titles
+                            axis_text=element_text(size=12),     # Tick labels
+                            legend_text=element_text(size=12),   # Legend text
+                            legend_title=element_text(size=14))  # Legend title
                         )
     if p_value < 0.001:
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
@@ -11017,7 +11065,7 @@ def susceptibility_analysis():
     elif p_value < 0.05:
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-    group_voxel_intensity_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_voxel_intensity_plot.png')
+    group_voxel_intensity_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_voxel_intensity_plot.png', dpi=300)
 
     # Step 7: Test quality of alternate distortion correction method (Stage 2).
     print("\n###### STEP 7: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 2) ######")

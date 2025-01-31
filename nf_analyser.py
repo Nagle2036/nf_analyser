@@ -10554,7 +10554,7 @@ def susceptibility_analysis():
         geom_bar(stat='identity', position='dodge') +
         theme_classic() +
         scale_fill_manual(values=['#B22222', '#67B7EB']) +
-        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y='Percentage of SCC Voxels in Signal Dropout') +
+        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y=r'% of SCC Voxels in Signal Dropout') +
         scale_y_continuous(expand=(0, 0)) +
         theme(
         axis_text_x=element_text(rotation=45, hjust=1),
@@ -10583,11 +10583,10 @@ def susceptibility_analysis():
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
-                        labs(title='Percentage of Voxels in Signal Dropout Regions', y='Percentage of SCC Voxels in Signal Dropout') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,10]) +
+                        labs(title='Percentage of Voxels in Signal Dropout Regions', y=r'% of SCC Voxels in Signal Dropout') +
+                        scale_y_continuous(expand=(0, 0), limits=[0,10], breaks=[0.0, 2.5, 5.0, 7.5, 10.0]) +
                         scale_fill_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
                         theme(
-                            axis_text_x=element_text(rotation=45, hjust=1),
                             axis_title=element_text(size=14),    # Axis titles
                             axis_text=element_text(size=12),     # Tick labels
                             legend_text=element_text(size=12),   # Legend text
@@ -10702,10 +10701,10 @@ def susceptibility_analysis():
     })
     ssim_perc_voxels_plot = (
         ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
-        geom_bar(stat='identity', position='dodge', color='#67B7EB') +
+        geom_bar(stat='identity', position='dodge', fill='#67B7EB') +
         geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='#B22222') +
         theme_classic() +
-        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y='Percentage of SCC Voxels in SSIM Mask') +
+        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y=r'% of SCC Voxels in SSIM Mask') +
         scale_y_continuous(expand=(0, 0)) +
         theme(
             axis_text_x=element_text(rotation=45, hjust=1),
@@ -10822,7 +10821,7 @@ def susceptibility_analysis():
         theme_classic() +
         labs(title='Sequence Tissue Type Overlap', x='Participant', y='Tissue Overlap Percentage', fill='Tissue Type') +
         scale_y_continuous(expand=(0, 0), limits=[0,100]) +
-        scale_fill_manual(values={'CSF': '#67B7EB', 'WM': '#B22222', 'GM': '#EBE967'}) +
+        scale_fill_manual(values={'CSF': '#67B7EB', 'WM': '#EBE967', 'GM': '#B22222'}) +
         theme(
             axis_title=element_text(size=14),    # Axis titles
             axis_text=element_text(size=12),     # Tick labels
@@ -10870,7 +10869,7 @@ def susceptibility_analysis():
                         theme_classic() +
                         labs(title='Sequence Tissue Type Overlap', x='Tissue Type', y='Tissue Overlap Percentage') +
                         scale_y_continuous(expand=(0, 0), limits=[0,100]) +
-                        scale_fill_manual(values={'CSF': '#67B7EB', 'WM': '#B22222', 'GM': '#EBE967'}) +
+                        scale_fill_manual(values={'CSF': '#67B7EB', 'WM': '#EBE967', 'GM': '#B22222'}) +
                         theme(
                             axis_title=element_text(size=14),    # Axis titles
                             axis_text=element_text(size=12),     # Tick labels
@@ -10899,7 +10898,7 @@ def susceptibility_analysis():
     ax2.set_ylim(75, 95)
     ax1.set_xlabel('Participant', fontsize=14)
     ax1.set_xticks(index_sorted + bar_width / 2)
-    ax1.set_xticklabels(plot_data_sorted['Participant'], rotation=45, ha='right')
+    ax1.set_xticklabels(plot_data_sorted['Participant'])
     plt.title('SSIM and Tissue Overlap Percentage Plot', fontsize=14)
     fig.legend(loc='upper right', bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes, fontsize=12, title_fontsize=14)
     save_path = 'analysis/susceptibility_analysis/run_comparisons/1/group/ssim_overlap_perc_plot.png'
@@ -11020,20 +11019,20 @@ def susceptibility_analysis():
     data_long['sequence'] = data_long['sequence'].map({'pa_values': 'PA', 'rl_values': 'RL'})
     group_voxel_intensity_ladder_plot = (
         ggplot(data_long, aes(x='sequence', y='value', group='p_id')) +
-        geom_line(aes(group='p_id'), color='gray', size=1) +
+        geom_line(aes(group='p_id'), color='black', size=1) +
         geom_point(aes(color='sequence'), size=4) +
         scale_color_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
-        theme_light() +
+        theme_classic() +
         theme(
             panel_grid_major=element_blank(), 
             panel_grid_minor=element_blank(), 
             panel_border=element_blank(),
             axis_line_x=element_line(color='black'),  
             axis_line_y=element_line(color='black'),  
-            axis_title=element_text(size=14),    # Axis titles
-            axis_text=element_text(size=12),     # Tick labels
-            legend_text=element_text(size=12),   # Legend text
-            legend_title=element_text(size=14)  # Legend title
+            axis_title=element_text(size=14, color='black'),    # Axis titles
+            axis_text=element_text(size=12, color='black'),     # Tick labels
+            legend_text=element_text(size=12,color= 'black'),   # Legend text
+            legend_title=element_text(size=14, color='black')  # Legend title
         ) +
         labs(title='Ladder Plot of PA and RL Sequences',
             x='Sequence',
@@ -12018,17 +12017,17 @@ def susceptibility_analysis():
         if not os.path.exists(fnirted_run01):
             subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
 
-        print(f"Running FLIRT betted, FNIRT unbetted, applywarp unbetted, downsampled, with lambda configuration 2 for {p_id}...")
-        flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/flirted_run01.nii.gz'
-        flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/flirted_run01_matrix.mat'
-        if not os.path.exists(flirted_run01):
-            subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
-        warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/warp_run01'
-        if not os.path.exists(warp_run01):
-            subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', '--lambda=400,200,150,75,60,45'])
-        fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/fnirted_run01.nii.gz'
-        if not os.path.exists(fnirted_run01):
-            subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+        # print(f"Running FLIRT betted, FNIRT unbetted, applywarp unbetted, downsampled, with lambda configuration 2 for {p_id}...")
+        # flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/flirted_run01.nii.gz'
+        # flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/flirted_run01_matrix.mat'
+        # if not os.path.exists(flirted_run01):
+        #     subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
+        # warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/warp_run01'
+        # if not os.path.exists(warp_run01):
+        #     subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', '--lambda=400,200,150,75,60,45'])
+        # fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/fnirted_run01.nii.gz'
+        # if not os.path.exists(fnirted_run01):
+        #     subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
 #endregion
 
 #region MAIN MENU.

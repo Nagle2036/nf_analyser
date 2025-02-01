@@ -10862,14 +10862,16 @@ def susceptibility_analysis():
         print(anova_result)
     else:
         print('Stage 1 segmentation analysis parametric assumptions not met. Two-way ANOVA not run.')
+    tissue_type_order = ['GM', 'WM', 'CSF']
     plot_data = pd.DataFrame({'Tissue_Type': ['CSF', 'WM', 'GM'], 'Overlap_Perc': [mean_csf, mean_wm, mean_gm], 'Std_Error': [csf_std_error, wm_std_error, gm_std_error]})
+    plot_data['Tissue_Type'] = pd.Categorical(plot_data['Tissue_Type'], categories=tissue_type_order, ordered=True)
     group_overlap_perc_plot = (ggplot(plot_data, aes(x='Tissue_Type', y='Overlap_Perc', fill='Tissue_Type')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_Perc + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Sequence Tissue Type Overlap', x='Tissue Type', y='Tissue Overlap Percentage') +
                         scale_y_continuous(expand=(0, 0), limits=[0,100]) +
-                        scale_fill_manual(values={'CSF': '#67B7EB', 'WM': '#EBE967', 'GM': '#B22222'}) +
+                        scale_fill_manual(values={'CSF': '#EBE967', 'WM': '#67B7EB', 'GM': '#B22222'}) +
                         theme(
                             axis_title=element_text(size=14),    # Axis titles
                             axis_text=element_text(size=12),     # Tick labels

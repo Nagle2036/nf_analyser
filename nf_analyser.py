@@ -10265,7 +10265,7 @@ def susceptibility_analysis():
                 print("No .nii file found or multiple .nii files found in the 'nifti' folder.")
         else:
             print('Structural Nifti file already exists. Skipping process.')
-        bet_path = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii'
+        bet_path = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii.gz'
         structural_path = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural.nii'
         if not os.path.exists(bet_path):
             print("Performing brain extraction on structural image...")

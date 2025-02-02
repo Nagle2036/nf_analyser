@@ -11228,7 +11228,7 @@ def susceptibility_analysis():
                             axis_text=element_text(size=14),     # Tick labels
                             legend_text=element_text(size=14),   # Legend text
                             legend_title=element_text(size=16)   # Legend title
-                        )
+                        ) +
                         scale_fill_manual(values={'CORR': '#B22222', 'UNCORR': '#67B7EB'})
                         )
     if p_value < 0.001:
@@ -11692,7 +11692,7 @@ def susceptibility_analysis():
                             axis_text=element_text(size=14),     # Tick labels
                             legend_text=element_text(size=14),   # Legend text
                             legend_title=element_text(size=16)   # Legend title
-                        )
+                        ) +
                         scale_fill_manual(values={'run01': '#B22222', 'run04': '#67B7EB'})
                         )
     if p_value < 0.001:

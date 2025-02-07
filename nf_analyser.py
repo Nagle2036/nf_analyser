@@ -10425,7 +10425,8 @@ def susceptibility_analysis():
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     perc_outside_pa_values = []
     perc_outside_rl_values = []
-    column_headers = ['p_id', 'perc_outside_pa', 'perc_outside_rl']
+    perc_outside_ap_values = []
+    column_headers = ['p_id', 'perc_outside_pa', 'perc_outside_rl', 'perc_outside_ap']
     group_perc_outside_df = pd.DataFrame(columns = column_headers) 
     for p_id in good_participants:
         print(f"Preparing Stage 1 files for {p_id}...")
@@ -10437,24 +10438,32 @@ def susceptibility_analysis():
         os.makedirs(run_comparison_1_group_folder, exist_ok=True)
         pa_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/pa_fieldmaps.nii'
         rl_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/rl_fieldmaps.nii'
+        ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/ap_fieldmaps.nii'
         averaged_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/averaged_pa_fieldmaps.nii.gz'
         averaged_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/averaged_rl_fieldmaps.nii.gz'
-        if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps):
+        averaged_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/averaged_ap_fieldmaps.nii.gz'
+        if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps) or not os.path.exists(averaged_ap_fieldmaps):
             subprocess.run(['fslmaths', pa_fieldmaps, '-Tmean', averaged_pa_fieldmaps])
             subprocess.run(['fslmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
+            subprocess.run(['fslmaths', ap_fieldmaps, '-Tmean', averaged_ap_fieldmaps])
         betted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/betted_pa_fieldmaps.nii.gz'
         betted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/betted_rl_fieldmaps.nii.gz'
-        if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps):
+        betted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/betted_ap_fieldmaps.nii.gz'
+        if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps) or not os.path.exists(betted_ap_fieldmaps):
             subprocess.run(["bet", averaged_pa_fieldmaps, betted_pa_fieldmaps, "-m", "-R"])
             subprocess.run(["bet", averaged_rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
+            subprocess.run(["bet", averaged_ap_fieldmaps, betted_ap_fieldmaps, "-m", "-R"])
         flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps.nii.gz'
         t1_flirted_pa_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/t1_flirted_pa_fieldmaps_transformation.mat'
         t1_flirted_rl_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/t1_flirted_rl_fieldmaps_transformation.mat'
+        t1_flirted_ap_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/t1_flirted_ap_fieldmaps_transformation.mat'
         structural_brain = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii'
-        if not os.path.exists(flirted_pa_fieldmaps):
+        if not os.path.exists(flirted_pa_fieldmaps) or not os.path.exists(flirted_rl_fieldmaps) or not os.path.exists(flirted_ap_fieldmaps):
             subprocess.run(["flirt", "-in", betted_pa_fieldmaps, "-ref", structural_brain, "-out", flirted_pa_fieldmaps, "-omat", t1_flirted_pa_fieldmaps_transformation])
             subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", structural_brain, "-out", flirted_rl_fieldmaps, "-omat", t1_flirted_rl_fieldmaps_transformation])
+            subprocess.run(["flirt", "-in", betted_ap_fieldmaps, "-ref", structural_brain, "-out", flirted_ap_fieldmaps, "-omat", t1_flirted_ap_fieldmaps_transformation])
         def read_roi_file(roi_file):
             voxel_coordinates = []
             with open(roi_file, 'r') as file:
@@ -10502,12 +10511,18 @@ def susceptibility_analysis():
         flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
         if not os.path.exists(flirted_rl_fieldmaps_bin):
             subprocess.run(['fslmaths', flirted_rl_fieldmaps, '-thr', '100', '-bin', flirted_rl_fieldmaps_bin])
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        if not os.path.exists(flirted_ap_fieldmaps_bin):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps, '-thr', '100', '-bin', flirted_ap_fieldmaps_bin])
         pa_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_bin_inv.nii.gz'
         if not os.path.exists(pa_bin_inv):
             subprocess.run(['fslmaths', flirted_pa_fieldmaps_bin, '-sub', '1', '-abs', pa_bin_inv])
         rl_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_bin_inv.nii.gz'
         if not os.path.exists(rl_bin_inv):
             subprocess.run(['fslmaths', flirted_rl_fieldmaps_bin, '-sub', '1', '-abs', rl_bin_inv])
+        ap_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_bin_inv.nii.gz'
+        if not os.path.exists(ap_bin_inv):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-sub', '1', '-abs', ap_bin_inv])
         pa_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', pa_bin_inv, '-V'], capture_output=True, text=True)
         if pa_result.returncode == 0:
             pa_result_output = pa_result.stdout.strip()
@@ -10522,6 +10537,13 @@ def susceptibility_analysis():
             print("Error executing fslstats command.")
         rl_result_output_values = rl_result_output.split()
         rl_voxels_outside = float(rl_result_output_values[0])
+        ap_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', ap_bin_inv, '-V'], capture_output=True, text=True)
+        if ap_result.returncode == 0:
+            ap_result_output = ap_result.stdout.strip()
+        else:
+            print("Error executing fslstats command.")
+        ap_result_output_values = ap_result_output.split()
+        ap_voxels_outside = float(ap_result_output_values[0])
         result1 = subprocess.run(['fslstats', transformed_roi_mask, '-V'], capture_output=True, text=True)
         if result1.returncode == 0:
             result1_output = result1.stdout.strip()
@@ -10535,14 +10557,19 @@ def susceptibility_analysis():
         perc_outside_rl = (rl_voxels_outside / total_voxels_in_roi) * 100
         perc_outside_rl = round(perc_outside_rl, 2)
         perc_outside_rl_values.append(perc_outside_rl)
-        perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_pa': [perc_outside_pa], 'perc_outside_rl': [perc_outside_rl]})
+        perc_outside_ap = (ap_voxels_outside / total_voxels_in_roi) * 100
+        perc_outside_ap = round(perc_outside_ap, 2)
+        perc_outside_ap_values.append(perc_outside_ap)
+        perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_pa': [perc_outside_pa], 'perc_outside_rl': [perc_outside_rl], 'perc_outside_ap': [perc_outside_ap]})
         perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/perc_outside_df.txt', sep='\t', index=False)
         group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
         pa_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_trimmed_roi_mask.nii.gz'
         rl_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_trimmed_roi_mask.nii.gz'
-        if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask):
+        ap_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_trimmed_roi_mask.nii.gz'
+        if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask) or not os.path.exists(ap_trimmed_roi_mask):
             subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_fieldmaps_bin, pa_trimmed_roi_mask])
             subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
+            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_ap_fieldmaps_bin, ap_trimmed_roi_mask])
     group_perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/group/group_perc_outside_df.txt', sep='\t', index=False)
     plot_data = pd.DataFrame({
         'Participant': good_participants * 2,
@@ -10604,9 +10631,9 @@ def susceptibility_analysis():
     group_perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_perc_outside_plot.png', dpi=300)
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
-    group_ssim_df = pd.DataFrame(columns = column_headers) 
+    pa_rl_group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in good_participants:
-        print(f"Running Stage 1 SSIM analysis for {p_id}...")
+        print(f"Running Stage 1 PA-RL SSIM analysis for {p_id}...")
         def calculate_ssim(image1_path, image2_path, ssim_output_path):
             """Function to calculate SSIM between two Nifti images and save the SSIM map."""
             image1_nii = nib.load(image1_path)
@@ -10619,18 +10646,18 @@ def susceptibility_analysis():
             ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
             nib.save(ssim_map_nifti, ssim_output_path)
             return ssim_index
-        ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ssim_map.nii.gz'
+        pa_rl_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_rl_ssim_map.nii.gz'
         flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
-        if not os.path.exists(ssim_output_path):
-            ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, ssim_output_path)
+        if not os.path.exists(pa_rl_ssim_output_path):
+            pa_rl_ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, pa_rl_ssim_output_path)
         else:
-            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ssim_df.txt', delimiter='\t')
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_rl_ssim_df.txt', delimiter='\t')
             ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
-            ssim_index = ssim_index_series.iloc[0]
-        ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ssim_bin.nii.gz'
-        if not os.path.exists(ssim_bin):
-            subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
+            pa_rl_ssim_index = ssim_index_series.iloc[0]
+        pa_rl_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_rl_ssim_bin.nii.gz'
+        if not os.path.exists(pa_rl_ssim_bin):
+            subprocess.run(["fslmaths", pa_rl_ssim_output_path, "-thr", "0.8", "-binv", pa_rl_ssim_bin])
         combined_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/combined_pa_rl_mask.nii.gz'
         flirted_pa_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps_bin.nii.gz'
         flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
@@ -10639,81 +10666,194 @@ def susceptibility_analysis():
         bin_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/bin_pa_rl_mask.nii.gz'
         if not os.path.exists(bin_pa_rl_mask):
             subprocess.run(['fslmaths', combined_pa_rl_mask, '-bin', bin_pa_rl_mask])
-        ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ssim_bin_trimmed.nii.gz'
-        if not os.path.exists(ssim_bin_trimmed):
-            subprocess.run(['fslmaths', ssim_bin, '-mul', bin_pa_rl_mask, ssim_bin_trimmed])
-        voxels_in_whole_mask = subprocess.run(["fslstats", ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
-        voxels_in_whole_mask = float(voxels_in_whole_mask)
-        intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ssim_roi_intersect.nii.gz'
+        pa_rl_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_rl_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(pa_rl_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', pa_rl_ssim_bin, '-mul', bin_pa_rl_mask, pa_rl_ssim_bin_trimmed])
+        voxels_in_whole_pa_rl_mask = subprocess.run(["fslstats", pa_rl_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_pa_rl_mask = float(voxels_in_whole_pa_rl_mask)
+        pa_rl_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_rl_ssim_roi_intersect.nii.gz'
         transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/transformed_roi_mask.nii.gz'
-        if not os.path.exists(intersection_mask_path):
-            subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", transformed_roi_mask, intersection_mask_path])
-        voxels_in_roi_in_mask = subprocess.run(["fslstats", intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
-        voxels_in_roi_in_mask = float(voxels_in_roi_in_mask)
-        perc_roi_voxels_in_mask = (voxels_in_roi_in_mask / total_voxels_in_roi) * 100
-        ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask]})
-        ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ssim_df.txt', sep='\t', index=False)
-        group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
-    group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/1/group/group_ssim_df.txt', sep='\t', index=False)
-    ssim_indexes = group_ssim_df['ssim_index'].tolist()
-    ssim_mean = np.mean(ssim_indexes)
-    print(f"Mean SSIM index for Stage 1: {ssim_mean}")
-    plot_data = pd.DataFrame({
-        'Participant': good_participants,
-        'SSIM': ssim_indexes,
-    })
-    ssim_index_plot = (
-        ggplot(plot_data, aes(x='Participant', y='SSIM')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
-        theme_classic() +
-        labs(title='SSIM Indexes', x='Participant', y='SSIM') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
-        scale_y_continuous(expand=(0, 0), limits=[0.8,1])
-    )
-    ssim_index_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_index_plot.png')
-    voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
-    voxels_mean = np.mean(voxels)
-    plot_data = pd.DataFrame({
-        'Participant': good_participants,
-        'Voxels': voxels,
-    })
-    ssim_voxels_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Voxels')) +
-        geom_bar(stat='identity', position='dodge', fill='#67B7EB') +
-        geom_hline(yintercept=voxels_mean, linetype='dashed', color='#B22222') +
-        theme_classic() +
-        labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
-        scale_y_continuous(expand=(0, 0)) +
-        theme(
-            axis_text_x=element_text(rotation=45, hjust=1),
-            axis_title=element_text(size=14),    # Axis titles
-            axis_text=element_text(size=12),     # Tick labels
-            legend_text=element_text(size=12),   # Legend text
-            legend_title=element_text(size=14))  # Legend title
-    )
-    ssim_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_voxels_plot.png', dpi=300)
-    perc_voxels = group_ssim_df['perc_roi_voxels_in_bin_ssim_mask'].tolist()
-    perc_voxels_mean = np.mean(perc_voxels)
-    plot_data = pd.DataFrame({
-        'Participant': good_participants,
-        'Perc_Voxels': perc_voxels,
-    })
-    ssim_perc_voxels_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
-        geom_bar(stat='identity', position='dodge', fill='#67B7EB') +
-        geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='#B22222') +
-        theme_classic() +
-        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y=r'% of SCC Voxels in SSIM Mask') +
-        scale_y_continuous(expand=(0, 0)) +
-        theme(
-            axis_text_x=element_text(rotation=45, hjust=1),
-            axis_title=element_text(size=14),    # Axis titles
-            axis_text=element_text(size=12),     # Tick labels
-            legend_text=element_text(size=12),   # Legend text
-            legend_title=element_text(size=14))  # Legend title
-    )
-    ssim_perc_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_perc_voxels_plot.png', dpi=300)
+        if not os.path.exists(pa_rl_intersection_mask_path):
+            subprocess.run(["fslmaths", pa_rl_ssim_bin_trimmed, "-mas", transformed_roi_mask, pa_rl_intersection_mask_path])
+        voxels_in_roi_in_pa_rl_mask = subprocess.run(["fslstats", pa_rl_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_pa_rl_mask = float(voxels_in_roi_in_pa_rl_mask)
+        perc_roi_voxels_in_pa_rl_mask = (voxels_in_roi_in_pa_rl_mask / total_voxels_in_roi) * 100
+        pa_rl_ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [pa_rl_ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_pa_rl_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_pa_rl_mask]})
+        pa_rl_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_rl_ssim_df.txt', sep='\t', index=False)
+        pa_rl_group_ssim_df = pd.concat([pa_rl_group_ssim_df, pa_rl_ssim_df], ignore_index=True)
+    pa_rl_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/1/group/pa_rl_group_ssim_df.txt', sep='\t', index=False)
+    pa_rl_ssim_indexes = pa_rl_group_ssim_df['ssim_index'].tolist()
+    pa_rl_ssim_mean = np.mean(pa_rl_ssim_indexes)
+    print(f"Mean PA-RL SSIM index for Stage 1: {pa_rl_ssim_mean}")
+
+    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
+    rl_ap_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running Stage 1 RL-AP SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return ssim_index
+        rl_ap_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_ap_ssim_map.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        if not os.path.exists(rl_ap_ssim_output_path):
+            rl_ap_ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_ap_fieldmaps, rl_ap_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_ap_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            rl_ap_ssim_index = ssim_index_series.iloc[0]
+        rl_ap_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_ap_ssim_bin.nii.gz'
+        if not os.path.exists(rl_ap_ssim_bin):
+            subprocess.run(["fslmaths", rl_ap_ssim_output_path, "-thr", "0.8", "-binv", rl_ap_ssim_bin])
+        combined_rl_ap_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/combined_rl_ap_mask.nii.gz'
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
+        if not os.path.exists(combined_rl_ap_mask):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-add', flirted_rl_fieldmaps_bin, combined_rl_ap_mask])
+        bin_rl_ap_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/bin_rl_ap_mask.nii.gz'
+        if not os.path.exists(bin_rl_ap_mask):
+            subprocess.run(['fslmaths', combined_rl_ap_mask, '-bin', bin_rl_ap_mask])
+        rl_ap_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_ap_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(rl_ap_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', rl_ap_ssim_bin, '-mul', bin_rl_ap_mask, rl_ap_ssim_bin_trimmed])
+        voxels_in_whole_rl_ap_mask = subprocess.run(["fslstats", rl_ap_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_rl_ap_mask = float(voxels_in_whole_rl_ap_mask)
+        rl_ap_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_ap_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(rl_ap_intersection_mask_path):
+            subprocess.run(["fslmaths", rl_ap_ssim_bin_trimmed, "-mas", transformed_roi_mask, rl_ap_intersection_mask_path])
+        voxels_in_roi_in_rl_ap_mask = subprocess.run(["fslstats", rl_ap_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_rl_ap_mask = float(voxels_in_roi_in_rl_ap_mask)
+        perc_roi_voxels_in_rl_ap_mask = (voxels_in_roi_in_rl_ap_mask / total_voxels_in_roi) * 100
+        rl_ap_ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [rl_ap_ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_rl_ap_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_rl_ap_mask]})
+        rl_ap_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_ap_ssim_df.txt', sep='\t', index=False)
+        rl_ap_group_ssim_df = pd.concat([rl_ap_group_ssim_df, rl_ap_ssim_df], ignore_index=True)
+    rl_ap_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/1/group/rl_ap_group_ssim_df.txt', sep='\t', index=False)
+    rl_ap_ssim_indexes = rl_ap_group_ssim_df['ssim_index'].tolist()
+    rl_ap_ssim_mean = np.mean(rl_ap_ssim_indexes)
+    print(f"Mean RL-AP SSIM index for Stage 1: {rl_ap_ssim_mean}")
+
+    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
+    ap_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running Stage 1 AP-PA SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return ssim_index
+        ap_pa_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_pa_ssim_map.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
+        if not os.path.exists(ap_pa_ssim_output_path):
+            ap_pa_ssim_index = calculate_ssim(flirted_pa_fieldmaps, flirted_ap_fieldmaps, ap_pa_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_pa_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            ap_pa_ssim_index = ssim_index_series.iloc[0]
+        ap_pa_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_pa_ssim_bin.nii.gz'
+        if not os.path.exists(ap_pa_ssim_bin):
+            subprocess.run(["fslmaths", ap_pa_ssim_output_path, "-thr", "0.8", "-binv", ap_pa_ssim_bin])
+        combined_ap_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/combined_ap_pa_mask.nii.gz'
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        flirted_pa_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps_bin.nii.gz'
+        if not os.path.exists(combined_ap_pa_mask):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-add', flirted_pa_fieldmaps_bin, combined_ap_pa_mask])
+        bin_ap_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/bin_ap_pa_mask.nii.gz'
+        if not os.path.exists(bin_ap_pa_mask):
+            subprocess.run(['fslmaths', combined_ap_pa_mask, '-bin', bin_ap_pa_mask])
+        ap_pa_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_pa_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(ap_pa_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', ap_pa_ssim_bin, '-mul', bin_ap_pa_mask, ap_pa_ssim_bin_trimmed])
+        voxels_in_whole_ap_pa_mask = subprocess.run(["fslstats", ap_pa_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_ap_pa_mask = float(voxels_in_whole_ap_pa_mask)
+        ap_pa_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_pa_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(ap_pa_intersection_mask_path):
+            subprocess.run(["fslmaths", ap_pa_ssim_bin_trimmed, "-mas", transformed_roi_mask, ap_pa_intersection_mask_path])
+        voxels_in_roi_in_ap_pa_mask = subprocess.run(["fslstats", ap_pa_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_ap_pa_mask = float(voxels_in_roi_in_ap_pa_mask)
+        perc_roi_voxels_in_ap_pa_mask = (voxels_in_roi_in_ap_pa_mask / total_voxels_in_roi) * 100
+        ap_pa_ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ap_pa_ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_ap_pa_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_ap_pa_mask]})
+        ap_pa_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_pa_ssim_df.txt', sep='\t', index=False)
+        ap_pa_group_ssim_df = pd.concat([ap_pa_group_ssim_df, ap_pa_ssim_df], ignore_index=True)
+    ap_pa_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/1/group/ap_pa_group_ssim_df.txt', sep='\t', index=False)
+    ap_pa_ssim_indexes = ap_pa_group_ssim_df['ssim_index'].tolist()
+    ap_pa_ssim_mean = np.mean(ap_pa_ssim_indexes)
+    print(f"Mean AP-PA SSIM index for Stage 1: {ap_pa_ssim_mean}")
+    
+    # plot_data = pd.DataFrame({
+    #     'Participant': good_participants,
+    #     'SSIM': ssim_indexes,
+    # })
+    # ssim_index_plot = (
+    #     ggplot(plot_data, aes(x='Participant', y='SSIM')) +
+    #     geom_bar(stat='identity', position='dodge') +
+    #     geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
+    #     theme_classic() +
+    #     labs(title='SSIM Indexes', x='Participant', y='SSIM') +
+    #     theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
+    #     scale_y_continuous(expand=(0, 0), limits=[0.8,1])
+    # )
+    # ssim_index_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_index_plot.png')
+    # voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
+    # voxels_mean = np.mean(voxels)
+    # plot_data = pd.DataFrame({
+    #     'Participant': good_participants,
+    #     'Voxels': voxels,
+    # })
+    # ssim_voxels_plot = (
+    #     ggplot(plot_data, aes(x='Participant', y='Voxels')) +
+    #     geom_bar(stat='identity', position='dodge', fill='#67B7EB') +
+    #     geom_hline(yintercept=voxels_mean, linetype='dashed', color='#B22222') +
+    #     theme_classic() +
+    #     labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
+    #     scale_y_continuous(expand=(0, 0)) +
+    #     theme(
+    #         axis_text_x=element_text(rotation=45, hjust=1),
+    #         axis_title=element_text(size=14),    # Axis titles
+    #         axis_text=element_text(size=12),     # Tick labels
+    #         legend_text=element_text(size=12),   # Legend text
+    #         legend_title=element_text(size=14))  # Legend title
+    # )
+    # ssim_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_voxels_plot.png', dpi=300)
+    # perc_voxels = group_ssim_df['perc_roi_voxels_in_bin_ssim_mask'].tolist()
+    # perc_voxels_mean = np.mean(perc_voxels)
+    # plot_data = pd.DataFrame({
+    #     'Participant': good_participants,
+    #     'Perc_Voxels': perc_voxels,
+    # })
+    # ssim_perc_voxels_plot = (
+    #     ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
+    #     geom_bar(stat='identity', position='dodge', fill='#67B7EB') +
+    #     geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='#B22222') +
+    #     theme_classic() +
+    #     labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y=r'% of SCC Voxels in SSIM Mask') +
+    #     scale_y_continuous(expand=(0, 0)) +
+    #     theme(
+    #         axis_text_x=element_text(rotation=45, hjust=1),
+    #         axis_title=element_text(size=14),    # Axis titles
+    #         axis_text=element_text(size=12),     # Tick labels
+    #         legend_text=element_text(size=12),   # Legend text
+    #         legend_title=element_text(size=14))  # Legend title
+    # )
+    # ssim_perc_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_perc_voxels_plot.png', dpi=300)
 
     overlap_perc_av_values = []
     column_headers = ['p_id', 'tissue_type', 'overlap_perc']
@@ -10922,13 +11062,16 @@ def susceptibility_analysis():
             return voxel_intensity_list
         flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps.nii.gz'
         pa_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_trimmed_roi_mask.nii.gz'
         rl_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_trimmed_roi_mask.nii.gz'
+        ap_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_trimmed_roi_mask.nii.gz'
         pa_voxel_intensities = extract_voxel_intensities(flirted_pa_fieldmaps, pa_trimmed_roi_mask)
         rl_voxel_intensities = extract_voxel_intensities(flirted_rl_fieldmaps, rl_trimmed_roi_mask)
-        values = pa_voxel_intensities + rl_voxel_intensities
-        sequence = ['pa'] * len(pa_voxel_intensities) + ['rl'] * len(rl_voxel_intensities)
-        subject = [f'{p_id}'] * len(pa_voxel_intensities) + [f'{p_id}'] * len(rl_voxel_intensities)
+        ap_voxel_intensities = extract_voxel_intensities(flirted_ap_fieldmaps, ap_trimmed_roi_mask)
+        values = pa_voxel_intensities + rl_voxel_intensities + ap_voxel_intensities
+        sequence = ['pa'] * len(pa_voxel_intensities) + ['rl'] * len(rl_voxel_intensities) + ['ap'] * len(ap_voxel_intensities)
+        subject = [f'{p_id}'] * len(pa_voxel_intensities) + [f'{p_id}'] * len(rl_voxel_intensities) + [f'{p_id}'] * len(ap_voxel_intensities)
         voxel_intensity_df = pd.DataFrame({'p_id': subject, 'sequence': sequence, 'value': values})
         voxel_intensity_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/voxel_intensity_df.txt', sep='\t', index=False)
         group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)

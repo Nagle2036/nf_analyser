@@ -11404,8 +11404,7 @@ def susceptibility_analysis():
         ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/2/{p_id}/ssim_map.nii.gz'
         flirted_corrected_run = f'analysis/susceptibility_analysis/run_comparisons/2/{p_id}/flirted_corrected_run.nii.gz'
         flirted_uncorrected_run = f'analysis/susceptibility_analysis/run_comparisons/2/{p_id}/flirted_uncorrected_run.nii.gz'
-        if not os.path.exists(ssim_output_path):
-            ssim_index = calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)       
+        ssim_index = calculate_ssim(flirted_uncorrected_run, flirted_corrected_run, ssim_output_path)       
         ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/2/{p_id}/ssim_bin.nii.gz'
         if not os.path.exists(ssim_bin):
             subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])

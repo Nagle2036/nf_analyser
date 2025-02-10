@@ -10642,10 +10642,10 @@ def susceptibility_analysis():
             image2 = image2_nii.get_fdata()
             if image1.shape != image2.shape:
                 raise ValueError("Input images must have the same dimensions for SSIM calculation.")
-            ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            pa_rl_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
             ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
             nib.save(ssim_map_nifti, ssim_output_path)
-            return ssim_index
+            return pa_rl_ssim_index
         pa_rl_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_rl_ssim_map.nii.gz'
         flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
@@ -10698,10 +10698,10 @@ def susceptibility_analysis():
             image2 = image2_nii.get_fdata()
             if image1.shape != image2.shape:
                 raise ValueError("Input images must have the same dimensions for SSIM calculation.")
-            ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            rl_ap_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
             ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
             nib.save(ssim_map_nifti, ssim_output_path)
-            return ssim_index
+            return rl_ap_ssim_index
         rl_ap_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_ap_ssim_map.nii.gz'
         flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps.nii.gz'
         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
@@ -10754,10 +10754,10 @@ def susceptibility_analysis():
             image2 = image2_nii.get_fdata()
             if image1.shape != image2.shape:
                 raise ValueError("Input images must have the same dimensions for SSIM calculation.")
-            ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ap_pa_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
             ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
             nib.save(ssim_map_nifti, ssim_output_path)
-            return ssim_index
+            return ap_pa_ssim_index
         ap_pa_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_pa_ssim_map.nii.gz'
         flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps.nii.gz'
         flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'

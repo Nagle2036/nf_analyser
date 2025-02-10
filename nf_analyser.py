@@ -10855,197 +10855,197 @@ def susceptibility_analysis():
     # )
     # ssim_perc_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/ssim_perc_voxels_plot.png', dpi=300)
 
-    overlap_perc_av_values = []
-    column_headers = ['p_id', 'tissue_type', 'overlap_perc']
-    group_overlap_perc_df = pd.DataFrame(columns = column_headers) 
-    for p_id in good_participants:
-        print(f'Running Stage 1 segmentation analysis for {p_id}...')
-        pa_csf_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_seg_pve_0.nii.gz'
-        pa_wm_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_seg_pve_1.nii.gz'
-        pa_gm_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_seg_pve_2.nii.gz'
-        rl_csf_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_seg_pve_0.nii.gz'
-        rl_wm_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_seg_pve_1.nii.gz'
-        rl_gm_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_seg_pve_2.nii.gz'
-        if not os.path.exists(pa_csf_pve_seg):
-            pa_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_seg'
-            rl_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_seg'
-            flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
-            flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
-            structural_brain = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii'
-            subprocess.run(["fast", "-n", "3", "-o", pa_seg, structural_brain, flirted_pa_fieldmaps])
-            subprocess.run(["fast", "-n", "3", "-o", rl_seg, structural_brain, flirted_rl_fieldmaps])
-        pa_csf_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_csf_pve_seg_bin.nii.gz'
-        pa_wm_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_wm_pve_seg_bin.nii.gz'
-        pa_gm_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_gm_pve_seg_bin.nii.gz'
-        if not os.path.exists(pa_csf_pve_seg_bin):
-            subprocess.run(['fslmaths', pa_csf_pve_seg, '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
-            subprocess.run(['fslmaths', pa_wm_pve_seg, '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
-            subprocess.run(['fslmaths', pa_gm_pve_seg, '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
-        rl_csf_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_csf_pve_seg_bin.nii.gz'
-        rl_wm_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_wm_pve_seg_bin.nii.gz'
-        rl_gm_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_gm_pve_seg_bin.nii.gz'
-        if not os.path.exists(rl_csf_pve_seg_bin):
-            subprocess.run(['fslmaths', rl_csf_pve_seg, '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
-            subprocess.run(['fslmaths', rl_wm_pve_seg, '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
-            subprocess.run(['fslmaths', rl_gm_pve_seg, '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
-        csf_intersect_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/csf_intersect_mask.nii.gz'
-        wm_intersect_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/wm_intersect_mask.nii.gz'
-        gm_intersect_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/gm_intersect_mask.nii.gz'
-        if not os.path.exists(csf_intersect_mask):
-            subprocess.run(['fslmaths', pa_csf_pve_seg_bin, '-mul', rl_csf_pve_seg_bin, '-bin', csf_intersect_mask])
-            subprocess.run(['fslmaths', pa_wm_pve_seg_bin, '-mul', rl_wm_pve_seg_bin, '-bin', wm_intersect_mask])
-            subprocess.run(['fslmaths', pa_gm_pve_seg_bin, '-mul', rl_gm_pve_seg_bin, '-bin', gm_intersect_mask])
-        csf_intersect_vol = float(subprocess.run(['fslstats', csf_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
-        wm_intersect_vol = float(subprocess.run(['fslstats', wm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
-        gm_intersect_vol = float(subprocess.run(['fslstats', gm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
-        pa_csf_mask_vol = float(subprocess.run(['fslstats', pa_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-        rl_csf_mask_vol = float(subprocess.run(['fslstats', rl_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-        if pa_csf_mask_vol < rl_csf_mask_vol:
-            csf_overlap_perc = (csf_intersect_vol / pa_csf_mask_vol) * 100
-        else: 
-            csf_overlap_perc = (csf_intersect_vol / rl_csf_mask_vol) * 100
-        pa_wm_mask_vol = float(subprocess.run(['fslstats', pa_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-        rl_wm_mask_vol = float(subprocess.run(['fslstats', rl_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-        if pa_wm_mask_vol < rl_wm_mask_vol:
-            wm_overlap_perc = (wm_intersect_vol / pa_wm_mask_vol) * 100
-        else: 
-            wm_overlap_perc = (wm_intersect_vol / rl_wm_mask_vol) * 100
-        pa_gm_mask_vol = float(subprocess.run(['fslstats', pa_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-        rl_gm_mask_vol = float(subprocess.run(['fslstats', rl_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
-        if pa_gm_mask_vol < rl_gm_mask_vol:
-            gm_overlap_perc = (gm_intersect_vol / pa_gm_mask_vol) * 100
-        else: 
-            gm_overlap_perc = (gm_intersect_vol / rl_gm_mask_vol) * 100
-        participant_col = []
-        tissue_type_col = []
-        overlap_perc_col = []
-        participant_col.append(p_id)
-        participant_col.append(p_id)
-        participant_col.append(p_id)
-        tissue_type_col.append('csf')
-        tissue_type_col.append('wm')
-        tissue_type_col.append('gm')
-        overlap_perc_col.append(csf_overlap_perc)
-        overlap_perc_col.append(wm_overlap_perc)
-        overlap_perc_col.append(gm_overlap_perc)
-        if p_id == 'P122' or p_id == 'P136':
-            values = np.array([wm_overlap_perc, gm_overlap_perc])
-            overlap_perc_av = np.mean(values)
-            overlap_perc_av_values.append(overlap_perc_av)
-        overlap_perc_df = pd.DataFrame({'p_id': participant_col, 'tissue_type': tissue_type_col, 'overlap_perc': overlap_perc_col})
-        overlap_perc_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/overlap_perc_df.txt', sep='\t', index=False)
-        group_overlap_perc_df = pd.concat([group_overlap_perc_df, overlap_perc_df], ignore_index=True)
-    group_overlap_perc_df.to_csv('analysis/susceptibility_analysis/run_comparisons/1/group/group_overlap_perc_df.txt', sep='\t', index=False)
-    csf_values = []
-    wm_values = []
-    gm_values = []
-    for p_id in participants:
-        if p_id in good_participants:
-            filtered_csf = group_overlap_perc_df.loc[(group_overlap_perc_df['tissue_type'] == 'csf') & (group_overlap_perc_df['p_id'] == p_id), 'overlap_perc'].values[0]
-            filtered_csf = float(filtered_csf)
-            csf_values.append(filtered_csf)
-            filtered_wm = group_overlap_perc_df.loc[(group_overlap_perc_df['tissue_type'] == 'wm') & (group_overlap_perc_df['p_id'] == p_id), 'overlap_perc'].values[0]
-            filtered_wm = float(filtered_wm)
-            wm_values.append(filtered_wm)
-            filtered_gm = group_overlap_perc_df.loc[(group_overlap_perc_df['tissue_type'] == 'gm') & (group_overlap_perc_df['p_id'] == p_id), 'overlap_perc'].values[0]
-            filtered_gm = float(filtered_gm)
-            gm_values.append(filtered_gm)
-    plot_data = pd.DataFrame({
-        'Participant': good_participants * 3,
-        'Overlap_Perc': csf_values + wm_values + gm_values,
-        'Tissue_Type': ['CSF'] * len(good_participants) + ['WM'] * len(good_participants) + ['GM'] * len(good_participants)
-    })
-    overlap_perc_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Overlap_Perc', fill='Tissue_Type')) +
-        geom_bar(stat='identity', position='dodge') +
-        theme_classic() +
-        labs(title='Sequence Tissue Type Overlap', x='Participant', y='Tissue Overlap Percentage', fill='Tissue Type') +
-        scale_y_continuous(expand=(0, 0), limits=[0,100]) +
-        scale_fill_manual(values={'CSF': '#67B7EB', 'WM': '#EBE967', 'GM': '#B22222'}) +
-        theme(
-            axis_title=element_text(size=14),    # Axis titles
-            axis_text=element_text(size=12),     # Tick labels
-            legend_text=element_text(size=12),   # Legend text
-            legend_title=element_text(size=14))  # Legend title
-    )
-    overlap_perc_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/overlap_perc_plot.png', dpi=300)
-    filtered_csf = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'].tolist()
-    mean_csf = np.mean(filtered_csf)
-    filtered_wm = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'wm']['overlap_perc'].tolist()
-    mean_wm = np.mean(filtered_wm)
-    filtered_gm = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'gm']['overlap_perc'].tolist()
-    mean_gm = np.mean(filtered_gm)
-    csf_std_error = np.std(filtered_csf) / np.sqrt(len(filtered_csf))
-    wm_std_error = np.std(filtered_wm) / np.sqrt(len(filtered_wm))
-    gm_std_error = np.std(filtered_gm) / np.sqrt(len(filtered_gm))
-    group_overlap_perc_df['p_id'] = group_overlap_perc_df['p_id'].astype(str)
-    group_overlap_perc_df['tissue_type'] = group_overlap_perc_df['tissue_type'].astype(str)
-    group_overlap_perc_df['overlap_perc'] = pd.to_numeric(group_overlap_perc_df['overlap_perc'], errors='coerce')
-    sphericity_test = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
-    epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
-    print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
-    normality_passed = True
-    shapiro_results = group_overlap_perc_df.groupby('tissue_type')['overlap_perc'].apply(stats.shapiro)
-    shapiro_p_values = shapiro_results.apply(lambda x: x.pvalue)
-    if any(shapiro_p_values < 0.05):
-        normality_passed = False
-    print(f'Stage 1 segmentation analysis Shapiro-Wilk test of normality passed: {normality_passed}')
-    _, p_value_levene = stats.levene(
-        group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'],
-        group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'wm']['overlap_perc'],
-        group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'gm']['overlap_perc']
-    )
-    print(f'Stage 1 segmentation analysis Levene test p-value: {p_value_levene}')
-    if normality_passed and p_value_levene > 0.05 and epsilon_value > 0.75:
-        print('Stage 1 segmentation analysis parametric assumptions met. Proceeding with two-way ANOVA...')
-        anova_result = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
-        print(anova_result)
-    else:
-        print('Stage 1 segmentation analysis parametric assumptions not met. Two-way ANOVA not run.')
-    tissue_type_order = ['GM', 'WM', 'CSF']
-    plot_data = pd.DataFrame({'Tissue_Type': ['CSF', 'WM', 'GM'], 'Overlap_Perc': [mean_csf, mean_wm, mean_gm], 'Std_Error': [csf_std_error, wm_std_error, gm_std_error]})
-    plot_data['Tissue_Type'] = pd.Categorical(plot_data['Tissue_Type'], categories=tissue_type_order, ordered=True)
-    group_overlap_perc_plot = (ggplot(plot_data, aes(x='Tissue_Type', y='Overlap_Perc', fill='Tissue_Type')) + 
-                        geom_bar(stat='identity', position='dodge') +
-                        geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_Perc + Std_Error'), width=0.2, color='black') +
-                        theme_classic() +
-                        labs(title='Sequence Tissue Type Overlap', x='Tissue Type', y='Tissue Overlap Percentage') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,100]) +
-                        scale_fill_manual(values={'CSF': '#EBE967', 'WM': '#67B7EB', 'GM': '#B22222'}) +
-                        theme(
-                            axis_title=element_text(size=14),    # Axis titles
-                            axis_text=element_text(size=12),     # Tick labels
-                            legend_text=element_text(size=12),   # Legend text
-                            legend_title=element_text(size=14))  # Legend title
-                        )
-    group_overlap_perc_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_overlap_perc_plot.png', dpi=300)
-    ssim_values = group_ssim_df.loc[group_ssim_df['p_id'].isin(['P122', 'P136']), 'ssim_index'].tolist()
-    plot_data = pd.DataFrame({
-        'Participant': ['P122', 'P136'],
-        'SSIM': ssim_values,
-        'Overlap_Perc': overlap_perc_av_values
-    })
-    plot_data_sorted = plot_data.sort_values(by='Overlap_Perc', ascending=False)
-    index_sorted = np.arange(len(plot_data_sorted))
-    fig, ax1 = plt.subplots()
-    bar_width = 0.35
-    bar1 = ax1.bar(index_sorted, plot_data_sorted['SSIM'], bar_width, label='SSIM', color='#67B7EB')
-    ax1.set_ylabel('SSIM Index', color='#67B7EB', fontsize=14)
-    ax1.tick_params(axis='y', labelcolor='#67B7EB', labelsize=12)
-    ax1.set_ylim(0.94, 0.98)
-    ax2 = ax1.twinx()
-    bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='#B22222', alpha=1)
-    ax2.set_ylabel(' Tissue Overlap Percentage', color='#B22222', fontsize=14)
-    ax2.tick_params(axis='y', labelcolor='#B22222', labelsize=12)
-    ax2.set_ylim(75, 95)
-    ax1.set_xlabel('Participant', fontsize=14)
-    ax1.set_xticks(index_sorted + bar_width / 2)
-    ax1.set_xticklabels(plot_data_sorted['Participant'])
-    plt.title('SSIM and Tissue Overlap Percentage Plot', fontsize=14)
-    fig.legend(loc='upper right', bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes, fontsize=12, title_fontsize=14)
-    save_path = 'analysis/susceptibility_analysis/run_comparisons/1/group/ssim_overlap_perc_plot.png'
-    plt.tight_layout()
-    plt.savefig(save_path, bbox_inches='tight', dpi=300)
+    # overlap_perc_av_values = []
+    # column_headers = ['p_id', 'tissue_type', 'overlap_perc']
+    # group_overlap_perc_df = pd.DataFrame(columns = column_headers) 
+    # for p_id in good_participants:
+    #     print(f'Running Stage 1 segmentation analysis for {p_id}...')
+    #     pa_csf_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_seg_pve_0.nii.gz'
+    #     pa_wm_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_seg_pve_1.nii.gz'
+    #     pa_gm_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_seg_pve_2.nii.gz'
+    #     rl_csf_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_seg_pve_0.nii.gz'
+    #     rl_wm_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_seg_pve_1.nii.gz'
+    #     rl_gm_pve_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_seg_pve_2.nii.gz'
+    #     if not os.path.exists(pa_csf_pve_seg):
+    #         pa_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_seg'
+    #         rl_seg = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_seg'
+    #         flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
+    #         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
+    #         structural_brain = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii'
+    #         subprocess.run(["fast", "-n", "3", "-o", pa_seg, structural_brain, flirted_pa_fieldmaps])
+    #         subprocess.run(["fast", "-n", "3", "-o", rl_seg, structural_brain, flirted_rl_fieldmaps])
+    #     pa_csf_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_csf_pve_seg_bin.nii.gz'
+    #     pa_wm_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_wm_pve_seg_bin.nii.gz'
+    #     pa_gm_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_gm_pve_seg_bin.nii.gz'
+    #     if not os.path.exists(pa_csf_pve_seg_bin):
+    #         subprocess.run(['fslmaths', pa_csf_pve_seg, '-thr', '0.5', '-bin', pa_csf_pve_seg_bin])
+    #         subprocess.run(['fslmaths', pa_wm_pve_seg, '-thr', '0.5', '-bin', pa_wm_pve_seg_bin])
+    #         subprocess.run(['fslmaths', pa_gm_pve_seg, '-thr', '0.5', '-bin', pa_gm_pve_seg_bin])
+    #     rl_csf_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_csf_pve_seg_bin.nii.gz'
+    #     rl_wm_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_wm_pve_seg_bin.nii.gz'
+    #     rl_gm_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_gm_pve_seg_bin.nii.gz'
+    #     if not os.path.exists(rl_csf_pve_seg_bin):
+    #         subprocess.run(['fslmaths', rl_csf_pve_seg, '-thr', '0.5', '-bin', rl_csf_pve_seg_bin])
+    #         subprocess.run(['fslmaths', rl_wm_pve_seg, '-thr', '0.5', '-bin', rl_wm_pve_seg_bin])
+    #         subprocess.run(['fslmaths', rl_gm_pve_seg, '-thr', '0.5', '-bin', rl_gm_pve_seg_bin])
+    #     csf_intersect_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/csf_intersect_mask.nii.gz'
+    #     wm_intersect_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/wm_intersect_mask.nii.gz'
+    #     gm_intersect_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/gm_intersect_mask.nii.gz'
+    #     if not os.path.exists(csf_intersect_mask):
+    #         subprocess.run(['fslmaths', pa_csf_pve_seg_bin, '-mul', rl_csf_pve_seg_bin, '-bin', csf_intersect_mask])
+    #         subprocess.run(['fslmaths', pa_wm_pve_seg_bin, '-mul', rl_wm_pve_seg_bin, '-bin', wm_intersect_mask])
+    #         subprocess.run(['fslmaths', pa_gm_pve_seg_bin, '-mul', rl_gm_pve_seg_bin, '-bin', gm_intersect_mask])
+    #     csf_intersect_vol = float(subprocess.run(['fslstats', csf_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+    #     wm_intersect_vol = float(subprocess.run(['fslstats', wm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+    #     gm_intersect_vol = float(subprocess.run(['fslstats', gm_intersect_mask, '-V'], capture_output=True, text=True).stdout.split()[0])
+    #     pa_csf_mask_vol = float(subprocess.run(['fslstats', pa_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+    #     rl_csf_mask_vol = float(subprocess.run(['fslstats', rl_csf_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+    #     if pa_csf_mask_vol < rl_csf_mask_vol:
+    #         csf_overlap_perc = (csf_intersect_vol / pa_csf_mask_vol) * 100
+    #     else: 
+    #         csf_overlap_perc = (csf_intersect_vol / rl_csf_mask_vol) * 100
+    #     pa_wm_mask_vol = float(subprocess.run(['fslstats', pa_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+    #     rl_wm_mask_vol = float(subprocess.run(['fslstats', rl_wm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+    #     if pa_wm_mask_vol < rl_wm_mask_vol:
+    #         wm_overlap_perc = (wm_intersect_vol / pa_wm_mask_vol) * 100
+    #     else: 
+    #         wm_overlap_perc = (wm_intersect_vol / rl_wm_mask_vol) * 100
+    #     pa_gm_mask_vol = float(subprocess.run(['fslstats', pa_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+    #     rl_gm_mask_vol = float(subprocess.run(['fslstats', rl_gm_pve_seg_bin, '-V'], capture_output=True, text=True).stdout.split()[0])
+    #     if pa_gm_mask_vol < rl_gm_mask_vol:
+    #         gm_overlap_perc = (gm_intersect_vol / pa_gm_mask_vol) * 100
+    #     else: 
+    #         gm_overlap_perc = (gm_intersect_vol / rl_gm_mask_vol) * 100
+    #     participant_col = []
+    #     tissue_type_col = []
+    #     overlap_perc_col = []
+    #     participant_col.append(p_id)
+    #     participant_col.append(p_id)
+    #     participant_col.append(p_id)
+    #     tissue_type_col.append('csf')
+    #     tissue_type_col.append('wm')
+    #     tissue_type_col.append('gm')
+    #     overlap_perc_col.append(csf_overlap_perc)
+    #     overlap_perc_col.append(wm_overlap_perc)
+    #     overlap_perc_col.append(gm_overlap_perc)
+    #     if p_id == 'P122' or p_id == 'P136':
+    #         values = np.array([wm_overlap_perc, gm_overlap_perc])
+    #         overlap_perc_av = np.mean(values)
+    #         overlap_perc_av_values.append(overlap_perc_av)
+    #     overlap_perc_df = pd.DataFrame({'p_id': participant_col, 'tissue_type': tissue_type_col, 'overlap_perc': overlap_perc_col})
+    #     overlap_perc_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/overlap_perc_df.txt', sep='\t', index=False)
+    #     group_overlap_perc_df = pd.concat([group_overlap_perc_df, overlap_perc_df], ignore_index=True)
+    # group_overlap_perc_df.to_csv('analysis/susceptibility_analysis/run_comparisons/1/group/group_overlap_perc_df.txt', sep='\t', index=False)
+    # csf_values = []
+    # wm_values = []
+    # gm_values = []
+    # for p_id in participants:
+    #     if p_id in good_participants:
+    #         filtered_csf = group_overlap_perc_df.loc[(group_overlap_perc_df['tissue_type'] == 'csf') & (group_overlap_perc_df['p_id'] == p_id), 'overlap_perc'].values[0]
+    #         filtered_csf = float(filtered_csf)
+    #         csf_values.append(filtered_csf)
+    #         filtered_wm = group_overlap_perc_df.loc[(group_overlap_perc_df['tissue_type'] == 'wm') & (group_overlap_perc_df['p_id'] == p_id), 'overlap_perc'].values[0]
+    #         filtered_wm = float(filtered_wm)
+    #         wm_values.append(filtered_wm)
+    #         filtered_gm = group_overlap_perc_df.loc[(group_overlap_perc_df['tissue_type'] == 'gm') & (group_overlap_perc_df['p_id'] == p_id), 'overlap_perc'].values[0]
+    #         filtered_gm = float(filtered_gm)
+    #         gm_values.append(filtered_gm)
+    # plot_data = pd.DataFrame({
+    #     'Participant': good_participants * 3,
+    #     'Overlap_Perc': csf_values + wm_values + gm_values,
+    #     'Tissue_Type': ['CSF'] * len(good_participants) + ['WM'] * len(good_participants) + ['GM'] * len(good_participants)
+    # })
+    # overlap_perc_plot = (
+    #     ggplot(plot_data, aes(x='Participant', y='Overlap_Perc', fill='Tissue_Type')) +
+    #     geom_bar(stat='identity', position='dodge') +
+    #     theme_classic() +
+    #     labs(title='Sequence Tissue Type Overlap', x='Participant', y='Tissue Overlap Percentage', fill='Tissue Type') +
+    #     scale_y_continuous(expand=(0, 0), limits=[0,100]) +
+    #     scale_fill_manual(values={'CSF': '#67B7EB', 'WM': '#EBE967', 'GM': '#B22222'}) +
+    #     theme(
+    #         axis_title=element_text(size=14),    # Axis titles
+    #         axis_text=element_text(size=12),     # Tick labels
+    #         legend_text=element_text(size=12),   # Legend text
+    #         legend_title=element_text(size=14))  # Legend title
+    # )
+    # overlap_perc_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/overlap_perc_plot.png', dpi=300)
+    # filtered_csf = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'].tolist()
+    # mean_csf = np.mean(filtered_csf)
+    # filtered_wm = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'wm']['overlap_perc'].tolist()
+    # mean_wm = np.mean(filtered_wm)
+    # filtered_gm = group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'gm']['overlap_perc'].tolist()
+    # mean_gm = np.mean(filtered_gm)
+    # csf_std_error = np.std(filtered_csf) / np.sqrt(len(filtered_csf))
+    # wm_std_error = np.std(filtered_wm) / np.sqrt(len(filtered_wm))
+    # gm_std_error = np.std(filtered_gm) / np.sqrt(len(filtered_gm))
+    # group_overlap_perc_df['p_id'] = group_overlap_perc_df['p_id'].astype(str)
+    # group_overlap_perc_df['tissue_type'] = group_overlap_perc_df['tissue_type'].astype(str)
+    # group_overlap_perc_df['overlap_perc'] = pd.to_numeric(group_overlap_perc_df['overlap_perc'], errors='coerce')
+    # sphericity_test = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
+    # epsilon_value = sphericity_test.loc[sphericity_test['Source'] == 'tissue_type', 'eps'].values[0]
+    # print(f'Stage 1 segmentation analysis sphericity test epsilon value: {epsilon_value}')
+    # normality_passed = True
+    # shapiro_results = group_overlap_perc_df.groupby('tissue_type')['overlap_perc'].apply(stats.shapiro)
+    # shapiro_p_values = shapiro_results.apply(lambda x: x.pvalue)
+    # if any(shapiro_p_values < 0.05):
+    #     normality_passed = False
+    # print(f'Stage 1 segmentation analysis Shapiro-Wilk test of normality passed: {normality_passed}')
+    # _, p_value_levene = stats.levene(
+    #     group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'csf']['overlap_perc'],
+    #     group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'wm']['overlap_perc'],
+    #     group_overlap_perc_df[group_overlap_perc_df['tissue_type'] == 'gm']['overlap_perc']
+    # )
+    # print(f'Stage 1 segmentation analysis Levene test p-value: {p_value_levene}')
+    # if normality_passed and p_value_levene > 0.05 and epsilon_value > 0.75:
+    #     print('Stage 1 segmentation analysis parametric assumptions met. Proceeding with two-way ANOVA...')
+    #     anova_result = rm_anova(data=group_overlap_perc_df, dv='overlap_perc', within='tissue_type', subject='p_id')
+    #     print(anova_result)
+    # else:
+    #     print('Stage 1 segmentation analysis parametric assumptions not met. Two-way ANOVA not run.')
+    # tissue_type_order = ['GM', 'WM', 'CSF']
+    # plot_data = pd.DataFrame({'Tissue_Type': ['CSF', 'WM', 'GM'], 'Overlap_Perc': [mean_csf, mean_wm, mean_gm], 'Std_Error': [csf_std_error, wm_std_error, gm_std_error]})
+    # plot_data['Tissue_Type'] = pd.Categorical(plot_data['Tissue_Type'], categories=tissue_type_order, ordered=True)
+    # group_overlap_perc_plot = (ggplot(plot_data, aes(x='Tissue_Type', y='Overlap_Perc', fill='Tissue_Type')) + 
+    #                     geom_bar(stat='identity', position='dodge') +
+    #                     geom_errorbar(aes(ymin='Overlap_Perc - Std_Error', ymax='Overlap_Perc + Std_Error'), width=0.2, color='black') +
+    #                     theme_classic() +
+    #                     labs(title='Sequence Tissue Type Overlap', x='Tissue Type', y='Tissue Overlap Percentage') +
+    #                     scale_y_continuous(expand=(0, 0), limits=[0,100]) +
+    #                     scale_fill_manual(values={'CSF': '#EBE967', 'WM': '#67B7EB', 'GM': '#B22222'}) +
+    #                     theme(
+    #                         axis_title=element_text(size=14),    # Axis titles
+    #                         axis_text=element_text(size=12),     # Tick labels
+    #                         legend_text=element_text(size=12),   # Legend text
+    #                         legend_title=element_text(size=14))  # Legend title
+    #                     )
+    # group_overlap_perc_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_overlap_perc_plot.png', dpi=300)
+    # ssim_values = group_ssim_df.loc[group_ssim_df['p_id'].isin(['P122', 'P136']), 'ssim_index'].tolist()
+    # plot_data = pd.DataFrame({
+    #     'Participant': ['P122', 'P136'],
+    #     'SSIM': ssim_values,
+    #     'Overlap_Perc': overlap_perc_av_values
+    # })
+    # plot_data_sorted = plot_data.sort_values(by='Overlap_Perc', ascending=False)
+    # index_sorted = np.arange(len(plot_data_sorted))
+    # fig, ax1 = plt.subplots()
+    # bar_width = 0.35
+    # bar1 = ax1.bar(index_sorted, plot_data_sorted['SSIM'], bar_width, label='SSIM', color='#67B7EB')
+    # ax1.set_ylabel('SSIM Index', color='#67B7EB', fontsize=14)
+    # ax1.tick_params(axis='y', labelcolor='#67B7EB', labelsize=12)
+    # ax1.set_ylim(0.94, 0.98)
+    # ax2 = ax1.twinx()
+    # bar2 = ax2.bar(index_sorted + bar_width, plot_data_sorted['Overlap_Perc'], bar_width, label='Overlap_Perc', color='#B22222', alpha=1)
+    # ax2.set_ylabel(' Tissue Overlap Percentage', color='#B22222', fontsize=14)
+    # ax2.tick_params(axis='y', labelcolor='#B22222', labelsize=12)
+    # ax2.set_ylim(75, 95)
+    # ax1.set_xlabel('Participant', fontsize=14)
+    # ax1.set_xticks(index_sorted + bar_width / 2)
+    # ax1.set_xticklabels(plot_data_sorted['Participant'])
+    # plt.title('SSIM and Tissue Overlap Percentage Plot', fontsize=14)
+    # fig.legend(loc='upper right', bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes, fontsize=12, title_fontsize=14)
+    # save_path = 'analysis/susceptibility_analysis/run_comparisons/1/group/ssim_overlap_perc_plot.png'
+    # plt.tight_layout()
+    # plt.savefig(save_path, bbox_inches='tight', dpi=300)
 
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   

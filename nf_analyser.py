@@ -12087,7 +12087,7 @@ def susceptibility_analysis():
         scale_x_discrete(limits=['RUN01', 'RUN04']) +
         scale_y_continuous()
     )
-    group_voxel_intensity_ladder_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/group_voxel_intensity_ladder_plot.png, dpi=300')
+    group_voxel_intensity_ladder_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/group_voxel_intensity_ladder_plot.png', dpi=300)
     plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +

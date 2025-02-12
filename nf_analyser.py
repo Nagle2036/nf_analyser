@@ -10436,32 +10436,35 @@ def susceptibility_analysis():
         os.makedirs(run_comparison_1_participant_folder, exist_ok=True)
         run_comparison_1_group_folder = 'analysis/susceptibility_analysis/run_comparisons/1/group'
         os.makedirs(run_comparison_1_group_folder, exist_ok=True)
-        pa_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/pa_fieldmaps.nii'
+        runfirst5 = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/runfirst5.nii.gz'
+        run = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
+        if not os.path.exists(runfirst5):
+            subprocess.run(['fslroi', run, runfirst5, '0', '5'])
         rl_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/rl_fieldmaps.nii'
         ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/ap_fieldmaps.nii'
-        averaged_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/averaged_pa_fieldmaps.nii.gz'
+        averaged_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/averaged_pa_run01.nii.gz'
         averaged_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/averaged_rl_fieldmaps.nii.gz'
         averaged_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/averaged_ap_fieldmaps.nii.gz'
-        if not os.path.exists(averaged_pa_fieldmaps) or not os.path.exists(averaged_rl_fieldmaps) or not os.path.exists(averaged_ap_fieldmaps):
-            subprocess.run(['fslmaths', pa_fieldmaps, '-Tmean', averaged_pa_fieldmaps])
+        if not os.path.exists(averaged_pa_run01) or not os.path.exists(averaged_rl_fieldmaps) or not os.path.exists(averaged_ap_fieldmaps):
+            subprocess.run(['fslmaths', runfirst5, '-Tmean', averaged_pa_run01])
             subprocess.run(['fslmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
             subprocess.run(['fslmaths', ap_fieldmaps, '-Tmean', averaged_ap_fieldmaps])
-        betted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/betted_pa_fieldmaps.nii.gz'
+        betted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/betted_pa_run01.nii.gz'
         betted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/betted_rl_fieldmaps.nii.gz'
         betted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/betted_ap_fieldmaps.nii.gz'
-        if not os.path.exists(betted_pa_fieldmaps) or not os.path.exists(betted_rl_fieldmaps) or not os.path.exists(betted_ap_fieldmaps):
-            subprocess.run(["bet", averaged_pa_fieldmaps, betted_pa_fieldmaps, "-m", "-R"])
+        if not os.path.exists(betted_pa_run01) or not os.path.exists(betted_rl_fieldmaps) or not os.path.exists(betted_ap_fieldmaps):
+            subprocess.run(["bet", averaged_pa_run01, betted_pa_run01, "-m", "-R"])
             subprocess.run(["bet", averaged_rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
             subprocess.run(["bet", averaged_ap_fieldmaps, betted_ap_fieldmaps, "-m", "-R"])
-        flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
+        flirted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_run01.nii.gz'
         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
         flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps.nii.gz'
-        t1_flirted_pa_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/t1_flirted_pa_fieldmaps_transformation.mat'
+        t1_flirted_pa_run01_transformation = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/t1_flirted_pa_run01_transformation.mat'
         t1_flirted_rl_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/t1_flirted_rl_fieldmaps_transformation.mat'
         t1_flirted_ap_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/t1_flirted_ap_fieldmaps_transformation.mat'
         structural_brain = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii'
-        if not os.path.exists(flirted_pa_fieldmaps) or not os.path.exists(flirted_rl_fieldmaps) or not os.path.exists(flirted_ap_fieldmaps):
-            subprocess.run(["flirt", "-in", betted_pa_fieldmaps, "-ref", structural_brain, "-out", flirted_pa_fieldmaps, "-omat", t1_flirted_pa_fieldmaps_transformation])
+        if not os.path.exists(flirted_pa_run01) or not os.path.exists(flirted_rl_fieldmaps) or not os.path.exists(flirted_ap_fieldmaps):
+            subprocess.run(["flirt", "-in", betted_pa_run01, "-ref", structural_brain, "-out", flirted_pa_run01, "-omat", t1_flirted_pa_run01_transformation])
             subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", structural_brain, "-out", flirted_rl_fieldmaps, "-omat", t1_flirted_rl_fieldmaps_transformation])
             subprocess.run(["flirt", "-in", betted_ap_fieldmaps, "-ref", structural_brain, "-out", flirted_ap_fieldmaps, "-omat", t1_flirted_ap_fieldmaps_transformation])
         def read_roi_file(roi_file):
@@ -10505,9 +10508,9 @@ def susceptibility_analysis():
         roi_transformation = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/roi_transformation.mat'
         subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', temp_file, '-omat', roi_transformation])
         subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', roi_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
-        flirted_pa_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps_bin.nii.gz'
-        if not os.path.exists(flirted_pa_fieldmaps_bin):
-            subprocess.run(['fslmaths', flirted_pa_fieldmaps, '-thr', '100', '-bin', flirted_pa_fieldmaps_bin])
+        flirted_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_run01_bin.nii.gz'
+        if not os.path.exists(flirted_pa_run01_bin):
+            subprocess.run(['fslmaths', flirted_pa_run01, '-thr', '100', '-bin', flirted_pa_run01_bin])
         flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
         if not os.path.exists(flirted_rl_fieldmaps_bin):
             subprocess.run(['fslmaths', flirted_rl_fieldmaps, '-thr', '100', '-bin', flirted_rl_fieldmaps_bin])
@@ -10516,7 +10519,7 @@ def susceptibility_analysis():
             subprocess.run(['fslmaths', flirted_ap_fieldmaps, '-thr', '100', '-bin', flirted_ap_fieldmaps_bin])
         pa_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_bin_inv.nii.gz'
         if not os.path.exists(pa_bin_inv):
-            subprocess.run(['fslmaths', flirted_pa_fieldmaps_bin, '-sub', '1', '-abs', pa_bin_inv])
+            subprocess.run(['fslmaths', flirted_pa_run01_bin, '-sub', '1', '-abs', pa_bin_inv])
         rl_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_bin_inv.nii.gz'
         if not os.path.exists(rl_bin_inv):
             subprocess.run(['fslmaths', flirted_rl_fieldmaps_bin, '-sub', '1', '-abs', rl_bin_inv])
@@ -10567,7 +10570,7 @@ def susceptibility_analysis():
         rl_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_trimmed_roi_mask.nii.gz'
         ap_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_trimmed_roi_mask.nii.gz'
         if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask) or not os.path.exists(ap_trimmed_roi_mask):
-            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_fieldmaps_bin, pa_trimmed_roi_mask])
+            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_run01_bin, pa_trimmed_roi_mask])
             subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
             subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_ap_fieldmaps_bin, ap_trimmed_roi_mask])
     group_perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/group/group_perc_outside_df.txt', sep='\t', index=False)
@@ -10647,10 +10650,10 @@ def susceptibility_analysis():
             nib.save(ssim_map_nifti, ssim_output_path)
             return pa_rl_ssim_index
         pa_rl_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_rl_ssim_map.nii.gz'
-        flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
+        flirted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_run01.nii.gz'
         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
         if not os.path.exists(pa_rl_ssim_output_path):
-            pa_rl_ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_fieldmaps, pa_rl_ssim_output_path)
+            pa_rl_ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_run01, pa_rl_ssim_output_path)
         else:
             df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_rl_ssim_df.txt', delimiter='\t')
             ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
@@ -10659,10 +10662,10 @@ def susceptibility_analysis():
         if not os.path.exists(pa_rl_ssim_bin):
             subprocess.run(["fslmaths", pa_rl_ssim_output_path, "-thr", "0.8", "-binv", pa_rl_ssim_bin])
         combined_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/combined_pa_rl_mask.nii.gz'
-        flirted_pa_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps_bin.nii.gz'
+        flirted_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_run01_bin.nii.gz'
         flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
         if not os.path.exists(combined_pa_rl_mask):
-            subprocess.run(['fslmaths', flirted_pa_fieldmaps_bin, '-add', flirted_rl_fieldmaps_bin, combined_pa_rl_mask])
+            subprocess.run(['fslmaths', flirted_pa_run01_bin, '-add', flirted_rl_fieldmaps_bin, combined_pa_rl_mask])
         bin_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/bin_pa_rl_mask.nii.gz'
         if not os.path.exists(bin_pa_rl_mask):
             subprocess.run(['fslmaths', combined_pa_rl_mask, '-bin', bin_pa_rl_mask])
@@ -10760,9 +10763,9 @@ def susceptibility_analysis():
             return ap_pa_ssim_index
         ap_pa_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_pa_ssim_map.nii.gz'
         flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps.nii.gz'
-        flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
+        flirted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_run01.nii.gz'
         if not os.path.exists(ap_pa_ssim_output_path):
-            ap_pa_ssim_index = calculate_ssim(flirted_pa_fieldmaps, flirted_ap_fieldmaps, ap_pa_ssim_output_path)
+            ap_pa_ssim_index = calculate_ssim(flirted_pa_run01, flirted_ap_fieldmaps, ap_pa_ssim_output_path)
         else:
             df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_pa_ssim_df.txt', delimiter='\t')
             ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
@@ -10772,9 +10775,9 @@ def susceptibility_analysis():
             subprocess.run(["fslmaths", ap_pa_ssim_output_path, "-thr", "0.8", "-binv", ap_pa_ssim_bin])
         combined_ap_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/combined_ap_pa_mask.nii.gz'
         flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
-        flirted_pa_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps_bin.nii.gz'
+        flirted_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_run01_bin.nii.gz'
         if not os.path.exists(combined_ap_pa_mask):
-            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-add', flirted_pa_fieldmaps_bin, combined_ap_pa_mask])
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-add', flirted_pa_run01_bin, combined_ap_pa_mask])
         bin_ap_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/bin_ap_pa_mask.nii.gz'
         if not os.path.exists(bin_ap_pa_mask):
             subprocess.run(['fslmaths', combined_ap_pa_mask, '-bin', bin_ap_pa_mask])
@@ -11060,13 +11063,13 @@ def susceptibility_analysis():
             roi_voxel_intensities = epi_data[mask_data]
             voxel_intensity_list = roi_voxel_intensities.tolist()
             return voxel_intensity_list
-        flirted_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_fieldmaps.nii.gz'
+        flirted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_pa_run01.nii.gz'
         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_rl_fieldmaps.nii.gz'
         flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/flirted_ap_fieldmaps.nii.gz'
         pa_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/pa_trimmed_roi_mask.nii.gz'
         rl_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/rl_trimmed_roi_mask.nii.gz'
         ap_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/ap_trimmed_roi_mask.nii.gz'
-        pa_voxel_intensities = extract_voxel_intensities(flirted_pa_fieldmaps, pa_trimmed_roi_mask)
+        pa_voxel_intensities = extract_voxel_intensities(flirted_pa_run01, pa_trimmed_roi_mask)
         rl_voxel_intensities = extract_voxel_intensities(flirted_rl_fieldmaps, rl_trimmed_roi_mask)
         ap_voxel_intensities = extract_voxel_intensities(flirted_ap_fieldmaps, ap_trimmed_roi_mask)
         values = pa_voxel_intensities + rl_voxel_intensities + ap_voxel_intensities
@@ -11225,10 +11228,13 @@ def susceptibility_analysis():
         os.makedirs(run_comparison_2_participant_folder, exist_ok=True)
         run_comparison_2_group_folder = 'analysis/susceptibility_analysis/run_comparisons/2/group'
         os.makedirs(run_comparison_2_group_folder, exist_ok=True)
+        runfirst5 = f'analysis/susceptibility_analysis/run_comparisons/2/{p_id}/runfirst5.nii.gz'
+        run = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
+        if not os.path.exists(runfirst5):
+            subprocess.run(['fslroi', run, runfirst5, '0', '5'])
         averaged_run = f'analysis/susceptibility_analysis/run_comparisons/2/{p_id}/averaged_run.nii.gz'
         if not os.path.exists(averaged_run):
-            run = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
-            subprocess.run(['fslmaths', run, '-Tmean', averaged_run])
+            subprocess.run(['fslmaths', runfirst5, '-Tmean', averaged_run])
         uncorrected_run = f'analysis/susceptibility_analysis/run_comparisons/2/{p_id}/uncorrected_run.nii.gz'
         if not os.path.exists(uncorrected_run):
             subprocess.run(["bet", averaged_run, uncorrected_run, "-m", "-R"])
@@ -11640,12 +11646,13 @@ def susceptibility_analysis():
 
     # Step 8: Test quality of alternate distortion correction method (Stage 3).
     print("\n###### STEP 8: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 3) ######")   
-    bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
-    perc_outside_run01_values = []
-    perc_outside_run04_values = []
-    column_headers = ['p_id', 'perc_outside_run01', 'perc_outside_run04']
+    good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    perc_outside_pa_values = []
+    perc_outside_rl_values = []
+    perc_outside_ap_values = []
+    column_headers = ['p_id', 'perc_outside_pa', 'perc_outside_rl', 'perc_outside_ap']
     group_perc_outside_df = pd.DataFrame(columns = column_headers) 
-    for p_id in bad_participants:
+    for p_id in good_participants:
         print(f"Preparing Stage 3 files for {p_id}...")
         run_comparison_3_folder = 'analysis/susceptibility_analysis/run_comparisons/3'
         os.makedirs(run_comparison_3_folder, exist_ok=True)
@@ -11653,26 +11660,40 @@ def susceptibility_analysis():
         os.makedirs(run_comparison_3_participant_folder, exist_ok=True)
         run_comparison_3_group_folder = 'analysis/susceptibility_analysis/run_comparisons/3/group'
         os.makedirs(run_comparison_3_group_folder, exist_ok=True)
-        run01 = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
-        run04 = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run04.nii'
-        averaged_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/averaged_run01.nii.gz'
-        averaged_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/averaged_run04.nii.gz'
-        if not os.path.exists(averaged_run01) or not os.path.exists(averaged_run04):
-            subprocess.run(['fslmaths', run01, '-Tmean', averaged_run01])
-            subprocess.run(['fslmaths', run04, '-Tmean', averaged_run04])
-        betted_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/betted_run01.nii.gz'
-        betted_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/betted_run04.nii.gz'
-        if not os.path.exists(betted_run01) or not os.path.exists(betted_run04):
-            subprocess.run(["bet", averaged_run01, betted_run01, "-m", "-R"])
-            subprocess.run(["bet", averaged_run04, betted_run04, "-m", "-R"])
-        flirted_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run01.nii.gz'
-        flirted_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run04.nii.gz'
-        t1_flirted_run01_transformation = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/t1_flirted_run01_transformation.mat'
-        t1_flirted_run04_transformation = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/t1_flirted_run04_transformation.mat'
+        runfirst5 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/runfirst5.nii.gz'
+        run = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
+        if not os.path.exists(runfirst5):
+            subprocess.run(['fslroi', run, runfirst5, '0', '5'])
+        rl_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/rl_fieldmaps.nii'
+        ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/ap_fieldmaps.nii'
+        averaged_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/averaged_pa_run01.nii.gz'
+        averaged_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/averaged_rl_fieldmaps.nii.gz'
+        averaged_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/averaged_ap_fieldmaps.nii.gz'
+        if not os.path.exists(averaged_pa_run01) or not os.path.exists(averaged_rl_fieldmaps) or not os.path.exists(averaged_ap_fieldmaps):
+            subprocess.run(['fslmaths', runfirst5, '-Tmean', averaged_pa_run01])
+            subprocess.run(['fslmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
+            subprocess.run(['fslmaths', ap_fieldmaps, '-Tmean', averaged_ap_fieldmaps])
+        betted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/betted_pa_run01.nii.gz'
+        betted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/betted_rl_fieldmaps.nii.gz'
+        betted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/betted_ap_fieldmaps.nii.gz'
+        if not os.path.exists(betted_pa_run01) or not os.path.exists(betted_rl_fieldmaps) or not os.path.exists(betted_ap_fieldmaps):
+            subprocess.run(["bet", averaged_pa_run01, betted_pa_run01, "-m", "-R"])
+            subprocess.run(["bet", averaged_rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
+            subprocess.run(["bet", averaged_ap_fieldmaps, betted_ap_fieldmaps, "-m", "-R"])
+        corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/corrected_pa_run01.nii.gz'
+        if not os.path.exists(corrected_pa_run01):
+            subprocess.run(["applytopup", f"--imain={betted_pa_run01}", f"--datain=analysis/susceptibility_analysis/data/{p_id}/acqparams.txt", "--inindex=6", f"--topup=analysis/susceptibility_analysis/data/{p_id}/topup_{p_id}", "--method=jac", f"--out={corrected_pa_run01}"])
+        flirted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_pa_run01.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        t1_flirted_pa_run01_transformation = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/t1_flirted_pa_run01_transformation.mat'
+        t1_flirted_rl_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/t1_flirted_rl_fieldmaps_transformation.mat'
+        t1_flirted_ap_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/t1_flirted_ap_fieldmaps_transformation.mat'
         structural_brain = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii'
-        if not os.path.exists(flirted_run01):
-            subprocess.run(["flirt", "-in", betted_run01, "-ref", structural_brain, "-out", flirted_run01, "-omat", t1_flirted_run01_transformation])
-            subprocess.run(["flirt", "-in", betted_run04, "-ref", structural_brain, "-out", flirted_run04, "-omat", t1_flirted_run04_transformation])
+        if not os.path.exists(flirted_pa_run01) or not os.path.exists(flirted_rl_fieldmaps) or not os.path.exists(flirted_ap_fieldmaps):
+            subprocess.run(["flirt", "-in", corrected_pa_run01, "-ref", structural_brain, "-out", flirted_pa_run01, "-omat", t1_flirted_pa_run01_transformation])
+            subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", structural_brain, "-out", flirted_rl_fieldmaps, "-omat", t1_flirted_rl_fieldmaps_transformation])
+            subprocess.run(["flirt", "-in", betted_ap_fieldmaps, "-ref", structural_brain, "-out", flirted_ap_fieldmaps, "-omat", t1_flirted_ap_fieldmaps_transformation])
         def read_roi_file(roi_file):
             voxel_coordinates = []
             with open(roi_file, 'r') as file:
@@ -11692,13 +11713,13 @@ def susceptibility_analysis():
         if cisc_folder is None:
             print("No 'CISC' folder found in the 'neurofeedback' directory.")
             exit(1)
-        roi_file_run01 = f'data/raw_data/{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
-        voxel_coordinates_run01 = read_roi_file(roi_file_run01)
-        run01_template = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_template.nii.gz'
-        if not os.path.exists(run01_template):
+        roi_file = f'data/raw_data/{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
+        voxel_coordinates = read_roi_file(roi_file)
+        averaged_run = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/averaged_run.nii.gz'
+        if not os.path.exists(averaged_run):
             run = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
-            subprocess.run(['fslmaths', run, '-Tmean', run01_template])
-        functional_image_info = nib.load(run01_template)
+            subprocess.run(['fslmaths', run, '-Tmean', averaged_run])
+        functional_image_info = nib.load(averaged_run)
         functional_dims = functional_image_info.shape
         binary_volume = np.zeros(functional_dims)
         for voxel in voxel_coordinates:
@@ -11708,89 +11729,82 @@ def susceptibility_analysis():
         functional_affine = functional_image_info.affine
         binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
         nib.save(binary_mask, f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_subject_space_ROI.nii.gz')
-        roi_mask_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_subject_space_ROI.nii.gz'
-        flirted_roi_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_roi_run01.nii.gz'
-        if not os.path.exists(flirted_roi_run01):
-            subprocess.run(['flirt', '-in', roi_mask_run01, '-ref', structural_brain, '-applyxfm', '-init', t1_flirted_run01_transformation, '-out', flirted_roi_run01, '-interp', 'nearestneighbour'])
-        roi_file_run04 = f'data/raw_data/{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-4/depnf_run-4.roi'
-        voxel_coordinates_run04 = read_roi_file(roi_file_run04)
-        run04_template = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run04_template.nii.gz'
-        if not os.path.exists(run04_template):
-            run = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run04.nii'
-            subprocess.run(['fslmaths', run, '-Tmean', run04_template])
-        functional_image_info = nib.load(run04_template)
-        functional_dims = functional_image_info.shape
-        binary_volume = np.zeros(functional_dims)
-        for voxel in voxel_coordinates:
-            x, y, z = voxel
-            binary_volume[x, y, z] = 1
-        binary_volume = np.flip(binary_volume, axis=1)
-        functional_affine = functional_image_info.affine
-        binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
-        nib.save(binary_mask, f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run04_subject_space_ROI.nii.gz')
-        roi_mask_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run04_subject_space_ROI.nii.gz'
-        flirted_roi_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_roi_run04.nii.gz'
-        if not os.path.exists(flirted_roi_run04):
-            subprocess.run(['flirt', '-in', roi_mask_run04, '-ref', structural_brain, '-applyxfm', '-init', t1_flirted_run04_transformation, '-out', flirted_roi_run04, '-interp', 'nearestneighbour'])
-        flirted_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run01_bin.nii.gz'
-        if not os.path.exists(flirted_run01_bin):
-            subprocess.run(['fslmaths', flirted_run01, '-thr', '100', '-bin', flirted_run01_bin])
-        flirted_run04_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run04_bin.nii.gz'
-        if not os.path.exists(flirted_run04_bin):
-            subprocess.run(['fslmaths', flirted_run04, '-thr', '100', '-bin', flirted_run04_bin])
-        run01_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_bin_inv.nii.gz'
-        if not os.path.exists(run01_bin_inv):
-            subprocess.run(['fslmaths', flirted_run01_bin, '-sub', '1', '-abs', run01_bin_inv])
-        run04_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run04_bin_inv.nii.gz'
-        if not os.path.exists(run04_bin_inv):
-            subprocess.run(['fslmaths', flirted_run04_bin, '-sub', '1', '-abs', run04_bin_inv])
-        run01_result = subprocess.run(['fslstats', flirted_roi_run01, '-k', run01_bin_inv, '-V'], capture_output=True, text=True)
-        if run01_result.returncode == 0:
-            run01_result_output = run01_result.stdout.strip()
+        roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_subject_space_ROI.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/transformed_roi_mask.nii.gz'
+        temp_file = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/temp_file.nii.gz'
+        roi_transformation = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/roi_transformation.mat'
+        subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', temp_file, '-omat', roi_transformation])
+        subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', roi_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
+        flirted_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_pa_run01_bin.nii.gz'
+        if not os.path.exists(flirted_pa_run01_bin):
+            subprocess.run(['fslmaths', flirted_pa_run01, '-thr', '100', '-bin', flirted_pa_run01_bin])
+        flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
+        if not os.path.exists(flirted_rl_fieldmaps_bin):
+            subprocess.run(['fslmaths', flirted_rl_fieldmaps, '-thr', '100', '-bin', flirted_rl_fieldmaps_bin])
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        if not os.path.exists(flirted_ap_fieldmaps_bin):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps, '-thr', '100', '-bin', flirted_ap_fieldmaps_bin])
+        pa_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/pa_bin_inv.nii.gz'
+        if not os.path.exists(pa_bin_inv):
+            subprocess.run(['fslmaths', flirted_pa_run01_bin, '-sub', '1', '-abs', pa_bin_inv])
+        rl_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/rl_bin_inv.nii.gz'
+        if not os.path.exists(rl_bin_inv):
+            subprocess.run(['fslmaths', flirted_rl_fieldmaps_bin, '-sub', '1', '-abs', rl_bin_inv])
+        ap_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ap_bin_inv.nii.gz'
+        if not os.path.exists(ap_bin_inv):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-sub', '1', '-abs', ap_bin_inv])
+        pa_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', pa_bin_inv, '-V'], capture_output=True, text=True)
+        if pa_result.returncode == 0:
+            pa_result_output = pa_result.stdout.strip()
         else:
             print("Error executing fslstats command.")
-        run01_result_output_values = run01_result_output.split()
-        run01_voxels_outside = float(run01_result_output_values[0])
-        run04_result = subprocess.run(['fslstats', flirted_roi_run04, '-k', run04_bin_inv, '-V'], capture_output=True, text=True)
-        if run04_result.returncode == 0:
-            run04_result_output = run04_result.stdout.strip()
+        pa_result_output_values = pa_result_output.split()
+        pa_voxels_outside = float(pa_result_output_values[0])
+        rl_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', rl_bin_inv, '-V'], capture_output=True, text=True)
+        if rl_result.returncode == 0:
+            rl_result_output = rl_result.stdout.strip()
         else:
             print("Error executing fslstats command.")
-        run04_result_output_values = run04_result_output.split()
-        run04_voxels_outside = float(run04_result_output_values[0])
-        result1 = subprocess.run(['fslstats', flirted_roi_run01, '-V'], capture_output=True, text=True)
+        rl_result_output_values = rl_result_output.split()
+        rl_voxels_outside = float(rl_result_output_values[0])
+        ap_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', ap_bin_inv, '-V'], capture_output=True, text=True)
+        if ap_result.returncode == 0:
+            ap_result_output = ap_result.stdout.strip()
+        else:
+            print("Error executing fslstats command.")
+        ap_result_output_values = ap_result_output.split()
+        ap_voxels_outside = float(ap_result_output_values[0])
+        result1 = subprocess.run(['fslstats', transformed_roi_mask, '-V'], capture_output=True, text=True)
         if result1.returncode == 0:
             result1_output = result1.stdout.strip()
         else:
             print("Error executing fslstats command.")
         result1_output_values = result1_output.split()
-        total_voxels_in_roi_run01 = float(result1_output_values[0])
-        result2 = subprocess.run(['fslstats', flirted_roi_run04, '-V'], capture_output=True, text=True)
-        if result2.returncode == 0:
-            result2_output = result2.stdout.strip()
-        else:
-            print("Error executing fslstats command.")
-        result2_output_values = result2_output.split()
-        total_voxels_in_roi_run04 = float(result2_output_values[0])
-        perc_outside_run01 = (run01_voxels_outside / total_voxels_in_roi_run01) * 100
-        perc_outside_run01 = round(perc_outside_run01, 2)
-        perc_outside_run01_values.append(perc_outside_run01)
-        perc_outside_run04 = (run04_voxels_outside / total_voxels_in_roi_run04) * 100
-        perc_outside_run04 = round(perc_outside_run04, 2)
-        perc_outside_run04_values.append(perc_outside_run04)
-        perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_run01': [perc_outside_run01], 'perc_outside_run04': [perc_outside_run04]})
-        perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/perc_outside_df.txt', sep='\t', index=False)
+        total_voxels_in_roi = float(result1_output_values[0])
+        perc_outside_pa = (pa_voxels_outside / total_voxels_in_roi) * 100
+        perc_outside_pa = round(perc_outside_pa, 2)
+        perc_outside_pa_values.append(perc_outside_pa)
+        perc_outside_rl = (rl_voxels_outside / total_voxels_in_roi) * 100
+        perc_outside_rl = round(perc_outside_rl, 2)
+        perc_outside_rl_values.append(perc_outside_rl)
+        perc_outside_ap = (ap_voxels_outside / total_voxels_in_roi) * 100
+        perc_outside_ap = round(perc_outside_ap, 2)
+        perc_outside_ap_values.append(perc_outside_ap)
+        perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_pa': [perc_outside_pa], 'perc_outside_rl': [perc_outside_rl], 'perc_outside_ap': [perc_outside_ap]})
+        perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/{p_id}/perc_outside_df.txt', sep='\t', index=False)
         group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
-        run01_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_trimmed_roi_mask.nii.gz'
-        run04_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run04_trimmed_roi_mask.nii.gz'
-        if not os.path.exists(run01_trimmed_roi_mask) or not os.path.exists(run04_trimmed_roi_mask):
-            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_run01_bin, run01_trimmed_roi_mask])
-            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_run04_bin, run04_trimmed_roi_mask])
-    group_perc_outside_df.to_csv('analysis/susceptibility_analysis/run_comparisons/3/group/group_perc_outside_df.txt', sep='\t', index=False)
+        pa_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/pa_trimmed_roi_mask.nii.gz'
+        rl_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/rl_trimmed_roi_mask.nii.gz'
+        ap_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ap_trimmed_roi_mask.nii.gz'
+        if not os.path.exists(pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask) or not os.path.exists(ap_trimmed_roi_mask):
+            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_pa_run01_bin, pa_trimmed_roi_mask])
+            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
+            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_ap_fieldmaps_bin, ap_trimmed_roi_mask])
+    group_perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/group/group_perc_outside_df.txt', sep='\t', index=False)
     plot_data = pd.DataFrame({
-        'Participant': bad_participants * 2,
-        'Perc_Outside': perc_outside_run01_values + perc_outside_run04_values,
-        'Sequence': ['run01'] * len(bad_participants) + ['run04'] * len(bad_participants)
+        'Participant': good_participants * 2,
+        'Perc_Outside': perc_outside_pa_values + perc_outside_rl_values,
+        'Sequence': ['PA'] * len(good_participants) + ['RL'] * len(good_participants)
     })
     perc_outside_plot = (
         ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
@@ -11798,7 +11812,6 @@ def susceptibility_analysis():
         theme_classic() +
         scale_fill_manual(values=['#B22222', '#67B7EB']) +
         labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y=r'% of SCC Voxels in Signal Dropout') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0)) +
         theme(
         axis_text_x=element_text(rotation=45, hjust=1),
@@ -11808,34 +11821,33 @@ def susceptibility_analysis():
         legend_title=element_text(size=14))  # Legend title
     )
     perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/perc_outside_plot.png', dpi=300)
-    perc_outside_run01_overall = np.mean(perc_outside_run01_values)
-    perc_outside_run04_overall = np.mean(perc_outside_run04_values)
-    run01_std_error = np.std(perc_outside_run01_values) / np.sqrt(len(perc_outside_run01_values))
-    run04_std_error = np.std(perc_outside_run04_values) / np.sqrt(len(perc_outside_run04_values))
-    _, perc_outside_run01_overall_shap_p = stats.shapiro(perc_outside_run01_values)
-    _, perc_outside_run04_overall_shap_p = stats.shapiro(perc_outside_run04_values)
-    if perc_outside_run01_overall_shap_p > 0.05 and perc_outside_run04_overall_shap_p > 0.05:
+    perc_outside_pa_overall = np.mean(perc_outside_pa_values)
+    perc_outside_rl_overall = np.mean(perc_outside_rl_values)
+    pa_std_error = np.std(perc_outside_pa_values) / np.sqrt(len(perc_outside_pa_values))
+    rl_std_error = np.std(perc_outside_rl_values) / np.sqrt(len(perc_outside_rl_values))
+    _, perc_outside_pa_overall_shap_p = stats.shapiro(perc_outside_pa_values)
+    _, perc_outside_rl_overall_shap_p = stats.shapiro(perc_outside_rl_values)
+    if perc_outside_pa_overall_shap_p > 0.05 and perc_outside_rl_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(perc_outside_run01_values, perc_outside_run04_values)
+        _, p_value = stats.ttest_ind(perc_outside_pa_values, perc_outside_rl_values)
         print(f"T-test p-value: {p_value}")
     else:
         print(f'Shapiro-Wilk test failed for perc_outside values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(perc_outside_run01_values, perc_outside_run04_values)
+        _, p_value = stats.mannwhitneyu(perc_outside_pa_values, perc_outside_rl_values)
         print(f"Mann-Whitney U test p-value: {p_value}")
-    plot_data = pd.DataFrame({'Sequence': ['run01', 'run04'], 'Perc_Outside': [perc_outside_run01_overall, perc_outside_run04_overall], 'Std_Error': [run01_std_error, run04_std_error]})
+    plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Perc_Outside': [perc_outside_pa_overall, perc_outside_rl_overall], 'Std_Error': [pa_std_error, rl_std_error]})
     group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Percentage of Voxels in Signal Dropout Regions', y=r'% of SCC Voxels in Signal Dropout') +
-                        scale_y_continuous(expand=(0, 0)) +
+                        scale_y_continuous(expand=(0, 0), limits=[0,10], breaks=[0.0, 2.5, 5.0, 7.5, 10.0]) +
+                        scale_fill_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
                         theme(
-                            axis_title=element_text(size=16),    # Axis titles
-                            axis_text=element_text(size=14),     # Tick labels
-                            legend_text=element_text(size=14),   # Legend text
-                            legend_title=element_text(size=16)   # Legend title
-                        ) +
-                        scale_fill_manual(values={'run01': '#B22222', 'run04': '#67B7EB'})
+                            axis_title=element_text(size=14),    # Axis titles
+                            axis_text=element_text(size=12),     # Tick labels
+                            legend_text=element_text(size=12),   # Legend text
+                            legend_title=element_text(size=14))  # Legend title
                         )
     if p_value < 0.001:
         group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
@@ -11849,119 +11861,176 @@ def susceptibility_analysis():
     group_perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/group_perc_outside_plot.png', dpi=300)
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
-    group_ssim_df = pd.DataFrame(columns = column_headers) 
-    for p_id in bad_participants:
-        print(f"Running Stage 3 SSIM analysis for {p_id}...")
+    pa_rl_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running Stage 3 PA-RL SSIM analysis for {p_id}...")
         def calculate_ssim(image1_path, image2_path, ssim_output_path):
-            """Function to calculate SSIM between two NIfTI images and save the SSIM map."""
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
             image1_nii = nib.load(image1_path)
             image2_nii = nib.load(image2_path)
             image1 = image1_nii.get_fdata()
             image2 = image2_nii.get_fdata()
             if image1.shape != image2.shape:
                 raise ValueError("Input images must have the same dimensions for SSIM calculation.")
-            ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            pa_rl_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
             ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
             nib.save(ssim_map_nifti, ssim_output_path)
-            return ssim_index
-        ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_map.nii.gz'
-        flirted_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run01.nii.gz'
-        flirted_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run04.nii.gz'
-        if not os.path.exists(ssim_output_path):
-            ssim_index = calculate_ssim(flirted_run01, flirted_run04, ssim_output_path)
-        ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_bin.nii.gz'
-        if not os.path.exists(ssim_bin):
-            subprocess.run(["fslmaths", ssim_output_path, "-thr", "0.8", "-binv", ssim_bin])
-        combined_run01_run04_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/combined_run01_run04_mask.nii.gz'
-        flirted_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run01_bin.nii.gz'
-        flirted_run04_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run04_bin.nii.gz'
-        if not os.path.exists(combined_run01_run04_mask):
-            subprocess.run(['fslmaths', flirted_run01_bin, '-add', flirted_run04_bin, combined_run01_run04_mask])
-        bin_run01_run04_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/bin_run01_run04_mask.nii.gz'
-        if not os.path.exists(bin_run01_run04_mask):
-            subprocess.run(['fslmaths', combined_run01_run04_mask, '-bin', bin_run01_run04_mask])
-        ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_bin_trimmed.nii.gz'
-        if not os.path.exists(ssim_bin_trimmed):
-            subprocess.run(['fslmaths', ssim_bin, '-mul', bin_run01_run04_mask, ssim_bin_trimmed])
-        voxels_in_whole_mask = subprocess.run(["fslstats", ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
-        voxels_in_whole_mask = float(voxels_in_whole_mask)
-        intersection_mask_path_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_roi_intersect_run01.nii.gz'
-        intersection_mask_path_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_roi_intersect_run04.nii.gz'
-        run01_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_trimmed_roi_mask.nii.gz'
-        run04_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run04_trimmed_roi_mask.nii.gz'
-        if not os.path.exists(intersection_mask_path_run01):
-            subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run01_trimmed_roi_mask, intersection_mask_path_run01])
-            subprocess.run(["fslmaths", ssim_bin_trimmed, "-mas", run04_trimmed_roi_mask, intersection_mask_path_run04])
-        voxels_in_roi_in_mask_run01 = subprocess.run(["fslstats", intersection_mask_path_run01, "-V"], capture_output=True, text=True).stdout.split()[0]
-        voxels_in_roi_in_mask_run01 = float(voxels_in_roi_in_mask_run01)
-        perc_roi_voxels_in_mask_run01 = (voxels_in_roi_in_mask_run01 / total_voxels_in_roi_run01) * 100
-        voxels_in_roi_in_mask_run04 = subprocess.run(["fslstats", intersection_mask_path_run04, "-V"], capture_output=True, text=True).stdout.split()[0]
-        voxels_in_roi_in_mask_run04 = float(voxels_in_roi_in_mask_run04)
-        perc_roi_voxels_in_mask_run04 = (voxels_in_roi_in_mask_run04 / total_voxels_in_roi_run04) * 100
-        perc_roi_voxels_in_mask_av = (perc_roi_voxels_in_mask_run01 + perc_roi_voxels_in_mask_run04) / 2
-        ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_mask_av]})
-        ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ssim_df.txt', sep='\t', index=False)
-        group_ssim_df = pd.concat([group_ssim_df, ssim_df], ignore_index=True)
-    group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/3/group/group_ssim_df.txt', sep='\t', index=False)
-    ssim_indexes = group_ssim_df['ssim_index'].tolist()
-    ssim_mean = np.mean(ssim_indexes)
-    print(f"Mean SSIM index for Stage 3: {ssim_mean}")
-    plot_data = pd.DataFrame({
-        'Participant': bad_participants,
-        'SSIM': ssim_indexes,
-    })
-    ssim_index_plot = (
-        ggplot(plot_data, aes(x='Participant', y='SSIM')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_hline(yintercept=ssim_mean, linetype='dashed', color='red') +
-        theme_classic() +
-        labs(title='SSIM Indexes', x='Participant', y='SSIM') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
-        scale_y_continuous(expand=(0, 0), limits=[0.8,1])
-    )
-    ssim_index_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/ssim_index_plot.png')
-    voxels = group_ssim_df['voxels_in_bin_ssim_mask'].tolist()
-    voxels_mean = np.mean(voxels)
-    plot_data = pd.DataFrame({
-        'Participant': bad_participants,
-        'Voxels': voxels,
-    })
-    ssim_voxels_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Voxels')) +
-        geom_bar(stat='identity', position='dodge') +
-        geom_hline(yintercept=voxels_mean, linetype='dashed', color='red') +
-        theme_classic() +
-        labs(title='Number of Voxels in SSIM Mask', x='Participant', y='Voxels') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='blue'), axis_title=element_text(size=12, face='bold')) +
-        scale_y_continuous(expand=(0, 0))
-    )
-    ssim_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/ssim_voxels_plot.png')
-    perc_voxels = group_ssim_df['perc_roi_voxels_in_bin_ssim_mask'].tolist()
-    perc_voxels_mean = np.mean(perc_voxels)
-    plot_data = pd.DataFrame({
-        'Participant': bad_participants,
-        'Perc_Voxels': perc_voxels,
-    })
-    ssim_perc_voxels_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Perc_Voxels')) +
-        geom_bar(stat='identity', position='dodge', fill='#67B7EB') +
-        geom_hline(yintercept=perc_voxels_mean, linetype='dashed', color='#B22222') +
-        theme_classic() +
-        labs(title='Percentage of ROI Voxels in SSIM Mask', x='Participant', y=r'% of SCC Voxels in SSIM Mask') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
-        scale_y_continuous(expand=(0, 0)) +
-        theme(
-            axis_text_x=element_text(rotation=45, hjust=1),
-            axis_title=element_text(size=14),    # Axis titles
-            axis_text=element_text(size=12),     # Tick labels
-            legend_text=element_text(size=12),   # Legend text
-            legend_title=element_text(size=14))  # Legend title
-    )
-    ssim_perc_voxels_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/ssim_perc_voxels_plot.png', dpi=300)
+            return pa_rl_ssim_index
+        pa_rl_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/pa_rl_ssim_map.nii.gz'
+        flirted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_pa_run01.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        if not os.path.exists(pa_rl_ssim_output_path):
+            pa_rl_ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_pa_run01, pa_rl_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/pa_rl_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            pa_rl_ssim_index = ssim_index_series.iloc[0]
+        pa_rl_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/pa_rl_ssim_bin.nii.gz'
+        if not os.path.exists(pa_rl_ssim_bin):
+            subprocess.run(["fslmaths", pa_rl_ssim_output_path, "-thr", "0.8", "-binv", pa_rl_ssim_bin])
+        combined_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/combined_pa_rl_mask.nii.gz'
+        flirted_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_pa_run01_bin.nii.gz'
+        flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
+        if not os.path.exists(combined_pa_rl_mask):
+            subprocess.run(['fslmaths', flirted_pa_run01_bin, '-add', flirted_rl_fieldmaps_bin, combined_pa_rl_mask])
+        bin_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/bin_pa_rl_mask.nii.gz'
+        if not os.path.exists(bin_pa_rl_mask):
+            subprocess.run(['fslmaths', combined_pa_rl_mask, '-bin', bin_pa_rl_mask])
+        pa_rl_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/pa_rl_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(pa_rl_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', pa_rl_ssim_bin, '-mul', bin_pa_rl_mask, pa_rl_ssim_bin_trimmed])
+        voxels_in_whole_pa_rl_mask = subprocess.run(["fslstats", pa_rl_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_pa_rl_mask = float(voxels_in_whole_pa_rl_mask)
+        pa_rl_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/pa_rl_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(pa_rl_intersection_mask_path):
+            subprocess.run(["fslmaths", pa_rl_ssim_bin_trimmed, "-mas", transformed_roi_mask, pa_rl_intersection_mask_path])
+        voxels_in_roi_in_pa_rl_mask = subprocess.run(["fslstats", pa_rl_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_pa_rl_mask = float(voxels_in_roi_in_pa_rl_mask)
+        perc_roi_voxels_in_pa_rl_mask = (voxels_in_roi_in_pa_rl_mask / total_voxels_in_roi) * 100
+        pa_rl_ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [pa_rl_ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_pa_rl_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_pa_rl_mask]})
+        pa_rl_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/pa_rl_ssim_df.txt', sep='\t', index=False)
+        pa_rl_group_ssim_df = pd.concat([pa_rl_group_ssim_df, pa_rl_ssim_df], ignore_index=True)
+    pa_rl_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/3/group/pa_rl_group_ssim_df.txt', sep='\t', index=False)
+    pa_rl_ssim_indexes = pa_rl_group_ssim_df['ssim_index'].tolist()
+    pa_rl_ssim_mean = np.mean(pa_rl_ssim_indexes)
+    print(f"Mean PA-RL SSIM index for Stage 3: {pa_rl_ssim_mean}")
 
+    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
+    rl_ap_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running Stage 3 RL-AP SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            rl_ap_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return rl_ap_ssim_index
+        rl_ap_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/rl_ap_ssim_map.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        if not os.path.exists(rl_ap_ssim_output_path):
+            rl_ap_ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_ap_fieldmaps, rl_ap_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/rl_ap_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            rl_ap_ssim_index = ssim_index_series.iloc[0]
+        rl_ap_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/rl_ap_ssim_bin.nii.gz'
+        if not os.path.exists(rl_ap_ssim_bin):
+            subprocess.run(["fslmaths", rl_ap_ssim_output_path, "-thr", "0.8", "-binv", rl_ap_ssim_bin])
+        combined_rl_ap_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/combined_rl_ap_mask.nii.gz'
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
+        if not os.path.exists(combined_rl_ap_mask):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-add', flirted_rl_fieldmaps_bin, combined_rl_ap_mask])
+        bin_rl_ap_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/bin_rl_ap_mask.nii.gz'
+        if not os.path.exists(bin_rl_ap_mask):
+            subprocess.run(['fslmaths', combined_rl_ap_mask, '-bin', bin_rl_ap_mask])
+        rl_ap_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/rl_ap_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(rl_ap_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', rl_ap_ssim_bin, '-mul', bin_rl_ap_mask, rl_ap_ssim_bin_trimmed])
+        voxels_in_whole_rl_ap_mask = subprocess.run(["fslstats", rl_ap_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_rl_ap_mask = float(voxels_in_whole_rl_ap_mask)
+        rl_ap_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/rl_ap_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(rl_ap_intersection_mask_path):
+            subprocess.run(["fslmaths", rl_ap_ssim_bin_trimmed, "-mas", transformed_roi_mask, rl_ap_intersection_mask_path])
+        voxels_in_roi_in_rl_ap_mask = subprocess.run(["fslstats", rl_ap_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_rl_ap_mask = float(voxels_in_roi_in_rl_ap_mask)
+        perc_roi_voxels_in_rl_ap_mask = (voxels_in_roi_in_rl_ap_mask / total_voxels_in_roi) * 100
+        rl_ap_ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [rl_ap_ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_rl_ap_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_rl_ap_mask]})
+        rl_ap_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/rl_ap_ssim_df.txt', sep='\t', index=False)
+        rl_ap_group_ssim_df = pd.concat([rl_ap_group_ssim_df, rl_ap_ssim_df], ignore_index=True)
+    rl_ap_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/3/group/rl_ap_group_ssim_df.txt', sep='\t', index=False)
+    rl_ap_ssim_indexes = rl_ap_group_ssim_df['ssim_index'].tolist()
+    rl_ap_ssim_mean = np.mean(rl_ap_ssim_indexes)
+    print(f"Mean RL-AP SSIM index for Stage 3: {rl_ap_ssim_mean}")
+
+    column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
+    ap_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running Stage 3 AP-PA SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            ap_pa_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return ap_pa_ssim_index
+        ap_pa_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ap_pa_ssim_map.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        flirted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_pa_run01.nii.gz'
+        if not os.path.exists(ap_pa_ssim_output_path):
+            ap_pa_ssim_index = calculate_ssim(flirted_pa_run01, flirted_ap_fieldmaps, ap_pa_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ap_pa_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            ap_pa_ssim_index = ssim_index_series.iloc[0]
+        ap_pa_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ap_pa_ssim_bin.nii.gz'
+        if not os.path.exists(ap_pa_ssim_bin):
+            subprocess.run(["fslmaths", ap_pa_ssim_output_path, "-thr", "0.8", "-binv", ap_pa_ssim_bin])
+        combined_ap_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/combined_ap_pa_mask.nii.gz'
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        flirted_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_pa_run01_bin.nii.gz'
+        if not os.path.exists(combined_ap_pa_mask):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-add', flirted_pa_run01_bin, combined_ap_pa_mask])
+        bin_ap_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/bin_ap_pa_mask.nii.gz'
+        if not os.path.exists(bin_ap_pa_mask):
+            subprocess.run(['fslmaths', combined_ap_pa_mask, '-bin', bin_ap_pa_mask])
+        ap_pa_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ap_pa_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(ap_pa_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', ap_pa_ssim_bin, '-mul', bin_ap_pa_mask, ap_pa_ssim_bin_trimmed])
+        voxels_in_whole_ap_pa_mask = subprocess.run(["fslstats", ap_pa_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_ap_pa_mask = float(voxels_in_whole_ap_pa_mask)
+        ap_pa_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ap_pa_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(ap_pa_intersection_mask_path):
+            subprocess.run(["fslmaths", ap_pa_ssim_bin_trimmed, "-mas", transformed_roi_mask, ap_pa_intersection_mask_path])
+        voxels_in_roi_in_ap_pa_mask = subprocess.run(["fslstats", ap_pa_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_ap_pa_mask = float(voxels_in_roi_in_ap_pa_mask)
+        perc_roi_voxels_in_ap_pa_mask = (voxels_in_roi_in_ap_pa_mask / total_voxels_in_roi) * 100
+        ap_pa_ssim_df = pd.DataFrame({'p_id': [p_id], 'ssim_index': [ap_pa_ssim_index], 'voxels_in_bin_ssim_mask': [voxels_in_whole_ap_pa_mask], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_ap_pa_mask]})
+        ap_pa_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ap_pa_ssim_df.txt', sep='\t', index=False)
+        ap_pa_group_ssim_df = pd.concat([ap_pa_group_ssim_df, ap_pa_ssim_df], ignore_index=True)
+    ap_pa_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/3/group/ap_pa_group_ssim_df.txt', sep='\t', index=False)
+    ap_pa_ssim_indexes = ap_pa_group_ssim_df['ssim_index'].tolist()
+    ap_pa_ssim_mean = np.mean(ap_pa_ssim_indexes)
+    print(f"Mean AP-PA SSIM index for Stage 3: {ap_pa_ssim_mean}")
+    
     column_headers = ['p_id', 'sequence', 'value']
     group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
-    for p_id in bad_participants:
+    for p_id in good_participants:
         print(f'Running Stage 3 voxel signal intensity analysis for {p_id}...')
         def extract_voxel_intensities(epi_image_path, mask_image_path):
             epi_img = nib.load(epi_image_path)
@@ -11972,56 +12041,59 @@ def susceptibility_analysis():
             roi_voxel_intensities = epi_data[mask_data]
             voxel_intensity_list = roi_voxel_intensities.tolist()
             return voxel_intensity_list
-        flirted_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run01.nii.gz'
-        flirted_run04 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_run04.nii.gz'
-        run01_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run01_trimmed_roi_mask.nii.gz'
-        run04_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/run04_trimmed_roi_mask.nii.gz'
-        run01_voxel_intensities = extract_voxel_intensities(flirted_run01, run01_trimmed_roi_mask)
-        run04_voxel_intensities = extract_voxel_intensities(flirted_run04, run04_trimmed_roi_mask)
-        values = run01_voxel_intensities + run04_voxel_intensities
-        sequence = ['run01'] * len(run01_voxel_intensities) + ['run04'] * len(run04_voxel_intensities)
-        subject = [f'{p_id}'] * len(run01_voxel_intensities) + [f'{p_id}'] * len(run04_voxel_intensities)
+        flirted_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_pa_run01.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        pa_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/pa_trimmed_roi_mask.nii.gz'
+        rl_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/rl_trimmed_roi_mask.nii.gz'
+        ap_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/ap_trimmed_roi_mask.nii.gz'
+        pa_voxel_intensities = extract_voxel_intensities(flirted_pa_run01, pa_trimmed_roi_mask)
+        rl_voxel_intensities = extract_voxel_intensities(flirted_rl_fieldmaps, rl_trimmed_roi_mask)
+        ap_voxel_intensities = extract_voxel_intensities(flirted_ap_fieldmaps, ap_trimmed_roi_mask)
+        values = pa_voxel_intensities + rl_voxel_intensities + ap_voxel_intensities
+        sequence = ['pa'] * len(pa_voxel_intensities) + ['rl'] * len(rl_voxel_intensities) + ['ap'] * len(ap_voxel_intensities)
+        subject = [f'{p_id}'] * len(pa_voxel_intensities) + [f'{p_id}'] * len(rl_voxel_intensities) + [f'{p_id}'] * len(ap_voxel_intensities)
         voxel_intensity_df = pd.DataFrame({'p_id': subject, 'sequence': sequence, 'value': values})
         voxel_intensity_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/3/{p_id}/voxel_intensity_df.txt', sep='\t', index=False)
         group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
     group_voxel_intensity_df.to_csv('analysis/susceptibility_analysis/run_comparisons/3/group/group_voxel_intensity_df.txt', sep='\t', index=False)
-    run01_means = []
-    run04_means= []
+    pa_means = []
+    rl_means= []
     p_values = []
-    run01_std_errors = []
-    run04_std_errors = []
-    for p_id in bad_participants:
-        filtered_run01 = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'run01')]
-        mean_value_run01 = filtered_run01['value'].mean()
-        run01_means.append(mean_value_run01)
-        filtered_run04 = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'run04')]
-        mean_value_run04 = filtered_run04['value'].mean()
-        run04_means.append(mean_value_run04)
-        anderson_run01 = stats.anderson(filtered_run01['value'])
-        anderson_run04 = stats.anderson(filtered_run04['value'])
+    pa_std_errors = []
+    rl_std_errors = []
+    for p_id in good_participants:
+        filtered_pa = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'pa')]
+        mean_value_pa = filtered_pa['value'].mean()
+        pa_means.append(mean_value_pa)
+        filtered_rl = group_voxel_intensity_df[(group_voxel_intensity_df['p_id'] == f'{p_id}') & (group_voxel_intensity_df['sequence'] == 'rl')]
+        mean_value_rl = filtered_rl['value'].mean()
+        rl_means.append(mean_value_rl)
+        anderson_pa = stats.anderson(filtered_pa['value'])
+        anderson_rl = stats.anderson(filtered_rl['value'])
         significance_level = 0.05
-        is_run01_normal = anderson_run01.statistic < anderson_pa.critical_values[
+        is_pa_normal = anderson_pa.statistic < anderson_pa.critical_values[
             anderson_pa.significance_level.tolist().index(significance_level * 100)]
-        is_run04_normal = anderson_run04.statistic < anderson_rl.critical_values[
+        is_rl_normal = anderson_rl.statistic < anderson_rl.critical_values[
             anderson_rl.significance_level.tolist().index(significance_level * 100)]
-        if is_run01_normal and is_run04_normal:
+        if is_pa_normal and is_rl_normal:
             print(f'Anderson-Darling test passed for {p_id} voxel intensity values. Running parametric t-test...')
-            _, p_value = stats.ttest_ind(filtered_run01['value'], filtered_run04['value'], equal_var=False)
+            _, p_value = stats.ttest_ind(filtered_pa['value'], filtered_rl['value'], equal_var=False)
             p_values.append(p_value)
         else:
             print(f'Anderson-Darling test failed for {p_id} voxel intensity values. Running non-parametric Mann Whitney U test...')
-            _, p_value = stats.mannwhitneyu(filtered_run01['value'], filtered_run04['value'], alternative='two-sided')
+            _, p_value = stats.mannwhitneyu(filtered_pa['value'], filtered_rl['value'], alternative='two-sided')
             p_values.append(p_value)
-        run01_std_error = np.std(filtered_run01['value']) / np.sqrt(len(filtered_run01['value']))
-        run01_std_errors.append(run01_std_error)
-        run04_std_error = np.std(filtered_run04['value']) / np.sqrt(len(filtered_run04['value']))
-        run04_std_errors.append(run04_std_error)
+        pa_std_error = np.std(filtered_pa['value']) / np.sqrt(len(filtered_pa['value']))
+        pa_std_errors.append(pa_std_error)
+        rl_std_error = np.std(filtered_rl['value']) / np.sqrt(len(filtered_rl['value']))
+        rl_std_errors.append(rl_std_error)
     plot_data = pd.DataFrame({
-        'Participant': bad_participants * 2,
-        'Mean_Value': run01_means + run04_means,
-        'Sequence': ['RUN01'] * len(bad_participants) + ['RUN04'] * len(bad_participants),
-        'Significance': ['' for _ in range(len(bad_participants) * 2)],
-        'Std_Error': run01_std_errors + run04_std_errors
+        'Participant': good_participants * 2,
+        'Mean_Value': pa_means + rl_means,
+        'Sequence': ['PA'] * len(good_participants) + ['RL'] * len(good_participants),
+        'Significance': ['' for _ in range(len(good_participants) * 2)],
+        'Std_Error': pa_std_errors + rl_std_errors
     })
     for idx, p_value in enumerate(p_values):
         if p_value < 0.001:
@@ -12034,9 +12106,9 @@ def susceptibility_analysis():
         ggplot(plot_data, aes(x='Participant', y='Mean_Value', fill='Sequence')) +
         geom_bar(stat='identity', position='dodge') +
         geom_errorbar(aes(ymin='Mean_Value - Std_Error', ymax='Mean_Value + Std_Error'), position=position_dodge(width=0.9), width=0.2, color='black') +
+        scale_fill_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
         theme_classic() +
         labs(title='Mean SCC Voxel Intensity', x='Participant', y='Mean SCC Signal Intensity') +
-        theme(axis_text_x=element_text(rotation=45, hjust=1), text=element_text(size=12, color='black'), axis_title=element_text(size=12)) +
         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
         geom_text(
             aes(x='Participant', y='Mean_Value', label='Significance'),
@@ -12045,30 +12117,37 @@ def susceptibility_analysis():
             size=12,
             ha='center',
             va='bottom',
-            show_legend=False))
-    voxel_intensity_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/voxel_intensity_plot.png')
-    run01_means_overall = np.mean(run01_means)
-    run04_means_overall = np.mean(run04_means)
-    run01_std_error_overall = np.std(run01_means) / np.sqrt(len(run01_means))
-    run04_std_error_overall = np.std(run04_means) / np.sqrt(len(run04_means))
-    _, run01_means_overall_shap_p = stats.shapiro(run01_means)
-    _, run04_means_overall_shap_p = stats.shapiro(run04_means)
-    if run01_means_overall_shap_p > 0.05 and run04_means_overall_shap_p > 0.05:
+            show_legend=False) +
+        theme(
+            axis_text_x=element_text(rotation=45, hjust=1),
+            axis_title=element_text(size=14),    # Axis titles
+            axis_text=element_text(size=12),     # Tick labels
+            legend_text=element_text(size=12),   # Legend text
+            legend_title=element_text(size=14))  # Legend title
+        )
+    voxel_intensity_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/voxel_intensity_plot.png', dpi=300)
+    pa_means_overall = np.mean(pa_means)
+    rl_means_overall = np.mean(rl_means)
+    pa_std_error_overall = np.std(pa_means) / np.sqrt(len(pa_means))
+    rl_std_error_overall = np.std(rl_means) / np.sqrt(len(rl_means))
+    _, pa_means_overall_shap_p = stats.shapiro(pa_means)
+    _, rl_means_overall_shap_p = stats.shapiro(rl_means)
+    if pa_means_overall_shap_p > 0.05 and rl_means_overall_shap_p > 0.05:
         print(f'Shapiro-Wilk test passed for voxel intensity values. Running parametric t-test...')
-        _, p_value = stats.ttest_rel(run01_means, run04_means)
+        _, p_value = stats.ttest_rel(pa_means, rl_means)
         print(f"T-test p-value: {p_value}")
     else:
         print(f'Shapiro-Wilk test failed for voxel intensity values. Running non-parametric Wilcoxon test...')
-        _, p_value = stats.wilcoxon(run01_means, run04_means)
+        _, p_value = stats.wilcoxon(pa_means, rl_means)
         print(f"Wilcoxon test p-value: {p_value}")
-    plot_data = pd.DataFrame({'p_id': bad_participants, 'run01_values': run01_means, 'run04_values': run04_means})
-    data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['run01_values', 'run04_values'], var_name='sequence', value_name='value')
-    data_long['sequence'] = data_long['sequence'].map({'run01_values': 'RUN01', 'run04_values': 'RUN04'})
+    plot_data = pd.DataFrame({'p_id': good_participants, 'pa_values': pa_means, 'rl_values': rl_means})
+    data_long = pd.melt(plot_data, id_vars=['p_id'], value_vars=['pa_values', 'rl_values'], var_name='sequence', value_name='value')
+    data_long['sequence'] = data_long['sequence'].map({'pa_values': 'PA', 'rl_values': 'RL'})
     group_voxel_intensity_ladder_plot = (
         ggplot(data_long, aes(x='sequence', y='value', group='p_id')) +
         geom_line(aes(group='p_id'), color='black', size=1) +
         geom_point(aes(color='sequence'), size=4) +
-        scale_color_manual(values={'CORR': '#B22222', 'UNCORR': '#67B7EB'}) +
+        scale_color_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
         theme_classic() +
         theme(
             panel_grid_major=element_blank(), 
@@ -12081,21 +12160,26 @@ def susceptibility_analysis():
             legend_text=element_text(size=12,color= 'black'),   # Legend text
             legend_title=element_text(size=14, color='black')  # Legend title
         ) +
-        labs(title='Ladder Plot of RUN01 and RUN04 Sequences',
+        labs(title='Ladder Plot of PA and RL Sequences',
             x='Sequence',
             y='Mean SCC Signal Intensity') +
-        scale_x_discrete(limits=['RUN01', 'RUN04']) +
+        scale_x_discrete(limits=['PA', 'RL']) +
         scale_y_continuous()
     )
-    group_voxel_intensity_ladder_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/group_voxel_intensity_ladder_plot.png', dpi=300)
-    plot_data = pd.DataFrame({'Sequence': ['RUN01', 'RUN04'], 'Mean': [run01_means_overall, run04_means_overall], 'Std_Error': [run01_std_error_overall, run04_std_error_overall]})
+    group_voxel_intensity_ladder_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/group_voxel_intensity_ladder_plot.png', dpi=300)                          
+    plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Mean': [pa_means_overall, rl_means_overall], 'Std_Error': [pa_std_error_overall, rl_std_error_overall]})
     group_voxel_intensity_plot = (ggplot(plot_data, aes(x='Sequence', y='Mean', fill='Sequence')) + 
                         geom_bar(stat='identity', position='dodge') +
                         geom_errorbar(aes(ymin='Mean - Std_Error', ymax='Mean + Std_Error'), width=0.2, color='black') +
                         theme_classic() +
                         labs(title='Mean of Voxel Intensities Across Participants', y='Mean SCC Signal Intensity') +
                         scale_y_continuous(expand=(0, 0), limits=[0,350]) +
-                        scale_fill_manual(values={'PA': '#DB5F57', 'RL': '#57D3DB'})
+                        scale_fill_manual(values={'PA': '#67B7EB', 'RL': '#B22222'}) +
+                        theme(
+                            axis_title=element_text(size=14),    # Axis titles
+                            axis_text=element_text(size=12),     # Tick labels
+                            legend_text=element_text(size=12),   # Legend text
+                            legend_title=element_text(size=14))  # Legend title
                         )
     if p_value < 0.001:
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="***", size=16, color="black") + \
@@ -12106,8 +12190,8 @@ def susceptibility_analysis():
     elif p_value < 0.05:
         group_voxel_intensity_plot = group_voxel_intensity_plot + annotate("text", x=1.5, y=max(plot_data['Mean']) + 40, label="*", size=16, color="black") + \
             annotate("segment", x=1, xend=2, y=max(plot_data['Mean']) +30, yend=max(plot_data['Mean']) + 30, color="black")    
-    group_voxel_intensity_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/group_voxel_intensity_plot.png')
-
+    group_voxel_intensity_plot.save('analysis/susceptibility_analysis/run_comparisons/3/group/group_voxel_intensity_plot.png', dpi=300)
+    
     # Step 9: Testing FNIRT parameters.
     print("\n###### STEP 9: TESTING FNIRT PARAMETERS ######")   
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']

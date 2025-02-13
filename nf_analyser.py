@@ -10572,7 +10572,7 @@ def susceptibility_analysis():
         flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps.nii.gz'
         flirted_uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01.nii.gz'
         if not os.path.exists(ap_uncorrected_pa_ssim_output_path):
-            ap_pa_ssim_index = calculate_ssim(flirted_uncorrected_pa_run01, flirted_ap_fieldmaps, ap_uncorrected_pa_ssim_output_path)
+            ap_uncorrected_pa_ssim_index = calculate_ssim(flirted_uncorrected_pa_run01, flirted_ap_fieldmaps, ap_uncorrected_pa_ssim_output_path)
         else:
             df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_uncorrected_pa_ssim_df.txt', delimiter='\t')
             ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
@@ -10740,7 +10740,7 @@ def susceptibility_analysis():
         flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps.nii.gz'
         flirted_corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01.nii.gz'
         if not os.path.exists(ap_corrected_pa_ssim_output_path):
-            ap_pa_ssim_index = calculate_ssim(flirted_corrected_pa_run01, flirted_ap_fieldmaps, ap_corrected_pa_ssim_output_path)
+            ap_corrected_pa_ssim_index = calculate_ssim(flirted_corrected_pa_run01, flirted_ap_fieldmaps, ap_corrected_pa_ssim_output_path)
         else:
             df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_corrected_pa_ssim_df.txt', delimiter='\t')
             ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']

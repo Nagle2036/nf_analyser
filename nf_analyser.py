@@ -10432,7 +10432,7 @@ def susceptibility_analysis():
         all_group_folder = 'analysis/susceptibility_analysis/run_comparisons/all/group'
         os.makedirs(all_group_folder, exist_ok=True)
         
-        run01_first5 = f'analysis/susceptibility_analysis/all/{p_id}/run01_first5.nii.gz'
+        run01_first5 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/run01_first5.nii.gz'
         run01 = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
         if not os.path.exists(run01_first5):
             subprocess.run(['fslroi', run01, run01_first5, '0', '5'])

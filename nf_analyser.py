@@ -10420,6 +10420,192 @@ def susceptibility_analysis():
             else:
                 print("Fieldmaps already calculated. Skipping process.")
 
+    # Step 6: Testing for alternative distortion correction method.
+    print("\n###### STEP 6: TESTING FOR ALTERNATE DISTORTION CORRECTION METHOD ######")
+    good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
+    for p_id in good_participants:
+        print(f"Preparing files for {p_id}...")
+        all_folder = 'analysis/susceptibility_analysis/run_comparisons/all'
+        os.makedirs(all_folder, exist_ok=True)
+        all_participant_folder = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}'
+        os.makedirs(all_participant_folder, exist_ok=True)
+        all_group_folder = 'analysis/susceptibility_analysis/run_comparisons/all/group'
+        os.makedirs(all_group_folder, exist_ok=True)
+        
+        run01_first5 = f'analysis/susceptibility_analysis/all/{p_id}/run01_first5.nii.gz'
+        run01 = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
+        if not os.path.exists(run01_first5):
+            subprocess.run(['fslroi', run01, run01_first5, '0', '5'])
+        rl_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/rl_fieldmaps.nii'
+        ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/ap_fieldmaps.nii'
+        
+        averaged_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/averaged_pa_run01.nii.gz'
+        averaged_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/averaged_rl_fieldmaps.nii.gz'
+        averaged_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/averaged_ap_fieldmaps.nii.gz'
+
+        if not os.path.exists(averaged_pa_run01) or not os.path.exists(averaged_rl_fieldmaps) or not os.path.exists(averaged_ap_fieldmaps):
+            subprocess.run(['fslmaths', run01_first5, '-Tmean', averaged_pa_run01])
+            subprocess.run(['fslmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
+            subprocess.run(['fslmaths', ap_fieldmaps, '-Tmean', averaged_ap_fieldmaps])
+
+        uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/betted_pa_run01.nii.gz'
+        betted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/betted_rl_fieldmaps.nii.gz'
+        betted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/betted_ap_fieldmaps.nii.gz'
+        if not os.path.exists(uncorrected_pa_run01) or not os.path.exists(betted_rl_fieldmaps) or not os.path.exists(betted_ap_fieldmaps):
+            subprocess.run(["bet", averaged_pa_run01, uncorrected_pa_run01, "-m", "-R"])
+            subprocess.run(["bet", averaged_rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
+            subprocess.run(["bet", averaged_ap_fieldmaps, betted_ap_fieldmaps, "-m", "-R"])
+
+        corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_run.nii.gz'
+        if not os.path.exists(corrected_pa_run01):
+            subprocess.run(["applytopup", f"--imain={uncorrected_pa_run01}", f"--datain=analysis/susceptibility_analysis/data/{p_id}/acqparams.txt", "--inindex=6", f"--topup=analysis/susceptibility_analysis/data/{p_id}/topup_{p_id}", "--method=jac", f"--out={corrected_pa_run01}"])
+        
+        flirted_uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01.nii.gz'
+        flirted_corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        t1_flirted_uncorrected_pa_run01_transformation = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/t1_flirted_uncorrected_pa_run01_transformation.mat'
+        t1_flirted_corrected_pa_run01_transformation = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/t1_flirted_corrected_pa_run01_transformation.mat'
+        t1_flirted_rl_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/t1_flirted_rl_fieldmaps_transformation.mat'
+        t1_flirted_ap_fieldmaps_transformation = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/t1_flirted_ap_fieldmaps_transformation.mat'
+        structural_brain = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii'
+        if not os.path.exists(flirted_uncorrected_pa_run01) or not os.path.exists(flirted_corrected_pa_run01) or not os.path.exists(flirted_rl_fieldmaps) or not os.path.exists(flirted_ap_fieldmaps):
+            subprocess.run(["flirt", "-in", uncorrected_pa_run01, "-ref", structural_brain, "-out", flirted_uncorrected_pa_run01, "-omat", t1_flirted_uncorrected_pa_run01_transformation])
+            subprocess.run(["flirt", "-in", corrected_pa_run01, "-ref", structural_brain, "-out", flirted_corrected_pa_run01, "-omat", t1_flirted_corrected_pa_run01_transformation])
+            subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", structural_brain, "-out", flirted_rl_fieldmaps, "-omat", t1_flirted_rl_fieldmaps_transformation])
+            subprocess.run(["flirt", "-in", betted_ap_fieldmaps, "-ref", structural_brain, "-out", flirted_ap_fieldmaps, "-omat", t1_flirted_ap_fieldmaps_transformation])
+
+        def read_roi_file(roi_file):
+            voxel_coordinates = []
+            with open(roi_file, 'r') as file:
+                content = file.read()
+                matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
+                for match in matches:
+                    coordinates = match.split()
+                    voxel_coordinates.append(
+                        (int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
+            return voxel_coordinates
+        path = f'data/raw_data/{p_id}/data/neurofeedback'
+        cisc_folder = None
+        for folder_name in os.listdir(path):
+            if "CISC" in folder_name:
+                cisc_folder = folder_name
+                break
+        if cisc_folder is None:
+            print("No 'CISC' folder found in the 'neurofeedback' directory.")
+            exit(1)
+        roi_file = f'data/raw_data/{p_id}/data/neurofeedback/{cisc_folder}/depression_neurofeedback/target_folder_run-1/depnf_run-1.roi'
+        voxel_coordinates = read_roi_file(roi_file)
+        averaged_run = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/averaged_run.nii.gz'
+        if not os.path.exists(averaged_run):
+            run = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
+            subprocess.run(['fslmaths', run, '-Tmean', averaged_run])
+        functional_image_info = nib.load(averaged_run)
+        functional_dims = functional_image_info.shape
+        binary_volume = np.zeros(functional_dims)
+        for voxel in voxel_coordinates:
+            x, y, z = voxel
+            binary_volume[x, y, z] = 1
+        binary_volume = np.flip(binary_volume, axis=1)
+        functional_affine = functional_image_info.affine
+        binary_mask = nib.Nifti1Image(binary_volume, affine=functional_affine)
+        nib.save(binary_mask, f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/run01_subject_space_ROI.nii.gz')
+        roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/run01_subject_space_ROI.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/transformed_roi_mask.nii.gz'
+        temp_file = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/temp_file.nii.gz'
+        roi_transformation = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/roi_transformation.mat'
+        subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', temp_file, '-omat', roi_transformation])
+        subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', roi_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
+
+        flirted_uncorrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01_bin.nii.gz'
+        if not os.path.exists(flirted_uncorrected_pa_run01_bin):
+            subprocess.run(['fslmaths', flirted_uncorrected_pa_run01, '-thr', '100', '-bin', flirted_uncorrected_pa_run01_bin])
+        flirted_corrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01_bin.nii.gz'
+        if not os.path.exists(flirted_corrected_pa_run01_bin):
+            subprocess.run(['fslmaths', flirted_corrected_pa_run01, '-thr', '100', '-bin', flirted_corrected_pa_run01_bin])
+        flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
+        if not os.path.exists(flirted_rl_fieldmaps_bin):
+            subprocess.run(['fslmaths', flirted_rl_fieldmaps, '-thr', '100', '-bin', flirted_rl_fieldmaps_bin])
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        if not os.path.exists(flirted_ap_fieldmaps_bin):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps, '-thr', '100', '-bin', flirted_ap_fieldmaps_bin])
+        uncorrected_pa_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_bin_inv.nii.gz'
+        if not os.path.exists(uncorrected_pa_bin_inv):
+            subprocess.run(['fslmaths', flirted_uncorrected_pa_run01_bin, '-sub', '1', '-abs', uncorrected_pa_bin_inv])
+        corrected_pa_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_pa_bin_inv.nii.gz'
+        if not os.path.exists(corrected_pa_bin_inv):
+            subprocess.run(['fslmaths', flirted_corrected_pa_run01_bin, '-sub', '1', '-abs', corrected_pa_bin_inv])
+        rl_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_bin_inv.nii.gz'
+        if not os.path.exists(rl_bin_inv):
+            subprocess.run(['fslmaths', flirted_rl_fieldmaps_bin, '-sub', '1', '-abs', rl_bin_inv])
+        ap_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_bin_inv.nii.gz'
+        if not os.path.exists(ap_bin_inv):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-sub', '1', '-abs', ap_bin_inv])
+
+        uncorrected_pa_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', uncorrected_pa_bin_inv, '-V'], capture_output=True, text=True)
+        if uncorrected_pa_result.returncode == 0:
+            uncorrected_pa_result_output = uncorrected_pa_result.stdout.strip()
+        else:
+            print("Error executing fslstats command.")
+        uncorrected_pa_result_output_values = uncorrected_pa_result_output.split()
+        uncorrected_pa_voxels_outside = float(uncorrected_pa_result_output_values[0])
+        corrected_pa_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', corrected_pa_bin_inv, '-V'], capture_output=True, text=True)
+        if corrected_pa_result.returncode == 0:
+            corrected_pa_result_output = corrected_pa_result.stdout.strip()
+        else:
+            print("Error executing fslstats command.")
+        corrected_pa_result_output_values = corrected_pa_result_output.split()
+        corrected_pa_voxels_outside = float(corrected_pa_result_output_values[0])
+        rl_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', rl_bin_inv, '-V'], capture_output=True, text=True)
+        if rl_result.returncode == 0:
+            rl_result_output = rl_result.stdout.strip()
+        else:
+            print("Error executing fslstats command.")
+        rl_result_output_values = rl_result_output.split()
+        rl_voxels_outside = float(rl_result_output_values[0])
+        ap_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', ap_bin_inv, '-V'], capture_output=True, text=True)
+        if ap_result.returncode == 0:
+            ap_result_output = ap_result.stdout.strip()
+        else:
+            print("Error executing fslstats command.")
+        ap_result_output_values = ap_result_output.split()
+        ap_voxels_outside = float(ap_result_output_values[0])
+        result1 = subprocess.run(['fslstats', transformed_roi_mask, '-V'], capture_output=True, text=True)
+        if result1.returncode == 0:
+            result1_output = result1.stdout.strip()
+        else:
+            print("Error executing fslstats command.")
+        result1_output_values = result1_output.split()
+        total_voxels_in_roi = float(result1_output_values[0])
+
+        perc_outside_uncorrected_pa = (uncorrected_pa_voxels_outside / total_voxels_in_roi) * 100
+        perc_outside_uncorrected_pa = round(perc_outside_uncorrected_pa, 2)
+        perc_outside_corrected_pa = (corrected_pa_voxels_outside / total_voxels_in_roi) * 100
+        perc_outside_corrected_pa = round(perc_outside_corrected_pa, 2)
+        perc_outside_rl = (rl_voxels_outside / total_voxels_in_roi) * 100
+        perc_outside_rl = round(perc_outside_rl, 2)
+        perc_outside_ap = (ap_voxels_outside / total_voxels_in_roi) * 100
+        perc_outside_ap = round(perc_outside_ap, 2)
+
+        perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_uncorrected_pa': [perc_outside_uncorrected_pa], 'perc_outside_corrected_pa': [perc_outside_corrected_pa], 'perc_outside_rl': [perc_outside_rl], 'perc_outside_ap': [perc_outside_ap]})
+        perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/perc_outside_df.txt', sep='\t', index=False)
+        group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
+        uncorrected_pa_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_trimmed_roi_mask.nii.gz'
+        corrected_pa_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_pa_trimmed_roi_mask.nii.gz'
+        rl_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_trimmed_roi_mask.nii.gz'
+        ap_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_trimmed_roi_mask.nii.gz'
+        if not os.path.exists(uncorrected_pa_trimmed_roi_mask) or not os.path.exists(corrected_pa_trimmed_roi_mask) or not os.path.exists(rl_trimmed_roi_mask) or not os.path.exists(ap_trimmed_roi_mask):
+            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_uncorrected_pa_run01_bin, uncorrected_pa_trimmed_roi_mask])
+            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_corrected_pa_run01_bin, corrected_pa_trimmed_roi_mask])
+            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
+            subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_ap_fieldmaps_bin, ap_trimmed_roi_mask])
+    group_perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/group/group_perc_outside_df.txt', sep='\t', index=False)
+
+
+
+
+
+
     # Step 6: Test quality of alternate distortion correction method (Stage 1).
     print("\n###### STEP 6: TESTING ALTERNATE DISTORTION CORRECTION METHOD (STAGE 1) ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
@@ -10574,64 +10760,64 @@ def susceptibility_analysis():
             subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
             subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_ap_fieldmaps_bin, ap_trimmed_roi_mask])
     group_perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/1/group/group_perc_outside_df.txt', sep='\t', index=False)
-    plot_data = pd.DataFrame({
-        'Participant': good_participants * 2,
-        'Perc_Outside': perc_outside_pa_values + perc_outside_rl_values,
-        'Sequence': ['PA'] * len(good_participants) + ['RL'] * len(good_participants)
-    })
-    perc_outside_plot = (
-        ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
-        geom_bar(stat='identity', position='dodge') +
-        theme_classic() +
-        scale_fill_manual(values=['#B22222', '#67B7EB']) +
-        labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y=r'% of SCC Voxels in Signal Dropout') +
-        scale_y_continuous(expand=(0, 0)) +
-        theme(
-        axis_text_x=element_text(rotation=45, hjust=1),
-        axis_title=element_text(size=14),    # Axis titles
-        axis_text=element_text(size=12),     # Tick labels
-        legend_text=element_text(size=12),   # Legend text
-        legend_title=element_text(size=14))  # Legend title
-    )
-    perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/perc_outside_plot.png', dpi=300)
-    perc_outside_pa_overall = np.mean(perc_outside_pa_values)
-    perc_outside_rl_overall = np.mean(perc_outside_rl_values)
-    pa_std_error = np.std(perc_outside_pa_values) / np.sqrt(len(perc_outside_pa_values))
-    rl_std_error = np.std(perc_outside_rl_values) / np.sqrt(len(perc_outside_rl_values))
-    _, perc_outside_pa_overall_shap_p = stats.shapiro(perc_outside_pa_values)
-    _, perc_outside_rl_overall_shap_p = stats.shapiro(perc_outside_rl_values)
-    if perc_outside_pa_overall_shap_p > 0.05 and perc_outside_rl_overall_shap_p > 0.05:
-        print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
-        _, p_value = stats.ttest_ind(perc_outside_pa_values, perc_outside_rl_values)
-        print(f"T-test p-value: {p_value}")
-    else:
-        print(f'Shapiro-Wilk test failed for perc_outside values. Running non-parametric Mann-Whitney U test...')
-        _, p_value = stats.mannwhitneyu(perc_outside_pa_values, perc_outside_rl_values)
-        print(f"Mann-Whitney U test p-value: {p_value}")
-    plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Perc_Outside': [perc_outside_pa_overall, perc_outside_rl_overall], 'Std_Error': [pa_std_error, rl_std_error]})
-    group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside', fill='Sequence')) + 
-                        geom_bar(stat='identity', position='dodge') +
-                        geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
-                        theme_classic() +
-                        labs(title='Percentage of Voxels in Signal Dropout Regions', y=r'% of SCC Voxels in Signal Dropout') +
-                        scale_y_continuous(expand=(0, 0), limits=[0,10], breaks=[0.0, 2.5, 5.0, 7.5, 10.0]) +
-                        scale_fill_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
-                        theme(
-                            axis_title=element_text(size=14),    # Axis titles
-                            axis_text=element_text(size=12),     # Tick labels
-                            legend_text=element_text(size=12),   # Legend text
-                            legend_title=element_text(size=14))  # Legend title
-                        )
-    if p_value < 0.001:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
-    elif p_value < 0.01:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="**", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
-    elif p_value < 0.05:
-        group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="*", size=16, color="black") + \
-            annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")    
-    group_perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_perc_outside_plot.png', dpi=300)
+    # plot_data = pd.DataFrame({
+    #     'Participant': good_participants * 2,
+    #     'Perc_Outside': perc_outside_pa_values + perc_outside_rl_values,
+    #     'Sequence': ['PA'] * len(good_participants) + ['RL'] * len(good_participants)
+    # })
+    # perc_outside_plot = (
+    #     ggplot(plot_data, aes(x='Participant', y='Perc_Outside', fill='Sequence')) +
+    #     geom_bar(stat='identity', position='dodge') +
+    #     theme_classic() +
+    #     scale_fill_manual(values=['#B22222', '#67B7EB']) +
+    #     labs(title='Percentage of Voxels in Signal Dropout Regions', x='Participant', y=r'% of SCC Voxels in Signal Dropout') +
+    #     scale_y_continuous(expand=(0, 0)) +
+    #     theme(
+    #     axis_text_x=element_text(rotation=45, hjust=1),
+    #     axis_title=element_text(size=14),    # Axis titles
+    #     axis_text=element_text(size=12),     # Tick labels
+    #     legend_text=element_text(size=12),   # Legend text
+    #     legend_title=element_text(size=14))  # Legend title
+    # )
+    # perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/perc_outside_plot.png', dpi=300)
+    # perc_outside_pa_overall = np.mean(perc_outside_pa_values)
+    # perc_outside_rl_overall = np.mean(perc_outside_rl_values)
+    # pa_std_error = np.std(perc_outside_pa_values) / np.sqrt(len(perc_outside_pa_values))
+    # rl_std_error = np.std(perc_outside_rl_values) / np.sqrt(len(perc_outside_rl_values))
+    # _, perc_outside_pa_overall_shap_p = stats.shapiro(perc_outside_pa_values)
+    # _, perc_outside_rl_overall_shap_p = stats.shapiro(perc_outside_rl_values)
+    # if perc_outside_pa_overall_shap_p > 0.05 and perc_outside_rl_overall_shap_p > 0.05:
+    #     print(f'Shapiro-Wilk test passed for perc_outside values. Running parametric t-test...')
+    #     _, p_value = stats.ttest_ind(perc_outside_pa_values, perc_outside_rl_values)
+    #     print(f"T-test p-value: {p_value}")
+    # else:
+    #     print(f'Shapiro-Wilk test failed for perc_outside values. Running non-parametric Mann-Whitney U test...')
+    #     _, p_value = stats.mannwhitneyu(perc_outside_pa_values, perc_outside_rl_values)
+    #     print(f"Mann-Whitney U test p-value: {p_value}")
+    # plot_data = pd.DataFrame({'Sequence': ['PA', 'RL'], 'Perc_Outside': [perc_outside_pa_overall, perc_outside_rl_overall], 'Std_Error': [pa_std_error, rl_std_error]})
+    # group_perc_outside_plot = (ggplot(plot_data, aes(x='Sequence', y='Perc_Outside', fill='Sequence')) + 
+    #                     geom_bar(stat='identity', position='dodge') +
+    #                     geom_errorbar(aes(ymin='Perc_Outside - Std_Error', ymax='Perc_Outside + Std_Error'), width=0.2, color='black') +
+    #                     theme_classic() +
+    #                     labs(title='Percentage of Voxels in Signal Dropout Regions', y=r'% of SCC Voxels in Signal Dropout') +
+    #                     scale_y_continuous(expand=(0, 0), limits=[0,10], breaks=[0.0, 2.5, 5.0, 7.5, 10.0]) +
+    #                     scale_fill_manual(values={'PA': '#B22222', 'RL': '#67B7EB'}) +
+    #                     theme(
+    #                         axis_title=element_text(size=14),    # Axis titles
+    #                         axis_text=element_text(size=12),     # Tick labels
+    #                         legend_text=element_text(size=12),   # Legend text
+    #                         legend_title=element_text(size=14))  # Legend title
+    #                     )
+    # if p_value < 0.001:
+    #     group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="***", size=16, color="black") + \
+    #         annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
+    # elif p_value < 0.01:
+    #     group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="**", size=16, color="black") + \
+    #         annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")
+    # elif p_value < 0.05:
+    #     group_perc_outside_plot = group_perc_outside_plot + annotate("text", x=1.5, y=max(plot_data['Perc_Outside']) + 3.5, label="*", size=16, color="black") + \
+    #         annotate("segment", x=1, xend=2, y=max(plot_data['Perc_Outside']) + 3, yend=max(plot_data['Perc_Outside']) + 3, color="black")    
+    # group_perc_outside_plot.save('analysis/susceptibility_analysis/run_comparisons/1/group/group_perc_outside_plot.png', dpi=300)
     
     column_headers = ['p_id', 'ssim_index', 'voxels_in_bin_ssim_mask', 'perc_roi_voxels_in_bin_ssim_mask']
     pa_rl_group_ssim_df = pd.DataFrame(columns = column_headers) 

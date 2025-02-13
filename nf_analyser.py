@@ -10602,7 +10602,7 @@ def susceptibility_analysis():
     group_perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/group/group_perc_outside_df.txt', sep='\t', index=False)
 
 
-
+    sys.exit()
 
 
 

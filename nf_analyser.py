@@ -9878,165 +9878,8 @@ def susceptibility_analysis():
         pngs_folder = f'analysis/susceptibility_analysis/data/{p_id}/pngs'
         os.makedirs(pngs_folder, exist_ok=True)
     print("Directories created.")
-    
-    # Step 2: Calculate percentage of ROI voxels outside the brain during neurofeedback.
-    # print("\n###### STEP 2: CALCULATE PERCENTAGE OF ROI VOXELS OUTSIDE BRAIN DURING NEUROFEEDBACK ######")
-    # def get_sequence_numbers(file_name):
-    #     parts = file_name.split('_')
-    #     return int(parts[1]), int(parts[2].split('.')[0])
-    # def copy_files(src_folder, dest_folder, sequence_number):
-    #     src_pattern = f'*_{sequence_number:06d}_*.dcm'
-    #     matching_files = [f for f in os.listdir(src_folder) if fnmatch.fnmatch(f, src_pattern)]
-    #     for file in matching_files:
-    #         src_path = os.path.join(src_folder, file)
-    #         dest_path = os.path.join(dest_folder, file)
-    #         shutil.copy(src_path, dest_path)
-    # def read_roi_file(roi_file):
-    #     voxel_coordinates = []
-    #     with open(roi_file, 'r') as file:
-    #         content = file.read()
-    #         matches = re.findall(r'(?<=\n)\s*\d+\s+\d+\s+\d+', content)
-    #         for match in matches:
-    #             coordinates = match.split()
-    #             voxel_coordinates.append((int(coordinates[0]), int(coordinates[1]), int(coordinates[2])))
-    #     return voxel_coordinates
-    # def process_participant(p_id, runs):
-    #     path = f'data/raw_data/{p_id}/data/neurofeedback'
-    #     cisc_folder = None
-    #     for folder_name in os.listdir(path):
-    #         if "CISC" in folder_name:
-    #             cisc_folder = folder_name
-    #             break
-    #     if cisc_folder is None:
-    #         print(f"No 'CISC' folder found in the 'neurofeedback' directory for participant {p_id}.")
-    #         return
-    #     src_folder = os.path.join(path, cisc_folder)
-    #     analysis_folder = os.path.join(os.getcwd(), p_id, 'analysis', 'susceptibility')
-    #     dicoms_folder = os.path.join(analysis_folder, 'susc_scc', 'dicoms')
-    #     os.makedirs(dicoms_folder, exist_ok=True)
-    #     run_folders = {f"run0{num}_dicoms": os.path.join(dicoms_folder, f"run0{num}_dicoms") for num in range(1, 5)}
-    #     for folder in run_folders.values():
-    #         os.makedirs(folder, exist_ok=True)
-    #     files = [f for f in os.listdir(src_folder) if f.endswith('.dcm')]
-    #     seq_vol_counts = {}
-    #     for file in files:
-    #         sequence_number, volume_number = get_sequence_numbers(file)
-    #         if sequence_number not in seq_vol_counts:
-    #             seq_vol_counts[sequence_number] = []
-    #         seq_vol_counts[sequence_number].append(volume_number)
-    #     seq_210 = [seq for seq, vols in seq_vol_counts.items() if len(vols) == 210]
-    #     seq_238 = [seq for seq, vols in seq_vol_counts.items() if len(vols) == 238]
-    #     min_210, max_210 = min(seq_210), max(seq_210)
-    #     min_238, max_238 = min(seq_238), max(seq_238)
-    #     if not os.listdir(run_folders["run01_dicoms"]):
-    #         print(f"Copying Run01 dicoms for participant {p_id}...")
-    #         copy_files(src_folder, run_folders["run01_dicoms"], min_210)
-    #     if not os.listdir(run_folders["run02_dicoms"]):
-    #         print(f"Copying Run02 dicoms for participant {p_id}...")
-    #         copy_files(src_folder, run_folders["run02_dicoms"], min_238)
-    #     if not os.listdir(run_folders["run03_dicoms"]):
-    #         print(f"Copying Run03 dicoms for participant {p_id}...")
-    #         copy_files(src_folder, run_folders["run03_dicoms"], max_238)
-    #     if not os.listdir(run_folders["run04_dicoms"]):
-    #         print(f"Copying Run04 dicoms for participant {p_id}...")
-    #         copy_files(src_folder, run_folders["run04_dicoms"], max_210)
-    #     output_folder = os.path.join(analysis_folder, 'susc_scc', 'niftis')
-    #     os.makedirs(output_folder, exist_ok=True)
-    #     for run in runs:
-    #         destination_folder = run_folders[f"{run}_dicoms"]
-    #         output_file = os.path.join(output_folder, f"{run}.nii")
-    #         if not os.path.exists(output_file):
-    #             print(f"Converting {run.upper()} DICOM files to Nifti format for participant {p_id}...")
-    #             subprocess.run(['dcm2niix', '-o', output_folder, '-f', f"{run}", '-b', 'n', destination_folder])
-    #         averaged_file = os.path.join(output_folder, f"{run}_averaged.nii.gz")
-    #         if not os.path.exists(averaged_file):
-    #             subprocess.run(['fslmaths', output_file, '-Tmean', averaged_file])
-    #     run_num = ['1', '2', '3', '4']
-    #     for num in run_num:
-    #         roi_file = os.path.join(os.getcwd(), p_id, 'data', 'neurofeedback', cisc_folder, 'depression_neurofeedback', f'target_folder_run-{num}', f'depnf_run-{num}.roi')
-    #         voxel_coordinates = read_roi_file(roi_file)
-    #         functional_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/run0{num}_averaged.nii.gz'
-    #         functional_image_info = nib.load(functional_image)
-    #         functional_dims = functional_image_info.shape
-    #         binary_volume = np.zeros(functional_dims)
-    #         for voxel in voxel_coordinates:
-    #             x, y, z = voxel
-    #             binary_volume[x, y, z] = 1
-    #         binary_volume = np.flip(binary_volume, axis=1)
-    #         functional_affine = functional_image_info.affine
-    #         binary_nifti = nib.Nifti1Image(binary_volume, affine=functional_affine)
-    #         nib.save(binary_nifti, f'{p_id}/analysis/susceptibility/susc_scc/niftis/run0{num}_subject_space_ROI.nii.gz')
-    #     for run in runs:
-    #         betted_file = os.path.join(output_folder, f"{run}_averaged_betted.nii.gz")
-    #         if not os.path.exists(betted_file):
-    #             subprocess.run(['bet', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged.nii.gz', betted_file, '-R'])
-    #         functional_image_betted = f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted.nii.gz'
-    #         binary_nifti_image = f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz'
-    #         screenshot_file = f'{p_id}/analysis/susceptibility/susc_scc/ROI_on_{run}_EPI.png'
-    #         binary_img = nib.load(binary_nifti_image)
-    #         binary_data = binary_img.get_fdata()
-    #         indices = np.nonzero(binary_data)
-    #         center_x = int(np.mean(indices[0]))
-    #         center_y = int(np.mean(indices[1]))
-    #         center_z = int(np.mean(indices[2]))
-    #         result = subprocess.run(['fsleyes', 'render', '--scene', 'lightbox', '--voxelLoc', f'{center_x}', f'{center_y}', f'{center_z}', '-hc', '-hl', '-of', screenshot_file, functional_image_betted, binary_nifti_image, '-ot', 'mask', '-mc', '1', '0', '0'], capture_output=True, text=True)
-    #         if result.returncode == 0:
-    #             print(f"Screenshot saved as {screenshot_file}")
-    #         else:
-    #             print(f"Error encountered: {result.stderr}")
-    #     for run in runs:
-    #         bin_file = os.path.join(output_folder, f"{run}_averaged_betted_bin.nii.gz")
-    #         threshold = '100'
-    #         if not os.path.exists(bin_file):
-    #             subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted.nii.gz', '-thr', threshold, '-bin', bin_file])
-    #         inverse_file = os.path.join(output_folder, f"{run}_averaged_betted_bin_inverse.nii.gz")
-    #         if not os.path.exists(inverse_file):
-    #             subprocess.run(['fslmaths', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted_bin.nii.gz', '-sub', '1', '-abs', inverse_file])
-    #         result2 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz', '-k', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_averaged_betted_bin_inverse.nii.gz', '-V'], capture_output=True, text=True)
-    #         if result2.returncode == 0:
-    #             result2_output = result2.stdout.strip()
-    #         else:
-    #             print(f"Error executing second fslstats command for {run}.")
-    #             continue
-    #         result2_output_values = result2_output.split()
-    #         voxels_outside = float(result2_output_values[0])
-    #         result3 = subprocess.run(['fslstats', f'{p_id}/analysis/susceptibility/susc_scc/niftis/{run}_subject_space_ROI.nii.gz', '-V'], capture_output=True, text=True)
-    #         if result3.returncode == 0:
-    #             result3_output = result3.stdout.strip()
-    #         else:
-    #             print(f"Error executing first fslstats command for {run}.")
-    #             continue
-    #         result3_output_values = result3_output.split()
-    #         total_voxels_in_roi = float(result3_output_values[0])
-    #         percentage_outside = (voxels_outside / total_voxels_in_roi) * 100
-    #         percentage_outside = round(percentage_outside, 2)
-    #         percentage_file = f"{p_id}/analysis/susceptibility/susc_scc/percentage_outside.txt"
-    #         if not os.path.exists(percentage_file):
-    #             with open(percentage_file, "a") as f:
-    #                 f.write("Percentage of ROI voxels in signal dropout regions of merged EPI images.\n\n")
-    #                 f.write("run threshold percentage_outside\n")
-    #                 f.write(f"{run} {threshold} {percentage_outside}\n")
-    #         else:
-    #             with open(percentage_file, "r") as f:
-    #                 lines = f.readlines()
-    #                 matching_lines = [line for line in lines if line.startswith(f"{run}")]
-    #                 if matching_lines:
-    #                     with open(percentage_file, "w") as f:
-    #                         for index, line in enumerate(lines):
-    #                             if index not in matching_lines:
-    #                                 f.write(line)
-    #                         f.write(f"{run} {threshold} {percentage_outside}\n")
-    #                 else:
-    #                     with open(percentage_file, "a") as f:
-    #                         f.write(f"{run} {threshold} {percentage_outside}\n")
-    #         print(f"Percentage of ROI voxels in dropout regions saved in percentage_outside.txt file for {run}.")
-    # screenshot_file = f'{p_id}/analysis/susceptibility/susc_scc/ROI_on_run01_EPI.png'
-    # if not os.path.exists(screenshot_file):
-    #     if __name__ == "__main__":
-    #         for p_id in participants_to_iterate:
-    #             process_participant(p_id, runs)
 
-    # Step 3: Prepare DICOM and Nifti files.
+    # Step 2: Prepare DICOM and Nifti files.
     print("\n###### STEP 3: DICOM AND NIFTI FILE PREPARATION ######")
     for p_id in participants:
         print(f"Preparing DICOM and Nifti files for {p_id}...")
@@ -10274,7 +10117,7 @@ def susceptibility_analysis():
         else:
             print("Structural image already brain extracted. Skipping process.")
 
-    # Step 4: Confirm sequence phase encoding directions for stratification of participants.
+    # Step 3: Confirm sequence phase encoding directions for stratification of participants.
     print("\n###### STEP 4: DETERMINING PHASE ENCODING DIRECTIONS ######")
     for p_id in bad_participants:
         ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/ap'
@@ -10379,7 +10222,7 @@ def susceptibility_analysis():
                 print('Sequence PE directions are not as expected. Please investigate.')
                 sys.exit()
 
-    # Step 5: Calculate fieldmaps for relevant participants.
+    # Step 4: Calculate fieldmaps for relevant participants.
     print("\n###### STEP 5: CALCULATING FIELDMAPS ######")
     for p_id in participants:
         if p_id not in bad_participants:
@@ -10420,7 +10263,7 @@ def susceptibility_analysis():
             else:
                 print("Fieldmaps already calculated. Skipping process.")
 
-    # Step 6: Testing for alternative distortion correction method.
+    # Step 5: Testing for alternative distortion correction method.
     print("\n###### STEP 6: TESTING FOR ALTERNATE DISTORTION CORRECTION METHOD ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     column_headers = ['p_id', 'perc_outside_uncorrected_pa', 'perc_outside_corrected_pa', 'perc_outside_rl', 'perc_outside_ap']
@@ -10433,23 +10276,19 @@ def susceptibility_analysis():
         os.makedirs(all_participant_folder, exist_ok=True)
         all_group_folder = 'analysis/susceptibility_analysis/run_comparisons/all/group'
         os.makedirs(all_group_folder, exist_ok=True)
-        
         run01_first5 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/run01_first5.nii.gz'
         run01 = f'analysis/susceptibility_analysis/data/{p_id}/niftis/run01.nii'
         if not os.path.exists(run01_first5):
             subprocess.run(['fslroi', run01, run01_first5, '0', '5'])
         rl_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/rl_fieldmaps.nii'
         ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/ap_fieldmaps.nii'
-        
         averaged_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/averaged_pa_run01.nii.gz'
         averaged_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/averaged_rl_fieldmaps.nii.gz'
         averaged_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/averaged_ap_fieldmaps.nii.gz'
-
         if not os.path.exists(averaged_pa_run01) or not os.path.exists(averaged_rl_fieldmaps) or not os.path.exists(averaged_ap_fieldmaps):
             subprocess.run(['fslmaths', run01_first5, '-Tmean', averaged_pa_run01])
             subprocess.run(['fslmaths', rl_fieldmaps, '-Tmean', averaged_rl_fieldmaps])
             subprocess.run(['fslmaths', ap_fieldmaps, '-Tmean', averaged_ap_fieldmaps])
-
         uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/betted_pa_run01.nii.gz'
         betted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/betted_rl_fieldmaps.nii.gz'
         betted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/betted_ap_fieldmaps.nii.gz'
@@ -10457,11 +10296,9 @@ def susceptibility_analysis():
             subprocess.run(["bet", averaged_pa_run01, uncorrected_pa_run01, "-m", "-R"])
             subprocess.run(["bet", averaged_rl_fieldmaps, betted_rl_fieldmaps, "-m", "-R"])
             subprocess.run(["bet", averaged_ap_fieldmaps, betted_ap_fieldmaps, "-m", "-R"])
-
         corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_run.nii.gz'
         if not os.path.exists(corrected_pa_run01):
             subprocess.run(["applytopup", f"--imain={uncorrected_pa_run01}", f"--datain=analysis/susceptibility_analysis/data/{p_id}/acqparams.txt", "--inindex=6", f"--topup=analysis/susceptibility_analysis/data/{p_id}/topup_{p_id}", "--method=jac", f"--out={corrected_pa_run01}"])
-        
         flirted_uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01.nii.gz'
         flirted_corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01.nii.gz'
         flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps.nii.gz'
@@ -10476,7 +10313,6 @@ def susceptibility_analysis():
             subprocess.run(["flirt", "-in", corrected_pa_run01, "-ref", structural_brain, "-out", flirted_corrected_pa_run01, "-omat", t1_flirted_corrected_pa_run01_transformation])
             subprocess.run(["flirt", "-in", betted_rl_fieldmaps, "-ref", structural_brain, "-out", flirted_rl_fieldmaps, "-omat", t1_flirted_rl_fieldmaps_transformation])
             subprocess.run(["flirt", "-in", betted_ap_fieldmaps, "-ref", structural_brain, "-out", flirted_ap_fieldmaps, "-omat", t1_flirted_ap_fieldmaps_transformation])
-
         def read_roi_file(roi_file):
             voxel_coordinates = []
             with open(roi_file, 'r') as file:
@@ -10519,6 +10355,7 @@ def susceptibility_analysis():
         subprocess.run(['flirt', '-in', averaged_run, '-ref', structural_brain, '-out', temp_file, '-omat', roi_transformation])
         subprocess.run(['flirt', '-in', roi_mask, '-ref', structural_brain, '-applyxfm', '-init', roi_transformation, '-out', transformed_roi_mask, '-interp', 'nearestneighbour'])
 
+        print(f"Calculating percentage of SCC voxels in signal dropout for {p_id}")
         flirted_uncorrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01_bin.nii.gz'
         if not os.path.exists(flirted_uncorrected_pa_run01_bin):
             subprocess.run(['fslmaths', flirted_uncorrected_pa_run01, '-thr', '100', '-bin', flirted_uncorrected_pa_run01_bin])
@@ -10543,7 +10380,6 @@ def susceptibility_analysis():
         ap_bin_inv = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_bin_inv.nii.gz'
         if not os.path.exists(ap_bin_inv):
             subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-sub', '1', '-abs', ap_bin_inv])
-
         uncorrected_pa_result = subprocess.run(['fslstats', transformed_roi_mask, '-k', uncorrected_pa_bin_inv, '-V'], capture_output=True, text=True)
         if uncorrected_pa_result.returncode == 0:
             uncorrected_pa_result_output = uncorrected_pa_result.stdout.strip()
@@ -10579,7 +10415,6 @@ def susceptibility_analysis():
             print("Error executing fslstats command.")
         result1_output_values = result1_output.split()
         total_voxels_in_roi = float(result1_output_values[0])
-
         perc_outside_uncorrected_pa = (uncorrected_pa_voxels_outside / total_voxels_in_roi) * 100
         perc_outside_uncorrected_pa = round(perc_outside_uncorrected_pa, 2)
         perc_outside_corrected_pa = (corrected_pa_voxels_outside / total_voxels_in_roi) * 100
@@ -10588,7 +10423,6 @@ def susceptibility_analysis():
         perc_outside_rl = round(perc_outside_rl, 2)
         perc_outside_ap = (ap_voxels_outside / total_voxels_in_roi) * 100
         perc_outside_ap = round(perc_outside_ap, 2)
-
         perc_outside_df = pd.DataFrame({'p_id': [p_id], 'perc_outside_uncorrected_pa': [perc_outside_uncorrected_pa], 'perc_outside_corrected_pa': [perc_outside_corrected_pa], 'perc_outside_rl': [perc_outside_rl], 'perc_outside_ap': [perc_outside_ap]})
         perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/perc_outside_df.txt', sep='\t', index=False)
         group_perc_outside_df = pd.concat([group_perc_outside_df, perc_outside_df], ignore_index=True)
@@ -10602,6 +10436,351 @@ def susceptibility_analysis():
             subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_rl_fieldmaps_bin, rl_trimmed_roi_mask])
             subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_ap_fieldmaps_bin, ap_trimmed_roi_mask])
     group_perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/group/group_perc_outside_df.txt', sep='\t', index=False)
+
+
+
+
+    column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
+    uncorrected_pa_rl_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running Uncorrected PA-RL SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            uncorrected_pa_rl_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return uncorrected_pa_rl_ssim_index
+        uncorrected_pa_rl_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_rl_ssim_map.nii.gz'
+        flirted_uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        if not os.path.exists(uncorrected_pa_rl_ssim_output_path):
+            uncorrected_pa_rl_ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_uncorrected_pa_run01, uncorrected_pa_rl_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_rl_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            uncorrected_pa_rl_ssim_index = ssim_index_series.iloc[0]
+        uncorrected_pa_rl_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_rl_ssim_bin.nii.gz'
+        if not os.path.exists(uncorrected_pa_rl_ssim_bin):
+            subprocess.run(["fslmaths", uncorrected_pa_rl_ssim_output_path, "-thr", "0.8", "-binv", uncorrected_pa_rl_ssim_bin])
+        combined_uncorrected_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/combined_uncorrected_pa_rl_mask.nii.gz'
+        flirted_uncorrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01_bin.nii.gz'
+        flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
+        if not os.path.exists(combined_uncorrected_pa_rl_mask):
+            subprocess.run(['fslmaths', flirted_uncorrected_pa_run01_bin, '-add', flirted_rl_fieldmaps_bin, combined_uncorrected_pa_rl_mask])
+        bin_uncorrected_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/bin_uncorrected_pa_rl_mask.nii.gz'
+        if not os.path.exists(bin_uncorrected_pa_rl_mask):
+            subprocess.run(['fslmaths', combined_uncorrected_pa_rl_mask, '-bin', bin_uncorrected_pa_rl_mask])
+        uncorrected_pa_rl_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_rl_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(uncorrected_pa_rl_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', uncorrected_pa_rl_ssim_bin, '-mul', bin_uncorrected_pa_rl_mask, uncorrected_pa_rl_ssim_bin_trimmed])
+        voxels_in_whole_uncorrected_pa_rl_mask = subprocess.run(["fslstats", uncorrected_pa_rl_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_uncorrected_pa_rl_mask = float(voxels_in_whole_uncorrected_pa_rl_mask)
+        uncorrected_pa_rl_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_rl_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(uncorrected_pa_rl_intersection_mask_path):
+            subprocess.run(["fslmaths", uncorrected_pa_rl_ssim_bin_trimmed, "-mas", transformed_roi_mask, uncorrected_pa_rl_intersection_mask_path])
+        voxels_in_roi_in_uncorrected_pa_rl_mask = subprocess.run(["fslstats", uncorrected_pa_rl_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_uncorrected_pa_rl_mask = float(voxels_in_roi_in_uncorrected_pa_rl_mask)
+        perc_roi_voxels_in_uncorrected_pa_rl_mask = (voxels_in_roi_in_uncorrected_pa_rl_mask / total_voxels_in_roi) * 100
+        uncorrected_pa_rl_ssim_df = pd.DataFrame({'p_id': [p_id], 'sequences': ['uncorrected_ap_rl'], 'ssim_index': [uncorrected_pa_rl_ssim_index], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_uncorrected_pa_rl_mask]})
+        uncorrected_pa_rl_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_rl_ssim_df.txt', sep='\t', index=False)
+        uncorrected_pa_rl_group_ssim_df = pd.concat([uncorrected_pa_rl_group_ssim_df, uncorrected_pa_rl_ssim_df], ignore_index=True)
+    uncorrected_pa_rl_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/uncorrected_pa_rl_group_ssim_df.txt', sep='\t', index=False)
+    uncorrected_pa_rl_ssim_indexes = uncorrected_pa_rl_group_ssim_df['ssim_index'].tolist()
+    uncorrected_pa_rl_ssim_mean = np.mean(uncorrected_pa_rl_ssim_indexes)
+    print(f"Mean Uncorrected PA-RL SSIM index: {uncorrected_pa_rl_ssim_mean}")
+    
+    column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
+    rl_ap_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running RL-AP SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            rl_ap_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return rl_ap_ssim_index
+        rl_ap_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_ap_ssim_map.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        if not os.path.exists(rl_ap_ssim_output_path):
+            rl_ap_ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_ap_fieldmaps, rl_ap_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_ap_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            rl_ap_ssim_index = ssim_index_series.iloc[0]
+        rl_ap_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_ap_ssim_bin.nii.gz'
+        if not os.path.exists(rl_ap_ssim_bin):
+            subprocess.run(["fslmaths", rl_ap_ssim_output_path, "-thr", "0.8", "-binv", rl_ap_ssim_bin])
+        combined_rl_ap_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/combined_rl_ap_mask.nii.gz'
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
+        if not os.path.exists(combined_rl_ap_mask):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-add', flirted_rl_fieldmaps_bin, combined_rl_ap_mask])
+        bin_rl_ap_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/bin_rl_ap_mask.nii.gz'
+        if not os.path.exists(bin_rl_ap_mask):
+            subprocess.run(['fslmaths', combined_rl_ap_mask, '-bin', bin_rl_ap_mask])
+        rl_ap_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_ap_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(rl_ap_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', rl_ap_ssim_bin, '-mul', bin_rl_ap_mask, rl_ap_ssim_bin_trimmed])
+        voxels_in_whole_rl_ap_mask = subprocess.run(["fslstats", rl_ap_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_rl_ap_mask = float(voxels_in_whole_rl_ap_mask)
+        rl_ap_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_ap_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(rl_ap_intersection_mask_path):
+            subprocess.run(["fslmaths", rl_ap_ssim_bin_trimmed, "-mas", transformed_roi_mask, rl_ap_intersection_mask_path])
+        voxels_in_roi_in_rl_ap_mask = subprocess.run(["fslstats", rl_ap_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_rl_ap_mask = float(voxels_in_roi_in_rl_ap_mask)
+        perc_roi_voxels_in_rl_ap_mask = (voxels_in_roi_in_rl_ap_mask / total_voxels_in_roi) * 100
+        rl_ap_ssim_df = pd.DataFrame({'p_id': [p_id], 'sequences': ['rl_ap'], 'ssim_index': [rl_ap_ssim_index], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_rl_ap_mask]})
+        rl_ap_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_ap_ssim_df.txt', sep='\t', index=False)
+        rl_ap_group_ssim_df = pd.concat([rl_ap_group_ssim_df, rl_ap_ssim_df], ignore_index=True)
+    rl_ap_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/rl_ap_group_ssim_df.txt', sep='\t', index=False)
+    rl_ap_ssim_indexes = rl_ap_group_ssim_df['ssim_index'].tolist()
+    rl_ap_ssim_mean = np.mean(rl_ap_ssim_indexes)
+    print(f"Mean RL-AP SSIM index: {rl_ap_ssim_mean}")
+    
+    column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
+    ap_uncorrected_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running AP-Uncorrected PA SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            ap_uncorrected_pa_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return ap_uncorrected_pa_ssim_index
+        ap_uncorrected_pa_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_uncorrected_pa_ssim_map.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        flirted_uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01.nii.gz'
+        if not os.path.exists(ap_uncorrected_pa_ssim_output_path):
+            ap_pa_ssim_index = calculate_ssim(flirted_uncorrected_pa_run01, flirted_ap_fieldmaps, ap_uncorrected_pa_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_uncorrected_pa_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            ap_uncorrected_pa_ssim_index = ssim_index_series.iloc[0]
+        ap_uncorrected_pa_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_uncorrected_pa_ssim_bin.nii.gz'
+        if not os.path.exists(ap_uncorrected_pa_ssim_bin):
+            subprocess.run(["fslmaths", ap_uncorrected_pa_ssim_output_path, "-thr", "0.8", "-binv", ap_uncorrected_pa_ssim_bin])
+        combined_ap_uncorrected_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/combined_ap_uncorrected_pa_mask.nii.gz'
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        flirted_uncorrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01_bin.nii.gz'
+        if not os.path.exists(combined_ap_uncorrected_pa_mask):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-add', flirted_uncorrected_pa_run01_bin, combined_ap_uncorrected_pa_mask])
+        bin_ap_uncorrected_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/bin_ap_uncorrected_pa_mask.nii.gz'
+        if not os.path.exists(bin_ap_uncorrected_pa_mask):
+            subprocess.run(['fslmaths', combined_ap_uncorrected_pa_mask, '-bin', bin_ap_uncorrected_pa_mask])
+        ap_uncorrected_pa_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_uncorrected_pa_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(ap_uncorrected_pa_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', ap_uncorrected_pa_ssim_bin, '-mul', bin_ap_uncorrected_pa_mask, ap_uncorrected_pa_ssim_bin_trimmed])
+        voxels_in_whole_ap_uncorrected_pa_mask = subprocess.run(["fslstats", ap_uncorrected_pa_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_ap_uncorrected_pa_mask = float(voxels_in_whole_ap_uncorrected_pa_mask)
+        ap_uncorrected_pa_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_uncorrected_pa_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(ap_uncorrected_pa_intersection_mask_path):
+            subprocess.run(["fslmaths", ap_uncorrected_pa_ssim_bin_trimmed, "-mas", transformed_roi_mask, ap_uncorrected_pa_intersection_mask_path])
+        voxels_in_roi_in_ap_uncorrected_pa_mask = subprocess.run(["fslstats", ap_uncorrected_pa_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_ap_uncorrected_pa_mask = float(voxels_in_roi_in_ap_uncorrected_pa_mask)
+        perc_roi_voxels_in_ap_uncorrected_pa_mask = (voxels_in_roi_in_ap_uncorrected_pa_mask / total_voxels_in_roi) * 100
+        ap_uncorrected_pa_ssim_df = pd.DataFrame({'p_id': [p_id], 'sequences': ['ap_uncorrected_pa'], 'ssim_index': [ap_uncorrected_pa_ssim_index], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_ap_uncorrected_pa_mask]})
+        ap_uncorrected_pa_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_uncorrected_pa_ssim_df.txt', sep='\t', index=False)
+        ap_uncorrected_pa_group_ssim_df = pd.concat([ap_uncorrected_pa_group_ssim_df, ap_uncorrected_pa_ssim_df], ignore_index=True)
+    ap_uncorrected_pa_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/ap_uncorrected_pa_group_ssim_df.txt', sep='\t', index=False)
+    ap_uncorrected_pa_ssim_indexes = ap_uncorrected_pa_group_ssim_df['ssim_index'].tolist()
+    ap_uncorrected_pa_ssim_mean = np.mean(ap_uncorrected_pa_ssim_indexes)
+    print(f"Mean AP-Uncorrected PA SSIM index: {ap_uncorrected_pa_ssim_mean}")
+
+    column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
+    ap_uncorrected_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running Uncorrected PA-Corrected PA SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            uncorrected_pa_corrected_pa_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return uncorrected_pa_corrected_pa_ssim_index
+        uncorrected_pa_corrected_pa_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_corrected_pa_ssim_map.nii.gz'
+        flirted_uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01.nii.gz'
+        flirted_corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01.nii.gz'
+        if not os.path.exists(uncorrected_pa_corrected_pa_ssim_output_path):
+            uncorrected_pa_corrected_pa_ssim_index = calculate_ssim(flirted_uncorrected_pa_run01, flirted_corrected_pa_run01, uncorrected_pa_corrected_pa_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_corrected_pa_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            uncorrected_pa_corrected_pa_ssim_index = ssim_index_series.iloc[0]
+        uncorrected_pa_corrected_pa_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_corrected_pa_ssim_bin.nii.gz'
+        if not os.path.exists(uncorrected_pa_corrected_pa_ssim_bin):
+            subprocess.run(["fslmaths", uncorrected_pa_corrected_pa_ssim_output_path, "-thr", "0.8", "-binv", uncorrected_pa_corrected_pa_ssim_bin])
+        combined_uncorrected_pa_corrected_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/combined_uncorrected_pa_corrected_pa_mask.nii.gz'
+        flirted_uncorrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01_bin.nii.gz'
+        flirted_uncorrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01_bin.nii.gz'
+        if not os.path.exists(combined_uncorrected_pa_corrected_pa_mask):
+            subprocess.run(['fslmaths', flirted_uncorrected_pa_run01_bin, '-add', flirted_corrected_pa_run01_bin, combined_uncorrected_pa_corrected_pa_mask])
+        bin_uncorrected_pa_corrected_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/bin_uncorrected_pa_corrected_pa_mask.nii.gz'
+        if not os.path.exists(bin_uncorrected_pa_corrected_pa_mask):
+            subprocess.run(['fslmaths', combined_uncorrected_pa_corrected_pa_mask, '-bin', bin_uncorrected_pa_corrected_pa_mask])
+        uncorrected_pa_corrected_pa_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_corrected_pa_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(uncorrected_pa_corrected_pa_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', uncorrected_pa_corrected_pa_ssim_bin, '-mul', bin_uncorrected_pa_corrected_pa_mask, uncorrected_pa_corrected_pa_ssim_bin_trimmed])
+        voxels_in_whole_uncorrected_pa_corrected_pa_mask = subprocess.run(["fslstats", uncorrected_pa_corrected_pa_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_uncorrected_pa_corrected_pa_mask = float(voxels_in_whole_uncorrected_pa_corrected_pa_mask)
+        uncorrected_pa_corrected_pa_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_corrected_pa_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(uncorrected_pa_corrected_pa_intersection_mask_path):
+            subprocess.run(["fslmaths", uncorrected_pa_corrected_pa_ssim_bin_trimmed, "-mas", transformed_roi_mask, uncorrected_pa_corrected_pa_intersection_mask_path])
+        voxels_in_roi_in_uncorrected_pa_corrected_pa_mask = subprocess.run(["fslstats", uncorrected_pa_corrected_pa_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_uncorrected_pa_corrected_pa_mask = float(voxels_in_roi_in_uncorrected_pa_corrected_pa_mask)
+        perc_roi_voxels_in_uncorrected_pa_corrected_pa_mask = (voxels_in_roi_in_uncorrected_pa_corrected_pa_mask / total_voxels_in_roi) * 100
+        uncorrected_pa_corrected_pa_ssim_df = pd.DataFrame({'p_id': [p_id], 'sequences': ['uncorrected_pa_corrected_pa'], 'ssim_index': [uncorrected_pa_corrected_pa_ssim_index], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_uncorrected_pa_corrected_pa_mask]})
+        uncorrected_pa_corrected_pa_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_corrected_pa_ssim_df.txt', sep='\t', index=False)
+        uncorrected_pa_corrected_pa_group_ssim_df = pd.concat([uncorrected_pa_corrected_pa_group_ssim_df, uncorrected_pa_corrected_pa_ssim_df], ignore_index=True)
+    uncorrected_pa_corrected_pa_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/uncorrected_pa_corrected_pa_group_ssim_df.txt', sep='\t', index=False)
+    uncorrected_pa_corrected_pa_ssim_indexes = uncorrected_pa_corrected_pa_group_ssim_df['ssim_index'].tolist()
+    uncorrected_pa_corrected_pa_ssim_mean = np.mean(uncorrected_pa_corrected_pa_ssim_indexes)
+    print(f"Mean Uncorrected PA-Corrected PA SSIM index: {uncorrected_pa_corrected_pa_ssim_mean}")
+    
+    column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
+    corrected_pa_rl_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running Corrected PA-RL SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            corrected_pa_rl_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return corrected_pa_rl_ssim_index
+        corrected_pa_rl_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_pa_rl_ssim_map.nii.gz'
+        flirted_corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        if not os.path.exists(corrected_pa_rl_ssim_output_path):
+            corrected_pa_rl_ssim_index = calculate_ssim(flirted_rl_fieldmaps, flirted_corrected_pa_run01, corrected_pa_rl_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_pa_rl_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            corrected_pa_rl_ssim_index = ssim_index_series.iloc[0]
+        corrected_pa_rl_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_pa_rl_ssim_bin.nii.gz'
+        if not os.path.exists(corrected_pa_rl_ssim_bin):
+            subprocess.run(["fslmaths", corrected_pa_rl_ssim_output_path, "-thr", "0.8", "-binv", corrected_pa_rl_ssim_bin])
+        combined_corrected_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/combined_corrected_pa_rl_mask.nii.gz'
+        flirted_corrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01_bin.nii.gz'
+        flirted_rl_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps_bin.nii.gz'
+        if not os.path.exists(combined_corrected_pa_rl_mask):
+            subprocess.run(['fslmaths', flirted_corrected_pa_run01_bin, '-add', flirted_rl_fieldmaps_bin, combined_corrected_pa_rl_mask])
+        bin_corrected_pa_rl_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/bin_corrected_pa_rl_mask.nii.gz'
+        if not os.path.exists(bin_corrected_pa_rl_mask):
+            subprocess.run(['fslmaths', combined_corrected_pa_rl_mask, '-bin', bin_corrected_pa_rl_mask])
+        corrected_pa_rl_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_pa_rl_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(corrected_pa_rl_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', corrected_pa_rl_ssim_bin, '-mul', bin_corrected_pa_rl_mask, corrected_pa_rl_ssim_bin_trimmed])
+        voxels_in_whole_corrected_pa_rl_mask = subprocess.run(["fslstats", corrected_pa_rl_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_corrected_pa_rl_mask = float(voxels_in_whole_corrected_pa_rl_mask)
+        corrected_pa_rl_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_pa_rl_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(corrected_pa_rl_intersection_mask_path):
+            subprocess.run(["fslmaths", corrected_pa_rl_ssim_bin_trimmed, "-mas", transformed_roi_mask, corrected_pa_rl_intersection_mask_path])
+        voxels_in_roi_in_corrected_pa_rl_mask = subprocess.run(["fslstats", corrected_pa_rl_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_corrected_pa_rl_mask = float(voxels_in_roi_in_corrected_pa_rl_mask)
+        perc_roi_voxels_in_corrected_pa_rl_mask = (voxels_in_roi_in_corrected_pa_rl_mask / total_voxels_in_roi) * 100
+        corrected_pa_rl_ssim_df = pd.DataFrame({'p_id': [p_id], 'sequences': ['corrected_pa_rl'], 'ssim_index': [corrected_pa_rl_ssim_index], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_corrected_pa_rl_mask]})
+        corrected_pa_rl_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_pa_rl_ssim_df.txt', sep='\t', index=False)
+        corrected_pa_rl_group_ssim_df = pd.concat([corrected_pa_rl_group_ssim_df, corrected_pa_rl_ssim_df], ignore_index=True)
+    corrected_pa_rl_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/corrected_pa_rl_group_ssim_df.txt', sep='\t', index=False)
+    corrected_pa_rl_ssim_indexes = corrected_pa_rl_group_ssim_df['ssim_index'].tolist()
+    corrected_pa_rl_ssim_mean = np.mean(corrected_pa_rl_ssim_indexes)
+    print(f"Mean Corrected PA-RL SSIM index: {corrected_pa_rl_ssim_mean}")
+
+    column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
+    ap_corrected_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    for p_id in good_participants:
+        print(f"Running AP-Corrected PA SSIM analysis for {p_id}...")
+        def calculate_ssim(image1_path, image2_path, ssim_output_path):
+            """Function to calculate SSIM between two Nifti images and save the SSIM map."""
+            image1_nii = nib.load(image1_path)
+            image2_nii = nib.load(image2_path)
+            image1 = image1_nii.get_fdata()
+            image2 = image2_nii.get_fdata()
+            if image1.shape != image2.shape:
+                raise ValueError("Input images must have the same dimensions for SSIM calculation.")
+            ap_corrected_pa_ssim_index, ssim_map = ssim(image1, image2, full=True, data_range=image1.max() - image1.min())
+            ssim_map_nifti = nib.Nifti1Image(ssim_map, affine=image1_nii.affine, header=image1_nii.header)
+            nib.save(ssim_map_nifti, ssim_output_path)
+            return ap_corrected_pa_ssim_index
+        ap_corrected_pa_ssim_output_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_corrected_pa_ssim_map.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        flirted_corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01.nii.gz'
+        if not os.path.exists(ap_corrected_pa_ssim_output_path):
+            ap_pa_ssim_index = calculate_ssim(flirted_corrected_pa_run01, flirted_ap_fieldmaps, ap_corrected_pa_ssim_output_path)
+        else:
+            df = pd.read_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_corrected_pa_ssim_df.txt', delimiter='\t')
+            ssim_index_series = df.loc[df['p_id'] == p_id, 'ssim_index']
+            ap_corrected_pa_ssim_index = ssim_index_series.iloc[0]
+        ap_corrected_pa_ssim_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_corrected_pa_ssim_bin.nii.gz'
+        if not os.path.exists(ap_corrected_pa_ssim_bin):
+            subprocess.run(["fslmaths", ap_corrected_pa_ssim_output_path, "-thr", "0.8", "-binv", ap_corrected_pa_ssim_bin])
+        combined_ap_corrected_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/combined_ap_corrected_pa_mask.nii.gz'
+        flirted_ap_fieldmaps_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps_bin.nii.gz'
+        flirted_corrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01_bin.nii.gz'
+        if not os.path.exists(combined_ap_corrected_pa_mask):
+            subprocess.run(['fslmaths', flirted_ap_fieldmaps_bin, '-add', flirted_corrected_pa_run01_bin, combined_ap_corrected_pa_mask])
+        bin_ap_corrected_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/bin_ap_corrected_pa_mask.nii.gz'
+        if not os.path.exists(bin_ap_corrected_pa_mask):
+            subprocess.run(['fslmaths', combined_ap_corrected_pa_mask, '-bin', bin_ap_corrected_pa_mask])
+        ap_corrected_pa_ssim_bin_trimmed = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_corrected_pa_ssim_bin_trimmed.nii.gz'
+        if not os.path.exists(ap_corrected_pa_ssim_bin_trimmed):
+            subprocess.run(['fslmaths', ap_corrected_pa_ssim_bin, '-mul', bin_ap_corrected_pa_mask, ap_corrected_pa_ssim_bin_trimmed])
+        voxels_in_whole_ap_corrected_pa_mask = subprocess.run(["fslstats", ap_corrected_pa_ssim_bin_trimmed, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_whole_ap_corrected_pa_mask = float(voxels_in_whole_ap_corrected_pa_mask)
+        ap_corrected_pa_intersection_mask_path = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_corrected_pa_ssim_roi_intersect.nii.gz'
+        transformed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/transformed_roi_mask.nii.gz'
+        if not os.path.exists(ap_corrected_pa_intersection_mask_path):
+            subprocess.run(["fslmaths", ap_corrected_pa_ssim_bin_trimmed, "-mas", transformed_roi_mask, ap_corrected_pa_intersection_mask_path])
+        voxels_in_roi_in_ap_corrected_pa_mask = subprocess.run(["fslstats", ap_corrected_pa_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
+        voxels_in_roi_in_ap_corrected_pa_mask = float(voxels_in_roi_in_ap_corrected_pa_mask)
+        perc_roi_voxels_in_ap_corrected_pa_mask = (voxels_in_roi_in_ap_corrected_pa_mask / total_voxels_in_roi) * 100
+        ap_corrected_pa_ssim_df = pd.DataFrame({'p_id': [p_id], 'sequences': ['ap_corrected_pa'], 'ssim_index': [ap_corrected_pa_ssim_index], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_ap_corrected_pa_mask]})
+        ap_corrected_pa_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_corrected_pa_ssim_df.txt', sep='\t', index=False)
+        ap_corrected_pa_group_ssim_df = pd.concat([ap_corrected_pa_group_ssim_df, ap_corrected_pa_ssim_df], ignore_index=True)
+    ap_corrected_pa_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/ap_corrected_pa_group_ssim_df.txt', sep='\t', index=False)
+    ap_corrected_pa_ssim_indexes = ap_corrected_pa_group_ssim_df['ssim_index'].tolist()
+    ap_corrected_pa_ssim_mean = np.mean(ap_corrected_pa_ssim_indexes)
+    print(f"Mean AP-Corrected PA SSIM index: {ap_corrected_pa_ssim_mean}")
+
+    column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
+    group_ssim_df = pd.DataFrame(columns = column_headers)
+    dataframes_to_concat = [group_ssim_df, ap_corrected_pa_group_ssim_df, ap_uncorrected_pa_group_ssim_df, corrected_pa_rl_group_ssim_df, uncorrected_pa_rl_group_ssim_df, uncorrected_pa_corrected_pa_group_ssim_df, rl_ap_group_ssim_df]
+    group_ssim_df = pd.concat(dataframes_to_concat, ignore_index=True)
+    group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/group_ssim_df.txt', sep='\t', index=False)
 
 
     sys.exit()

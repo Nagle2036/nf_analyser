@@ -10638,7 +10638,7 @@ def susceptibility_analysis():
             subprocess.run(["fslmaths", uncorrected_pa_corrected_pa_ssim_output_path, "-thr", "0.8", "-binv", uncorrected_pa_corrected_pa_ssim_bin])
         combined_uncorrected_pa_corrected_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/combined_uncorrected_pa_corrected_pa_mask.nii.gz'
         flirted_uncorrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01_bin.nii.gz'
-        flirted_uncorrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01_bin.nii.gz'
+        flirted_corrected_pa_run01_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01_bin.nii.gz'
         if not os.path.exists(combined_uncorrected_pa_corrected_pa_mask):
             subprocess.run(['fslmaths', flirted_uncorrected_pa_run01_bin, '-add', flirted_corrected_pa_run01_bin, combined_uncorrected_pa_corrected_pa_mask])
         bin_uncorrected_pa_corrected_pa_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/bin_uncorrected_pa_corrected_pa_mask.nii.gz'

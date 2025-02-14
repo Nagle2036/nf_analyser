@@ -10609,7 +10609,7 @@ def susceptibility_analysis():
     print(f"Mean AP-Uncorrected PA SSIM index: {ap_uncorrected_pa_ssim_mean}")
 
     column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
-    ap_uncorrected_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
+    uncorrected_pa_corrected_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in good_participants:
         print(f"Running Uncorrected PA-Corrected PA SSIM analysis for {p_id}...")
         def calculate_ssim(image1_path, image2_path, ssim_output_path):

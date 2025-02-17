@@ -10437,9 +10437,6 @@ def susceptibility_analysis():
             subprocess.run(['fslmaths', transformed_roi_mask, '-mul', flirted_ap_fieldmaps_bin, ap_trimmed_roi_mask])
     group_perc_outside_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/group/group_perc_outside_df.txt', sep='\t', index=False)
 
-
-
-
     column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
     uncorrected_pa_rl_group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in good_participants:
@@ -10488,14 +10485,13 @@ def susceptibility_analysis():
         voxels_in_roi_in_uncorrected_pa_rl_mask = subprocess.run(["fslstats", uncorrected_pa_rl_intersection_mask_path, "-V"], capture_output=True, text=True).stdout.split()[0]
         voxels_in_roi_in_uncorrected_pa_rl_mask = float(voxels_in_roi_in_uncorrected_pa_rl_mask)
         perc_roi_voxels_in_uncorrected_pa_rl_mask = (voxels_in_roi_in_uncorrected_pa_rl_mask / total_voxels_in_roi) * 100
-        uncorrected_pa_rl_ssim_df = pd.DataFrame({'p_id': [p_id], 'sequences': ['uncorrected_ap_rl'], 'ssim_index': [uncorrected_pa_rl_ssim_index], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_uncorrected_pa_rl_mask]})
+        uncorrected_pa_rl_ssim_df = pd.DataFrame({'p_id': [p_id], 'sequences': ['uncorrected_pa_rl'], 'ssim_index': [uncorrected_pa_rl_ssim_index], 'perc_roi_voxels_in_bin_ssim_mask': [perc_roi_voxels_in_uncorrected_pa_rl_mask]})
         uncorrected_pa_rl_ssim_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_rl_ssim_df.txt', sep='\t', index=False)
         uncorrected_pa_rl_group_ssim_df = pd.concat([uncorrected_pa_rl_group_ssim_df, uncorrected_pa_rl_ssim_df], ignore_index=True)
     uncorrected_pa_rl_group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/uncorrected_pa_rl_group_ssim_df.txt', sep='\t', index=False)
     uncorrected_pa_rl_ssim_indexes = uncorrected_pa_rl_group_ssim_df['ssim_index'].tolist()
     uncorrected_pa_rl_ssim_mean = np.mean(uncorrected_pa_rl_ssim_indexes)
     print(f"Mean Uncorrected PA-RL SSIM index: {uncorrected_pa_rl_ssim_mean}")
-    
     column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
     rl_ap_group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in good_participants:
@@ -10551,7 +10547,6 @@ def susceptibility_analysis():
     rl_ap_ssim_indexes = rl_ap_group_ssim_df['ssim_index'].tolist()
     rl_ap_ssim_mean = np.mean(rl_ap_ssim_indexes)
     print(f"Mean RL-AP SSIM index: {rl_ap_ssim_mean}")
-    
     column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
     ap_uncorrected_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in good_participants:
@@ -10607,7 +10602,6 @@ def susceptibility_analysis():
     ap_uncorrected_pa_ssim_indexes = ap_uncorrected_pa_group_ssim_df['ssim_index'].tolist()
     ap_uncorrected_pa_ssim_mean = np.mean(ap_uncorrected_pa_ssim_indexes)
     print(f"Mean AP-Uncorrected PA SSIM index: {ap_uncorrected_pa_ssim_mean}")
-
     column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
     uncorrected_pa_corrected_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in good_participants:
@@ -10663,7 +10657,6 @@ def susceptibility_analysis():
     uncorrected_pa_corrected_pa_ssim_indexes = uncorrected_pa_corrected_pa_group_ssim_df['ssim_index'].tolist()
     uncorrected_pa_corrected_pa_ssim_mean = np.mean(uncorrected_pa_corrected_pa_ssim_indexes)
     print(f"Mean Uncorrected PA-Corrected PA SSIM index: {uncorrected_pa_corrected_pa_ssim_mean}")
-    
     column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
     corrected_pa_rl_group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in good_participants:
@@ -10719,7 +10712,6 @@ def susceptibility_analysis():
     corrected_pa_rl_ssim_indexes = corrected_pa_rl_group_ssim_df['ssim_index'].tolist()
     corrected_pa_rl_ssim_mean = np.mean(corrected_pa_rl_ssim_indexes)
     print(f"Mean Corrected PA-RL SSIM index: {corrected_pa_rl_ssim_mean}")
-
     column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
     ap_corrected_pa_group_ssim_df = pd.DataFrame(columns = column_headers) 
     for p_id in good_participants:
@@ -10775,12 +10767,45 @@ def susceptibility_analysis():
     ap_corrected_pa_ssim_indexes = ap_corrected_pa_group_ssim_df['ssim_index'].tolist()
     ap_corrected_pa_ssim_mean = np.mean(ap_corrected_pa_ssim_indexes)
     print(f"Mean AP-Corrected PA SSIM index: {ap_corrected_pa_ssim_mean}")
-
     column_headers = ['p_id', 'sequences', 'ssim_index', 'perc_roi_voxels_in_bin_ssim_mask']
     group_ssim_df = pd.DataFrame(columns = column_headers)
     dataframes_to_concat = [group_ssim_df, ap_corrected_pa_group_ssim_df, ap_uncorrected_pa_group_ssim_df, corrected_pa_rl_group_ssim_df, uncorrected_pa_rl_group_ssim_df, uncorrected_pa_corrected_pa_group_ssim_df, rl_ap_group_ssim_df]
     group_ssim_df = pd.concat(dataframes_to_concat, ignore_index=True)
     group_ssim_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/group_ssim_df.txt', sep='\t', index=False)
+
+    column_headers = ['p_id', 'sequence', 'value']
+    group_voxel_intensity_df = pd.DataFrame(columns = column_headers)   
+    for p_id in good_participants:
+        print(f'Running voxel signal intensity analysis for {p_id}...')
+        def extract_voxel_intensities(epi_image_path, mask_image_path):
+            epi_img = nib.load(epi_image_path)
+            epi_data = epi_img.get_fdata()
+            mask_img = nib.load(mask_image_path)
+            mask_data = mask_img.get_fdata()
+            mask_data = mask_data > 0
+            roi_voxel_intensities = epi_data[mask_data]
+            voxel_intensity_list = roi_voxel_intensities.tolist()
+            return voxel_intensity_list
+        flirted_uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01.nii.gz'
+        flirted_corrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_corrected_pa_run01.nii.gz'
+        flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps.nii.gz'
+        flirted_ap_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_ap_fieldmaps.nii.gz'
+        uncorrected_pa_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/uncorrected_pa_trimmed_roi_mask.nii.gz'
+        corrected_pa_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/corrected_pa_trimmed_roi_mask.nii.gz'
+        rl_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_trimmed_roi_mask.nii.gz'
+        ap_trimmed_roi_mask = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/ap_trimmed_roi_mask.nii.gz'
+        uncorrected_pa_voxel_intensities = extract_voxel_intensities(flirted_uncorrected_pa_run01, uncorrected_pa_trimmed_roi_mask)
+        corrected_pa_voxel_intensities = extract_voxel_intensities(flirted_corrected_pa_run01, corrected_pa_trimmed_roi_mask)
+        rl_voxel_intensities = extract_voxel_intensities(flirted_rl_fieldmaps, rl_trimmed_roi_mask)
+        ap_voxel_intensities = extract_voxel_intensities(flirted_ap_fieldmaps, ap_trimmed_roi_mask)
+        values = uncorrected_pa_voxel_intensities + corrected_pa_voxel_intensities + rl_voxel_intensities + ap_voxel_intensities
+        sequence = ['uncorrected_pa'] * len(uncorrected_pa_voxel_intensities) + ['corrected_pa'] * len(corrected_pa_voxel_intensities) + ['rl'] * len(rl_voxel_intensities) + ['ap'] * len(ap_voxel_intensities)
+        subject = [f'{p_id}'] * len(uncorrected_pa_voxel_intensities) + [f'{p_id}'] * len(corrected_pa_voxel_intensities) + [f'{p_id}'] * len(rl_voxel_intensities) + [f'{p_id}'] * len(ap_voxel_intensities)
+        voxel_intensity_df = pd.DataFrame({'p_id': subject, 'sequence': sequence, 'value': values})
+        voxel_intensity_df.to_csv(f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/voxel_intensity_df.txt', sep='\t', index=False)
+        group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
+    group_voxel_intensity_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/group_voxel_intensity_df.txt', sep='\t', index=False)
+
 
 
     sys.exit()

@@ -10261,7 +10261,7 @@ def susceptibility_analysis():
             else:
                 print("Fieldmaps already calculated. Skipping process.")
 
-    Step 5: Testing for alternative distortion correction method.
+    # Step 5: Testing for alternative distortion correction method.
     print("\n###### STEP 6: TESTING FOR ALTERNATE DISTORTION CORRECTION METHOD ######")
     good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     column_headers = ['p_id', 'perc_outside_uncorrected_pa', 'perc_outside_corrected_pa', 'perc_outside_rl', 'perc_outside_ap']

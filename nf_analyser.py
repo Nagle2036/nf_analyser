@@ -10614,10 +10614,10 @@ def susceptibility_analysis():
         if not os.path.exists(pa_csf_pve_seg):
             pa_seg = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/pa_seg'
             rl_seg = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_seg'
-            flirted_uncorrected_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_fieldmaps.nii.gz'
+            flirted_uncorrected_pa_run01 = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_run01.nii.gz'
             flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps.nii.gz'
             structural_brain = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii'
-            subprocess.run(["fast", "-n", "3", "-o", pa_seg, structural_brain, flirted_uncorrected_pa_fieldmaps])
+            subprocess.run(["fast", "-n", "3", "-o", pa_seg, structural_brain, flirted_uncorrected_pa_run01])
             subprocess.run(["fast", "-n", "3", "-o", rl_seg, structural_brain, flirted_rl_fieldmaps])
         pa_csf_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/pa_csf_pve_seg_bin.nii.gz'
         pa_wm_pve_seg_bin = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/pa_wm_pve_seg_bin.nii.gz'

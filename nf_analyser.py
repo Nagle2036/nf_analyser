@@ -10614,7 +10614,7 @@ def susceptibility_analysis():
         if not os.path.exists(pa_csf_pve_seg):
             pa_seg = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/pa_seg'
             rl_seg = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/rl_seg'
-            flirted_uncorrected_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted__uncorrected_pa_fieldmaps.nii.gz'
+            flirted_uncorrected_pa_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_uncorrected_pa_fieldmaps.nii.gz'
             flirted_rl_fieldmaps = f'analysis/susceptibility_analysis/run_comparisons/all/{p_id}/flirted_rl_fieldmaps.nii.gz'
             structural_brain = f'analysis/susceptibility_analysis/data/{p_id}/niftis/structural_brain.nii'
             subprocess.run(["fast", "-n", "3", "-o", pa_seg, structural_brain, flirted_uncorrected_pa_fieldmaps])

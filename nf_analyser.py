@@ -10960,7 +10960,7 @@ def susceptibility_analysis():
         if not os.path.exists(fnirted_run01):
             subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--mask={structural_brain_downsampled_mask}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
 
-        print(f"Running FLIRT betted, FNIRT unbetted, applywarp betted, downsampled, with refmask, , with lambda configuation 1, for {p_id}...")
+        print(f"Running FLIRT betted, FNIRT unbetted, applywarp betted, downsampled, with refmask, with lambda configuation 1, for {p_id}...")
         flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/flirted_run01.nii.gz'
         flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/flirted_run01_matrix.mat'
         if not os.path.exists(flirted_run01):

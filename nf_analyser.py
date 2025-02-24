@@ -9878,7 +9878,7 @@ def susceptibility_analysis():
     print("Directories created.")
 
     # Step 2: Prepare DICOM and Nifti files.
-    print("\n###### STEP 3: DICOM AND NIFTI FILE PREPARATION ######")
+    print("\n###### STEP 2: DICOM AND NIFTI FILE PREPARATION ######")
     for p_id in participants:
         print(f"Preparing DICOM and Nifti files for {p_id}...")
         path = f'data/raw_data/{p_id}/data/neurofeedback'
@@ -10116,7 +10116,7 @@ def susceptibility_analysis():
             print("Structural image already brain extracted. Skipping process.")
 
     # Step 3: Confirm sequence phase encoding directions for stratification of participants.
-    print("\n###### STEP 4: DETERMINING PHASE ENCODING DIRECTIONS ######")
+    print("\n###### STEP 3: DETERMINING PHASE ENCODING DIRECTIONS ######")
     for p_id in bad_participants:
         ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/ap'
         pa_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/dicoms/fieldmaps/badpa'
@@ -10221,7 +10221,7 @@ def susceptibility_analysis():
                 sys.exit()
 
     # Step 4: Calculate fieldmaps for relevant participants.
-    print("\n###### STEP 5: CALCULATING FIELDMAPS ######")
+    print("\n###### STEP 4: CALCULATING FIELDMAPS ######")
     for p_id in participants:
         if p_id not in bad_participants:
             ap_fieldmaps = f'analysis/susceptibility_analysis/data/{p_id}/niftis/ap_fieldmaps.nii'
@@ -10262,7 +10262,7 @@ def susceptibility_analysis():
                 print("Fieldmaps already calculated. Skipping process.")
 
     # Step 5: Testing for alternative distortion correction method.
-    print("\n###### STEP 6: TESTING FOR ALTERNATE DISTORTION CORRECTION METHOD ######")
+    print("\n###### STEP 5: TESTING FOR ALTERNATE DISTORTION CORRECTION METHOD ######")
     # good_participants = ['P059', 'P100', 'P107', 'P122', 'P125', 'P127', 'P128', 'P136', 'P145', 'P155', 'P199', 'P215', 'P216']
     # column_headers = ['p_id', 'perc_outside_uncorrected_pa', 'perc_outside_corrected_pa', 'perc_outside_rl', 'perc_outside_ap']
     # group_perc_outside_df = pd.DataFrame(columns = column_headers) 
@@ -10885,8 +10885,8 @@ def susceptibility_analysis():
     #     group_voxel_intensity_df = pd.concat([group_voxel_intensity_df, voxel_intensity_df], ignore_index=True)
     # group_voxel_intensity_df.to_csv('analysis/susceptibility_analysis/run_comparisons/all/group/group_voxel_intensity_df.txt', sep='\t', index=False)
     
-    # Step 9: Testing FNIRT parameters.
-    print("\n###### STEP 9: TESTING FNIRT PARAMETERS ######")   
+    # Step 6: Testing FNIRT parameters.
+    print("\n###### STEP 6: TESTING FNIRT PARAMETERS ######")   
     bad_participants = ['P004', 'P006', 'P020', 'P030', 'P078', 'P093', 'P094']
     for p_id in bad_participants:
         fnirt_test_folder = 'analysis/susceptibility_analysis/fnirt_test'
@@ -10984,17 +10984,6 @@ def susceptibility_analysis():
         if not os.path.exists(fnirted_run01):
             subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
 
-        # print(f"Running FLIRT betted, FNIRT unbetted, applywarp unbetted, downsampled, with lambda configuration 2 for {p_id}...")
-        # flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/flirted_run01.nii.gz'
-        # flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/flirted_run01_matrix.mat'
-        # if not os.path.exists(flirted_run01):
-        #     subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
-        # warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/warp_run01'
-        # if not os.path.exists(warp_run01):
-        #     subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', '--lambda=400,200,150,75,60,45'])
-        # fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/6/{p_id}/fnirted_run01.nii.gz'
-        # if not os.path.exists(fnirted_run01):
-        #     subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
 #endregion
 
 #region MAIN MENU.

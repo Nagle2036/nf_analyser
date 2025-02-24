@@ -10960,17 +10960,17 @@ def susceptibility_analysis():
         if not os.path.exists(fnirted_run01):
             subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--mask={structural_brain_downsampled_mask}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
 
-        print(f"Running FLIRT betted, FNIRT betted, applywarp betted, downsampled, with refmask, for {p_id}...")
+        print(f"Running FLIRT betted, FNIRT unbetted, applywarp betted, downsampled, with refmask, , with lambda configuation 1, for {p_id}...")
         flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/flirted_run01.nii.gz'
         flirted_run01_matrix = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/flirted_run01_matrix.mat'
         if not os.path.exists(flirted_run01):
             subprocess.run(['flirt', '-in', averaged_run01_brain, '-ref', structural_brain_downsampled, '-out', flirted_run01, '-omat', flirted_run01_matrix, '-dof', '6'])
         warp_run01 = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/warp_run01'
         if not os.path.exists(warp_run01):
-            subprocess.run(['fnirt', f'--in={averaged_run01_brain}', f'--ref={structural_brain_downsampled}', f'--refmask={structural_brain_downsampled_mask}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}'])
+            subprocess.run(['fnirt', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--refmask={structural_brain_downsampled_mask}', f'--aff={flirted_run01_matrix}', f'--cout={warp_run01}', '--lambda=200,75,40,20'])
         fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/4/{p_id}/fnirted_run01.nii.gz'
         if not os.path.exists(fnirted_run01):
-            subprocess.run(['applywarp', f'--in={averaged_run01_brain}', f'--ref={structural_brain_downsampled}', f'--mask={structural_brain_downsampled_mask}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+            subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_brain_downsampled}', f'--mask={structural_brain_downsampled_mask}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
 
         print(f"Running FLIRT betted, FNIRT unbetted, applywarp unbetted, downsampled, with lambda configuration 1, for {p_id}...")
         flirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/5/{p_id}/flirted_run01.nii.gz'

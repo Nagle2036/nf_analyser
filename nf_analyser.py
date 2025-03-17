@@ -28,6 +28,8 @@ import numpy as np
 import re
 import nibabel as nib
 import matplotlib.pyplot as plt
+from scipy.stats import pearsonr
+import seaborn as sns
 import fnmatch
 from collections import defaultdict
 import io
@@ -919,7 +921,96 @@ def thermometer_analysis():
     run_startend_prop_plot.save('analysis/thermometer_analysis/figs/run_startend_prop_plot.png')
     print("Proportion of expanded thermometer levels > 0 for run-start and run-end plotted.")
 
-    # Step 19: Generate TMS Metric and plot.
+    # Step 19: Calculate mean expanded thermometer for the quarter of each run, do stats, and plot.
+    def split_and_compute_means_quarters(df):
+        quarter = len(df) // 4
+        q1_mean = df.iloc[:quarter]['therm_lvl_exp'].mean()
+        q2_mean = df.iloc[quarter:2 * quarter]['therm_lvl_exp'].mean()
+        q3_mean = df.iloc[2 * quarter:3 * quarter]['therm_lvl_exp'].mean()
+        q4_mean = df.iloc[3 * quarter:]['therm_lvl_exp'].mean()
+        return pd.Series({'q1_mean': q1_mean, 'q2_mean': q2_mean, 'q3_mean': q3_mean, 'q4_mean': q4_mean})
+    therm_quarters_df = therm_df.groupby(['participant', 'condition', 'intervention']).apply(split_and_compute_means_quarters).reset_index()
+    therm_quarters_long_df = pd.melt(therm_quarters_df, 
+                                    id_vars=['participant', 'condition', 'intervention'], 
+                                    value_vars=['q1_mean', 'q2_mean', 'q3_mean', 'q4_mean'], 
+                                    var_name='quarter', value_name='therm_lvl_exp')
+    mean_therm_lvl_exp_group_df = therm_quarters_long_df.groupby(['condition', 'intervention', 'quarter']).agg(
+        mean_therm_lvl_exp=('therm_lvl_exp', 'mean'),
+        std_dev=('therm_lvl_exp', 'std'),
+        n=('therm_lvl_exp', 'size')
+    ).reset_index()
+    mean_therm_lvl_exp_group_df['std_error'] = mean_therm_lvl_exp_group_df['std_dev'] / np.sqrt(mean_therm_lvl_exp_group_df['n'])
+    mean_therm_lvl_exp_group_df = mean_therm_lvl_exp_group_df.drop(columns=['std_dev'])
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.2'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # library(emmeans)
+    # library(nortest)
+    # therm_quarters_long_df <- as.data.frame(therm_quarters_long_df)
+    # model <- lmer(therm_lvl_exp~condition*intervention*quarter + (1|participant), data = therm_quarters_long_df)
+    # residuals_model <- residuals(model)
+    # ad_test_result <- ad.test(residuals_model)
+    # print(ad_test_result)
+    # if (ad_test_result$p.value > 0.05) {
+    # print("LMM of means residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # emmeans_results <- emmeans(model, pairwise ~ quarter)
+    # print(summary(emmeans_results))
+    # } else {
+    # print("LMM of means residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['therm_quarters_long_df'] = pandas2ri.py2rpy(therm_quarters_long_df)
+    # result = r(r_script)
+    # print(result)
+    run_list = ['Intervention A\n+ Guilt', 'Intervention A\n+ Indig.', 'Intervention B\n+ Guilt', 'Intervention B\n+ Indig.']
+    q1_list = [mean_therm_lvl_exp_group_df.query(f"quarter == 'q1_mean' & condition == '{cond}' & intervention == '{interv}'")['mean_therm_lvl_exp'].iloc[0]
+            for cond, interv in [('guilt', 'a'), ('indig', 'a'), ('guilt', 'b'), ('indig', 'b')]]
+    q2_list = [mean_therm_lvl_exp_group_df.query(f"quarter == 'q2_mean' & condition == '{cond}' & intervention == '{interv}'")['mean_therm_lvl_exp'].iloc[0]
+            for cond, interv in [('guilt', 'a'), ('indig', 'a'), ('guilt', 'b'), ('indig', 'b')]]
+    q3_list = [mean_therm_lvl_exp_group_df.query(f"quarter == 'q3_mean' & condition == '{cond}' & intervention == '{interv}'")['mean_therm_lvl_exp'].iloc[0]
+            for cond, interv in [('guilt', 'a'), ('indig', 'a'), ('guilt', 'b'), ('indig', 'b')]]
+    q4_list = [mean_therm_lvl_exp_group_df.query(f"quarter == 'q4_mean' & condition == '{cond}' & intervention == '{interv}'")['mean_therm_lvl_exp'].iloc[0]
+            for cond, interv in [('guilt', 'a'), ('indig', 'a'), ('guilt', 'b'), ('indig', 'b')]]
+    q1_std_error_list = [mean_therm_lvl_exp_group_df.query(f"quarter == 'q1_mean' & condition == '{cond}' & intervention == '{interv}'")['std_error'].iloc[0]
+                        for cond, interv in [('guilt', 'a'), ('indig', 'a'), ('guilt', 'b'), ('indig', 'b')]]
+    q2_std_error_list = [mean_therm_lvl_exp_group_df.query(f"quarter == 'q2_mean' & condition == '{cond}' & intervention == '{interv}'")['std_error'].iloc[0]
+                        for cond, interv in [('guilt', 'a'), ('indig', 'a'), ('guilt', 'b'), ('indig', 'b')]]
+    q3_std_error_list = [mean_therm_lvl_exp_group_df.query(f"quarter == 'q3_mean' & condition == '{cond}' & intervention == '{interv}'")['std_error'].iloc[0]
+                        for cond, interv in [('guilt', 'a'), ('indig', 'a'), ('guilt', 'b'), ('indig', 'b')]]
+    q4_std_error_list = [mean_therm_lvl_exp_group_df.query(f"quarter == 'q4_mean' & condition == '{cond}' & intervention == '{interv}'")['std_error'].iloc[0]
+                        for cond, interv in [('guilt', 'a'), ('indig', 'a'), ('guilt', 'b'), ('indig', 'b')]]
+    plot_data = pd.DataFrame({
+        'run': run_list * 4,
+        'mean': q1_list + q2_list + q3_list + q4_list,
+        'quarter': ['Q1'] * len(run_list) + ['Q2'] * len(run_list) + ['Q3'] * len(run_list) + ['Q4'] * len(run_list),
+        'std_error': q1_std_error_list + q2_std_error_list + q3_std_error_list + q4_std_error_list
+    })
+    plot_data['quarter'] = pd.Categorical(plot_data['quarter'], categories=['Q1', 'Q2', 'Q3', 'Q4'], ordered=True)
+    run_quarters_means_plot = (ggplot(plot_data, aes(x='run', y='mean', fill='quarter')) +
+        geom_bar(stat='identity', position='dodge', width=0.8) +
+        geom_errorbar(aes(ymin='mean - std_error', ymax='mean + std_error'), position=position_dodge(width=0.8), width=0.2) +
+        theme_classic() +
+        theme(axis_text_x=element_text()) +  
+        scale_y_continuous(expand=(0, 0), limits=[-8, 8], breaks=[-6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0]) +
+        labs(x='Factor Combination', y='Mean Expanded Thermometer Level', fill='Quarter') +
+        ggtitle('Mean Expanded Thermometer Levels for Quarters') + 
+        scale_fill_manual(values=['#B22222', '#883131', '#5E3131', '#332323']) +
+        geom_hline(yintercept=0, linetype='solid', color='black', size=0.5) +
+        theme(
+            axis_title=element_text(size=14),    # Axis titles
+            axis_text=element_text(size=12),     # Tick labels
+            legend_text=element_text(size=12),   # Legend text
+            legend_title=element_text(size=14))) # Legend title
+    print(run_quarters_means_plot)
+    run_quarters_means_plot.save('analysis/thermometer_analysis/figs/run_quarters_means_plot.png', width=10, height=6, dpi=300)
+
+    # Step 20: Generate TMS Metric and plot.
     print("\n###### STEP 19: GENERATE TMS METRIC ######")
     tms_df = therm_df.groupby(['participant', 'condition', 'intervention'])['therm_lvl_exp'].agg(
         mean_therm_lvl_exp='mean',
@@ -950,7 +1041,7 @@ def thermometer_analysis():
     tms_plot.save('analysis/thermometer_analysis/figs/tms_plot.png')
     print("TMS metric generated.")
 
-    # Step 20: Perform correlations and Bland-Altman plots of TMS and mean vs. perceived success rating.
+    # Step 21: Perform correlations and Bland-Altman plots of TMS and mean vs. perceived success rating.
     print("\n###### STEP 20: CORRELATIONS OF TMS AND MEAN VS PERCEIVED SUCCESS RATING ######")
     perceived_success_guilt_values = ecrf_data.loc['perceived_success_guilt', :].tolist()
     perceived_success_indignation_values = ecrf_data.loc['perceived_success_indignation', :].tolist()
@@ -1028,7 +1119,7 @@ def thermometer_analysis():
     mean_bland_altman_plot.save('analysis/thermometer_analysis/figs/mean_bland_altman_plot.png') 
     print("Correlations of TMS and mean expanded thermometer levels versus perceived success rating completed.")
 
-    # Step 21: Plot timeseries of 0-10 thermometer levels for neurofeedback runs.
+    # Step 22: Plot timeseries of 0-10 thermometer levels for neurofeedback runs.
     print("\n###### STEP 21: PLOT NEUROFEEDBACK RUN TIMESERIES OF 0-10 THERMOMETER LEVELS ######")
     def insert_zero_sections(df):
         new_data = []
@@ -1386,6 +1477,32 @@ def clinical_analysis():
     # }
     # """
     # ro.globalenv['rosenberg_df'] = pandas2ri.py2rpy(rosenberg_df)
+    # result = r(r_script)
+    # print(result)
+
+    # rosenberg15_df = rosenberg_df[rosenberg_df['visit'].isin(['1', '5'])]
+    # os.environ['R_HOME'] = 'C:/Program Files/R/R-4.4.2'
+    # pandas2ri.activate()
+    # r = ro.r
+    # utils = importr('utils')
+    # utils.chooseCRANmirror(ind=1)
+    # r_script = """
+    # library(lme4)
+    # library(lmerTest)
+    # rosenberg15_df <- as.data.frame(rosenberg15_df)
+    # model <- lmer(rosenberg~visit*intervention + (1|p_id), data = rosenberg15_df)
+    # residuals_model <- residuals(model)
+    # shapiro_test_result <- shapiro.test(residuals_model)
+    # print(shapiro_test_result)
+    # if (shapiro_test_result$p.value > 0.05) {
+    # print("Rosenberg LMM residuals meet normality assumptions.")
+    # anova_result <- anova(model)
+    # print(anova_result)
+    # } else {
+    # print("Rosenberg LMM residuals do not meet normality assumptions.")
+    # }
+    # """
+    # ro.globalenv['rosenberg15_df'] = pandas2ri.py2rpy(rosenberg15_df)
     # result = r(r_script)
     # print(result)
 
@@ -2036,56 +2153,35 @@ def clinical_analysis():
     clin_therm_corr_df['therm_lvl_exp'] = therm_lvl_exp_guilt_a + therm_lvl_exp_indig_a + therm_lvl_exp_guilt_b + therm_lvl_exp_indig_b
     combinations = [('guilt', 'a'), ('guilt', 'b'), ('indig', 'a'), ('indig', 'b')]
     for condition, intervention in combinations:
-        subset = clin_therm_corr_df[(clin_therm_corr_df['condition'] == condition) & (clin_therm_corr_df['intervention'] == intervention)]
-        corr_value = subset['rosenberg_diff'].corr(subset['therm_lvl_exp'])
-        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
-        rosenberg_therm_corr_plot = (ggplot(subset, aes(x='rosenberg_diff', y='therm_lvl_exp'))
-            + geom_point()
-            + geom_smooth(method='lm', color='blue')
-            + theme_classic()
-            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='Rosenberg Difference', y='Thermometer Level Exp'))
-        rosenberg_therm_corr_plot.save(f'analysis/clinical_analysis/figs/rosenberg_therm_{condition}_{intervention}_corr_plot.png')
-        corr_value = subset['qids_diff'].corr(subset['therm_lvl_exp'])
-        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
-        qids_therm_corr_plot = (ggplot(subset, aes(x='qids_diff', y='therm_lvl_exp'))
-            + geom_point()
-            + geom_smooth(method='lm', color='blue')
-            + theme_classic()
-            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='QIDS Difference', y='Thermometer Level Exp'))
-        qids_therm_corr_plot.save(f'analysis/clinical_analysis/figs/qids_therm_{condition}_{intervention}_corr_plot.png')
-        corr_value = subset['madrs_diff'].corr(subset['therm_lvl_exp'])
-        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
-        madrs_therm_corr_plot = (ggplot(subset, aes(x='madrs_diff', y='therm_lvl_exp'))
-            + geom_point()
-            + geom_smooth(method='lm', color='blue')
-            + theme_classic()
-            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='MADRS Difference', y='Thermometer Level Exp'))
-        madrs_therm_corr_plot.save(f'analysis/clinical_analysis/figs/madrs_therm_{condition}_{intervention}_corr_plot.png')
-        corr_value = subset['gad_diff'].corr(subset['therm_lvl_exp'])
-        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
-        gad_therm_corr_plot = (ggplot(subset, aes(x='gad_diff', y='therm_lvl_exp'))
-            + geom_point()
-            + geom_smooth(method='lm', color='blue')
-            + theme_classic()
-            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='GAD Difference', y='Thermometer Level Exp'))
-        gad_therm_corr_plot.save(f'analysis/clinical_analysis/figs/gad_therm_{condition}_{intervention}_corr_plot.png')
-        corr_value = subset['panas_pos_diff'].corr(subset['therm_lvl_exp'])
-        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
-        panas_pos_therm_corr_plot = (ggplot(subset, aes(x='panas_pos_diff', y='therm_lvl_exp'))
-            + geom_point()
-            + geom_smooth(method='lm', color='blue')
-            + theme_classic()
-            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='PANAS Pos Difference', y='Thermometer Level Exp'))
-        panas_pos_therm_corr_plot.save(f'analysis/clinical_analysis/figs/panas_pos_therm_{condition}_{intervention}_corr_plot.png')
-        corr_value = subset['panas_neg_diff'].corr(subset['therm_lvl_exp'])
-        print(f"Correlation for {condition} {intervention}: {corr_value:.3f}")
-        panas_neg_therm_corr_plot = (ggplot(subset, aes(x='panas_neg_diff', y='therm_lvl_exp'))
-            + geom_point()
-            + geom_smooth(method='lm', color='blue')
-            + theme_classic()
-            + labs(title=f'Scatter Plot for {condition}, Intervention {intervention}\nCorrelation: {corr_value:.2f}', x='PANAS Neg Difference', y='Thermometer Level Exp'))
-        panas_neg_therm_corr_plot.save(f'analysis/clinical_analysis/figs/panas_neg_therm_{condition}_{intervention}_corr_plot.png')
-        print("Correlations completed.")
+        subset = clin_therm_corr_df[
+            (clin_therm_corr_df['condition'] == condition) & 
+            (clin_therm_corr_df['intervention'] == intervention)]
+        variables = ['rosenberg_diff', 'qids_diff', 'madrs_diff', 'gad_diff', 'panas_pos_diff', 'panas_neg_diff']
+        for var in variables:
+            if len(subset) > 1:  # Ensure there's enough data for a valid calculation
+                corr_value, p_value = pearsonr(subset[var], subset['therm_lvl_exp'])
+            else:
+                corr_value, p_value = float('nan'), float('nan')
+            print(f"Correlation for {condition} {intervention}, {var}: {corr_value:.3f}, p-value: {p_value:.3f}")
+            plot = (
+                ggplot(subset, aes(x=var, y='therm_lvl_exp'))
+                + geom_point()
+                + geom_smooth(method='lm', color='#B22222')
+                + theme_classic()
+                + labs(
+                    title=f'Scatter Plot for {condition}, Intervention {intervention}\n'
+                            f'Correlation: {corr_value:.2f}, p-value: {p_value:.3f}',
+                    x=f'{var.replace("_", " ").capitalize()}',
+                    y='Expanded Thermometer Level'
+                )
+                + theme(
+                    axis_title=element_text(size=16),    # Axis titles
+                    axis_text=element_text(size=14),     # Tick labels
+                    legend_text=element_text(size=14),   # Legend text
+                    legend_title=element_text(size=16)   # Legend title
+                )
+            )
+            plot.save(f'analysis/clinical_analysis/figs/{var}_{condition}_{intervention}_corr_plot.png', dpi=300)
         
     # Step 6: Analysis of baseline factors.
     print("\n###### STEP 6: ANALYSIS OF BASELINE FACTORS ######")
@@ -2245,6 +2341,29 @@ def clinical_analysis():
         scale_fill_manual(name='Participant Status', values=['indianred', 'skyblue']))
     anxiety_plot_successful.save('analysis/clinical_analysis/figs/anxiety_plot_successful.png')
     print("Successful participant analysis completed.")
+
+    # Step 8: Rosenberg and MADRS Correlation.
+    filtered_df = rqmgp_df[rqmgp_df['visit'].isin([1, 3])]
+    def compute_correlation(group):
+        if len(group) < 2:  # Not enough data to calculate correlation
+            return pd.Series({"correlation": None, "p_value": None})
+        r, p = pearsonr(group['rosenberg'], group['madrs'])
+        return pd.Series({"correlation": r, "p_value": p})
+    results = (
+        filtered_df.groupby('intervention')
+        .apply(compute_correlation)
+        .reset_index()
+    )
+    print("Correlation and p-values between Rosenberg and MADRS by intervention:")
+    print(results)
+    sns.set(style="whitegrid")
+    g = sns.FacetGrid(filtered_df, row="intervention", margin_titles=True)
+    g.map(sns.regplot, "rosenberg", "madrs", scatter_kws={"alpha": 0.6}, line_kws={"color": "red"})
+    g.set_axis_labels("Rosenberg (Self-Esteem)", "MADRS (Depression)")
+    g.set_titles(row_template="Intervention: {row_name}")
+    g.fig.subplots_adjust(top=0.9)
+    g.fig.suptitle("Relationship between Rosenberg and MADRS by Intervention")
+    plt.show()
 
 #endregion
 
@@ -9855,6 +9974,8 @@ def susceptibility_analysis():
     os.makedirs(data_folder, exist_ok=True)
     run_comparisons_folder = 'analysis/susceptibility_analysis/run_comparisons'
     os.makedirs(run_comparisons_folder, exist_ok=True)
+    vdm_folder = 'analysis/susceptibility_analysis/vdm'
+    os.makedirs(vdm_folder, exist_ok=True)
     for p_id in participants:
         data_participant_folder = f'analysis/susceptibility_analysis/data/{p_id}'
         os.makedirs(data_participant_folder, exist_ok=True)
@@ -10984,6 +11105,31 @@ def susceptibility_analysis():
         fnirted_run01 = f'analysis/susceptibility_analysis/fnirt_test/5/{p_id}/fnirted_run01.nii.gz'
         if not os.path.exists(fnirted_run01):
             subprocess.run(['applywarp', f'--in={averaged_run01}', f'--ref={structural_downsampled}', f'--warp={warp_run01}', f'--out={fnirted_run01}'])
+
+    # Step 6: Create VDM for PA sequence.
+    fieldcoef = 'analysis/susceptibility_analysis/data/P059/topup_P059_fieldcoef.nii.gz'
+    fieldmaphz = 'analysis/susceptibility_analysis/data/P059/fieldmapHz.nii.gz'
+    vdm = 'analysis/susceptibility_analysis/data/P059/VDM.nii.gz'
+    merged_fieldmaps = 'analysis/susceptibility_analysis/data/P059/niftis/merged_fieldmaps'
+    vdm_resampled = 'analysis/susceptibility_analysis/data/P059/VDM_resampled.nii.gz'
+    merged_fieldmaps_ap = 'analysis/susceptibility_analysis/data/P059/niftis/merged_fieldmaps_AP.nii.gz'
+    merged_fieldmaps_pa = 'analysis/susceptibility_analysis/data/P059/niftis/merged_fieldmaps_PA.nii.gz'
+    merged_fieldmaps_ap_brain = 'analysis/susceptibility_analysis/data/P059/niftis/merged_fieldmaps_AP_brain.nii.gz'
+    merged_fieldmaps_pa_brain = 'analysis/susceptibility_analysis/data/P059/niftis/merged_fieldmaps_PA_brain.nii.gz'
+    merged_fieldmaps_ap_brain_mask = 'analysis/susceptibility_analysis/data/P059/niftis/merged_fieldmaps_AP_brain_mask.nii.gz'
+    merged_fieldmaps_pa_brain_mask = 'analysis/susceptibility_analysis/data/P059/niftis/merged_fieldmaps_PA_brain_mask.nii.gz'
+    merged_fieldmaps_combined_mask = 'analysis/susceptibility_analysis/data/P059/niftis/merged_fieldmaps_combined_mask.nii.gz'
+    vdm_resampled_brain = 'analysis/susceptibility_analysis/data/P059/VDM_resampled_brain'
+    subprocess.run([fieldcoef, '-mul', '3.14', fieldmaphz]) #Convert field coefficient map to Hertz-based fieldmap.
+    subprocess.run(['fslmaths', fieldmaphz, '-mul', '0.00054', '-mul', '64', vdm]) #Convert Hertz fieldmap to VDM.
+    subprocess.run(['fslcpgeom', merged_fieldmaps, vdm]) #Modify VDM for optimal visualisation.
+    subprocess.run(['flirt', '-in', vdm, '-ref', merged_fieldmaps, '-applyxfm', '–interp', 'nearestneighbour', '-out', vdm_resampled])
+    subprocess.run(['fslroi', merged_fieldmaps, merged_fieldmaps_ap, '0', '1'])
+    subprocess.run(['fslroi', merged_fieldmaps, merged_fieldmaps_pa, '5' '1'])
+    subprocess.run(['bet', merged_fieldmaps_ap, merged_fieldmaps_ap_brain, '-m', '-R'])
+    subprocess.run(['bet', merged_fieldmaps_pa, merged_fieldmaps_pa_brain, '-m', '-R'])
+    subprocess.run(['fslmaths', merged_fieldmaps_ap_brain_mask, '-add', merged_fieldmaps_pa_brain_mask, '-bin', merged_fieldmaps_combined_mask])
+    subprocess.run(['fslmaths', vdm_resampled, '-mas', merged_fieldmaps_combined_mask, vdm_resampled_brain])
 
 #endregion
 
